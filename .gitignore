@@ -1,0 +1,51 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode: per-user state
+xcuserdata/
+*.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+*.moved-aside
+
+# Xcode: build products and reports
+DerivedData/
+build/
+*.app
+*.ipa
+*.dSYM
+*.dSYM.zip
+*.xcarchive
+*.xcresult
+*.resultbundle
+*.profraw
+*.profdata
+
+# Swift Package Manager local state
+.build/
+.swiftpm/xcode/package.xcworkspace/xcuserdata/
+
+# Local tool runtimes and generated diagnostic font faces
+node_modules/
+__pycache__/
+*.py[cod]
+PetIslandLiveActivity/Resources/PetTimerFaces/
+
+# Local configuration and signing material
+*.xcconfig.local
+.env
+.env.*
+!.env.example
+*.mobileprovision
+*.provisionprofile
+*.p8
+*.p12
+
+# Editors and temporary files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~

@@ -1,0 +1,649 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000001 /* PetIslandApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* PetIslandApp.swift */; };
+		A10000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ContentView.swift */; };
+		A10000000000000000000003 /* PetSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* PetSessionController.swift */; };
+		A10000000000000000000005 /* PetPixelArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* PetPixelArtwork.swift */; };
+		A10000000000000000000006 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* Assets.xcassets */; };
+		A10000000000000000000007 /* PetIslandWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* PetIslandWidgetBundle.swift */; };
+		A10000000000000000000008 /* PetLiveActivityWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000008 /* PetLiveActivityWidget.swift */; };
+		A1000000000000000000000A /* PetPixelArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* PetPixelArtwork.swift */; };
+		A1000000000000000000000B /* PetIslandLiveActivity.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000A /* PetIslandLiveActivity.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D10000000000000000000001 /* PetDomain.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000001 /* PetDomain.swift */; };
+		D10000000000000000000002 /* PetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000002 /* PetStore.swift */; };
+		D10000000000000000000003 /* PetActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000003 /* PetActivityAttributes.swift */; };
+		D10000000000000000000004 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000004 /* HomeView.swift */; };
+		D10000000000000000000005 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000005 /* OnboardingView.swift */; };
+		D10000000000000000000006 /* Sheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000006 /* Sheets.swift */; };
+		D10000000000000000000007 /* PetDomain.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000001 /* PetDomain.swift */; };
+		D10000000000000000000008 /* PetActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000003 /* PetActivityAttributes.swift */; };
+		D10000000000000000000009 /* PetCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000009 /* PetCollectionView.swift */; };
+		D1000000000000000000000A /* PlayYardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2000000000000000000000A /* PlayYardView.swift */; };
+		T10000000000000000000001 /* PetDomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = T20000000000000000000001 /* PetDomainTests.swift */; };
+		T10000000000000000000002 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = T20000000000000000000003 /* XCTest.framework */; };
+		R10000000000000000000001 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = R20000000000000000000001 /* Localizable.xcstrings */; };
+		R10000000000000000000002 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = R20000000000000000000001 /* Localizable.xcstrings */; };
+		S10000000000000000000001 /* PetSprites.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = S20000000000000000000001 /* PetSprites.xcassets */; };
+		S10000000000000000000002 /* PetSprites.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = S20000000000000000000001 /* PetSprites.xcassets */; };
+		W10000000000000000000001 /* PetLifeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = W20000000000000000000001 /* PetLifeState.swift */; };
+		W10000000000000000000002 /* PetLifeState.swift in Sources */ = {isa = PBXBuildFile; fileRef = W20000000000000000000001 /* PetLifeState.swift */; };
+		W10000000000000000000003 /* PetEnclosureWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = W20000000000000000000002 /* PetEnclosureWidget.swift */; };
+		H10000000000000000000001 /* PetHabitatState.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000001 /* PetHabitatState.swift */; };
+		H10000000000000000000002 /* PetHabitatState.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000001 /* PetHabitatState.swift */; };
+		H10000000000000000000003 /* HabitatEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000002 /* HabitatEditorView.swift */; };
+		H10000000000000000000004 /* PetHabitatStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000003 /* PetHabitatStateTests.swift */; };
+		L10000000000000000000004 /* PetIslandTimerPets.ttc in Resources */ = {isa = PBXBuildFile; fileRef = L20000000000000000000004 /* PetIslandTimerPets.ttc */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A30000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A90000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A80000000000000000000002;
+			remoteInfo = PetIslandLiveActivity;
+		};
+		T30000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A90000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A80000000000000000000001;
+			remoteInfo = PetIsland;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		A40000000000000000000001 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A1000000000000000000000B /* PetIslandLiveActivity.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		A20000000000000000000001 /* PetIslandApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetIslandApp.swift; sourceTree = "<group>"; };
+		A20000000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A20000000000000000000003 /* PetSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetSessionController.swift; sourceTree = "<group>"; };
+		A20000000000000000000005 /* PetPixelArtwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetPixelArtwork.swift; sourceTree = "<group>"; };
+		A20000000000000000000006 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A20000000000000000000007 /* PetIslandWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetIslandWidgetBundle.swift; sourceTree = "<group>"; };
+		A20000000000000000000008 /* PetLiveActivityWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLiveActivityWidget.swift; sourceTree = "<group>"; };
+		A20000000000000000000009 /* PetIsland.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PetIsland.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2000000000000000000000A /* PetIslandLiveActivity.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PetIslandLiveActivity.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2000000000000000000000B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A2000000000000000000000C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		W20000000000000000000003 /* PetIsland.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PetIsland.entitlements; sourceTree = "<group>"; };
+		W20000000000000000000004 /* PetIslandLiveActivity.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PetIslandLiveActivity.entitlements; sourceTree = "<group>"; };
+		D20000000000000000000001 /* PetDomain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDomain.swift; sourceTree = "<group>"; };
+		D20000000000000000000002 /* PetStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetStore.swift; sourceTree = "<group>"; };
+		D20000000000000000000003 /* PetActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetActivityAttributes.swift; sourceTree = "<group>"; };
+		D20000000000000000000004 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		D20000000000000000000005 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		D20000000000000000000006 /* Sheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sheets.swift; sourceTree = "<group>"; };
+		D20000000000000000000009 /* PetCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetCollectionView.swift; sourceTree = "<group>"; };
+		D2000000000000000000000A /* PlayYardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayYardView.swift; sourceTree = "<group>"; };
+		T20000000000000000000001 /* PetDomainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDomainTests.swift; sourceTree = "<group>"; };
+		T20000000000000000000002 /* PetIslandTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PetIslandTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		T20000000000000000000003 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
+		R20000000000000000000001 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
+		S20000000000000000000001 /* PetSprites.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = PetSprites.xcassets; sourceTree = "<group>"; };
+		W20000000000000000000001 /* PetLifeState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetLifeState.swift; sourceTree = "<group>"; };
+		W20000000000000000000002 /* PetEnclosureWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetEnclosureWidget.swift; sourceTree = "<group>"; };
+		H20000000000000000000001 /* PetHabitatState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetHabitatState.swift; sourceTree = "<group>"; };
+		H20000000000000000000002 /* HabitatEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitatEditorView.swift; sourceTree = "<group>"; };
+		H20000000000000000000003 /* PetHabitatStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetHabitatStateTests.swift; sourceTree = "<group>"; };
+		L20000000000000000000004 /* PetIslandTimerPets.ttc */ = {isa = PBXFileReference; lastKnownFileType = file; path = PetIslandTimerPets.ttc; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A50000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A50000000000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		T50000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (T10000000000000000000002 /* XCTest.framework in Frameworks */, );
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A60000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				A60000000000000000000002 /* PetIsland */,
+				A60000000000000000000005 /* PetIslandLiveActivity */,
+				T60000000000000000000001 /* PetIslandTests */,
+				S60000000000000000000001 /* SharedResources */,
+				A60000000000000000000006 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A60000000000000000000002 /* PetIsland */ = {
+			isa = PBXGroup;
+			children = (
+				A60000000000000000000003 /* App */,
+				D60000000000000000000001 /* Domain */,
+				D60000000000000000000002 /* Data */,
+				D60000000000000000000003 /* Features */,
+				R60000000000000000000001 /* Resources */,
+				A60000000000000000000004 /* Shared */,
+				A20000000000000000000006 /* Assets.xcassets */,
+				W20000000000000000000003 /* PetIsland.entitlements */,
+				A2000000000000000000000B /* Info.plist */,
+			);
+			path = PetIsland;
+			sourceTree = "<group>";
+		};
+		A60000000000000000000003 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000001 /* PetIslandApp.swift */,
+				A20000000000000000000002 /* ContentView.swift */,
+				A20000000000000000000003 /* PetSessionController.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A60000000000000000000004 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				D20000000000000000000003 /* PetActivityAttributes.swift */,
+				W20000000000000000000001 /* PetLifeState.swift */,
+				H20000000000000000000001 /* PetHabitatState.swift */,
+				A20000000000000000000005 /* PetPixelArtwork.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		A60000000000000000000005 /* PetIslandLiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000007 /* PetIslandWidgetBundle.swift */,
+				A20000000000000000000008 /* PetLiveActivityWidget.swift */,
+				W20000000000000000000002 /* PetEnclosureWidget.swift */,
+				L60000000000000000000001 /* Resources */,
+				W20000000000000000000004 /* PetIslandLiveActivity.entitlements */,
+				A2000000000000000000000C /* Info.plist */,
+			);
+			path = PetIslandLiveActivity;
+			sourceTree = "<group>";
+		};
+		L60000000000000000000001 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				L20000000000000000000004 /* PetIslandTimerPets.ttc */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A60000000000000000000006 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000009 /* PetIsland.app */,
+				A2000000000000000000000A /* PetIslandLiveActivity.appex */,
+				T20000000000000000000002 /* PetIslandTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D60000000000000000000001 /* Domain */ = {
+			isa = PBXGroup;
+			children = (D20000000000000000000001 /* PetDomain.swift */, );
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		D60000000000000000000002 /* Data */ = {
+			isa = PBXGroup;
+			children = (D20000000000000000000002 /* PetStore.swift */, );
+			path = Data;
+			sourceTree = "<group>";
+		};
+		D60000000000000000000003 /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				D20000000000000000000004 /* HomeView.swift */,
+				D20000000000000000000005 /* OnboardingView.swift */,
+				D20000000000000000000006 /* Sheets.swift */,
+				D20000000000000000000009 /* PetCollectionView.swift */,
+				D2000000000000000000000A /* PlayYardView.swift */,
+				H20000000000000000000002 /* HabitatEditorView.swift */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		T60000000000000000000001 /* PetIslandTests */ = {
+			isa = PBXGroup;
+			children = (
+				T20000000000000000000001 /* PetDomainTests.swift */,
+				H20000000000000000000003 /* PetHabitatStateTests.swift */,
+			);
+			path = PetIslandTests;
+			sourceTree = "<group>";
+		};
+		R60000000000000000000001 /* Resources */ = {
+			isa = PBXGroup;
+			children = (R20000000000000000000001 /* Localizable.xcstrings */, );
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		S60000000000000000000001 /* SharedResources */ = {
+			isa = PBXGroup;
+			children = (
+				S20000000000000000000001 /* PetSprites.xcassets */,
+			);
+			path = SharedResources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A80000000000000000000001 /* PetIsland */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000000000000000000001 /* Build configuration list for PBXNativeTarget "PetIsland" */;
+			buildPhases = (
+				A70000000000000000000001 /* Sources */,
+				A50000000000000000000001 /* Frameworks */,
+				A70000000000000000000003 /* Resources */,
+				A40000000000000000000001 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A30000000000000000000002 /* PBXTargetDependency */,
+			);
+			name = PetIsland;
+			productName = PetIsland;
+			productReference = A20000000000000000000009 /* PetIsland.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A80000000000000000000002 /* PetIslandLiveActivity */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000000000000000000002 /* Build configuration list for PBXNativeTarget "PetIslandLiveActivity" */;
+			buildPhases = (
+				A70000000000000000000002 /* Sources */,
+				A50000000000000000000002 /* Frameworks */,
+				A70000000000000000000004 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PetIslandLiveActivity;
+			productName = PetIslandLiveActivity;
+			productReference = A2000000000000000000000A /* PetIslandLiveActivity.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		T80000000000000000000001 /* PetIslandTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = TAA000000000000000000001 /* Build configuration list for PBXNativeTarget "PetIslandTests" */;
+			buildPhases = (
+				T70000000000000000000001 /* Sources */,
+				T50000000000000000000001 /* Frameworks */,
+				T70000000000000000000002 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = (T30000000000000000000002 /* PBXTargetDependency */, );
+			name = PetIslandTests;
+			productName = PetIslandTests;
+			productReference = T20000000000000000000002 /* PetIslandTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A90000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					A80000000000000000000001 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					A80000000000000000000002 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					T80000000000000000000001 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = A80000000000000000000001;
+					};
+				};
+			};
+			buildConfigurationList = AA0000000000000000000003 /* Build configuration list for PBXProject "PetIsland" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A60000000000000000000001;
+			productRefGroup = A60000000000000000000006 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A80000000000000000000001 /* PetIsland */,
+				A80000000000000000000002 /* PetIslandLiveActivity */,
+				T80000000000000000000001 /* PetIslandTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A70000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000006 /* Assets.xcassets in Resources */,
+				R10000000000000000000001 /* Localizable.xcstrings in Resources */,
+				S10000000000000000000001 /* PetSprites.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A70000000000000000000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				L10000000000000000000004 /* PetIslandTimerPets.ttc in Resources */,
+				R10000000000000000000002 /* Localizable.xcstrings in Resources */,
+				S10000000000000000000002 /* PetSprites.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		T70000000000000000000002 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A70000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000001 /* PetIslandApp.swift in Sources */,
+				A10000000000000000000002 /* ContentView.swift in Sources */,
+				A10000000000000000000003 /* PetSessionController.swift in Sources */,
+				A10000000000000000000005 /* PetPixelArtwork.swift in Sources */,
+				D10000000000000000000001 /* PetDomain.swift in Sources */,
+				D10000000000000000000002 /* PetStore.swift in Sources */,
+				D10000000000000000000003 /* PetActivityAttributes.swift in Sources */,
+				D10000000000000000000004 /* HomeView.swift in Sources */,
+				D10000000000000000000005 /* OnboardingView.swift in Sources */,
+				D10000000000000000000006 /* Sheets.swift in Sources */,
+				D10000000000000000000009 /* PetCollectionView.swift in Sources */,
+				D1000000000000000000000A /* PlayYardView.swift in Sources */,
+				W10000000000000000000001 /* PetLifeState.swift in Sources */,
+				H10000000000000000000001 /* PetHabitatState.swift in Sources */,
+				H10000000000000000000003 /* HabitatEditorView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A70000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000007 /* PetIslandWidgetBundle.swift in Sources */,
+				A10000000000000000000008 /* PetLiveActivityWidget.swift in Sources */,
+				A1000000000000000000000A /* PetPixelArtwork.swift in Sources */,
+				D10000000000000000000007 /* PetDomain.swift in Sources */,
+				D10000000000000000000008 /* PetActivityAttributes.swift in Sources */,
+				W10000000000000000000002 /* PetLifeState.swift in Sources */,
+				H10000000000000000000002 /* PetHabitatState.swift in Sources */,
+				W10000000000000000000003 /* PetEnclosureWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		T70000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				T10000000000000000000001 /* PetDomainTests.swift in Sources */,
+				H10000000000000000000004 /* PetHabitatStateTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A30000000000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A80000000000000000000002 /* PetIslandLiveActivity */;
+			targetProxy = A30000000000000000000001 /* PBXContainerItemProxy */;
+		};
+		T30000000000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A80000000000000000000001 /* PetIsland */;
+			targetProxy = T30000000000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		AB0000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PetIsland/PetIsland.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = J93HMY294J;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PetIsland/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.bortongo.PetIsland;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AB0000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = PetIsland/PetIsland.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = J93HMY294J;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PetIsland/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.bortongo.PetIsland;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AB0000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = PetIslandLiveActivity/PetIslandLiveActivity.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = J93HMY294J;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PetIslandLiveActivity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.bortongo.PetIsland.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AB0000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = PetIslandLiveActivity/PetIslandLiveActivity.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = J93HMY294J;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = PetIslandLiveActivity/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.bortongo.PetIsland.LiveActivity;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AB0000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AB0000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		TAB000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = J93HMY294J;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.bortongo.PetIslandTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PetIsland.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PetIsland";
+			};
+			name = Debug;
+		};
+		TAB000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = J93HMY294J;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.bortongo.PetIslandTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PetIsland.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/PetIsland";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA0000000000000000000001 /* Build configuration list for PBXNativeTarget "PetIsland" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AB0000000000000000000001 /* Debug */,
+				AB0000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000000000000000000002 /* Build configuration list for PBXNativeTarget "PetIslandLiveActivity" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AB0000000000000000000003 /* Debug */,
+				AB0000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000000000000000000003 /* Build configuration list for PBXProject "PetIsland" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AB0000000000000000000005 /* Debug */,
+				AB0000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		TAA000000000000000000001 /* Build configuration list for PBXNativeTarget "PetIslandTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				TAB000000000000000000001 /* Debug */,
+				TAB000000000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A90000000000000000000001 /* Project object */;
+}

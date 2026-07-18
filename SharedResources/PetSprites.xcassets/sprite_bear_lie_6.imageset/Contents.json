@@ -1,0 +1,13 @@
+{
+  "images": [
+    {
+      "filename": "sprite_bear_lie_6.png",
+      "idiom": "universal",
+      "scale": "1x"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}
