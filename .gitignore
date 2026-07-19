@@ -33,6 +33,10 @@ __pycache__/
 *.py[cod]
 PetIslandLiveActivity/Resources/PetTimerFaces/
 
+# Local asset-generation utilities (not required to build the app)
+Design/tools/
+Scripts/
+
 # Local project notes and design audits
 APP_STORE.md
 CHECKPOINT.md

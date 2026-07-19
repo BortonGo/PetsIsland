@@ -142,8 +142,7 @@ PetIsland/                 Main SwiftUI application
 PetIslandLiveActivity/     Home Screen widget and Live Activity
 PetIslandTests/            Unit tests
 SharedResources/           Shared sprite asset catalog
-Design/                    Source art, previews, and asset tools
-Scripts/                   Asset import/build utilities
+Design/                    Source art and visual previews
 ```
 
 ## Development status and roadmap
