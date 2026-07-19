@@ -107,12 +107,6 @@ The main application embeds the widget/Live Activity extension, so you should
 normally run only the `PetIsland` scheme. Running the extension scheme directly
 asks Xcode to preview a widget and is not the normal app launch path.
 
-For a detailed Russian-language Xcode walkthrough, see
-[XCODE_GUIDE_RU.md](XCODE_GUIDE_RU.md).
-
-For a file-by-file explanation of the Swift architecture and a Swift glossary
-for C++/Qt/Python developers, see [CODE_GUIDE_RU.md](CODE_GUIDE_RU.md).
-
 ## Testing the Home Screen widget
 
 1. Run Pet Island once and configure at least one enclosure resident.
@@ -171,10 +165,6 @@ Before the first public release:
 - [ ] Complete VoiceOver, Dynamic Type, Reduce Motion, and localization QA
 - [ ] Audit every bundled sprite and third-party notice before App Store submission
 - [ ] Add screenshots, App Store metadata, and a TestFlight release checklist
-
-Detailed planning lives in [ROADMAP.md](ROADMAP.md), the latest manual checkpoint
-is in [CHECKPOINT.md](CHECKPOINT.md), and known platform constraints are tracked
-in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 
 ## Inspiration and attribution
 
