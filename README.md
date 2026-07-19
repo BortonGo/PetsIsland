@@ -1,5 +1,11 @@
 # Pet Island
 
+<p align="center">
+  <img src="Docs/Media/dynamic-island-demo.gif" width="635" alt="A shepherd, parrot, and cat moving and resting in Dynamic Island">
+</p>
+
+<p align="center"><sub>Shepherd, parrot, and cat — actual Dynamic Island output captured in the iOS Simulator, not a mockup.</sub></p>
+
 Pet Island is an open-source iOS app that brings original pixel pets to the
 Home Screen, Dynamic Island, Lock Screen, and an interactive in-app playroom.
 It is inspired by the playful idea behind
