@@ -29,20 +29,12 @@ final class PetDomainTests: XCTestCase {
         XCTAssertEqual(clip.frameName(at: 10_000), "sleep")
     }
 
-    func testMovementClipCadenceAndExistingAssetNamesStayCompatible() {
+    func testMovementClipUsesDistinctWalkAndGallopArtwork() {
         let walk = PetAnimationLibrary.clip(for: .dog, breed: .corgi, pose: .walk)
         let run = PetAnimationLibrary.clip(for: .dog, breed: .corgi, pose: .run)
 
         XCTAssertEqual(walk.frames, ["island_dog_corgi_walk_0", "island_dog_corgi_walk_1"])
-        XCTAssertEqual(
-            run.frames,
-            [
-                "island_dog_corgi_walk_0",
-                "island_dog_corgi_idle",
-                "island_dog_corgi_walk_1",
-                "island_dog_corgi_idle"
-            ]
-        )
+        XCTAssertEqual(run.frames, ["island_dog_corgi_run_0", "island_dog_corgi_run_1"])
         XCTAssertLessThan(run.frameDuration, walk.frameDuration)
     }
 
@@ -122,8 +114,32 @@ final class PetDomainTests: XCTestCase {
         XCTAssertEqual(playing.pose, .fly)
     }
 
-    func testCatalogContainsEightOriginalSpecies() {
+    func testCatalogKeepsLegacySpeciesButOffersOnlyCompleteOriginalArtwork() {
         XCTAssertEqual(PetSpecies.allCases.count, 8)
+        XCTAssertEqual(PetSpecies.selectableCases, [.cat, .dog, .fox, .parrot, .penguin])
+        XCTAssertFalse(PetSpecies.bear.isSelectable)
+        XCTAssertFalse(PetSpecies.lizard.isSelectable)
+        XCTAssertFalse(PetSpecies.bunny.isSelectable)
+    }
+
+    func testUnsupportedLegacyPetsAreRemovedDuringNormalization() {
+        let panda = PetProfile(
+            id: UUID(), name: "Panda", species: .bear, coat: .sunrise, createdAt: .now
+        )
+        let dinosaur = PetProfile(
+            id: UUID(), name: "Dino", species: .lizard, coat: .sunrise, createdAt: .now
+        )
+        let rabbit = PetProfile(
+            id: UUID(), name: "Bunny", species: .bunny, coat: .sunrise, createdAt: .now
+        )
+        var state = PersistedAppState()
+        state.pets = [panda, dinosaur, rabbit]
+        state.activePetIDs = state.pets.map(\.id)
+
+        state.normalizePetCollection()
+
+        XCTAssertEqual(state.pets.map(\.species), [.dog])
+        XCTAssertEqual(state.activePetIDs, [state.pets[0].id])
     }
 
     func testVisualVariantsAreScopedToTheirSpecies() {
@@ -616,6 +632,30 @@ final class PetDomainTests: XCTestCase {
         XCTAssertEqual(first.pose, .run)
         XCTAssertEqual(second.pose, .run)
         XCTAssertGreaterThan(second.position, 0.45)
+    }
+
+    func testDynamicIslandPresetsMatchSettingsChoices() {
+        XCTAssertEqual(SessionPreset.allCases.map(\.rawValue), [20, 40, 60, 120, 240])
+    }
+
+    func testDynamicIslandMotionModesResolveTheirStartingPose() {
+        XCTAssertEqual(DynamicIslandMotionMode.run.initialPose, .run)
+        XCTAssertEqual(DynamicIslandMotionMode.walk.initialPose, .walk)
+        XCTAssertEqual(DynamicIslandMotionMode.sleep.initialPose, .sleep)
+        XCTAssertEqual(DynamicIslandMotionMode.run.initialPose(for: .parrot), .fly)
+        XCTAssertEqual(DynamicIslandMotionMode.walk.initialPose(for: .parrot), .fly)
+        XCTAssertTrue(DynamicIslandMotionMode.runWalkSleep.includesSleep)
+        XCTAssertFalse(DynamicIslandMotionMode.run.includesSleep)
+    }
+
+    func testLegacySettingsDecodeWithDynamicIslandDefaults() throws {
+        let data = Data(#"{"defaultSessionMinutes":40,"hapticsEnabled":false,"minimizeMotion":true}"#.utf8)
+        let settings = try JSONDecoder().decode(AppSettings.self, from: data)
+
+        XCTAssertEqual(settings.defaultSessionMinutes, 40)
+        XCTAssertEqual(settings.dynamicIslandMotionMode, .runSleep)
+        XCTAssertFalse(settings.hapticsEnabled)
+        XCTAssertTrue(settings.minimizeMotion)
     }
 }
 

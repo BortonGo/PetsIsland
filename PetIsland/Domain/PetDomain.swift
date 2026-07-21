@@ -11,6 +11,14 @@ enum PetSpecies: String, Codable, CaseIterable, Identifiable, Hashable, Sendable
     case bunny
 
     var id: String { rawValue }
+
+    /// Species with complete original Pet Island artwork. The remaining enum
+    /// cases stay decodable so older saved profiles can migrate safely.
+    static let selectableCases: [PetSpecies] = [
+        .cat, .dog, .fox, .parrot, .penguin
+    ]
+
+    var isSelectable: Bool { Self.selectableCases.contains(self) }
 }
 
 /// A visual variant within a species. Dog values are breeds while other
@@ -79,6 +87,36 @@ enum PetPose: String, Codable, CaseIterable, Hashable, Sendable {
     case play
     case eat
     case sleep
+}
+
+enum DynamicIslandMotionMode: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
+    case run
+    case walk
+    case sleep
+    case runSleep
+    case walkSleep
+    case runWalkSleep
+
+    var id: String { rawValue }
+
+    var initialPose: PetPose {
+        switch self {
+        case .run, .runSleep, .runWalkSleep: .run
+        case .walk, .walkSleep: .walk
+        case .sleep: .sleep
+        }
+    }
+
+    func initialPose(for species: PetSpecies) -> PetPose {
+        species == .parrot && self != .sleep ? .fly : initialPose
+    }
+
+    var includesSleep: Bool {
+        switch self {
+        case .sleep, .runSleep, .walkSleep, .runWalkSleep: true
+        case .run, .walk: false
+        }
+    }
 }
 
 enum PetDirection: String, Codable, Hashable, Sendable {
@@ -183,8 +221,10 @@ struct PetSession: Codable, Equatable, Identifiable, Sendable {
 
 enum SessionPreset: Int, CaseIterable, Identifiable, Sendable {
     case short = 20
+    case medium = 40
     case hour = 60
     case long = 120
+    case extended = 240
 
     var id: Int { rawValue }
     var duration: TimeInterval { TimeInterval(rawValue * 60) }
@@ -207,6 +247,34 @@ struct AppSettings: Codable, Equatable, Sendable {
     var defaultSessionMinutes: Int = 20
     var hapticsEnabled = true
     var minimizeMotion = false
+    var dynamicIslandMotionMode: DynamicIslandMotionMode = .runSleep
+
+    private enum CodingKeys: String, CodingKey {
+        case defaultSessionMinutes, hapticsEnabled, minimizeMotion, dynamicIslandMotionMode
+    }
+
+    init(
+        defaultSessionMinutes: Int = 20,
+        hapticsEnabled: Bool = true,
+        minimizeMotion: Bool = false,
+        dynamicIslandMotionMode: DynamicIslandMotionMode = .runSleep
+    ) {
+        self.defaultSessionMinutes = defaultSessionMinutes
+        self.hapticsEnabled = hapticsEnabled
+        self.minimizeMotion = minimizeMotion
+        self.dynamicIslandMotionMode = dynamicIslandMotionMode
+    }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        defaultSessionMinutes = try values.decodeIfPresent(Int.self, forKey: .defaultSessionMinutes) ?? 20
+        hapticsEnabled = try values.decodeIfPresent(Bool.self, forKey: .hapticsEnabled) ?? true
+        minimizeMotion = try values.decodeIfPresent(Bool.self, forKey: .minimizeMotion) ?? false
+        dynamicIslandMotionMode = try values.decodeIfPresent(
+            DynamicIslandMotionMode.self,
+            forKey: .dynamicIslandMotionMode
+        ) ?? .runSleep
+    }
 }
 
 struct PersistedAppState: Codable, Equatable, Sendable {
@@ -257,7 +325,9 @@ struct PersistedAppState: Codable, Equatable, Sendable {
 
     mutating func normalizePetCollection() {
         var seenPetIDs = Set<UUID>()
-        pets = pets.filter { seenPetIDs.insert($0.id).inserted }
+        pets = pets.filter {
+            $0.species.isSelectable && seenPetIDs.insert($0.id).inserted
+        }
 
         if pets.isEmpty {
             pets = [.starter]

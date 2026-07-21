@@ -33,6 +33,9 @@ __pycache__/
 *.py[cod]
 PetIslandLiveActivity/Resources/PetTimerFaces/
 
+# Local sprite-generation, simulator capture, and visual QA artifacts
+outputs/
+
 # Local asset-generation utilities (not required to build the app)
 Design/tools/
 Scripts/

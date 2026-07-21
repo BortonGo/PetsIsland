@@ -117,6 +117,7 @@ struct HomeView: View {
                     placement: .dynamicIsland
                 )
             }
+            dynamicIslandSettings
 
             Button {
                 draftResidentIDs = controller.habitat.configuration.residentPetIDs
@@ -137,6 +138,71 @@ struct HomeView: View {
             Color(.secondarySystemGroupedBackground),
             in: RoundedRectangle(cornerRadius: 24, style: .continuous)
         )
+    }
+
+    private var dynamicIslandSettings: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("Dynamic Island settings", systemImage: "slider.horizontal.3")
+                .font(.headline)
+
+            Picker("Pet mode", selection: motionModeBinding) {
+                ForEach(DynamicIslandMotionMode.allCases) { mode in
+                    Text(motionModeTitle(mode)).tag(mode)
+                }
+            }
+            .pickerStyle(.menu)
+
+            Picker("Time on the island", selection: durationBinding) {
+                ForEach(SessionPreset.allCases) { preset in
+                    Text(durationTitle(preset.rawValue)).tag(preset.rawValue)
+                }
+            }
+            .pickerStyle(.menu)
+
+            if controller.session != nil {
+                Text("New settings will apply the next time the pet enters Dynamic Island.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(14)
+        .background(Color.accentColor.opacity(0.06), in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private var motionModeBinding: Binding<DynamicIslandMotionMode> {
+        Binding(
+            get: { controller.settings.dynamicIslandMotionMode },
+            set: { value in Task { await controller.updateDynamicIslandSettings(mode: value) } }
+        )
+    }
+
+    private var durationBinding: Binding<Int> {
+        Binding(
+            get: { controller.settings.defaultSessionMinutes },
+            set: { value in Task { await controller.updateDynamicIslandSettings(durationMinutes: value) } }
+        )
+    }
+
+    private func motionModeTitle(_ mode: DynamicIslandMotionMode) -> String {
+        switch mode {
+        case .run: String(localized: "Run")
+        case .walk: String(localized: "Walk")
+        case .sleep: String(localized: "Sleep")
+        case .runSleep: String(localized: "Run + sleep")
+        case .walkSleep: String(localized: "Walk + sleep")
+        case .runWalkSleep: String(localized: "Run + walk + sleep")
+        }
+    }
+
+    private func durationTitle(_ minutes: Int) -> String {
+        switch minutes {
+        case 20: String(localized: "20 min")
+        case 40: String(localized: "40 min")
+        case 60: String(localized: "1 hour")
+        case 120: String(localized: "2 hours")
+        case 240: String(localized: "4 hours")
+        default: "\(minutes) min"
+        }
     }
 
     private func placementButton(

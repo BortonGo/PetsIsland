@@ -185,6 +185,18 @@ final class PetSessionController: ObservableObject {
         await persist()
     }
 
+    func updateDynamicIslandSettings(
+        mode: DynamicIslandMotionMode? = nil,
+        durationMinutes: Int? = nil
+    ) async {
+        if let mode { settings.dynamicIslandMotionMode = mode }
+        if let durationMinutes {
+            settings.defaultSessionMinutes = min(max(durationMinutes, 20), 240)
+        }
+        state.settings = settings
+        await persist()
+    }
+
     var habitatResidents: [PetProfile] {
         let residentsByID = Dictionary(uniqueKeysWithValues: habitat.residents.map { ($0.id, $0.profile) })
         return habitat.configuration.residentPetIDs.compactMap { residentsByID[$0] }
@@ -222,7 +234,8 @@ final class PetSessionController: ObservableObject {
         let clampedDuration = min(max(duration, 10 * 60), 8 * 60 * 60)
         let party = activeParty.isEmpty ? [profile] : activeParty
         let leadPet = party[0]
-        let snapshot = behavior.initialSnapshot(for: leadPet.species, at: now)
+        var snapshot = behavior.initialSnapshot(for: leadPet.species, at: now)
+        snapshot.pose = settings.dynamicIslandMotionMode.initialPose(for: leadPet.species)
         let newSession = PetSession(
             id: UUID(), petID: leadPet.id, startedAt: now,
             endsAt: now.addingTimeInterval(clampedDuration), snapshot: snapshot
@@ -255,7 +268,7 @@ final class PetSessionController: ObservableObject {
             moveLeadInSharedHabitat(toDynamicIsland: true)
             updateSharedPlacement(.dynamicIsland)
             if session == nil {
-                await startSession(duration: 8 * 60 * 60)
+                await startSession(duration: TimeInterval(settings.defaultSessionMinutes * 60))
             } else if !liveActivityConnection.isConnected {
                 await reconnectLiveActivity()
             }
@@ -550,7 +563,8 @@ final class PetSessionController: ObservableObject {
             pet: activityIdentity(for: leadPet),
             companions: [],
             startedAt: session.startedAt,
-            endsAt: session.endsAt
+            endsAt: session.endsAt,
+            motionMode: settings.dynamicIslandMotionMode
         )
         let content = ActivityContent(
             state: PetActivityAttributes.ContentState(

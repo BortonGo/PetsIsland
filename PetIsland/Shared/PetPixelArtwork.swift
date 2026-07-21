@@ -283,15 +283,38 @@ enum PetAnimationLibrary {
         }
     }
 
-    /// The approved shepherd keeps its existing animation assets. New breeds
-    /// use the six original Pet Island frames generated specifically for them.
+    /// Every selectable dog breed has a dedicated two-frame gallop. Slower
+    /// movement and expressive poses continue to use the original breed art.
     private static func originalDogBreedFrames(
         for breed: PetBreed,
         pose: PetPose
     ) -> [String]? {
+        if pose == .run {
+            let token: String
+            switch breed {
+            case .shepherd:
+                token = "shepherd"
+            case .corgi:
+                token = "corgi"
+            case .doberman:
+                token = "doberman"
+            case .bullTerrier:
+                token = "bull_terrier"
+            case .classicCat, .britishShorthair, .maineCoon, .siamese,
+                 .redFox, .arcticFox, .classicParrot, .cockatiel, .budgie,
+                 .macaw, .classicPenguin, .rockhopper:
+                return nil
+            }
+            let prefix = "island_dog_\(token)_run_"
+            return [prefix + "0", prefix + "1"]
+        }
+
         let token: String
         switch breed {
         case .shepherd:
+            if pose == .walk {
+                return ["island_dog_shepherd_walk_0", "island_dog_shepherd_walk_1"]
+            }
             return nil
         case .corgi:
             token = "corgi"
@@ -336,8 +359,16 @@ enum PetAnimationLibrary {
         }
 
         let prefix = originalVariantPrefix(for: species, variant: variant)
-        if species == .parrot, variant == .macaw, pose == .fly {
-            return (0..<8).map { "island_parrot_macaw_fly_\(String(format: "%02d", $0))" }
+        if species == .parrot, pose == .fly || pose == .walk || pose == .run {
+            let flightToken = switch variant ?? .classicParrot {
+            case .cockatiel: "cockatiel"
+            case .budgie: "budgie"
+            case .macaw: "macaw"
+            default: "classic"
+            }
+            return (0..<8).map {
+                "island_parrot_\(flightToken)_fly_\(String(format: "%02d", $0))"
+            }
         }
 
         return switch pose {
@@ -346,7 +377,9 @@ enum PetAnimationLibrary {
         case .walk:
             [prefix + "walk_0", prefix + "walk_1"]
         case .run:
-            [prefix + "walk_0", prefix + "idle", prefix + "walk_1", prefix + "idle"]
+            species == .parrot
+                ? [prefix + "walk_1", prefix + "jump", prefix + "walk_0", prefix + "jump"]
+                : [prefix + "run_0", prefix + "run_1"]
         case .jump:
             [prefix + "jump"]
         case .fly:

@@ -140,9 +140,31 @@ private struct PetLiveActivitySmokeHostView: View {
     @State private var status = "Preparing…"
     @State private var activity: Activity<PetActivityAttributes>?
 
+    private var qaSpecies: PetSpecies {
+        argumentValue(after: "-qa-species").flatMap(PetSpecies.init(rawValue:)) ?? .parrot
+    }
+
+    private var qaBreed: PetBreed? {
+        guard let rawValue = argumentValue(after: "-qa-breed"),
+              let breed = PetBreed(rawValue: rawValue),
+              PetBreed.available(for: qaSpecies).contains(breed) else {
+            return PetBreed.defaultVariant(for: qaSpecies)
+        }
+        return breed
+    }
+
+    private var qaMode: DynamicIslandMotionMode {
+        argumentValue(after: "-qa-mode").flatMap(DynamicIslandMotionMode.init(rawValue:)) ?? .run
+    }
+
     var body: some View {
         VStack(spacing: 16) {
-            PetArtwork(species: .parrot, pose: .fly, step: 1)
+            PetArtwork(
+                species: qaSpecies,
+                breed: qaBreed,
+                pose: qaMode.initialPose(for: qaSpecies),
+                step: 1
+            )
                 .frame(width: 80, height: 68)
             Text("Pet Live Activity smoke test")
                 .font(.title2.bold())
@@ -172,19 +194,24 @@ private struct PetLiveActivitySmokeHostView: View {
         let now = Date.now
         let endsAt = now.addingTimeInterval(20 * 60)
         let identity = PetActivityIdentity(
-            id: UUID(), name: "Кеша", species: .parrot, coat: .sunrise,
-            customColor: nil
+            id: UUID(),
+            name: qaBreed?.rawValue ?? qaSpecies.rawValue,
+            species: qaSpecies,
+            coat: .sunrise,
+            customColor: nil,
+            breed: qaBreed
         )
         do {
             let requested = try Activity.request(
                 attributes: PetActivityAttributes(
                     sessionID: UUID(), pet: identity, companions: [],
-                    startedAt: now, endsAt: endsAt
+                    startedAt: now, endsAt: endsAt, motionMode: qaMode
                 ),
                 content: ActivityContent(
                     state: .init(
                         snapshot: PetSnapshot(
-                            pose: .fly, position: 0.35, direction: .right,
+                            pose: qaMode.initialPose(for: qaSpecies),
+                            position: 0.35, direction: .right,
                             revision: 1, generatedAt: now
                         ),
                         lastInteraction: nil
@@ -198,6 +225,14 @@ private struct PetLiveActivitySmokeHostView: View {
         } catch {
             status = "request failed:\n\(String(reflecting: error))"
         }
+    }
+
+    private func argumentValue(after flag: String) -> String? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: flag), index + 1 < arguments.count else {
+            return nil
+        }
+        return arguments[index + 1]
     }
 }
 
@@ -289,7 +324,7 @@ private struct DynamicIslandSpritePreview: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     HStack(spacing: 12) {
-                        ForEach(PetSpecies.allCases) { species in
+                        ForEach(PetSpecies.selectableCases) { species in
                             PetArtwork(
                                 species: species,
                                 coat: .sunrise,

@@ -264,7 +264,9 @@ struct PetCollectionView: View {
 
     private var addButton: some View {
         Button {
-            let species = PetSpecies.allCases[controller.pets.count % PetSpecies.allCases.count]
+            let species = PetSpecies.selectableCases[
+                controller.pets.count % PetSpecies.selectableCases.count
+            ]
             let profile = PetProfile(
                 id: UUID(),
                 name: String(localized: "New friend"),

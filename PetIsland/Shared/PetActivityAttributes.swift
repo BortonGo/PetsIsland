@@ -24,6 +24,7 @@ struct PetActivityAttributes: ActivityAttributes {
     var companions: [PetActivityIdentity] = []
     var startedAt: Date
     var endsAt: Date
+    var motionMode: DynamicIslandMotionMode = .runSleep
 }
 
 enum PetLiveAction: String, AppEnum {

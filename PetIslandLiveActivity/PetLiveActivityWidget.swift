@@ -133,8 +133,11 @@ private struct CompactTimerPet: View {
         Group {
             if isLuminanceReduced || context.isStale {
                 compactArtwork(pose: .sleep, step: 0)
+            } else if context.attributes.motionMode == .sleep {
+                compactArtwork(pose: .sleep, step: 0)
             } else if let fontName = LiveTimerPetFontRegistry.fontName(
-                for: context.attributes.pet
+                for: context.attributes.pet,
+                mode: context.attributes.motionMode
             ) {
                 LiveTimerGlyphPet(
                     timerStart: context.attributes.startedAt,
@@ -272,9 +275,9 @@ private enum LiveTimerPetFontRegistry {
         CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
     }()
 
-    static func fontName(for pet: PetActivityIdentity) -> String? {
+    static func fontName(for pet: PetActivityIdentity, mode: DynamicIslandMotionMode) -> String? {
         _ = registration
-        let name = postScriptName(for: pet)
+        let name = postScriptName(for: pet) + mode.fontNameSuffix
         return isAvailable(name) ? name : nil
     }
 
@@ -321,6 +324,19 @@ private enum LiveTimerPetFontRegistry {
             "PetIslandTimerLizard"
         case .bunny:
             "PetIslandTimerBunny"
+        }
+    }
+}
+
+private extension DynamicIslandMotionMode {
+    var fontNameSuffix: String {
+        switch self {
+        case .run: "Run"
+        case .walk: "Walk"
+        case .sleep: "Sleep"
+        case .runSleep: "RunSleep"
+        case .walkSleep: "WalkSleep"
+        case .runWalkSleep: "RunWalkSleep"
         }
     }
 }

@@ -85,8 +85,10 @@ struct SessionComposerView: View {
     private func durationTitle(_ minutes: Int) -> String {
         switch minutes {
         case 20: String(localized: "A little while · 20 min")
+        case 40: String(localized: "A walk · 40 min")
         case 60: String(localized: "An hour · 60 min")
-        default: String(localized: "A long stay · 2 h")
+        case 120: String(localized: "A long stay · 2 h")
+        default: String(localized: "An adventure · 4 h")
         }
     }
 
@@ -142,7 +144,7 @@ struct PetEditorView: View {
 
 struct PetPicker: View {
     @Binding var profile: PetProfile
-    var allowedSpecies: [PetSpecies] = PetSpecies.allCases
+    var allowedSpecies: [PetSpecies] = PetSpecies.selectableCases
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
