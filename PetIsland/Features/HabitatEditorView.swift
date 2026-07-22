@@ -662,9 +662,7 @@ private struct HabitatEditorPreviewContainer: View {
     }
 }
 
-private struct HabitatEditorView_Previews: PreviewProvider {
-    static var previews: some View {
-        HabitatEditorPreviewContainer()
-    }
+#Preview("Редактор домика") {
+    HabitatEditorPreviewContainer()
 }
 #endif

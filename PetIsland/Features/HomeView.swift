@@ -5,6 +5,7 @@ struct HomeView: View {
     @ObservedObject var controller: PetSessionController
     @Environment(\.openURL) private var openURL
     @State private var showsPlayYard = false
+    @State private var showsMiniGames = false
     @State private var showsHabitatEditor = false
     @State private var draftResidentIDs: [UUID] = []
     @State private var draftTheme: HabitatTheme = .meadow
@@ -16,6 +17,7 @@ struct HomeView: View {
                     habitat
                     identity
                     placementCard
+                    arcadeCard
                     playCard
                     widgetHelp
                     activityAvailabilityNotice
@@ -55,6 +57,9 @@ struct HomeView: View {
         }
         .fullScreenCover(isPresented: $showsPlayYard) {
             PlayYardView(pets: controller.habitatResidents.isEmpty ? [controller.profile] : controller.habitatResidents)
+        }
+        .fullScreenCover(isPresented: $showsMiniGames) {
+            MiniGamesView(controller: controller)
         }
         .sheet(isPresented: $controller.showsSettings) {
             SettingsView(controller: controller)
@@ -258,6 +263,40 @@ struct HomeView: View {
         )
     }
 
+    private var arcadeCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("Pet Arcade", systemImage: "gamecontroller.fill")
+                    .font(.headline)
+                Spacer()
+                Label("\(controller.arcadeProgress.coins)", systemImage: "dollarsign.circle.fill")
+                    .font(.subheadline.bold().monospacedDigit())
+                    .foregroundStyle(.orange)
+            }
+            Text("Choose a pet, set a high score and spend your coins on food, treats, toys and vitamins.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            Button {
+                showsMiniGames = true
+            } label: {
+                Label("Open Pet Arcade", systemImage: "play.circle.fill")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+        }
+        .padding(18)
+        .background(
+            LinearGradient(
+                colors: [.purple.opacity(0.13), .blue.opacity(0.08)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
+            in: RoundedRectangle(cornerRadius: 24, style: .continuous)
+        )
+    }
+
     private var widgetHelp: some View {
         VStack(alignment: .leading, spacing: 8) {
             Label("Add Pixel's enclosure", systemImage: "square.grid.2x2.fill")
@@ -360,3 +399,18 @@ struct HomeView: View {
         }
     }
 }
+
+#if DEBUG
+private struct HomeViewPreview: View {
+    @StateObject private var controller = PetSessionController(store: InMemoryPetStore())
+
+    var body: some View {
+        HomeView(controller: controller)
+            .task { await controller.bootstrap() }
+    }
+}
+
+#Preview("Главный экран") {
+    HomeViewPreview()
+}
+#endif

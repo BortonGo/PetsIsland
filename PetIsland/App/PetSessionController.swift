@@ -45,19 +45,26 @@ final class PetSessionController: ObservableObject {
     @Published private(set) var placement: PetPlacement = .enclosure
     @Published private(set) var lifeState = PetLifeState.initial()
     @Published private(set) var habitat = SharedPetHabitat.initial()
+    @Published private(set) var arcadeProgress = ArcadeProgress()
 
     private let store: any PetStore
+    private let arcadeStore: any ArcadeStore
     private let behavior = PetBehaviorMachine()
     private var activity: Activity<PetActivityAttributes>?
     private var state = PersistedAppState()
+    private var arcadeState = ArcadeState()
     private var expiryTask: Task<Void, Never>?
     private var activityObservationTask: Task<Void, Never>?
     private var authorizationTask: Task<Void, Never>?
     private var didBootstrap = false
     private var shouldReconnectMissingActivity = true
 
-    init(store: any PetStore = FilePetStore()) {
+    init(
+        store: any PetStore = FilePetStore(),
+        arcadeStore: any ArcadeStore = FileArcadeStore()
+    ) {
         self.store = store
+        self.arcadeStore = arcadeStore
     }
 
     var isBusy: Bool { operation == .starting || operation == .stopping || operation == .loading }
@@ -65,7 +72,9 @@ final class PetSessionController: ObservableObject {
     func bootstrap() async {
         if !didBootstrap {
             state = await store.load()
+            arcadeState = await arcadeStore.load()
             ensureMVPDog()
+            arcadeState.reconcile(with: state.pets)
             publishPetCollection()
             synchronizeSharedLifeState()
             synchronizeSharedHabitat()
@@ -75,6 +84,7 @@ final class PetSessionController: ObservableObject {
             didBootstrap = true
             observeAuthorization()
             await persist()
+            await persistArcade()
         }
         reloadSharedLifeState()
         if placement == .dynamicIsland {
@@ -93,6 +103,7 @@ final class PetSessionController: ObservableObject {
         completedOnboarding = true
         state.completedOnboarding = true
         await persist()
+        await persistArcade()
         synchronizeSharedLifeState()
         synchronizeSharedHabitat()
     }
@@ -114,6 +125,7 @@ final class PetSessionController: ObservableObject {
         }
         publishPetCollection()
         await persist()
+        await persistArcade()
         synchronizeSharedLifeState()
         synchronizeSharedHabitat()
         return true
@@ -145,6 +157,7 @@ final class PetSessionController: ObservableObject {
         state.activePetIDs.removeAll { $0 == id }
         publishPetCollection()
         await persist()
+        await persistArcade()
         synchronizeSharedHabitat()
         return true
     }
@@ -203,7 +216,57 @@ final class PetSessionController: ObservableObject {
     }
 
     var habitatVitalsByPetID: [UUID: PetVitals] {
-        Dictionary(uniqueKeysWithValues: habitat.residents.map { ($0.id, $0.vitals) })
+        arcadeState.vitalsByPetID
+    }
+
+    func vitals(for petID: UUID) -> PetVitals {
+        arcadeState.vitalsByPetID[petID] ?? PetVitals()
+    }
+
+    func completeMiniGame(
+        _ game: MiniGameKind,
+        score: Int,
+        petID: UUID,
+        at date: Date = .now
+    ) async -> ArcadePayout? {
+        guard state.pets.contains(where: { $0.id == petID }) else { return nil }
+
+        let currentVitals = vitals(for: petID)
+        let payout = arcadeState.progress.record(
+            game: game,
+            score: score,
+            wasTired: currentVitals.energy < ArcadeEconomy.tiredEnergyThreshold,
+            at: date
+        )
+        arcadeState.vitalsByPetID[petID] = ArcadeEconomy.vitalsAfterPlaying(currentVitals)
+        arcadeProgress = arcadeState.progress
+        await persistArcade()
+        synchronizeGameVitalsWithHabitat()
+        Haptics.success(enabled: settings.hapticsEnabled)
+        return payout
+    }
+
+    func purchaseArcadeItem(_ item: ArcadeItemKind) async -> Bool {
+        guard arcadeState.progress.purchase(item) else { return false }
+        arcadeProgress = arcadeState.progress
+        await persistArcade()
+        Haptics.success(enabled: settings.hapticsEnabled)
+        return true
+    }
+
+    func useArcadeItem(_ item: ArcadeItemKind, for petID: UUID) async -> Bool {
+        guard state.pets.contains(where: { $0.id == petID }),
+              arcadeState.progress.consume(item) else { return false }
+
+        arcadeState.vitalsByPetID[petID] = ArcadeEconomy.vitals(
+            vitals(for: petID),
+            afterUsing: item
+        )
+        arcadeProgress = arcadeState.progress
+        await persistArcade()
+        synchronizeGameVitalsWithHabitat()
+        Haptics.success(enabled: settings.hapticsEnabled)
+        return true
     }
 
     /// Saves the enclosure composition and theme as one atomic App Group
@@ -216,8 +279,10 @@ final class PetSessionController: ObservableObject {
                 let selected = Set(shared.configuration.residentPetIDs)
                 shared.residents = state.pets.compactMap { pet in
                     guard selected.contains(pet.id) else { return nil }
-                    let previousVitals = shared.residents.first { $0.id == pet.id }?.vitals ?? PetVitals()
-                    return SharedHabitatResident(profile: pet, vitals: previousVitals)
+                    return SharedHabitatResident(
+                        profile: pet,
+                        vitals: arcadeState.vitalsByPetID[pet.id] ?? PetVitals()
+                    )
                 }
             }
             WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
@@ -518,10 +583,12 @@ final class PetSessionController: ObservableObject {
 
     private func publishPetCollection() {
         state.normalizePetCollection()
+        arcadeState.reconcile(with: state.pets)
         pets = state.pets
         activePetIDs = state.activePetIDs
         activeParty = state.activeParty
         profile = state.profile
+        arcadeProgress = arcadeState.progress
     }
 
     private func activityIdentity(for pet: PetProfile) -> PetActivityIdentity {
@@ -678,8 +745,10 @@ final class PetSessionController: ObservableObject {
                 let selected = Set(shared.configuration.residentPetIDs)
                 shared.residents = state.pets.compactMap { pet in
                     guard selected.contains(pet.id) else { return nil }
-                    let oldVitals = shared.residents.first { $0.id == pet.id }?.vitals ?? PetVitals()
-                    return SharedHabitatResident(profile: pet, vitals: oldVitals)
+                    return SharedHabitatResident(
+                        profile: pet,
+                        vitals: arcadeState.vitalsByPetID[pet.id] ?? PetVitals()
+                    )
                 }
             }
             WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
@@ -702,12 +771,29 @@ final class PetSessionController: ObservableObject {
                 let selected = Set(shared.configuration.residentPetIDs)
                 shared.residents = state.pets.compactMap { pet in
                     guard selected.contains(pet.id) else { return nil }
-                    let oldVitals = shared.residents.first { $0.id == pet.id }?.vitals ?? PetVitals()
-                    return SharedHabitatResident(profile: pet, vitals: oldVitals)
+                    return SharedHabitatResident(
+                        profile: pet,
+                        vitals: arcadeState.vitalsByPetID[pet.id] ?? PetVitals()
+                    )
                 }
             }
         } catch {
             alertMessage = String(localized: "The pet could not be moved.")
+        }
+    }
+
+    private func synchronizeGameVitalsWithHabitat() {
+        do {
+            habitat = try PetHabitatStore.update { shared in
+                shared.residents = shared.residents.map { resident in
+                    var updated = resident
+                    updated.vitals = arcadeState.vitalsByPetID[resident.id] ?? resident.vitals
+                    return updated
+                }
+            }
+            WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
+        } catch {
+            alertMessage = String(localized: "Pet rewards could not be synchronized with the enclosure.")
         }
     }
 
@@ -748,6 +834,14 @@ final class PetSessionController: ObservableObject {
             try await store.save(state)
         } catch {
             alertMessage = String(localized: "Your changes could not be saved. Please try again.")
+        }
+    }
+
+    private func persistArcade() async {
+        do {
+            try await arcadeStore.save(arcadeState)
+        } catch {
+            alertMessage = String(localized: "Arcade progress could not be saved. Please try again.")
         }
     }
 }

@@ -7,7 +7,9 @@ struct ContentView: View {
 
     var body: some View {
 #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-sprite-preview") {
+        if ProcessInfo.processInfo.arguments.contains("-arcade-preview") {
+            MiniGamesDebugHostView()
+        } else if ProcessInfo.processInfo.arguments.contains("-sprite-preview") {
             DynamicIslandSpritePreview()
         } else if ProcessInfo.processInfo.arguments.contains("-live-activity-recovery-test") {
             LiveActivityRecoveryHostView()
@@ -30,9 +32,26 @@ struct ContentView: View {
 #if DEBUG
     fileprivate static var previewParty: [PetProfile] {
         [
-            PetProfile(id: UUID(), name: "Рыжик", species: .fox, coat: .sunrise, createdAt: .now),
-            PetProfile(id: UUID(), name: "Кеша", species: .parrot, coat: .cloud, createdAt: .now),
-            PetProfile(id: UUID(), name: "Дружок", species: .dog, coat: .sunrise, createdAt: .now)
+            PetProfile(
+                id: UUID(), name: "Мейн-кун", species: .cat, coat: .sunrise,
+                createdAt: .now, breed: .maineCoon
+            ),
+            PetProfile(
+                id: UUID(), name: "Овчарка", species: .dog, coat: .sunrise,
+                createdAt: .now, breed: .shepherd
+            ),
+            PetProfile(
+                id: UUID(), name: "Корги", species: .dog, coat: .sunrise,
+                createdAt: .now, breed: .corgi
+            ),
+            PetProfile(
+                id: UUID(), name: "Пингвин", species: .penguin, coat: .cloud,
+                createdAt: .now, breed: .classicPenguin
+            ),
+            PetProfile(
+                id: UUID(), name: "Кеша", species: .parrot, coat: .sunrise,
+                createdAt: .now, breed: .macaw
+            )
         ]
     }
 #endif
@@ -301,6 +320,65 @@ private struct PetCollectionDebugPreview: View {
                 _ = await controller.addPet(party[2])
             }
     }
+}
+
+private struct MiniGamesDebugHostView: View {
+    @StateObject private var controller: PetSessionController
+
+    init() {
+        let previewParty = ContentView.previewParty
+        let party: [PetProfile]
+        if ProcessInfo.processInfo.arguments.contains("-arcade-shepherd-preview") {
+            party = Array(previewParty.dropFirst()) + [previewParty[0]]
+        } else if ProcessInfo.processInfo.arguments.contains("-arcade-parrot-preview"),
+                  let parrot = previewParty.last {
+            party = [parrot] + Array(previewParty.dropLast())
+        } else {
+            party = previewParty
+        }
+        var appState = PersistedAppState()
+        appState.pets = party
+        appState.activePetIDs = party.map(\.id)
+        appState.completedOnboarding = true
+        appState.normalizePetCollection()
+
+        let vitals = Dictionary(uniqueKeysWithValues: party.map { pet in
+            (pet.id, PetVitals(fullness: 0.7, happiness: 0.82, energy: 0.68))
+        })
+        let arcade = ArcadeState(
+            progress: ArcadeProgress(coins: 42, totalScore: 1_850, gamesPlayed: 5, highScores: [.skyHop: 720]),
+            vitalsByPetID: vitals
+        )
+        _controller = StateObject(
+            wrappedValue: PetSessionController(
+                store: InMemoryPetStore(appState),
+                arcadeStore: InMemoryArcadeStore(arcade)
+            )
+        )
+    }
+
+    var body: some View {
+        MiniGamesView(controller: controller)
+            .task { await controller.bootstrap() }
+    }
+}
+#endif
+
+#if DEBUG
+#Preview("Приложение") {
+    ContentView()
+}
+
+#Preview("Питомцы Dynamic Island") {
+    DynamicIslandSpritePreview()
+}
+
+#Preview("Коллекция питомцев") {
+    PetCollectionDebugPreview()
+}
+
+#Preview("Pet Arcade") {
+    MiniGamesDebugHostView()
 }
 #endif
 

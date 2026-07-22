@@ -426,3 +426,23 @@ struct SessionSummaryView: View {
         .presentationDetents([.medium])
     }
 }
+
+#if DEBUG
+#Preview("Новая прогулка") {
+    SessionComposerView(
+        controller: PetSessionController(store: InMemoryPetStore())
+    )
+}
+
+#Preview("Настройки") {
+    SettingsView(
+        controller: PetSessionController(store: InMemoryPetStore())
+    )
+}
+
+#Preview("Завершение прогулки") {
+    SessionSummaryView(
+        controller: PetSessionController(store: InMemoryPetStore())
+    )
+}
+#endif

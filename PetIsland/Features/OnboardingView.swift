@@ -81,6 +81,14 @@ struct OnboardingView: View {
     }
 }
 
+#if DEBUG
+#Preview("Знакомство с питомцем") {
+    OnboardingView(
+        controller: PetSessionController(store: InMemoryPetStore())
+    )
+}
+#endif
+
 private struct OnboardingPage<Content: View>: View {
     let title: LocalizedStringKey
     let message: LocalizedStringKey

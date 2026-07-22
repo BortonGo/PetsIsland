@@ -286,6 +286,21 @@ struct PetCollectionView: View {
     }
 }
 
+#if DEBUG
+private struct PetCollectionViewPreview: View {
+    @StateObject private var controller = PetSessionController(store: InMemoryPetStore())
+
+    var body: some View {
+        PetCollectionView(controller: controller)
+            .task { await controller.bootstrap() }
+    }
+}
+
+#Preview("Коллекция питомцев") {
+    PetCollectionViewPreview()
+}
+#endif
+
 private struct PetEditorRoute: Identifiable {
     let id = UUID()
     let profile: PetProfile

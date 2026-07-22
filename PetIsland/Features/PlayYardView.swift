@@ -625,3 +625,27 @@ private extension CGVector {
         return CGVector(dx: dx * scale, dy: dy * scale)
     }
 }
+
+#if DEBUG
+#Preview("Игровая комната") {
+    PlayYardView(
+        pets: [
+            .starter,
+            PetProfile(
+                id: UUID(),
+                name: "Моти",
+                species: .cat,
+                coat: .cloud,
+                createdAt: .now
+            ),
+            PetProfile(
+                id: UUID(),
+                name: "Кеша",
+                species: .parrot,
+                coat: .sunrise,
+                createdAt: .now
+            )
+        ]
+    )
+}
+#endif

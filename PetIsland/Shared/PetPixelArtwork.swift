@@ -315,6 +315,11 @@ enum PetAnimationLibrary {
             if pose == .walk {
                 return ["island_dog_shepherd_walk_0", "island_dog_shepherd_walk_1"]
             }
+            if pose == .jump {
+                // The first gallop frame is the shepherd's clear airborne pose.
+                // Reuse it here so pet pickers do not fall back to standing art.
+                return ["island_dog_shepherd_run_0"]
+            }
             return nil
         case .corgi:
             token = "corgi"
@@ -381,7 +386,9 @@ enum PetAnimationLibrary {
                 ? [prefix + "walk_1", prefix + "jump", prefix + "walk_0", prefix + "jump"]
                 : [prefix + "run_0", prefix + "run_1"]
         case .jump:
-            [prefix + "jump"]
+            species == .cat && variant == .maineCoon
+                ? [prefix + "run_0"]
+                : [prefix + "jump"]
         case .fly:
             species == .parrot
                 ? [prefix + "walk_1", prefix + "jump", prefix + "walk_0", prefix + "jump"]

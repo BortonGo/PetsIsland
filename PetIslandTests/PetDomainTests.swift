@@ -38,6 +38,188 @@ final class PetDomainTests: XCTestCase {
         XCTAssertLessThan(run.frameDuration, walk.frameDuration)
     }
 
+    func testShepherdJumpUsesItsAirborneGallopFrame() {
+        let jump = PetAnimationLibrary.clip(for: .dog, breed: .shepherd, pose: .jump)
+
+        XCTAssertEqual(jump.frames, ["island_dog_shepherd_run_0"])
+    }
+
+    func testMaineCoonJumpUsesTheCompleteAirborneFrame() {
+        let jump = PetAnimationLibrary.clip(for: .cat, breed: .maineCoon, pose: .jump)
+
+        XCTAssertEqual(jump.frames, ["island_cat_maine_coon_run_0"])
+    }
+
+    func testSkyPawsUsesOneDedicatedPlaneForEveryNonParrotVariant() {
+        let variants: [(PetSpecies, PetBreed, String)] = [
+            (.cat, .classicCat, "sky_paws_cat_classic"),
+            (.cat, .britishShorthair, "sky_paws_cat_british"),
+            (.cat, .maineCoon, "sky_paws_cat_maine_coon"),
+            (.cat, .siamese, "sky_paws_cat_siamese"),
+            (.dog, .shepherd, "sky_paws_dog_shepherd"),
+            (.dog, .corgi, "sky_paws_dog_corgi"),
+            (.dog, .doberman, "sky_paws_dog_doberman"),
+            (.dog, .bullTerrier, "sky_paws_dog_bull_terrier"),
+            (.fox, .redFox, "sky_paws_fox_red"),
+            (.fox, .arcticFox, "sky_paws_fox_arctic"),
+            (.penguin, .classicPenguin, "sky_paws_penguin_classic"),
+            (.penguin, .rockhopper, "sky_paws_penguin_rockhopper")
+        ]
+
+        for (species, breed, assetName) in variants {
+            XCTAssertEqual(
+                SkyPawsArtworkLibrary.assetNames(for: species, breed: breed),
+                [assetName]
+            )
+        }
+    }
+
+    func testSkyPawsParrotsUseExactlyTwoNativeWingFrames() {
+        let variants: [(PetBreed, String)] = [
+            (.classicParrot, "classic"),
+            (.cockatiel, "cockatiel"),
+            (.budgie, "budgie"),
+            (.macaw, "macaw")
+        ]
+
+        for (breed, token) in variants {
+            XCTAssertEqual(
+                SkyPawsArtworkLibrary.assetNames(for: .parrot, breed: breed),
+                ["island_parrot_\(token)_fly_00", "island_parrot_\(token)_fly_04"]
+            )
+        }
+    }
+
+    func testSkyPawsEngineStartsAndFlaps() {
+        var engine = SkyPawsEngine()
+        let size = CGSize(width: 393, height: 852)
+
+        engine.start(in: size)
+        XCTAssertEqual(engine.phase, .playing)
+        XCTAssertEqual(engine.gates.count, 4)
+        XCTAssertEqual(engine.score, 0)
+
+        engine.flap()
+        XCTAssertEqual(engine.velocityY, -325)
+        engine.update(deltaTime: 1.0 / 60.0, in: size)
+        XCTAssertLessThan(engine.playerY, size.height * 0.48)
+    }
+
+    func testSkyPawsSeedChangesTheGateLayout() {
+        let size = CGSize(width: 393, height: 852)
+        var first = SkyPawsEngine()
+        var second = SkyPawsEngine()
+
+        first.start(in: size, seed: 1)
+        second.start(in: size, seed: 2)
+
+        XCTAssertNotEqual(first.gates.map(\.gapCenter), second.gates.map(\.gapCenter))
+    }
+
+    func testSkyPawsGateSequenceKeepsEveryNextGapReachable() {
+        let size = CGSize(width: 393, height: 852)
+        var engine = SkyPawsEngine()
+
+        engine.start(in: size, seed: 0xCAFE_BABE)
+
+        for (previous, next) in zip(engine.gates, engine.gates.dropFirst()) {
+            XCTAssertLessThanOrEqual(
+                abs(next.gapCenter - previous.gapCenter),
+                SkyPawsEngine.maximumGateCenterShift + 0.001
+            )
+        }
+    }
+
+    func testPetsDashProvidesFourRearViewFramesForEverySelectableVariant() {
+        let variants: [(PetSpecies, PetBreed, String)] = [
+            (.cat, .classicCat, "cat_classic"),
+            (.cat, .britishShorthair, "cat_british"),
+            (.cat, .maineCoon, "cat_maine_coon"),
+            (.cat, .siamese, "cat_siamese"),
+            (.dog, .shepherd, "dog_shepherd"),
+            (.dog, .corgi, "dog_corgi"),
+            (.dog, .doberman, "dog_doberman"),
+            (.dog, .bullTerrier, "dog_bull_terrier"),
+            (.fox, .redFox, "fox_red"),
+            (.fox, .arcticFox, "fox_arctic"),
+            (.parrot, .classicParrot, "parrot_classic"),
+            (.parrot, .cockatiel, "parrot_cockatiel"),
+            (.parrot, .budgie, "parrot_budgie"),
+            (.parrot, .macaw, "parrot_macaw"),
+            (.penguin, .classicPenguin, "penguin_classic"),
+            (.penguin, .rockhopper, "penguin_rockhopper")
+        ]
+
+        for (species, breed, token) in variants {
+            XCTAssertEqual(
+                PetsDashArtworkLibrary.assetNames(for: species, breed: breed),
+                (0..<4).map { "pets_dash_\(token)_\(String(format: "%02d", $0))" }
+            )
+        }
+    }
+
+    func testPetsDashEngineSupportsThreeLanesAndJumping() {
+        var engine = PetsDashEngine()
+        let size = CGSize(width: 393, height: 852)
+
+        engine.start(in: size)
+        XCTAssertEqual(engine.phase, .playing)
+        XCTAssertEqual(engine.lane, 1)
+
+        engine.moveLane(-1)
+        engine.moveLane(-1)
+        XCTAssertEqual(engine.lane, 0)
+        engine.moveLane(1)
+        XCTAssertEqual(engine.lane, 1)
+
+        engine.jump()
+        engine.update(deltaTime: 1.0 / 60.0, in: size)
+        XCTAssertTrue(engine.isJumping)
+        XCTAssertGreaterThan(engine.jumpHeight, 0)
+    }
+
+    func testPetsDashObstacleEndsRunWithoutAJump() {
+        var engine = PetsDashEngine()
+        let size = CGSize(width: 393, height: 852)
+        engine.start(in: size)
+        engine.objects = [
+            PetsDashObject(id: 99, kind: .barrier, lane: 1, progress: 0.82)
+        ]
+
+        engine.update(deltaTime: 1.0 / 60.0, in: size)
+
+        XCTAssertEqual(engine.phase, .gameOver)
+    }
+
+    func testPetsDashCollectedCoinDisappearsImmediately() {
+        var engine = PetsDashEngine()
+        let size = CGSize(width: 393, height: 852)
+        engine.start(in: size, seed: 1)
+        engine.objects = [
+            PetsDashObject(id: 7, kind: .coin, lane: 1, progress: 0.78)
+        ]
+
+        engine.update(deltaTime: 1.0 / 60.0, in: size)
+
+        XCTAssertEqual(engine.coinsCollected, 1)
+        XCTAssertTrue(engine.objects.isEmpty)
+    }
+
+    func testPetsDashSeedChangesTheFirstWave() {
+        let size = CGSize(width: 393, height: 852)
+        var first = PetsDashEngine()
+        var second = PetsDashEngine()
+        first.start(in: size, seed: 1)
+        second.start(in: size, seed: 2)
+
+        for _ in 0..<18 {
+            first.update(deltaTime: 1.0 / 24.0, in: size)
+            second.update(deltaTime: 1.0 / 24.0, in: size)
+        }
+
+        XCTAssertNotEqual(first.objects, second.objects)
+    }
+
     func testSpeciesVariantsResolveToTheirOwnSpriteAssets() {
         XCTAssertEqual(
             PetAnimationLibrary.clip(for: .cat, breed: .siamese, pose: .idle).frames,
@@ -646,6 +828,121 @@ final class PetDomainTests: XCTestCase {
         XCTAssertEqual(DynamicIslandMotionMode.walk.initialPose(for: .parrot), .fly)
         XCTAssertTrue(DynamicIslandMotionMode.runWalkSleep.includesSleep)
         XCTAssertFalse(DynamicIslandMotionMode.run.includesSleep)
+    }
+
+    func testArcadeAwardsPerformanceRecordAndDailyCoins() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let firstDate = Date(timeIntervalSince1970: 1_750_000_000)
+        var progress = ArcadeProgress()
+
+        let first = progress.record(
+            game: .skyHop,
+            score: 550,
+            wasTired: false,
+            at: firstDate,
+            calendar: calendar
+        )
+        let second = progress.record(
+            game: .skyHop,
+            score: 700,
+            wasTired: true,
+            at: firstDate.addingTimeInterval(60),
+            calendar: calendar
+        )
+
+        XCTAssertEqual(first.coinsEarned, 20)
+        XCTAssertTrue(first.isNewHighScore)
+        XCTAssertTrue(first.receivedDailyBonus)
+        XCTAssertEqual(second.coinsEarned, 10)
+        XCTAssertTrue(second.isNewHighScore)
+        XCTAssertFalse(second.receivedDailyBonus)
+        XCTAssertTrue(second.wasTired)
+        XCTAssertEqual(progress.coins, 30)
+        XCTAssertEqual(progress.highScore(for: .skyHop), 700)
+    }
+
+    func testSkyHopCreatesDifferentMapsForDifferentRuns() {
+        let size = CGSize(width: 390, height: 844)
+        var firstRun = SkyHopEngine()
+        var secondRun = SkyHopEngine()
+
+        firstRun.start(in: size, seed: 101)
+        secondRun.start(in: size, seed: 202)
+
+        XCTAssertNotEqual(firstRun.platforms, secondRun.platforms)
+    }
+
+    func testSkyHopSeedKeepsGeneratedMapReproducibleForTests() {
+        let size = CGSize(width: 390, height: 844)
+        var firstRun = SkyHopEngine()
+        var repeatedRun = SkyHopEngine()
+
+        firstRun.start(in: size, seed: 7_777)
+        repeatedRun.start(in: size, seed: 7_777)
+
+        XCTAssertEqual(firstRun.platforms, repeatedRun.platforms)
+    }
+
+    func testSkyHopGeneratedPlatformsStayInsidePlayableBounds() {
+        let size = CGSize(width: 390, height: 844)
+        var engine = SkyHopEngine()
+
+        engine.start(in: size, seed: 42)
+
+        XCTAssertGreaterThan(engine.platforms.count, 5)
+        XCTAssertEqual(engine.platforms.first?.x, size.width / 2)
+        XCTAssertTrue(engine.platforms.dropFirst().allSatisfy { platform in
+            platform.x >= 52
+                && platform.x <= size.width - 52
+                && platform.width >= 72
+                && platform.width <= 112
+        })
+
+        let verticalGaps = zip(engine.platforms, engine.platforms.dropFirst()).map { lower, upper in
+            lower.y - upper.y
+        }
+        XCTAssertTrue(verticalGaps.allSatisfy { $0 >= 76 && $0 <= 108 })
+    }
+
+    func testArcadeShopMovesCoinsIntoInventory() {
+        var progress = ArcadeProgress(coins: 24)
+
+        XCTAssertTrue(progress.purchase(.toy))
+        XCTAssertEqual(progress.coins, 0)
+        XCTAssertEqual(progress.inventory[.toy], 1)
+        XCTAssertTrue(progress.consume(.toy))
+        XCTAssertEqual(progress.inventory[.toy], 0)
+        XCTAssertFalse(progress.consume(.toy))
+    }
+
+    func testArcadeVitalsCreateAClosedCareLoop() {
+        let starting = PetVitals(fullness: 0.5, happiness: 0.5, energy: 0.5)
+        let afterGame = ArcadeEconomy.vitalsAfterPlaying(starting)
+        let afterFood = ArcadeEconomy.vitals(afterGame, afterUsing: .food)
+        let afterVitamins = ArcadeEconomy.vitals(afterFood, afterUsing: .vitamins)
+
+        XCTAssertEqual(afterGame.fullness, 0.48, accuracy: 0.0001)
+        XCTAssertEqual(afterGame.happiness, 0.58, accuracy: 0.0001)
+        XCTAssertEqual(afterGame.energy, 0.445, accuracy: 0.0001)
+        XCTAssertGreaterThan(afterFood.fullness, starting.fullness)
+        XCTAssertGreaterThan(afterVitamins.energy, starting.energy)
+    }
+
+    func testArcadeStateRoundTripsWithPetVitals() throws {
+        let petID = UUID()
+        var state = ArcadeState()
+        state.vitalsByPetID[petID] = PetVitals(fullness: 0.4, happiness: 0.6, energy: 0.8)
+        _ = state.progress.record(game: .skyHop, score: 900, wasTired: false)
+        XCTAssertTrue(state.progress.purchase(.food))
+
+        let data = try JSONEncoder().encode(state)
+        let decoded = try JSONDecoder().decode(ArcadeState.self, from: data)
+
+        XCTAssertEqual(decoded.schemaVersion, ArcadeState.schemaVersion)
+        XCTAssertEqual(decoded.vitalsByPetID[petID]?.energy, 0.8)
+        XCTAssertEqual(decoded.progress.highScore(for: .skyHop), 900)
+        XCTAssertEqual(decoded.progress.inventory[.food], 1)
     }
 
     func testLegacySettingsDecodeWithDynamicIslandDefaults() throws {
