@@ -398,7 +398,7 @@ private struct DynamicIslandSpritePreview: View {
                 compactIsland
 
                 VStack(spacing: 10) {
-                    Text("29 × 25 pt compact sprite")
+                    Text("33 × 28 pt compact sprite")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     HStack(spacing: 12) {
@@ -408,7 +408,7 @@ private struct DynamicIslandSpritePreview: View {
                                 coat: .sunrise,
                                 pose: species == .parrot ? .fly : .idle
                             )
-                            .frame(width: 29, height: 25)
+                            .frame(width: 33, height: 28)
                         }
                     }
                     .padding(12)
@@ -445,7 +445,7 @@ private struct DynamicIslandSpritePreview: View {
     private var compactIsland: some View {
         HStack(spacing: 8) {
             PetArtwork(species: .parrot, coat: .sunrise, pose: .fly, step: 1)
-                .frame(width: 29, height: 25)
+                .frame(width: 33, height: 28)
             Spacer(minLength: 82)
             Text("19:42")
                 .font(.caption2.monospacedDigit().bold())

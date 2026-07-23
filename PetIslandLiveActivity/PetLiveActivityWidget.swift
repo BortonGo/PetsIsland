@@ -64,14 +64,14 @@ struct PetLiveActivityWidget: Widget {
             } compactLeading: {
                 CompactTimerPet(
                     context: context,
-                    viewport: CGSize(width: 32, height: 26)
+                    viewport: CGSize(width: 36, height: 30)
                 )
             } compactTrailing: {
                 EmptyView()
             } minimal: {
                 CompactTimerPet(
                     context: context,
-                    viewport: CGSize(width: 25, height: 22)
+                    viewport: CGSize(width: 28, height: 25)
                 )
             }
             .keylineTint(accent(for: context.attributes.pet))
@@ -177,10 +177,10 @@ private struct LiveTimerGlyphPet: View {
     let viewport: CGSize
 
     var body: some View {
-        // The generated sbix font contains a native 96 px bitmap strike.
-        // Rendering it at 32 pt on a @3x Dynamic Island screen selects that
+        // The generated sbix font contains a native 108 px bitmap strike.
+        // Rendering it at 36 pt on a @3x Dynamic Island screen selects that
         // strike without vectorizing or independently moving sprite pixels.
-        let glyphSize: CGFloat = 32
+        let glyphSize: CGFloat = 36
 
         Text(timerStart, style: .timer)
             .font(.custom(fontName, fixedSize: glyphSize))
