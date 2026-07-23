@@ -359,7 +359,7 @@ enum PetHabitatEngine {
         case .wandering: .walk
         case .running: .run
         case .flying: .fly
-        case .playing: species == .bunny ? .jump : .play
+        case .playing: .play
         case .resting: .idle
         case .sleeping: .sleep
         }
@@ -368,10 +368,8 @@ enum PetHabitatEngine {
     private static func cadence(for species: PetSpecies) -> TimeInterval {
         switch species {
         case .parrot: 1.8
-        case .bunny, .lizard: 2.2
         case .dog, .fox: 2.5
         case .cat, .penguin: 2.8
-        case .bear: 3.2
         }
     }
 

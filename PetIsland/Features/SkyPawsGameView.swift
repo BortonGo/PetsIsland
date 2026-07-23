@@ -386,8 +386,6 @@ enum SkyPawsArtworkLibrary {
                 ? ["sky_paws_penguin_rockhopper"]
                 : ["sky_paws_penguin_classic"]
 
-        case .bear, .lizard, .bunny:
-            return []
         }
     }
 }

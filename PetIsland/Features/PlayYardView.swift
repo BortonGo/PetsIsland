@@ -610,9 +610,7 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
         switch species {
         case .parrot: 190
         case .dog, .fox: 150
-        case .cat, .bunny, .penguin: 136
-        case .lizard: 112
-        case .bear: 98
+        case .cat, .penguin: 136
         }
     }
 }

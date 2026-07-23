@@ -5,18 +5,11 @@ enum PetSpecies: String, Codable, CaseIterable, Identifiable, Hashable, Sendable
     case dog
     case fox
     case parrot
-    case bear
     case penguin
-    case lizard
-    case bunny
 
     var id: String { rawValue }
 
-    /// Species with complete original Pet Island artwork. The remaining enum
-    /// cases stay decodable so older saved profiles can migrate safely.
-    static let selectableCases: [PetSpecies] = [
-        .cat, .dog, .fox, .parrot, .penguin
-    ]
+    static let selectableCases = PetSpecies.allCases
 
     var isSelectable: Bool { Self.selectableCases.contains(self) }
 }
@@ -55,7 +48,6 @@ enum PetBreed: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
         case .fox: [.redFox, .arcticFox]
         case .parrot: [.classicParrot, .cockatiel, .budgie, .macaw]
         case .penguin: [.classicPenguin, .rockhopper]
-        case .bear, .lizard, .bunny: []
         }
     }
 
@@ -159,10 +151,7 @@ struct PetProfile: Codable, Equatable, Hashable, Identifiable, Sendable {
         case .dog: .playful
         case .fox: .calm
         case .parrot: .curious
-        case .bear: .calm
         case .penguin: .playful
-        case .lizard: .calm
-        case .bunny: .curious
         }
     }
 

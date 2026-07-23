@@ -396,8 +396,6 @@ enum PetsDashArtworkLibrary {
             }
         case .penguin:
             return breed == .rockhopper ? "penguin_rockhopper" : "penguin_classic"
-        case .bear, .lizard, .bunny:
-            return nil
         }
     }
 }

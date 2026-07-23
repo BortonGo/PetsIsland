@@ -519,9 +519,6 @@ private enum WidgetSpriteAtlasLibrary {
         case (.parrot, .macaw): .init(assetName: "widget_atlas_parrot_macaw_fly", frameCount: 8)
         case (.penguin, .classicPenguin): .init(assetName: "widget_atlas_penguin_classic_run", frameCount: 4)
         case (.penguin, .rockhopper): .init(assetName: "widget_atlas_penguin_rockhopper_run", frameCount: 4)
-        case (.bear, _): .init(assetName: "widget_atlas_bear_run", frameCount: 16)
-        case (.lizard, _): .init(assetName: "widget_atlas_lizard_run", frameCount: 4)
-        case (.bunny, _): .init(assetName: "widget_atlas_bunny_run", frameCount: 1)
         default: nil
         }
     }

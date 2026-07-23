@@ -50,12 +50,17 @@ struct OnboardingView: View {
     }
 
     private var choosePet: some View {
-        OnboardingPage(
-            title: "Meet your dog",
-            message: "Choose a name and coat for the first Pet Island resident. More animals will arrive in future versions."
-        ) {
-            PetPicker(profile: $draft, allowedSpecies: [.dog])
+        ScrollView {
+            VStack(alignment: .leading, spacing: 14) {
+                Text("Choose your first pet").font(.title2.bold())
+                Text("Give your new friend a name, then choose an animal and appearance.")
+                    .foregroundStyle(.secondary)
+                PetPicker(profile: $draft, allowedSpecies: PetSpecies.selectableCases)
+            }
+            .padding(.vertical, 8)
         }
+        .scrollDismissesKeyboard(.interactively)
+        .scrollIndicators(.hidden)
     }
 
     private var firstSession: some View {

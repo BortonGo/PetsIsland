@@ -442,12 +442,6 @@ private enum LiveTimerPetFontRegistry {
             pet.breed == .rockhopper
                 ? "PetIslandTimerPenguinRockhopper"
                 : "PetIslandTimerPenguinClassic"
-        case .bear:
-            "PetIslandTimerBear"
-        case .lizard:
-            "PetIslandTimerLizard"
-        case .bunny:
-            "PetIslandTimerBunny"
         }
     }
 }

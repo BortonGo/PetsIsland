@@ -145,12 +145,26 @@ struct PetEditorView: View {
 struct PetPicker: View {
     @Binding var profile: PetProfile
     var allowedSpecies: [PetSpecies] = PetSpecies.selectableCases
+    @FocusState private var isNameFieldFocused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            TextField("Name", text: $profile.name)
-                .textInputAutocapitalization(.words)
-                .submitLabel(.done)
+            VStack(alignment: .leading, spacing: 7) {
+                Text("Pet name").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                TextField("Name", text: $profile.name)
+                    .font(.body)
+                    .textInputAutocapitalization(.words)
+                    .submitLabel(.done)
+                    .focused($isNameFieldFocused)
+                    .onSubmit { isNameFieldFocused = false }
+                    .padding(.horizontal, 14)
+                    .frame(minHeight: 52)
+                    .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(isNameFieldFocused ? Color.accentColor : Color(.separator), lineWidth: isNameFieldFocused ? 2 : 1)
+                    }
+            }
 
             Text("Species")
                 .font(.subheadline.weight(.semibold))
@@ -179,6 +193,12 @@ struct PetPicker: View {
             Toggle("Custom color", isOn: customColorEnabled)
             if profile.customColor != nil {
                 ColorPicker("Pet color", selection: customColor, supportsOpacity: false)
+            }
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { isNameFieldFocused = false }
             }
         }
     }

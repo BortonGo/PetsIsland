@@ -7,18 +7,15 @@ extension PetSpecies {
         case .dog: "Dog"
         case .fox: "Fox"
         case .parrot: "Parrot"
-        case .bear: "Bear"
         case .penguin: "Penguin"
-        case .lizard: "Lizard"
-        case .bunny: "Bunny"
         }
     }
 
     var personalityName: LocalizedStringKey {
         switch self {
-        case .cat, .parrot, .bunny: "curious"
+        case .cat, .parrot: "curious"
         case .dog, .penguin: "playful"
-        case .fox, .bear, .lizard: "calm"
+        case .fox: "calm"
         }
     }
 }
@@ -92,18 +89,9 @@ struct PetColors: Equatable {
         case (.parrot, .sunrise): PetColors(primary: Color(red: 0.12, green: 0.69, blue: 0.4), secondary: Color(red: 0.99, green: 0.76, blue: 0.14), detail: Color(red: 0.05, green: 0.17, blue: 0.12))
         case (.parrot, .cloud): PetColors(primary: Color(red: 0.2, green: 0.61, blue: 0.88), secondary: Color(red: 0.88, green: 0.96, blue: 1), detail: Color(red: 0.05, green: 0.16, blue: 0.29))
         case (.parrot, .midnight): PetColors(primary: Color(red: 0.26, green: 0.17, blue: 0.5), secondary: Color(red: 0.96, green: 0.39, blue: 0.6), detail: .white)
-        case (.bear, .sunrise): PetColors(primary: Color(red: 0.57, green: 0.32, blue: 0.17), secondary: Color(red: 0.87, green: 0.66, blue: 0.44), detail: Color(red: 0.15, green: 0.08, blue: 0.05))
-        case (.bear, .cloud): PetColors(primary: Color(red: 0.69, green: 0.65, blue: 0.61), secondary: Color(red: 0.94, green: 0.9, blue: 0.84), detail: Color(red: 0.19, green: 0.17, blue: 0.16))
-        case (.bear, .midnight): PetColors(primary: Color(red: 0.16, green: 0.14, blue: 0.17), secondary: Color(red: 0.5, green: 0.43, blue: 0.51), detail: .white)
         case (.penguin, .sunrise): PetColors(primary: Color(red: 0.08, green: 0.14, blue: 0.22), secondary: .white, detail: Color(red: 0.08, green: 0.1, blue: 0.15))
         case (.penguin, .cloud): PetColors(primary: Color(red: 0.2, green: 0.39, blue: 0.56), secondary: Color(red: 0.9, green: 0.97, blue: 1), detail: Color(red: 0.05, green: 0.14, blue: 0.24))
         case (.penguin, .midnight): PetColors(primary: Color(red: 0.08, green: 0.07, blue: 0.13), secondary: Color(red: 0.72, green: 0.78, blue: 0.96), detail: .white)
-        case (.lizard, .sunrise): PetColors(primary: Color(red: 0.28, green: 0.72, blue: 0.28), secondary: Color(red: 0.76, green: 0.91, blue: 0.3), detail: Color(red: 0.06, green: 0.19, blue: 0.06))
-        case (.lizard, .cloud): PetColors(primary: Color(red: 0.3, green: 0.65, blue: 0.62), secondary: Color(red: 0.72, green: 0.94, blue: 0.88), detail: Color(red: 0.05, green: 0.2, blue: 0.18))
-        case (.lizard, .midnight): PetColors(primary: Color(red: 0.14, green: 0.29, blue: 0.21), secondary: Color(red: 0.5, green: 0.84, blue: 0.58), detail: .white)
-        case (.bunny, .sunrise): PetColors(primary: Color(red: 0.83, green: 0.65, blue: 0.52), secondary: Color(red: 1, green: 0.87, blue: 0.85), detail: Color(red: 0.28, green: 0.15, blue: 0.13))
-        case (.bunny, .cloud): PetColors(primary: Color(red: 0.86, green: 0.86, blue: 0.91), secondary: .white, detail: Color(red: 0.25, green: 0.27, blue: 0.37))
-        case (.bunny, .midnight): PetColors(primary: Color(red: 0.23, green: 0.21, blue: 0.3), secondary: Color(red: 0.8, green: 0.67, blue: 0.84), detail: .white)
         }
     }
 }
@@ -418,7 +406,7 @@ enum PetAnimationLibrary {
     }
 
     private static func state(for species: PetSpecies, pose: PetPose) -> String {
-        if species == .cat || species == .penguin || species == .bunny {
+        if species == .cat || species == .penguin {
             return "idle"
         }
 
@@ -429,7 +417,7 @@ enum PetAnimationLibrary {
         case .play: return "swipe"
         case .eat: return "with_ball"
         case .sleep:
-            return species == .dog || species == .bear ? "lie" : "idle"
+            return species == .dog ? "lie" : "idle"
         }
     }
 
@@ -451,18 +439,7 @@ enum PetAnimationLibrary {
         case (.parrot, "run"): 4
         case (.parrot, "swipe"): 4
         case (.parrot, "with_ball"): 2
-        case (.bear, "idle"): 10
-        case (.bear, "walk"): 32
-        case (.bear, "run"): 16
-        case (.bear, "swipe"): 4
-        case (.bear, "with_ball"): 24
-        case (.bear, "lie"): 12
-        case (.lizard, "idle"): 4
-        case (.lizard, "walk"): 4
-        case (.lizard, "run"): 4
-        case (.lizard, "swipe"): 12
-        case (.lizard, "with_ball"): 8
-        case (.cat, "idle"), (.penguin, "idle"), (.bunny, "idle"): 1
+        case (.cat, "idle"), (.penguin, "idle"): 1
         default: 1
         }
     }
@@ -607,18 +584,14 @@ private enum PixelPetLibrary {
         case .dog: dog
         case .fox: fox
         case .parrot: parrot
-        case .bear: bear
         case .penguin: penguin
-        case .lizard: lizard
-        case .bunny: bunny
         }
     }
 
     static func accent(for species: PetSpecies) -> Color {
         switch species {
         case .parrot, .penguin: Color(red: 1, green: 0.66, blue: 0.12)
-        case .lizard: Color(red: 0.7, green: 0.92, blue: 0.25)
-        case .cat, .dog, .fox, .bear, .bunny: Color(red: 1, green: 0.48, blue: 0.55)
+        case .cat, .dog, .fox: Color(red: 1, green: 0.48, blue: 0.55)
         }
     }
 

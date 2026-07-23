@@ -296,32 +296,9 @@ final class PetDomainTests: XCTestCase {
         XCTAssertEqual(playing.pose, .fly)
     }
 
-    func testCatalogKeepsLegacySpeciesButOffersOnlyCompleteOriginalArtwork() {
-        XCTAssertEqual(PetSpecies.allCases.count, 8)
+    func testCatalogContainsSupportedSpecies() {
+        XCTAssertEqual(PetSpecies.allCases.count, 5)
         XCTAssertEqual(PetSpecies.selectableCases, [.cat, .dog, .fox, .parrot, .penguin])
-        XCTAssertFalse(PetSpecies.bear.isSelectable)
-        XCTAssertFalse(PetSpecies.lizard.isSelectable)
-        XCTAssertFalse(PetSpecies.bunny.isSelectable)
-    }
-
-    func testUnsupportedLegacyPetsAreRemovedDuringNormalization() {
-        let panda = PetProfile(
-            id: UUID(), name: "Panda", species: .bear, coat: .sunrise, createdAt: .now
-        )
-        let dinosaur = PetProfile(
-            id: UUID(), name: "Dino", species: .lizard, coat: .sunrise, createdAt: .now
-        )
-        let rabbit = PetProfile(
-            id: UUID(), name: "Bunny", species: .bunny, coat: .sunrise, createdAt: .now
-        )
-        var state = PersistedAppState()
-        state.pets = [panda, dinosaur, rabbit]
-        state.activePetIDs = state.pets.map(\.id)
-
-        state.normalizePetCollection()
-
-        XCTAssertEqual(state.pets.map(\.species), [.dog])
-        XCTAssertEqual(state.activePetIDs, [state.pets[0].id])
     }
 
     func testVisualVariantsAreScopedToTheirSpecies() {
@@ -342,7 +319,6 @@ final class PetDomainTests: XCTestCase {
             PetBreed.available(for: .penguin),
             [.classicPenguin, .rockhopper]
         )
-        XCTAssertTrue(PetBreed.available(for: .bear).isEmpty)
     }
 
     func testLegacyDogWithoutBreedResolvesToShepherd() throws {
