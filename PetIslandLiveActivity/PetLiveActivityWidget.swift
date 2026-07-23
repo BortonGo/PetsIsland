@@ -219,20 +219,19 @@ private struct LockScreenPetView: View {
                     .foregroundStyle(accent(for: context.attributes.pet))
                 Spacer()
                 Label(
-                    isLuminanceReduced || context.isStale ? "Resting" : status(for: resolvedSnapshot.pose),
+                    isLuminanceReduced || context.isStale
+                        ? "Resting"
+                        : status(for: resolvedSnapshot.pose),
                     systemImage: symbol(for: resolvedSnapshot.pose)
                 )
                 .font(.caption.bold())
                 .foregroundStyle(.secondary)
             }
-            ActivityPetTrack(
-                identity: context.attributes.pet,
-                snapshot: resolvedSnapshot,
-                isStale: context.isStale,
-                forceSleep: isLuminanceReduced,
-                spriteSize: CGSize(width: 62, height: 54)
+            LockScreenTimerPetTrack(
+                context: context,
+                spriteSize: CGSize(width: 84, height: 72)
             )
-            .frame(height: 78)
+            .frame(height: 86)
         }
         .padding(14)
         .accessibilityElement(children: .ignore)
@@ -266,10 +265,125 @@ private struct LockScreenPetView: View {
     }
 }
 
+private struct LockScreenTimerPetTrack: View {
+    let context: ActivityViewContext<PetActivityAttributes>
+    let spriteSize: CGSize
+
+    var body: some View {
+        GeometryReader { proxy in
+            let snapshot = context.state.snapshot
+            let travelWidth = max(proxy.size.width - spriteSize.width, 0)
+            let centerX = spriteSize.width / 2 + travelWidth * snapshot.position
+
+            ZStack(alignment: .bottom) {
+                Capsule()
+                    .fill(.white.opacity(context.isStale ? 0.07 : 0.12))
+                    .frame(height: 4)
+                    .offset(y: -7)
+
+                LockScreenTimerPet(
+                    context: context,
+                    viewport: spriteSize
+                )
+                .position(x: centerX, y: proxy.size.height / 2)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            Text(verbatim: context.attributes.pet.name) + Text(", pet session")
+        )
+    }
+}
+
+private struct LockScreenTimerPet: View {
+    let context: ActivityViewContext<PetActivityAttributes>
+    let viewport: CGSize
+    @Environment(\.isLuminanceReduced) private var isLuminanceReduced
+
+    var body: some View {
+        let snapshot = context.state.snapshot
+
+        Group {
+            if isLuminanceReduced || context.isStale || context.attributes.motionMode == .sleep {
+                artwork(pose: .sleep)
+            } else if let fontName = LiveTimerPetFontRegistry.lockScreenFontName(
+                for: context.attributes.pet,
+                mode: context.attributes.motionMode
+            ) {
+                LockScreenTimerGlyphPet(
+                    timerStart: context.attributes.startedAt,
+                    timerEnd: context.attributes.endsAt,
+                    fontName: fontName,
+                    viewport: viewport
+                )
+            } else {
+                artwork(pose: snapshot.pose)
+            }
+        }
+        .frame(width: viewport.width, height: viewport.height)
+    }
+
+    private func artwork(pose: PetPose) -> some View {
+        PetArtwork(
+            species: context.attributes.pet.species,
+            coat: context.attributes.pet.coat,
+            customColor: context.attributes.pet.customColor,
+            breed: context.attributes.pet.breed,
+            pose: pose,
+            direction: context.state.snapshot.direction,
+            step: 0,
+            animatesMotion: false
+        )
+    }
+}
+
+private struct LockScreenTimerGlyphPet: View {
+    let timerStart: Date
+    let timerEnd: Date
+    let fontName: String
+    let viewport: CGSize
+
+    var body: some View {
+        let glyphSize = viewport.height
+        // WidgetKit may keep the last rendered Live Activity snapshot past
+        // staleDate. Keep the invisible digit timer valid during that window
+        // so it never replaces the pet glyph with its "--" placeholder.
+        let renderingGracePeriod: TimeInterval = 24 * 60 * 60
+        let validEnd = max(
+            timerEnd.addingTimeInterval(renderingGracePeriod),
+            timerStart.addingTimeInterval(1)
+        )
+
+        Text(
+            timerInterval: timerStart...validEnd,
+            countsDown: true,
+            showsHours: true
+        )
+            .font(.custom(fontName, fixedSize: glyphSize))
+            .unredacted()
+            .lineLimit(1)
+            .frame(width: glyphSize * 9, height: glyphSize)
+            .multilineTextAlignment(.trailing)
+            .offset(x: -glyphSize * 4)
+            .offset(y: -1)
+            .environment(\.locale, Locale(identifier: "en_US_POSIX"))
+            .frame(width: viewport.width, height: viewport.height)
+            .clipped()
+    }
+}
+
 private enum LiveTimerPetFontRegistry {
     private static let registration: Void = {
         guard let url = Bundle.main.url(
             forResource: "PetIslandTimerPets",
+            withExtension: "ttc"
+        ) else { return }
+        CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+    }()
+
+    private static let lockScreenRegistration: Void = {
+        guard let url = Bundle.main.url(
+            forResource: "PetIslandLockTimerPets",
             withExtension: "ttc"
         ) else { return }
         CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
@@ -281,8 +395,18 @@ private enum LiveTimerPetFontRegistry {
         return isAvailable(name) ? name : nil
     }
 
+    static func lockScreenFontName(
+        for pet: PetActivityIdentity,
+        mode: DynamicIslandMotionMode
+    ) -> String? {
+        _ = lockScreenRegistration
+        let name = postScriptName(for: pet)
+            .replacingOccurrences(of: "PetIslandTimer", with: "PetIslandLockTimer")
+            + mode.fontNameSuffix
+        return isAvailable(name) ? name : nil
+    }
+
     private static func isAvailable(_ postScriptName: String) -> Bool {
-        _ = registration
         let font = CTFontCreateWithName(postScriptName as CFString, 12, nil)
         return CTFontCopyPostScriptName(font) as String == postScriptName
     }

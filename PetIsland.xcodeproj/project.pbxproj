@@ -44,6 +44,7 @@
 		G10000000000000000000003 /* SkyPawsGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = G20000000000000000000003 /* SkyPawsGameView.swift */; };
 		G10000000000000000000004 /* PetsDashGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = G20000000000000000000004 /* PetsDashGameView.swift */; };
 		L10000000000000000000004 /* PetIslandTimerPets.ttc in Resources */ = {isa = PBXBuildFile; fileRef = L20000000000000000000004 /* PetIslandTimerPets.ttc */; };
+		L10000000000000000000005 /* PetIslandLockTimerPets.ttc in Resources */ = {isa = PBXBuildFile; fileRef = L20000000000000000000005 /* PetIslandLockTimerPets.ttc */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -114,6 +115,7 @@
 		G20000000000000000000003 /* SkyPawsGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyPawsGameView.swift; sourceTree = "<group>"; };
 		G20000000000000000000004 /* PetsDashGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetsDashGameView.swift; sourceTree = "<group>"; };
 		L20000000000000000000004 /* PetIslandTimerPets.ttc */ = {isa = PBXFileReference; lastKnownFileType = file; path = PetIslandTimerPets.ttc; sourceTree = "<group>"; };
+		L20000000000000000000005 /* PetIslandLockTimerPets.ttc */ = {isa = PBXFileReference; lastKnownFileType = file; path = PetIslandLockTimerPets.ttc; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -205,6 +207,7 @@
 			isa = PBXGroup;
 			children = (
 				L20000000000000000000004 /* PetIslandTimerPets.ttc */,
+				L20000000000000000000005 /* PetIslandLockTimerPets.ttc */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -385,6 +388,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				L10000000000000000000004 /* PetIslandTimerPets.ttc in Resources */,
+				L10000000000000000000005 /* PetIslandLockTimerPets.ttc in Resources */,
 				R10000000000000000000002 /* Localizable.xcstrings in Resources */,
 				S10000000000000000000002 /* PetSprites.xcassets in Resources */,
 			);
