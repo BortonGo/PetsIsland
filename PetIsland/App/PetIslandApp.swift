@@ -6,3 +6,7 @@ struct PetIslandApp: App {
         WindowGroup { ContentView() }
     }
 }
+
+#Preview {
+    ContentView()
+}

@@ -219,6 +219,14 @@ enum SessionPreset: Int, CaseIterable, Identifiable, Sendable {
     var duration: TimeInterval { TimeInterval(rawValue * 60) }
 }
 
+enum AppAppearance: String, Codable, CaseIterable, Identifiable, Sendable {
+    case system
+    case light
+    case dark
+
+    var id: String { rawValue }
+}
+
 struct PetHistory: Codable, Equatable, Sendable {
     var totalSeconds: TimeInterval = 0
     var completedSessions: Int = 0
@@ -237,21 +245,24 @@ struct AppSettings: Codable, Equatable, Sendable {
     var hapticsEnabled = true
     var minimizeMotion = false
     var dynamicIslandMotionMode: DynamicIslandMotionMode = .runSleep
+    var appearance: AppAppearance = .system
 
     private enum CodingKeys: String, CodingKey {
-        case defaultSessionMinutes, hapticsEnabled, minimizeMotion, dynamicIslandMotionMode
+        case defaultSessionMinutes, hapticsEnabled, minimizeMotion, dynamicIslandMotionMode, appearance
     }
 
     init(
         defaultSessionMinutes: Int = 20,
         hapticsEnabled: Bool = true,
         minimizeMotion: Bool = false,
-        dynamicIslandMotionMode: DynamicIslandMotionMode = .runSleep
+        dynamicIslandMotionMode: DynamicIslandMotionMode = .runSleep,
+        appearance: AppAppearance = .system
     ) {
         self.defaultSessionMinutes = defaultSessionMinutes
         self.hapticsEnabled = hapticsEnabled
         self.minimizeMotion = minimizeMotion
         self.dynamicIslandMotionMode = dynamicIslandMotionMode
+        self.appearance = appearance
     }
 
     init(from decoder: Decoder) throws {
@@ -263,6 +274,7 @@ struct AppSettings: Codable, Equatable, Sendable {
             DynamicIslandMotionMode.self,
             forKey: .dynamicIslandMotionMode
         ) ?? .runSleep
+        appearance = try values.decodeIfPresent(AppAppearance.self, forKey: .appearance) ?? .system
     }
 }
 

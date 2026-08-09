@@ -379,17 +379,31 @@ struct PetPicker: View {
 
 struct SettingsView: View {
     @ObservedObject var controller: PetSessionController
+    var showsDismissButton = true
     @Environment(\.dismiss) private var dismiss
     @State private var draft: AppSettings
 
-    init(controller: PetSessionController) {
+    init(controller: PetSessionController, showsDismissButton: Bool = true) {
         self.controller = controller
+        self.showsDismissButton = showsDismissButton
         _draft = State(initialValue: controller.settings)
     }
 
     var body: some View {
         NavigationStack {
             Form {
+                Section("Appearance") {
+                    Picker("Theme", selection: $draft.appearance) {
+                        ForEach(AppAppearance.allCases) { appearance in
+                            Text(appearanceTitle(appearance)).tag(appearance)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+
+                    Text("System follows the appearance selected in iOS Settings.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
                 Section("Experience") {
                     Toggle("Haptic feedback", isOn: $draft.hapticsEnabled)
                     Toggle("Minimize pet motion", isOn: $draft.minimizeMotion)
@@ -408,11 +422,29 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { Task { await controller.updateSettings(draft); dismiss() } }
+                if showsDismissButton {
+                    ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { Task { await controller.updateSettings(draft); dismiss() } }
+                    }
                 }
             }
+        }
+        .onChange(of: draft) { _, newSettings in
+            guard !showsDismissButton else { return }
+            Task { await controller.updateSettings(newSettings) }
+        }
+        .onChange(of: controller.settings) { _, newSettings in
+            guard newSettings != draft else { return }
+            draft = newSettings
+        }
+    }
+
+    private func appearanceTitle(_ appearance: AppAppearance) -> LocalizedStringKey {
+        switch appearance {
+        case .system: "System"
+        case .light: "Light"
+        case .dark: "Dark"
         }
     }
 }

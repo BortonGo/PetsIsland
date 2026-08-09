@@ -9,6 +9,8 @@ struct ContentView: View {
 #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("-arcade-preview") {
             MiniGamesDebugHostView()
+        } else if ProcessInfo.processInfo.arguments.contains("-color-preview") {
+            PetColorDebugView()
         } else if ProcessInfo.processInfo.arguments.contains("-sprite-preview") {
             DynamicIslandSpritePreview()
         } else if ProcessInfo.processInfo.arguments.contains("-live-activity-recovery-test") {
@@ -19,6 +21,10 @@ struct ContentView: View {
             LiveActivitySmokeHostView()
         } else if ProcessInfo.processInfo.arguments.contains("-playroom-preview") {
             PlayYardView(pets: Self.previewParty)
+        } else if ProcessInfo.processInfo.arguments.contains("-settings-preview") {
+            HomeDebugHostView(showsSettings: true)
+        } else if ProcessInfo.processInfo.arguments.contains("-home-preview") {
+            HomeDebugHostView()
         } else if ProcessInfo.processInfo.arguments.contains("-collection-preview") {
             PetCollectionDebugPreview()
         } else {
@@ -98,10 +104,97 @@ struct ContentView: View {
         } message: {
             Text(controller.alertMessage ?? "")
         }
+        .preferredColorScheme(controller.settings.appearance.colorScheme)
+    }
+}
+
+private extension AppAppearance {
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: nil
+        case .light: .light
+        case .dark: .dark
+        }
     }
 }
 
 #if DEBUG
+private struct HomeDebugHostView: View {
+    @StateObject private var controller: PetSessionController
+    let showsSettings: Bool
+
+    init(showsSettings: Bool = false) {
+        self.showsSettings = showsSettings
+        var state = PersistedAppState()
+        state.completedOnboarding = true
+        _controller = StateObject(
+            wrappedValue: PetSessionController(
+                store: InMemoryPetStore(state),
+                arcadeStore: InMemoryArcadeStore()
+            )
+        )
+    }
+
+    var body: some View {
+        Group {
+            if showsSettings {
+                SettingsView(controller: controller, showsDismissButton: false)
+            } else {
+                HomeView(controller: controller)
+            }
+        }
+        .task { await controller.bootstrap() }
+    }
+}
+
+private struct PetColorDebugView: View {
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 3)
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    ForEach(PetSpecies.allCases) { species in
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(species.displayName)
+                                .font(.headline)
+
+                            LazyVGrid(columns: columns, spacing: 10) {
+                                ForEach(PetCoat.allCases) { coat in
+                                    VStack(spacing: 4) {
+                                        PetArtwork(
+                                            species: species,
+                                            coat: coat,
+                                            breed: PetBreed.defaultVariant(for: species),
+                                            pose: species == .parrot ? .fly : .idle,
+                                            animatesMotion: false
+                                        )
+                                        .frame(height: 58)
+
+                                        Text(coat.displayName)
+                                            .font(.caption2.bold())
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 8)
+                                    .background(
+                                        Color(.secondarySystemGroupedBackground),
+                                        in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(16)
+            }
+            .background(Color(.systemGroupedBackground))
+            .navigationTitle("Pet colors")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+}
+
 private struct LiveActivityRecoveryHostView: View {
     @StateObject private var controller: PetSessionController
     @Environment(\.scenePhase) private var scenePhase

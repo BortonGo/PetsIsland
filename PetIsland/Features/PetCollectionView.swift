@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PetCollectionView: View {
     @ObservedObject var controller: PetSessionController
+    var showsDismissButton = true
     @Environment(\.dismiss) private var dismiss
     @State private var editorRoute: PetEditorRoute?
     @State private var pendingRemoval: PetProfile?
@@ -21,8 +22,10 @@ struct PetCollectionView: View {
             .navigationTitle("My pets")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
+                if showsDismissButton {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Done") { dismiss() }
+                    }
                 }
             }
         }

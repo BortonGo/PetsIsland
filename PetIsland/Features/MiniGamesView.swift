@@ -9,13 +9,15 @@ private struct ActiveArcadeSession: Identifiable {
 
 struct MiniGamesView: View {
     @ObservedObject var controller: PetSessionController
+    var showsDismissButton = true
     @Environment(\.dismiss) private var dismiss
     @State private var selectedPetID: UUID?
     @State private var activeSession: ActiveArcadeSession?
     @State private var message: String?
 
-    init(controller: PetSessionController) {
+    init(controller: PetSessionController, showsDismissButton: Bool = true) {
         self.controller = controller
+        self.showsDismissButton = showsDismissButton
         _selectedPetID = State(initialValue: controller.pets.first?.id)
     }
 
@@ -39,10 +41,12 @@ struct MiniGamesView: View {
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Pet Arcade")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Close") { dismiss() }
+                if showsDismissButton {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Close") { dismiss() }
+                    }
                 }
             }
         }

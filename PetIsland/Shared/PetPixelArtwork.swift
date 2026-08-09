@@ -178,6 +178,7 @@ struct PetArtwork: View {
     private var baseArtwork: some View {
         ImportedPetSprite(
             species: species,
+            coat: coat,
             customColor: customColor,
             breed: breed,
             pose: pose,
@@ -201,6 +202,7 @@ struct PetArtwork: View {
 /// temporary fallback for species that have not received a new sheet yet.
 private struct ImportedPetSprite: View {
     let species: PetSpecies
+    let coat: PetCoat
     let customColor: PetColorSelection?
     let breed: PetBreed?
     let pose: PetPose
@@ -210,24 +212,79 @@ private struct ImportedPetSprite: View {
         let clip = PetAnimationLibrary.clip(for: species, breed: breed, pose: pose)
         let assetName = clip.frameName(forStep: step)
         let image = Image(assetName)
+            .renderingMode(.original)
             .resizable()
             .interpolation(.none)
             .scaledToFit()
+        let treatment = SpriteColorTreatment(
+            species: species,
+            coat: coat,
+            customColor: customColor
+        )
 
         image
+            .saturation(treatment.saturation)
+            .brightness(treatment.brightness)
+            .contrast(treatment.contrast)
             .overlay {
-                if let customColor {
-                    Color(
-                        red: customColor.red,
-                        green: customColor.green,
-                        blue: customColor.blue
-                    )
+                if let tint = treatment.tint {
+                    tint
                     .blendMode(.color)
-                    .opacity(0.58)
+                    .opacity(treatment.tintOpacity)
                     .mask(image)
                 }
             }
             .compositingGroup()
+    }
+}
+
+/// Keeps the hand-drawn light and shadow pixels intact while making each coat
+/// visibly different. A custom color has priority over the three presets.
+private struct SpriteColorTreatment {
+    let saturation: Double
+    let brightness: Double
+    let contrast: Double
+    let tint: Color?
+    let tintOpacity: Double
+
+    init(species: PetSpecies, coat: PetCoat, customColor: PetColorSelection?) {
+        if let customColor {
+            let luminance = 0.2126 * customColor.red
+                + 0.7152 * customColor.green
+                + 0.0722 * customColor.blue
+            saturation = 0.92
+            brightness = luminance < 0.12 ? 0.06 : 0
+            contrast = luminance < 0.12 ? 1.08 : 1
+            tint = Color(
+                red: customColor.red,
+                green: customColor.green,
+                blue: customColor.blue
+            )
+            tintOpacity = 0.62
+            return
+        }
+
+        let palette = PetColors.resolve(species: species, coat: coat)
+        switch coat {
+        case .sunrise:
+            saturation = 1
+            brightness = 0
+            contrast = 1
+            tint = nil
+            tintOpacity = 0
+        case .cloud:
+            saturation = 0.34
+            brightness = 0.12
+            contrast = 0.94
+            tint = palette.primary
+            tintOpacity = 0.22
+        case .midnight:
+            saturation = 0.58
+            brightness = -0.12
+            contrast = 1.12
+            tint = palette.primary
+            tintOpacity = 0.4
+        }
     }
 }
 

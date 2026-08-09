@@ -3,10 +3,42 @@ import UIKit
 
 struct HomeView: View {
     @ObservedObject var controller: PetSessionController
+    @State private var selectedTab: AppTab = .island
+
+    var body: some View {
+        TabView(selection: $selectedTab) {
+            IslandView(controller: controller)
+                .tabItem { Label("Island", systemImage: "house.lodge.fill") }
+                .tag(AppTab.island)
+
+            PetCollectionView(controller: controller, showsDismissButton: false)
+                .tabItem { Label("Pets", systemImage: "pawprint.fill") }
+                .tag(AppTab.pets)
+
+            MiniGamesView(controller: controller, showsDismissButton: false)
+                .tabItem { Label("Arcade", systemImage: "gamecontroller.fill") }
+                .tag(AppTab.arcade)
+
+            SettingsView(controller: controller, showsDismissButton: false)
+                .tabItem { Label("Settings", systemImage: "gearshape.fill") }
+                .tag(AppTab.settings)
+        }
+    }
+}
+
+private enum AppTab: Hashable {
+    case island
+    case pets
+    case arcade
+    case settings
+}
+
+private struct IslandView: View {
+    @ObservedObject var controller: PetSessionController
     @Environment(\.openURL) private var openURL
     @State private var showsPlayYard = false
-    @State private var showsMiniGames = false
     @State private var showsHabitatEditor = false
+    @State private var showsIslandSetup = false
     @State private var draftResidentIDs: [UUID] = []
     @State private var draftTheme: HabitatTheme = .meadow
 
@@ -15,33 +47,17 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: 18) {
                     habitat
-                    identity
                     placementCard
-                    arcadeCard
-                    playCard
-                    widgetHelp
+                    quickActions
                     activityAvailabilityNotice
                 }
                 .padding(.horizontal, 18)
+                .padding(.top, 8)
                 .padding(.bottom, 32)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("Pet Island")
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button { controller.showsPetEditor = true } label: {
-                        Label("My pets", systemImage: "pawprint.fill")
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { controller.showsSettings = true } label: {
-                        Label("Settings", systemImage: "gearshape.fill")
-                    }
-                }
-            }
-        }
-        .sheet(isPresented: $controller.showsPetEditor) {
-            PetCollectionView(controller: controller)
+            .navigationTitle("Island")
+            .navigationBarTitleDisplayMode(.inline)
         }
         .sheet(isPresented: $showsHabitatEditor) {
             HabitatEditorView(
@@ -55,14 +71,11 @@ struct HomeView: View {
                 showsHabitatEditor = false
             }
         }
+        .sheet(isPresented: $showsIslandSetup) {
+            IslandSetupView(controller: controller)
+        }
         .fullScreenCover(isPresented: $showsPlayYard) {
             PlayYardView(pets: controller.habitatResidents.isEmpty ? [controller.profile] : controller.habitatResidents)
-        }
-        .fullScreenCover(isPresented: $showsMiniGames) {
-            MiniGamesView(controller: controller)
-        }
-        .sheet(isPresented: $controller.showsSettings) {
-            SettingsView(controller: controller)
         }
     }
 
@@ -70,9 +83,10 @@ struct HomeView: View {
         HabitatEditorCanvas(
             theme: controller.habitat.configuration.theme,
             pets: controller.habitatResidents,
-            vitalsByPetID: controller.habitatVitalsByPetID
+            vitalsByPetID: controller.habitatVitalsByPetID,
+            petScale: 1.14
         )
-        .frame(height: 250)
+        .frame(height: 238)
         .overlay(alignment: .topTrailing) {
             Button {
                 draftResidentIDs = controller.habitat.configuration.residentPetIDs
@@ -88,16 +102,21 @@ struct HomeView: View {
             .buttonStyle(.plain)
             .padding(14)
         }
-    }
-
-    private var identity: some View {
-        VStack(spacing: 4) {
-            Text("Your enclosure").font(.title2.bold())
-            Text("\(controller.habitatResidents.count) of \(PetHabitatState.maximumResidents) residents · \(themeTitle)")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+        .overlay(alignment: .topLeading) {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(themeTitle)
+                    .font(.subheadline.bold())
+                Text(
+                    verbatim: "\(controller.habitatResidents.count)/\(PetHabitatState.maximumResidents) \(String(localized: "residents"))"
+                )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .padding(14)
         }
-        .accessibilityElement(children: .combine)
     }
 
     private var placementCard: some View {
@@ -122,17 +141,6 @@ struct HomeView: View {
                     placement: .dynamicIsland
                 )
             }
-            dynamicIslandSettings
-
-            Button {
-                draftResidentIDs = controller.habitat.configuration.residentPetIDs
-                draftTheme = controller.habitat.configuration.theme
-                showsHabitatEditor = true
-            } label: {
-                Label("Choose residents and background", systemImage: "slider.horizontal.3")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
 
             if controller.placement == .dynamicIsland {
                 liveActivityStatus
@@ -145,69 +153,63 @@ struct HomeView: View {
         )
     }
 
-    private var dynamicIslandSettings: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label("Dynamic Island settings", systemImage: "slider.horizontal.3")
-                .font(.headline)
+    private var quickActions: some View {
+        HStack(spacing: 12) {
+            quickActionButton(
+                title: "Play",
+                subtitle: "Throw the ball",
+                symbol: "tennisball.fill",
+                tint: .green
+            ) {
+                showsPlayYard = true
+            }
 
-            Picker("Pet mode", selection: motionModeBinding) {
-                ForEach(DynamicIslandMotionMode.allCases) { mode in
-                    Text(motionModeTitle(mode)).tag(mode)
+            quickActionButton(
+                title: "Setup",
+                subtitle: "Motion & widget",
+                symbol: "slider.horizontal.3",
+                tint: .indigo
+            ) {
+                showsIslandSetup = true
+            }
+        }
+    }
+
+    private func quickActionButton(
+        title: LocalizedStringKey,
+        subtitle: LocalizedStringKey,
+        symbol: String,
+        tint: Color,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: symbol)
+                    .font(.title3)
+                    .foregroundStyle(tint)
+                    .frame(width: 34, height: 34)
+                    .background(tint.opacity(0.13), in: Circle())
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.subheadline.bold())
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.82)
+                    Text(subtitle)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.72)
                 }
+                Spacer(minLength: 0)
             }
-            .pickerStyle(.menu)
-
-            Picker("Time on the island", selection: durationBinding) {
-                ForEach(SessionPreset.allCases) { preset in
-                    Text(durationTitle(preset.rawValue)).tag(preset.rawValue)
-                }
-            }
-            .pickerStyle(.menu)
-
-            if controller.session != nil {
-                Text("New settings will apply the next time the pet enters Dynamic Island.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            .frame(maxWidth: .infinity, minHeight: 58)
+            .padding(.horizontal, 12)
+            .background(
+                Color(.secondarySystemGroupedBackground),
+                in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+            )
         }
-        .padding(14)
-        .background(Color.accentColor.opacity(0.06), in: RoundedRectangle(cornerRadius: 16))
-    }
-
-    private var motionModeBinding: Binding<DynamicIslandMotionMode> {
-        Binding(
-            get: { controller.settings.dynamicIslandMotionMode },
-            set: { value in Task { await controller.updateDynamicIslandSettings(mode: value) } }
-        )
-    }
-
-    private var durationBinding: Binding<Int> {
-        Binding(
-            get: { controller.settings.defaultSessionMinutes },
-            set: { value in Task { await controller.updateDynamicIslandSettings(durationMinutes: value) } }
-        )
-    }
-
-    private func motionModeTitle(_ mode: DynamicIslandMotionMode) -> String {
-        switch mode {
-        case .run: String(localized: "Run")
-        case .walk: String(localized: "Walk")
-        case .sleep: String(localized: "Sleep")
-        case .runSleep: String(localized: "Run + sleep")
-        case .walkSleep: String(localized: "Walk + sleep")
-        case .runWalkSleep: String(localized: "Run + walk + sleep")
-        }
-    }
-
-    private func durationTitle(_ minutes: Int) -> String {
-        switch minutes {
-        case 20: String(localized: "20 min")
-        case 40: String(localized: "40 min")
-        case 60: String(localized: "1 hour")
-        case 120: String(localized: "2 hours")
-        case 240: String(localized: "4 hours")
-        default: "\(minutes) min"
-        }
+        .buttonStyle(.plain)
     }
 
     private func placementButton(
@@ -238,77 +240,6 @@ struct HomeView: View {
         .buttonStyle(.plain)
         .disabled(controller.isBusy)
         .accessibilityAddTraits(selected ? .isSelected : [])
-    }
-
-    private var playCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label("Play together", systemImage: "tennisball.fill")
-                .font(.headline)
-            Text("Open the playroom for continuous animation while the app is on screen. The enclosure widget has its own throwable ball.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-            Button {
-                showsPlayYard = true
-            } label: {
-                Label("Open playroom", systemImage: "figure.play")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
-        }
-        .padding(18)
-        .background(
-            Color(.secondarySystemGroupedBackground),
-            in: RoundedRectangle(cornerRadius: 24, style: .continuous)
-        )
-    }
-
-    private var arcadeCard: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Label("Pet Arcade", systemImage: "gamecontroller.fill")
-                    .font(.headline)
-                Spacer()
-                Label("\(controller.arcadeProgress.coins)", systemImage: "dollarsign.circle.fill")
-                    .font(.subheadline.bold().monospacedDigit())
-                    .foregroundStyle(.orange)
-            }
-            Text("Choose a pet, set a high score and spend your coins on food, treats, toys and vitamins.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            Button {
-                showsMiniGames = true
-            } label: {
-                Label("Open Pet Arcade", systemImage: "play.circle.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-        }
-        .padding(18)
-        .background(
-            LinearGradient(
-                colors: [.purple.opacity(0.13), .blue.opacity(0.08)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ),
-            in: RoundedRectangle(cornerRadius: 24, style: .continuous)
-        )
-    }
-
-    private var widgetHelp: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("Add Pixel's enclosure", systemImage: "square.grid.2x2.fill")
-                .font(.headline)
-            Text("Hold an empty area on the Home Screen, tap +, find Pet Island and add the medium Enclosure widget.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(18)
-        .background(.green.opacity(0.09), in: RoundedRectangle(cornerRadius: 22))
     }
 
     @ViewBuilder
@@ -362,14 +293,6 @@ struct HomeView: View {
         }
     }
 
-    private var placementTitle: LocalizedStringKey {
-        switch controller.placement {
-        case .home: "At home"
-        case .enclosure: "In the enclosure"
-        case .dynamicIsland: "On Dynamic Island"
-        }
-    }
-
     private var placementDescription: LocalizedStringKey {
         switch controller.placement {
         case .home:
@@ -381,21 +304,94 @@ struct HomeView: View {
         }
     }
 
-    private var placementSymbol: String {
-        switch controller.placement {
-        case .home: "house.fill"
-        case .enclosure: "house.lodge.fill"
-        case .dynamicIsland: "iphone.gen3.radiowaves.left.and.right"
+    private var themeTitle: String {
+        switch controller.habitat.configuration.theme {
+        case .meadow: String(localized: "Meadow")
+        case .cozyRoom: String(localized: "Cozy room")
+        case .moonlitGarden: String(localized: "Starlight")
+        case .arcticCove: String(localized: "Arctic cove")
+        case .desertCamp: String(localized: "Desert camp")
+        }
+    }
+}
+
+private struct IslandSetupView: View {
+    @ObservedObject var controller: PetSessionController
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Dynamic Island") {
+                    Picker("Pet mode", selection: motionModeBinding) {
+                        ForEach(DynamicIslandMotionMode.allCases) { mode in
+                            Text(motionModeTitle(mode)).tag(mode)
+                        }
+                    }
+
+                    Picker("Time on the island", selection: durationBinding) {
+                        ForEach(SessionPreset.allCases) { preset in
+                            Text(durationTitle(preset.rawValue)).tag(preset.rawValue)
+                        }
+                    }
+
+                    if controller.session != nil {
+                        Text("New settings will apply the next time the pet enters Dynamic Island.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Section("Home Screen widget") {
+                    Label("Add the medium Enclosure widget", systemImage: "square.grid.2x2.fill")
+                    Text("Hold an empty area on the Home Screen, tap +, find Pet Island and choose Enclosure.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("Island setup")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
         }
     }
 
-    private var themeTitle: String {
-        switch controller.habitat.configuration.theme {
-        case .meadow: "Meadow"
-        case .cozyRoom: "Cozy room"
-        case .moonlitGarden: "Starlight"
-        case .arcticCove: "Arctic cove"
-        case .desertCamp: "Desert camp"
+    private var motionModeBinding: Binding<DynamicIslandMotionMode> {
+        Binding(
+            get: { controller.settings.dynamicIslandMotionMode },
+            set: { value in Task { await controller.updateDynamicIslandSettings(mode: value) } }
+        )
+    }
+
+    private var durationBinding: Binding<Int> {
+        Binding(
+            get: { controller.settings.defaultSessionMinutes },
+            set: { value in Task { await controller.updateDynamicIslandSettings(durationMinutes: value) } }
+        )
+    }
+
+    private func motionModeTitle(_ mode: DynamicIslandMotionMode) -> String {
+        switch mode {
+        case .run: String(localized: "Run")
+        case .walk: String(localized: "Walk")
+        case .sleep: String(localized: "Sleep")
+        case .runSleep: String(localized: "Run + sleep")
+        case .walkSleep: String(localized: "Walk + sleep")
+        case .runWalkSleep: String(localized: "Run + walk + sleep")
+        }
+    }
+
+    private func durationTitle(_ minutes: Int) -> String {
+        switch minutes {
+        case 20: String(localized: "20 min")
+        case 40: String(localized: "40 min")
+        case 60: String(localized: "1 hour")
+        case 120: String(localized: "2 hours")
+        case 240: String(localized: "4 hours")
+        default: "\(minutes) min"
         }
     }
 }

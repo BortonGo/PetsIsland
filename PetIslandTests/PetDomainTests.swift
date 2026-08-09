@@ -927,8 +927,20 @@ final class PetDomainTests: XCTestCase {
 
         XCTAssertEqual(settings.defaultSessionMinutes, 40)
         XCTAssertEqual(settings.dynamicIslandMotionMode, .runSleep)
+        XCTAssertEqual(settings.appearance, .system)
         XCTAssertFalse(settings.hapticsEnabled)
         XCTAssertTrue(settings.minimizeMotion)
+    }
+
+    func testAppearancePreferenceSurvivesPersistenceRoundTrip() throws {
+        let settings = AppSettings(appearance: .dark)
+
+        let decoded = try JSONDecoder().decode(
+            AppSettings.self,
+            from: JSONEncoder().encode(settings)
+        )
+
+        XCTAssertEqual(decoded.appearance, .dark)
     }
 }
 

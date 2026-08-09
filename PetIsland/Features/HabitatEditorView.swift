@@ -300,6 +300,7 @@ struct HabitatEditorCanvas: View {
     let theme: HabitatTheme
     let pets: [PetProfile]
     let vitalsByPetID: [UUID: PetVitals]
+    var petScale: CGFloat = 1
 
     var body: some View {
         GeometryReader { proxy in
@@ -356,7 +357,11 @@ struct HabitatEditorCanvas: View {
                                             ),
                                             animatesMotion: false
                                         )
-                                        .frame(width: min(proxy.size.width * 0.24, 78), height: 60)
+                                        .frame(
+                                            width: min(proxy.size.width * 0.24, 78) * petScale,
+                                            height: 60 * petScale
+                                        )
+                                        .shadow(color: .black.opacity(0.24), radius: 1, y: 2)
                                     }
                                     .position(
                                         x: 36 + CGFloat(projection.position) * max(proxy.size.width - 72, 1),
@@ -379,13 +384,13 @@ struct HabitatEditorCanvas: View {
 
     private func statusTitle(_ status: HabitatPetStatus) -> String {
         switch status {
-        case .watching: "watching"
-        case .wandering: "wandering"
-        case .running: "running"
-        case .flying: "flying"
-        case .playing: "playing"
-        case .resting: "resting"
-        case .sleeping: "sleeping"
+        case .watching: String(localized: "watching")
+        case .wandering: String(localized: "wandering")
+        case .running: String(localized: "running")
+        case .flying: String(localized: "flying")
+        case .playing: String(localized: "playing")
+        case .resting: String(localized: "resting")
+        case .sleeping: String(localized: "sleeping")
         }
     }
 
