@@ -7,6 +7,11 @@ private struct ActiveArcadeSession: Identifiable {
     var id: String { "\(game.rawValue)-\(pet.id.uuidString)" }
 }
 
+private enum ArcadePage: Hashable {
+    case games
+    case shop
+}
+
 struct MiniGamesView: View {
     @ObservedObject var controller: PetSessionController
     var showsDismissButton = true
@@ -14,30 +19,43 @@ struct MiniGamesView: View {
     @State private var selectedPetID: UUID?
     @State private var activeSession: ActiveArcadeSession?
     @State private var message: String?
+    @State private var selectedPage: ArcadePage = .games
 
     init(controller: PetSessionController, showsDismissButton: Bool = true) {
         self.controller = controller
         self.showsDismissButton = showsDismissButton
         _selectedPetID = State(initialValue: controller.pets.first?.id)
+        _selectedPage = State(
+            initialValue: ProcessInfo.processInfo.arguments.contains("-arcade-shop-preview")
+                ? .shop
+                : .games
+        )
     }
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 18) {
-                    walletHeader
-                    petPicker
-                    if let selectedPet {
-                        vitalsCard(for: selectedPet)
-                        skyHopCard(for: selectedPet)
-                        skyPawsCard(for: selectedPet)
-                        petsDashCard(for: selectedPet)
-                        shop(for: selectedPet)
+            ScrollViewReader { scrollProxy in
+                ScrollView {
+                    LazyVStack(spacing: 18, pinnedViews: [.sectionHeaders]) {
+                        walletHeader
+                        petPicker
+                        if let selectedPet {
+                            Section {
+                                arcadeContent(for: selectedPet)
+                            } header: {
+                                arcadePageHeader(for: selectedPet)
+                                    .id("arcade-page-header")
+                            }
+                        }
                     }
-                    economyCard
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 32)
                 }
-                .padding(.horizontal, 18)
-                .padding(.bottom, 32)
+                .onChange(of: selectedPage) { _, _ in
+                    withAnimation(.snappy) {
+                        scrollProxy.scrollTo("arcade-page-header", anchor: .top)
+                    }
+                }
             }
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Pet Arcade")
@@ -111,6 +129,82 @@ struct MiniGamesView: View {
             get: { message != nil },
             set: { if !$0 { message = nil } }
         )
+    }
+
+    @ViewBuilder
+    private func arcadeContent(for pet: PetProfile) -> some View {
+        switch selectedPage {
+        case .games:
+            VStack(spacing: 18) {
+                vitalsCard(for: pet)
+                skyHopCard(for: pet)
+                skyPawsCard(for: pet)
+                petsDashCard(for: pet)
+                economyCard
+            }
+        case .shop:
+            shop(for: pet)
+        }
+    }
+
+    private func arcadePageHeader(for pet: PetProfile) -> some View {
+        VStack(spacing: 10) {
+            Picker("Arcade section", selection: $selectedPage) {
+                Text("Games").tag(ArcadePage.games)
+                Text("Shop").tag(ArcadePage.shop)
+            }
+            .pickerStyle(.segmented)
+
+            if selectedPage == .shop {
+                shopStatusBar(for: pet)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .padding(.vertical, 10)
+        .background(Color(.systemGroupedBackground))
+        .zIndex(1)
+    }
+
+    private func shopStatusBar(for pet: PetProfile) -> some View {
+        let vitals = controller.vitals(for: pet.id)
+
+        return VStack(spacing: 9) {
+            HStack {
+                Label(pet.name, systemImage: "pawprint.fill")
+                    .font(.subheadline.bold())
+                    .lineLimit(1)
+                Spacer()
+                Label("\(controller.arcadeProgress.coins)", systemImage: "dollarsign.circle.fill")
+                    .font(.subheadline.bold().monospacedDigit())
+                    .foregroundStyle(.orange)
+            }
+
+            HStack(spacing: 8) {
+                compactVital("fork.knife", value: vitals.fullness, color: .green)
+                compactVital("heart.fill", value: vitals.happiness, color: .pink)
+                compactVital("bolt.fill", value: vitals.energy, color: .cyan)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 11)
+        .background(
+            Color(.secondarySystemGroupedBackground),
+            in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+        )
+    }
+
+    private func compactVital(_ symbol: String, value: Double, color: Color) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: symbol)
+                .font(.caption.bold())
+            ProgressView(value: value)
+                .tint(color)
+            Text("\(Int(value * 100))%")
+                .font(.caption2.bold().monospacedDigit())
+        }
+        .foregroundStyle(color)
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
     }
 
     private var walletHeader: some View {
@@ -240,7 +334,16 @@ struct MiniGamesView: View {
                     .offset(x: 115, y: -58)
                 Capsule().fill(.green).frame(width: 92, height: 12).offset(x: -78, y: 72)
                 Capsule().fill(.mint).frame(width: 74, height: 12).offset(x: 74, y: 8)
-                Capsule().fill(.green).frame(width: 62, height: 12).offset(x: -48, y: -62)
+                Capsule()
+                    .fill(.orange)
+                    .overlay(Capsule().stroke(.white.opacity(0.7), style: StrokeStyle(lineWidth: 2, dash: [6, 4])))
+                    .frame(width: 62, height: 12)
+                    .offset(x: -48, y: -62)
+                Image(systemName: "cloud.bolt.rain.fill")
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(.white, .indigo, .yellow)
+                    .font(.title)
+                    .offset(x: 92, y: -58)
                 PetArtwork(
                     species: pet.species,
                     coat: pet.coat,
@@ -261,7 +364,7 @@ struct MiniGamesView: View {
                     VStack(alignment: .leading, spacing: 3) {
                         Text("Sky Hop")
                             .font(.title2.bold())
-                        Text("Jump higher, land on platforms and collect coins.")
+                        Text("Jump higher, use fragile platforms and dodge hazards.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -514,31 +617,40 @@ struct MiniGamesView: View {
                 .foregroundStyle(.secondary)
                 .lineLimit(2, reservesSpace: true)
 
-            Button {
-                Task {
-                    if await controller.purchaseArcadeItem(item) {
-                        message = "\(item.title) added to your inventory."
-                    } else {
-                        message = "You need \(price) coins to buy \(item.title.lowercased())."
+            HStack(spacing: 8) {
+                Button {
+                    Task {
+                        if await controller.purchaseArcadeItem(item) {
+                            message = "\(item.title) added to your inventory."
+                        } else {
+                            message = "You need \(price) coins to buy \(item.title.lowercased())."
+                        }
                     }
+                } label: {
+                    Label("\(price)", systemImage: "dollarsign.circle.fill")
+                        .frame(maxWidth: .infinity)
                 }
-            } label: {
-                Label("\(price)", systemImage: "dollarsign.circle.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.bordered)
-            .disabled(controller.arcadeProgress.coins < price)
+                .buttonStyle(.bordered)
+                .disabled(controller.arcadeProgress.coins < price)
 
-            Button("Use for \(pet.name)") {
-                Task {
-                    if await controller.useArcadeItem(item, for: pet.id) {
-                        message = "\(pet.name) used \(item.title.lowercased())."
+                Button {
+                    Task {
+                        if await controller.useArcadeItem(item, for: pet.id) {
+                            message = "\(pet.name) used \(item.title.lowercased())."
+                        }
                     }
+                } label: {
+                    Text("Give")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.78)
+                        .frame(maxWidth: .infinity)
                 }
+                .buttonStyle(.borderedProminent)
+                .disabled(owned == 0)
+                .accessibilityLabel("Give \(item.title) to \(pet.name)")
             }
-            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
             .frame(maxWidth: .infinity)
-            .disabled(owned == 0)
         }
         .padding(14)
         .background(
@@ -581,6 +693,7 @@ private struct SkyHopGameView: View {
                 ZStack {
                     gameBackground
                     platforms
+                    obstacles
                     player
                     gameHUD(topInset: proxy.safeAreaInsets.top)
 
@@ -607,7 +720,6 @@ private struct SkyHopGameView: View {
             }
         }
         .ignoresSafeArea()
-        .persistentSystemOverlays(.hidden)
         .onChange(of: scenePhase) { _, phase in
             if phase != .active { lastTick = nil }
         }
@@ -634,14 +746,89 @@ private struct SkyHopGameView: View {
 
     private var platforms: some View {
         ForEach(engine.platforms) { platform in
-            Capsule()
-                .fill(
-                    LinearGradient(colors: [.green, .mint], startPoint: .top, endPoint: .bottom)
-                )
-                .overlay(Capsule().stroke(.white.opacity(0.55), lineWidth: 2))
+            let crumbleProgress = platform.crumbleProgress
+
+            ZStack {
+                Capsule()
+                    .fill(platformGradient(for: platform.kind))
+                Capsule()
+                    .stroke(
+                        .white.opacity(platform.kind == .fragile ? 0.72 : 0.55),
+                        style: StrokeStyle(
+                            lineWidth: 2,
+                            dash: platform.kind == .fragile ? [7, 4] : []
+                        )
+                    )
+
+                if platform.kind == .fragile {
+                    Image(systemName: "bolt.fill")
+                        .font(.caption2.bold())
+                        .foregroundStyle(.brown.opacity(0.78))
+                        .rotationEffect(.degrees(92))
+                }
+            }
                 .frame(width: platform.width, height: SkyHopEngine.platformHeight)
                 .position(x: platform.x, y: platform.y)
+                .rotationEffect(.degrees(Double(platform.id.isMultiple(of: 2) ? crumbleProgress * 11 : -crumbleProgress * 11)))
+                .scaleEffect(x: 1 - crumbleProgress * 0.16, y: 1 - crumbleProgress * 0.4)
+                .opacity(1 - crumbleProgress)
                 .shadow(color: .black.opacity(0.14), radius: 3, y: 3)
+        }
+    }
+
+    private var obstacles: some View {
+        ForEach(engine.obstacles) { obstacle in
+            obstacleArtwork(obstacle)
+                .frame(width: obstacle.size, height: obstacle.size)
+                .position(x: obstacle.x, y: obstacle.y)
+                .shadow(color: .black.opacity(0.24), radius: 5, y: 4)
+                .accessibilityHidden(true)
+        }
+    }
+
+    @ViewBuilder
+    private func obstacleArtwork(_ obstacle: SkyHopObstacle) -> some View {
+        switch obstacle.kind {
+        case .stormCloud:
+            Image(systemName: "cloud.bolt.rain.fill")
+                .resizable()
+                .scaledToFit()
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.white, .indigo, .yellow)
+        case .spikeOrb:
+            ZStack {
+                ForEach(0..<8, id: \.self) { index in
+                    Capsule()
+                        .fill(Color.red)
+                        .frame(width: 5, height: obstacle.size * 0.48)
+                        .offset(y: -obstacle.size * 0.21)
+                        .rotationEffect(.degrees(Double(index) * 45))
+                }
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [.yellow, .orange, .red],
+                            center: .topLeading,
+                            startRadius: 1,
+                            endRadius: obstacle.size * 0.35
+                        )
+                    )
+                    .frame(width: obstacle.size * 0.52, height: obstacle.size * 0.52)
+                Circle()
+                    .fill(.black.opacity(0.72))
+                    .frame(width: 5, height: 5)
+                    .offset(x: obstacle.size * 0.08, y: -obstacle.size * 0.05)
+            }
+            .rotationEffect(.degrees(engine.elapsedTime * 105))
+        }
+    }
+
+    private func platformGradient(for kind: SkyHopPlatformKind) -> LinearGradient {
+        switch kind {
+        case .stable:
+            LinearGradient(colors: [.green, .mint], startPoint: .top, endPoint: .bottom)
+        case .fragile:
+            LinearGradient(colors: [.yellow, .orange], startPoint: .top, endPoint: .bottom)
         }
     }
 
@@ -750,6 +937,14 @@ private struct SkyHopGameView: View {
             Text("Land on platforms and climb as high as you can.")
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Fragile platforms break after one landing.", systemImage: "bolt.fill")
+                    .foregroundStyle(.orange)
+                Label("Avoid storm clouds and spike orbs.", systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.red)
+            }
+            .font(.footnote.bold())
+            .frame(maxWidth: .infinity, alignment: .leading)
             Button {
                 restart(in: size)
             } label: {
@@ -767,10 +962,17 @@ private struct SkyHopGameView: View {
 
     private func gameOverOverlay(size: CGSize) -> some View {
         VStack(spacing: 14) {
-            Text(payout?.isNewHighScore == true ? "New record!" : "Nice jump!")
+            Text(gameOverTitle)
                 .font(.largeTitle.bold())
             Text("\(engine.score) points")
                 .font(.title2.monospacedDigit())
+
+            if case .obstacle? = engine.gameOverReason {
+                Text("Watch the hazards and try another route.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
 
             if isSavingResult {
                 ProgressView("Counting coins…")
@@ -819,6 +1021,12 @@ private struct SkyHopGameView: View {
             .onEnded { _ in engine.steering = 0 }
     }
 
+    private var gameOverTitle: String {
+        if payout?.isNewHighScore == true { return String(localized: "New record!") }
+        if case .obstacle? = engine.gameOverReason { return String(localized: "Obstacle hit!") }
+        return String(localized: "Nice jump!")
+    }
+
     private func tick(from oldDate: Date, to newDate: Date, size: CGSize) {
         guard engine.phase == .playing, scenePhase == .active else {
             lastTick = nil
@@ -850,11 +1058,58 @@ private struct SkyHopGameView: View {
     }
 }
 
+enum SkyHopPlatformKind: Equatable {
+    case stable
+    case fragile
+}
+
 struct SkyHopPlatform: Identifiable, Equatable {
     let id: Int
     var x: CGFloat
     var y: CGFloat
     var width: CGFloat
+    var kind: SkyHopPlatformKind
+    var crumbleElapsed: CGFloat?
+
+    init(
+        id: Int,
+        x: CGFloat,
+        y: CGFloat,
+        width: CGFloat,
+        kind: SkyHopPlatformKind = .stable,
+        crumbleElapsed: CGFloat? = nil
+    ) {
+        self.id = id
+        self.x = x
+        self.y = y
+        self.width = width
+        self.kind = kind
+        self.crumbleElapsed = crumbleElapsed
+    }
+
+    var crumbleProgress: CGFloat {
+        min(max((crumbleElapsed ?? 0) / SkyHopEngine.crumbleDuration, 0), 1)
+    }
+
+    var isSolid: Bool { crumbleElapsed == nil }
+}
+
+enum SkyHopObstacleKind: Equatable {
+    case stormCloud
+    case spikeOrb
+}
+
+struct SkyHopObstacle: Identifiable, Equatable {
+    let id: Int
+    var kind: SkyHopObstacleKind
+    var x: CGFloat
+    var y: CGFloat
+    var size: CGFloat
+}
+
+enum SkyHopGameOverReason: Equatable {
+    case fell
+    case obstacle(SkyHopObstacleKind)
 }
 
 struct SkyHopEngine {
@@ -866,6 +1121,7 @@ struct SkyHopEngine {
 
     static let playerSize = CGSize(width: 58, height: 52)
     static let platformHeight: CGFloat = 13
+    static let crumbleDuration: CGFloat = 0.36
 
     var phase: Phase = .ready
     var playerPosition = CGPoint(x: 180, y: 500)
@@ -873,8 +1129,14 @@ struct SkyHopEngine {
     var steering = 0.0
     var score = 0
     var platforms: [SkyHopPlatform] = []
+    var obstacles: [SkyHopObstacle] = []
+    var elapsedTime = 0.0
+    var gameOverReason: SkyHopGameOverReason?
 
     private var nextPlatformID = 0
+    private var nextObstacleID = 0
+    private var generatedPlatformCount = 0
+    private var stablePlatformStreak = 0
     private var randomState: UInt64 = 0x534B_5948_4F50_2026
     private var lastLandedPlatformID: Int?
     private var viewportSize = CGSize.zero
@@ -887,20 +1149,31 @@ struct SkyHopEngine {
         steering = 0
         randomState = seed ?? UInt64.random(in: UInt64.min...UInt64.max)
         nextPlatformID = 0
+        nextObstacleID = 0
+        generatedPlatformCount = 0
+        stablePlatformStreak = 0
         lastLandedPlatformID = nil
+        elapsedTime = 0
+        gameOverReason = nil
         playerPosition = CGPoint(x: size.width / 2, y: size.height - 125)
         velocity = CGVector(dx: 0, dy: -570)
         platforms = []
+        obstacles = []
 
         var y = size.height - 72
-        addPlatform(x: size.width / 2, y: y, width: 112)
+        addPlatform(x: size.width / 2, y: y, width: 112, kind: .stable)
         while y > -100 {
+            guard let lowerPlatform = platforms.last else { break }
             y -= random(in: 76...108)
             addPlatform(
                 x: random(in: 52...max(size.width - 52, 53)),
                 y: y,
-                width: random(in: 72...112)
+                width: random(in: 72...112),
+                kind: nextPlatformKind(difficulty: 0)
             )
+            if let upperPlatform = platforms.last {
+                addObstacleIfNeeded(between: lowerPlatform, and: upperPlatform, in: size)
+            }
         }
     }
 
@@ -914,6 +1187,11 @@ struct SkyHopEngine {
             platforms[index].x *= xScale
             platforms[index].y *= yScale
         }
+        for index in obstacles.indices {
+            obstacles[index].x *= xScale
+            obstacles[index].y *= yScale
+            obstacles[index].size *= min(xScale, yScale)
+        }
         viewportSize = size
     }
 
@@ -922,6 +1200,7 @@ struct SkyHopEngine {
         if viewportSize == .zero { viewportSize = size }
         let dt = CGFloat(min(max(rawDeltaTime, 0), 1.0 / 24.0))
         guard dt > 0 else { return }
+        elapsedTime += Double(dt)
 
         let previousPosition = playerPosition
         let acceleration = CGFloat(steering) * 1_450
@@ -940,11 +1219,14 @@ struct SkyHopEngine {
 
         landIfNeeded(from: previousPosition)
         scrollWorldIfNeeded(in: size)
+        advanceCrumblingPlatforms(by: dt)
+        endGameIfPlayerHitsObstacle()
         removeAndAddPlatforms(in: size)
 
-        if playerPosition.y > size.height + Self.playerSize.height {
+        if phase == .playing, playerPosition.y > size.height + Self.playerSize.height {
             phase = .gameOver
             steering = 0
+            gameOverReason = .fell
         }
     }
 
@@ -954,17 +1236,23 @@ struct SkyHopEngine {
         let currentFeet = playerPosition.y + Self.playerSize.height * 0.38
         let playerReach = Self.playerSize.width * 0.3
 
-        let landing = platforms
-            .filter { platform in
-                previousFeet <= platform.y
+        let landingIndex = platforms.indices
+            .filter { index in
+                let platform = platforms[index]
+                return platform.isSolid
+                    && previousFeet <= platform.y
                     && currentFeet >= platform.y
                     && abs(playerPosition.x - platform.x) <= platform.width / 2 + playerReach
             }
-            .min { $0.y < $1.y }
+            .min { platforms[$0].y < platforms[$1].y }
 
-        guard let landing else { return }
+        guard let landingIndex else { return }
+        let landing = platforms[landingIndex]
         playerPosition.y = landing.y - Self.playerSize.height * 0.38
         velocity.dy = -570
+        if landing.kind == .fragile {
+            platforms[landingIndex].crumbleElapsed = 0
+        }
         if lastLandedPlatformID != landing.id {
             score += 20
             lastLandedPlatformID = landing.id
@@ -977,13 +1265,43 @@ struct SkyHopEngine {
         let shift = ceiling - playerPosition.y
         playerPosition.y = ceiling
         for index in platforms.indices { platforms[index].y += shift }
+        for index in obstacles.indices { obstacles[index].y += shift }
         score += max(Int(shift * 1.8), 1)
     }
 
+    private mutating func advanceCrumblingPlatforms(by deltaTime: CGFloat) {
+        for index in platforms.indices where platforms[index].crumbleElapsed != nil {
+            let elapsed = (platforms[index].crumbleElapsed ?? 0) + deltaTime
+            platforms[index].crumbleElapsed = elapsed
+            platforms[index].y += (90 + elapsed * 520) * deltaTime
+        }
+    }
+
+    private mutating func endGameIfPlayerHitsObstacle() {
+        guard phase == .playing else { return }
+        let horizontalReach = Self.playerSize.width * 0.27
+        let verticalReach = Self.playerSize.height * 0.3
+
+        guard let collision = obstacles.first(where: { obstacle in
+            abs(playerPosition.x - obstacle.x) <= horizontalReach + obstacle.size * 0.3
+                && abs(playerPosition.y - obstacle.y) <= verticalReach + obstacle.size * 0.3
+        }) else { return }
+
+        phase = .gameOver
+        steering = 0
+        velocity = .zero
+        gameOverReason = .obstacle(collision.kind)
+    }
+
     private mutating func removeAndAddPlatforms(in size: CGSize) {
-        platforms.removeAll { $0.y > size.height + 60 }
+        platforms.removeAll {
+            $0.y > size.height + 60
+                || ($0.crumbleElapsed ?? 0) >= Self.crumbleDuration
+        }
+        obstacles.removeAll { $0.y > size.height + 70 }
         var topY = platforms.map(\.y).min() ?? size.height
         while topY > -110 {
+            guard let lowerPlatform = platforms.min(by: { $0.y < $1.y }) else { break }
             let difficulty = min(CGFloat(score) / 2_000, 1)
             let minimumGap = 76 + difficulty * 12
             let maximumGap = 104 + difficulty * 18
@@ -992,30 +1310,81 @@ struct SkyHopEngine {
             addPlatform(
                 x: random(in: 48...max(size.width - 48, 49)),
                 y: topY,
-                width: width
+                width: width,
+                kind: nextPlatformKind(difficulty: difficulty)
             )
+            if let upperPlatform = platforms.min(by: { $0.y < $1.y }) {
+                addObstacleIfNeeded(between: lowerPlatform, and: upperPlatform, in: size)
+            }
         }
     }
 
-    private mutating func addPlatform(x: CGFloat, y: CGFloat, width: CGFloat) {
-        platforms.append(SkyHopPlatform(id: nextPlatformID, x: x, y: y, width: width))
+    private mutating func addPlatform(
+        x: CGFloat,
+        y: CGFloat,
+        width: CGFloat,
+        kind: SkyHopPlatformKind
+    ) {
+        platforms.append(
+            SkyHopPlatform(id: nextPlatformID, x: x, y: y, width: width, kind: kind)
+        )
         nextPlatformID += 1
+        generatedPlatformCount += 1
+        stablePlatformStreak = kind == .stable ? stablePlatformStreak + 1 : 0
+    }
+
+    private mutating func nextPlatformKind(difficulty: CGFloat) -> SkyHopPlatformKind {
+        guard generatedPlatformCount >= 3,
+              platforms.last?.kind != .fragile else {
+            return .stable
+        }
+        let fragileChance = 0.23 + Double(difficulty) * 0.12
+        return stablePlatformStreak >= 3 || randomUnit() < fragileChance ? .fragile : .stable
+    }
+
+    private mutating func addObstacleIfNeeded(
+        between lowerPlatform: SkyHopPlatform,
+        and upperPlatform: SkyHopPlatform,
+        in size: CGSize
+    ) {
+        guard generatedPlatformCount >= 5,
+              generatedPlatformCount % 4 == 1 else { return }
+
+        let pathCenter = (lowerPlatform.x + upperPlatform.x) / 2
+        let obstacleX: CGFloat
+        if pathCenter < size.width / 2 {
+            obstacleX = random(in: max(size.width * 0.7, 34)...max(size.width - 34, 35))
+        } else {
+            obstacleX = random(in: 34...max(size.width * 0.3, 35))
+        }
+        let obstacle = SkyHopObstacle(
+            id: nextObstacleID,
+            kind: nextObstacleID.isMultiple(of: 2) ? .stormCloud : .spikeOrb,
+            x: obstacleX,
+            y: (lowerPlatform.y + upperPlatform.y) / 2 + random(in: -7...7),
+            size: nextObstacleID.isMultiple(of: 2) ? 46 : 38
+        )
+        obstacles.append(obstacle)
+        nextObstacleID += 1
     }
 
     private mutating func random(in range: ClosedRange<CGFloat>) -> CGFloat {
+        range.lowerBound + (range.upperBound - range.lowerBound) * CGFloat(randomUnit())
+    }
+
+    private mutating func randomUnit() -> Double {
         randomState = randomState &* 6_364_136_223_846_793_005 &+ 1_442_695_040_888_963_407
-        let unit = CGFloat(Double(randomState >> 11) / Double(1 << 53))
-        return range.lowerBound + (range.upperBound - range.lowerBound) * unit
+        return Double(randomState >> 11) / Double(1 << 53)
     }
 }
 
 private extension ArcadeItemKind {
     var title: String {
         switch self {
-        case .food: "Pet food"
-        case .treat: "Treat"
-        case .toy: "New toy"
-        case .vitamins: "Vitamins"
+        case .food: String(localized: "Pet food")
+        case .treat: String(localized: "Treat")
+        case .toy: String(localized: "New toy")
+        case .vitamins: String(localized: "Vitamins")
         }
     }
 
@@ -1039,10 +1408,10 @@ private extension ArcadeItemKind {
 
     var effectDescription: String {
         switch self {
-        case .food: "+24% fullness"
-        case .treat: "+10% fullness, +14% happiness"
-        case .toy: "+22% happiness"
-        case .vitamins: "+25% energy"
+        case .food: String(localized: "+24% fullness")
+        case .treat: String(localized: "+10% fullness, +14% happiness")
+        case .toy: String(localized: "+22% happiness")
+        case .vitamins: String(localized: "+25% energy")
         }
     }
 }

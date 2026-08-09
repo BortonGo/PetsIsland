@@ -124,6 +124,45 @@ final class PetHabitatStateTests: XCTestCase {
         XCTAssertTrue(statuses.contains(.sleeping))
     }
 
+    func testRunningMovesFasterThanWalkingInsideHabitat() throws {
+        let epoch = Date(timeIntervalSince1970: 35_000)
+        let pet = makePets(count: 1, createdAt: epoch)[0]
+        let state = PetHabitatState(
+            residentPetIDs: [pet.id],
+            simulationEpoch: epoch,
+            behaviorSeed: 11
+        )
+        let sampleDuration = 0.05
+        var walkingDistance: Double?
+        var runningDistance: Double?
+
+        for sample in 0..<2_000 where walkingDistance == nil || runningDistance == nil {
+            let date = epoch.addingTimeInterval(Double(sample) * sampleDuration)
+            let nextDate = date.addingTimeInterval(sampleDuration)
+            guard
+                let current = PetHabitatEngine.projections(for: state, pets: [pet], at: date).first,
+                let next = PetHabitatEngine.projections(for: state, pets: [pet], at: nextDate).first,
+                current.status == next.status,
+                current.direction == next.direction
+            else { continue }
+
+            let distance = abs(next.position - current.position)
+            if current.status == .wandering, distance > 0 {
+                walkingDistance = distance
+            } else if current.status == .running, distance > 0 {
+                runningDistance = distance
+            }
+        }
+
+        let walk = try XCTUnwrap(walkingDistance)
+        let run = try XCTUnwrap(runningDistance)
+        XCTAssertEqual(
+            run / walk,
+            PetHabitatEngine.runningSpeedMultiplier,
+            accuracy: 0.01
+        )
+    }
+
     private func makePets(count: Int, createdAt: Date) -> [PetProfile] {
         let species = PetSpecies.allCases
         return (0..<count).map { index in

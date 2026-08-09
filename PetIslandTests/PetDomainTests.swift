@@ -748,6 +748,146 @@ final class PetDomainTests: XCTestCase {
         XCTAssertLessThan(highThrow, lowThrow)
     }
 
+    func testPlayYardThrowVelocityNeverProducesADeadThrow() {
+        let velocity = PlayYardGameRules.throwVelocity(
+            drag: .zero,
+            prediction: .zero,
+            sampledVelocity: .zero,
+            reduceMotion: false
+        )
+
+        XCTAssertEqual(
+            hypot(velocity.dx, velocity.dy),
+            PlayYardGameRules.minimumThrowSpeed,
+            accuracy: 0.5
+        )
+        XCTAssertLessThan(velocity.dy, 0)
+    }
+
+    func testPlayYardThrowVelocityIsClampedForWildGesturePredictions() {
+        let velocity = PlayYardGameRules.throwVelocity(
+            drag: CGVector(dx: 900, dy: -1_200),
+            prediction: CGVector(dx: 4_000, dy: -5_000),
+            sampledVelocity: CGVector(dx: 12_000, dy: -16_000),
+            reduceMotion: false
+        )
+
+        XCTAssertLessThanOrEqual(
+            hypot(velocity.dx, velocity.dy),
+            PlayYardGameRules.maximumThrowSpeed + 0.01
+        )
+        XCTAssertGreaterThanOrEqual(velocity.dx, -PlayYardGameRules.maximumHorizontalThrowSpeed)
+        XCTAssertLessThanOrEqual(velocity.dx, PlayYardGameRules.maximumHorizontalThrowSpeed)
+        XCTAssertGreaterThanOrEqual(velocity.dy, -PlayYardGameRules.maximumUpwardThrowSpeed)
+        XCTAssertLessThanOrEqual(velocity.dy, PlayYardGameRules.maximumDownwardThrowSpeed)
+    }
+
+    func testPlayYardDragCannotPullTheBallIntoTheHUD() {
+        let drag = PlayYardGameRules.constrainedDrag(CGVector(dx: 500, dy: -900))
+
+        XCTAssertEqual(
+            hypot(drag.dx, drag.dy),
+            PlayYardGameRules.maximumDragDistance,
+            accuracy: 0.01
+        )
+    }
+
+    func testPlayYardGesturePredictionOnlyAddsAControlledFlick() {
+        let drag = CGVector(dx: 20, dy: -100)
+        let controlled = PlayYardGameRules.throwVelocity(
+            drag: drag,
+            prediction: .zero,
+            sampledVelocity: .zero,
+            reduceMotion: false
+        )
+        let wild = PlayYardGameRules.throwVelocity(
+            drag: drag,
+            prediction: CGVector(dx: 4_000, dy: -5_000),
+            sampledVelocity: CGVector(dx: 12_000, dy: -16_000),
+            reduceMotion: false
+        )
+
+        XCTAssertLessThan(abs(wild.dy - controlled.dy), 60)
+        XCTAssertLessThan(abs(wild.dx - controlled.dx), 60)
+    }
+
+    func testPlayYardCarriedBallIsSmallerThanThrownBall() {
+        XCTAssertLessThan(
+            PlayYardMouthLayout.carriedBallDiameter,
+            PlayYardGameRules.ballDiameter
+        )
+    }
+
+    func testPlayYardMouthAnchorMirrorsWithDirectionForEverySpecies() {
+        for species in PetSpecies.allCases {
+            let right = PlayYardMouthLayout.offset(
+                for: species,
+                size: 90,
+                direction: .right
+            )
+            let left = PlayYardMouthLayout.offset(
+                for: species,
+                size: 90,
+                direction: .left
+            )
+
+            XCTAssertGreaterThan(right.width, 0)
+            XCTAssertEqual(left.width, -right.width, accuracy: 0.01)
+            XCTAssertEqual(left.height, right.height, accuracy: 0.01)
+        }
+    }
+
+    func testPlayYardCatchRulesRequireTheBallToBeReachable() {
+        XCTAssertTrue(
+            PlayYardGameRules.shouldCatch(
+                ballHeight: 4,
+                horizontalDistance: 24,
+                directDistance: 28,
+                isAirborne: false,
+                isFlying: false
+            )
+        )
+        XCTAssertFalse(
+            PlayYardGameRules.shouldCatch(
+                ballHeight: 90,
+                horizontalDistance: 24,
+                directDistance: 94,
+                isAirborne: false,
+                isFlying: false
+            )
+        )
+        XCTAssertTrue(
+            PlayYardGameRules.shouldCatch(
+                ballHeight: 90,
+                horizontalDistance: 18,
+                directDistance: 34,
+                isAirborne: true,
+                isFlying: false
+            )
+        )
+    }
+
+    func testPlayYardBallMustBeSlowAndOnTheGroundToSettle() {
+        XCTAssertTrue(
+            PlayYardGameRules.ballIsSettled(
+                ballHeight: 0,
+                velocity: CGVector(dx: 8, dy: 0)
+            )
+        )
+        XCTAssertFalse(
+            PlayYardGameRules.ballIsSettled(
+                ballHeight: 0,
+                velocity: CGVector(dx: 80, dy: 0)
+            )
+        )
+        XCTAssertFalse(
+            PlayYardGameRules.ballIsSettled(
+                ballHeight: 42,
+                velocity: .zero
+            )
+        )
+    }
+
     func testWidgetFetchContainsRunJumpAndLandingPhases() {
         let start = Date(timeIntervalSince1970: 40_000)
         var state = PetLifeState(
@@ -879,6 +1019,84 @@ final class PetDomainTests: XCTestCase {
             lower.y - upper.y
         }
         XCTAssertTrue(verticalGaps.allSatisfy { $0 >= 76 && $0 <= 108 })
+    }
+
+    func testSkyHopGeneratesFragilePlatformsWithoutUnsafeConsecutivePairs() {
+        let size = CGSize(width: 390, height: 844)
+        var engine = SkyHopEngine()
+
+        engine.start(in: size, seed: 42)
+
+        XCTAssertEqual(engine.platforms.first?.kind, .stable)
+        XCTAssertTrue(engine.platforms.contains { $0.kind == .fragile })
+        let pairs = zip(engine.platforms, engine.platforms.dropFirst())
+        XCTAssertFalse(pairs.contains { lower, upper in
+            lower.kind == .fragile && upper.kind == .fragile
+        })
+    }
+
+    func testSkyHopFragilePlatformBreaksAfterItsFirstLanding() {
+        let size = CGSize(width: 390, height: 844)
+        let fragileID = 9_001
+        var engine = SkyHopEngine()
+        engine.start(in: size, seed: 17)
+        engine.platforms = [
+            SkyHopPlatform(
+                id: fragileID,
+                x: size.width / 2,
+                y: 600,
+                width: 100,
+                kind: .fragile
+            )
+        ]
+        engine.obstacles = []
+        engine.playerPosition = CGPoint(x: size.width / 2, y: 560)
+        engine.velocity = CGVector(dx: 0, dy: 600)
+
+        engine.update(deltaTime: 1.0 / 24.0, in: size)
+
+        XCTAssertLessThan(engine.velocity.dy, 0)
+        XCTAssertNotNil(engine.platforms.first { $0.id == fragileID }?.crumbleElapsed)
+
+        for _ in 0..<10 {
+            engine.update(deltaTime: 1.0 / 24.0, in: size)
+        }
+        XCTAssertFalse(engine.platforms.contains { $0.id == fragileID })
+    }
+
+    func testSkyHopGeneratesBothObstacleKindsInsidePlayableBounds() {
+        let size = CGSize(width: 390, height: 844)
+        var engine = SkyHopEngine()
+
+        engine.start(in: size, seed: 1_234)
+
+        XCTAssertTrue(engine.obstacles.contains { $0.kind == .stormCloud })
+        XCTAssertTrue(engine.obstacles.contains { $0.kind == .spikeOrb })
+        XCTAssertTrue(engine.obstacles.allSatisfy { obstacle in
+            obstacle.x >= 34 && obstacle.x <= size.width - 34
+        })
+    }
+
+    func testSkyHopObstacleCollisionEndsTheRun() {
+        let size = CGSize(width: 390, height: 844)
+        var engine = SkyHopEngine()
+        engine.start(in: size, seed: 99)
+        engine.playerPosition = CGPoint(x: size.width / 2, y: 420)
+        engine.velocity = .zero
+        engine.obstacles = [
+            SkyHopObstacle(
+                id: 77,
+                kind: .stormCloud,
+                x: engine.playerPosition.x,
+                y: engine.playerPosition.y,
+                size: 46
+            )
+        ]
+
+        engine.update(deltaTime: 1.0 / 60.0, in: size)
+
+        XCTAssertEqual(engine.phase, .gameOver)
+        XCTAssertEqual(engine.gameOverReason, .obstacle(.stormCloud))
     }
 
     func testArcadeShopMovesCoinsIntoInventory() {

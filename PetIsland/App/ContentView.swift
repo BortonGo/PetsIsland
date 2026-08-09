@@ -20,7 +20,10 @@ struct ContentView: View {
         } else if ProcessInfo.processInfo.arguments.contains("-live-activity-smoke-test") {
             LiveActivitySmokeHostView()
         } else if ProcessInfo.processInfo.arguments.contains("-playroom-preview") {
-            PlayYardView(pets: Self.previewParty)
+            let pets = ProcessInfo.processInfo.arguments.contains("-playroom-bird-preview")
+                ? Array(Self.previewParty.suffix(3))
+                : Self.previewParty
+            PlayYardView(pets: pets)
         } else if ProcessInfo.processInfo.arguments.contains("-settings-preview") {
             HomeDebugHostView(showsSettings: true)
         } else if ProcessInfo.processInfo.arguments.contains("-home-preview") {

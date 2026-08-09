@@ -207,6 +207,10 @@ enum PetHabitatEngine {
     static let cycleLength = 32
     static let minimumHorizontalSeparation = 0.22
     static let minimumVerticalSeparation = 0.14
+    static let runningSpeedMultiplier = 1.8
+
+    private static let walkingStepCount = 5
+    private static let runningStepCount = 3
 
     static func projections(
         for state: PetHabitatState,
@@ -291,11 +295,19 @@ enum PetHabitatEngine {
             direction = .right
             status = .watching
         case 3...7:
-            normalizedPosition = (Double(phase - 3) + fraction) / 8
+            normalizedPosition = travelProgress(
+                step: phase - 3,
+                fraction: fraction,
+                runningFirst: false
+            )
             direction = .right
             status = profile.species == .parrot ? .flying : .wandering
         case 8...10:
-            normalizedPosition = (Double(phase - 3) + fraction) / 8
+            normalizedPosition = travelProgress(
+                step: phase - 3,
+                fraction: fraction,
+                runningFirst: false
+            )
             direction = .right
             status = profile.species == .parrot ? .flying : .running
         case 11...13:
@@ -307,11 +319,19 @@ enum PetHabitatEngine {
             direction = .left
             status = .watching
         case 17...19:
-            normalizedPosition = 1 - (Double(phase - 17) + fraction) / 8
+            normalizedPosition = 1 - travelProgress(
+                step: phase - 17,
+                fraction: fraction,
+                runningFirst: true
+            )
             direction = .left
             status = profile.species == .parrot ? .flying : .running
         case 20...24:
-            normalizedPosition = 1 - (Double(phase - 17) + fraction) / 8
+            normalizedPosition = 1 - travelProgress(
+                step: phase - 17,
+                fraction: fraction,
+                runningFirst: true
+            )
             direction = .left
             status = profile.species == .parrot ? .flying : .wandering
         case 25...27:
@@ -338,6 +358,29 @@ enum PetHabitatEngine {
             status: status,
             spriteStep: state.revision + Int(tick % 100_000)
         )
+    }
+
+    private static func travelProgress(
+        step: Int,
+        fraction: Double,
+        runningFirst: Bool
+    ) -> Double {
+        let elapsed = Double(step) + fraction
+        let weightedDistance: Double
+
+        if runningFirst {
+            let runDuration = Double(runningStepCount)
+            weightedDistance = min(elapsed, runDuration) * runningSpeedMultiplier
+                + max(elapsed - runDuration, 0)
+        } else {
+            let walkDuration = Double(walkingStepCount)
+            weightedDistance = min(elapsed, walkDuration)
+                + max(elapsed - walkDuration, 0) * runningSpeedMultiplier
+        }
+
+        let totalWeightedDistance = Double(walkingStepCount)
+            + Double(runningStepCount) * runningSpeedMultiplier
+        return min(max(weightedDistance / totalWeightedDistance, 0), 1)
     }
 
     private static func horizontalTrack(slot: Int, occupancy: Int) -> ClosedRange<Double> {
