@@ -520,6 +520,33 @@ final class PetDomainTests: XCTestCase {
         XCTAssertEqual(controller.activePetIDs, [onlyPetID])
     }
 
+    @MainActor
+    func testControllerBootstrapPreservesNonDogLeadPet() async {
+        let cat = PetProfile(
+            id: UUID(), name: "Milo", species: .cat,
+            coat: .midnight, createdAt: Date(timeIntervalSince1970: 1_000),
+            breed: .maineCoon
+        )
+        var persisted = PersistedAppState()
+        persisted.pets = [cat]
+        persisted.activePetIDs = [cat.id]
+        persisted.completedOnboarding = true
+        persisted.normalizePetCollection()
+        let store = InMemoryPetStore(persisted)
+        let controller = PetSessionController(store: store)
+
+        await controller.bootstrap()
+
+        XCTAssertEqual(controller.profile, cat)
+        XCTAssertEqual(controller.pets, [cat])
+        XCTAssertEqual(controller.activePetIDs, [cat.id])
+        XCTAssertFalse(controller.pets.contains { $0.species == .dog })
+
+        let saved = await store.load()
+        XCTAssertEqual(saved.profile, cat)
+        XCTAssertEqual(saved.pets, [cat])
+    }
+
     func testLiveActivityPayloadStaysWellBelowSystemLimit() throws {
         let now = Date(timeIntervalSince1970: 1_000)
         let state = PetActivityAttributes.ContentState(
@@ -625,7 +652,7 @@ final class PetDomainTests: XCTestCase {
         XCTAssertLessThan(rebounding.position, boundary.position)
     }
 
-    func testPetLifeStateRoundTripKeepsDogAndPlacement() throws {
+    func testPetLifeStateRoundTripKeepsSpeciesAndPlacement() throws {
         let date = Date(timeIntervalSince1970: 10_000)
         let cat = PetProfile(
             id: UUID(), name: "Pixel", species: .cat,
@@ -644,7 +671,8 @@ final class PetDomainTests: XCTestCase {
             from: PropertyListEncoder().encode(state)
         )
 
-        XCTAssertEqual(decoded.profile.species, .dog)
+        XCTAssertEqual(decoded.profile.species, .cat)
+        XCTAssertEqual(decoded.profile.breed, cat.breed)
         XCTAssertEqual(decoded.placement, .dynamicIsland)
         XCTAssertEqual(decoded, state)
     }

@@ -1,7 +1,7 @@
 import Foundation
 
 /// The single authoritative location of the pet. Keeping this in the shared
-/// state prevents the dog from appearing in two surfaces at the same time.
+/// state prevents it from appearing in two surfaces at the same time.
 enum PetPlacement: String, Codable, CaseIterable, Hashable, Sendable {
     case home
     case dynamicIsland
@@ -61,16 +61,13 @@ struct PetLifeState: Codable, Equatable, Sendable {
         lastBallThrownAt: Date? = nil,
         revision: Int = 0
     ) {
-        var dog = profile
-        dog.species = .dog
-
         self.schemaVersion = Self.currentSchemaVersion
-        self.profile = dog
+        self.profile = profile
         self.placement = placement
         self.vitals = vitals
         self.vitalsUpdatedAt = vitalsUpdatedAt
-        self.autonomyEpoch = autonomyEpoch ?? dog.createdAt
-        self.behaviorSeed = behaviorSeed ?? Self.seed(for: dog.id)
+        self.autonomyEpoch = autonomyEpoch ?? profile.createdAt
+        self.behaviorSeed = behaviorSeed ?? Self.seed(for: profile.id)
         self.lastBallThrownAt = lastBallThrownAt
         self.revision = max(revision, 0)
     }
@@ -133,7 +130,6 @@ struct PetLifeState: Codable, Equatable, Sendable {
         let fallback = Self.initial()
         schemaVersion = try container.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
         profile = try container.decodeIfPresent(PetProfile.self, forKey: .profile) ?? fallback.profile
-        profile.species = .dog
         placement = try container.decodeIfPresent(PetPlacement.self, forKey: .placement) ?? .enclosure
         vitals = try container.decodeIfPresent(PetVitals.self, forKey: .vitals) ?? PetVitals()
         vitalsUpdatedAt = try container.decodeIfPresent(Date.self, forKey: .vitalsUpdatedAt) ?? .now

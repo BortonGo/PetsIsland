@@ -73,7 +73,6 @@ final class PetSessionController: ObservableObject {
         if !didBootstrap {
             state = await store.load()
             arcadeState = await arcadeStore.load()
-            ensureMVPDog()
             arcadeState.reconcile(with: state.pets)
             publishPetCollection()
             synchronizeSharedLifeState()
@@ -322,9 +321,9 @@ final class PetSessionController: ObservableObject {
         Haptics.success(enabled: settings.hapticsEnabled)
     }
 
-    /// Moves the single MVP dog between the two system surfaces. ActivityKit
-    /// still needs an internal expiry date, but no duration is exposed to the
-    /// user. A fresh activity is created whenever Pixel is taken along.
+    /// Moves the lead pet between the two system surfaces. ActivityKit still
+    /// needs an internal expiry date, but no duration is exposed in this flow.
+    /// A fresh activity is created whenever the pet is taken along.
     func placePet(in newPlacement: PetPlacement) async {
         guard !isBusy, newPlacement != placement else { return }
 
@@ -690,28 +689,9 @@ final class PetSessionController: ObservableObject {
         publishPetCollection()
     }
 
-    private func ensureMVPDog() {
-        if let dog = state.pets.first(where: { $0.species == .dog }) {
-            state.activePetIDs = [dog.id]
-            return
-        }
-
-        let dog = PetProfile(
-            id: UUID(),
-            name: "Pixel",
-            species: .dog,
-            coat: state.pets.first?.coat ?? .sunrise,
-            createdAt: .now,
-            customColor: state.pets.first?.customColor
-        )
-        state.pets.insert(dog, at: 0)
-        state.activePetIDs = [dog.id]
-    }
-
     private func synchronizeSharedLifeState() {
         var shared = PetLifeStore.load()
         shared.profile = profile
-        shared.profile.species = .dog
         if state.activeSession != nil {
             shared.move(to: .dynamicIsland)
         }
@@ -807,7 +787,6 @@ final class PetSessionController: ObservableObject {
         do {
             lifeState = try PetLifeStore.update { shared in
                 shared.profile = profile
-                shared.profile.species = .dog
                 shared.move(to: newPlacement)
             }
             placement = lifeState.placement
