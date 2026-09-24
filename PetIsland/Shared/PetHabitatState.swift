@@ -9,6 +9,18 @@ enum HabitatTheme: String, CaseIterable, Hashable, Sendable, Codable {
     case moonlitGarden
     case arcticCove
     case desertCamp
+    case sunnyMeadow
+    case starryNight
+    case warmRoom
+    case snowyCove
+    case sunsetDunes
+
+    var isVivid: Bool {
+        switch self {
+        case .sunnyMeadow, .starryNight, .warmRoom, .snowyCove, .sunsetDunes: true
+        case .meadow, .cozyRoom, .moonlitGarden, .arcticCove, .desertCamp: false
+        }
+    }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
@@ -99,6 +111,7 @@ struct PetHabitatState: Codable, Equatable, Sendable {
         if let id {
             residentPetIDs.removeAll { $0 == id }
         }
+        normalize()
         guard previousLead != leadDynamicIslandPetID || previousResidents != residentPetIDs else {
             return false
         }
@@ -107,11 +120,12 @@ struct PetHabitatState: Codable, Equatable, Sendable {
     }
 
     /// Returns the current Dynamic Island pet to the habitat when a slot is
-    /// available. The lead remains assigned if the habitat is full.
+    /// available. New selections reserve its berth; legacy full snapshots release
+    /// the last berth without deleting that pet from the collection.
     @discardableResult
     mutating func returnDynamicIslandLeadToHabitat() -> Bool {
-        guard let leadDynamicIslandPetID,
-              residentPetIDs.count < Self.maximumResidents else { return false }
+        guard let leadDynamicIslandPetID else { return false }
+        if residentPetIDs.count >= Self.maximumResidents { residentPetIDs.removeLast() }
         self.leadDynamicIslandPetID = nil
         residentPetIDs.append(leadDynamicIslandPetID)
         revision += 1
@@ -137,7 +151,7 @@ struct PetHabitatState: Codable, Equatable, Sendable {
         residentPetIDs = residentPetIDs.filter { id in
             id != leadDynamicIslandPetID && seen.insert(id).inserted
         }
-        residentPetIDs = Array(residentPetIDs.prefix(Self.maximumResidents))
+        residentPetIDs = Array(residentPetIDs.prefix(Self.maximumResidents - (leadDynamicIslandPetID == nil ? 0 : 1)))
         revision = max(revision, 0)
     }
 
@@ -411,7 +425,7 @@ enum PetHabitatEngine {
     private static func cadence(for species: PetSpecies) -> TimeInterval {
         switch species {
         case .parrot: 1.8
-        case .dog, .fox: 2.5
+        case .dog, .fox, .lion: 2.5
         case .cat, .penguin: 2.8
         }
     }
@@ -442,6 +456,38 @@ struct SharedHabitatResident: Codable, Equatable, Sendable, Identifiable {
     var id: UUID { profile.id }
     var profile: PetProfile
     var vitals: PetVitals
+    var vitalsUpdatedAt: Date = .distantPast
+
+    private enum CodingKeys: String, CodingKey { case profile, vitals, vitalsUpdatedAt }
+
+    init(profile: PetProfile, vitals: PetVitals, vitalsUpdatedAt: Date = .distantPast) {
+        self.profile = profile
+        self.vitals = vitals
+        self.vitalsUpdatedAt = vitalsUpdatedAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        profile = try values.decode(PetProfile.self, forKey: .profile)
+        vitals = try values.decodeIfPresent(PetVitals.self, forKey: .vitals) ?? PetVitals()
+        vitalsUpdatedAt = try values.decodeIfPresent(Date.self, forKey: .vitalsUpdatedAt) ?? .distantPast
+    }
+}
+
+/// A durable care action can be retried without applying its effect twice.
+struct PetCareEvent: Codable, Equatable, Sendable {
+    var id = UUID()
+    let petID: UUID
+    let fullness: Double
+    let happiness: Double
+    let energy: Double
+    let date: Date
+
+    func applying(to vitals: PetVitals) -> PetVitals {
+        PetVitals(fullness: vitals.fullness + fullness,
+                  happiness: vitals.happiness + happiness,
+                  energy: vitals.energy + energy)
+    }
 }
 
 /// Complete cross-process payload used by the app and the enclosure widget.
@@ -450,6 +496,51 @@ struct SharedHabitatResident: Codable, Equatable, Sendable, Identifiable {
 struct SharedPetHabitat: Codable, Equatable, Sendable {
     var configuration: PetHabitatState
     var residents: [SharedHabitatResident]
+    var appliedCareEventIDs: [UUID] = []
+
+    mutating func apply(_ event: PetCareEvent) {
+        guard !appliedCareEventIDs.contains(event.id) else { return }
+        if let index = residents.firstIndex(where: { $0.id == event.petID }) {
+            residents[index].vitals = event.applying(to: residents[index].vitals.projected(from: residents[index].vitalsUpdatedAt, to: event.date))
+            residents[index].vitalsUpdatedAt = max(residents[index].vitalsUpdatedAt, event.date)
+        }
+        appliedCareEventIDs.append(event.id)
+        // The app drains its ordered outbox before accepting further care.
+        appliedCareEventIDs = Array(appliedCareEventIDs.suffix(512))
+    }
+
+    private enum CodingKeys: String, CodingKey { case configuration, residents, appliedCareEventIDs }
+
+    init(configuration: PetHabitatState, residents: [SharedHabitatResident]) {
+        self.configuration = configuration
+        self.residents = residents
+    }
+
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        configuration = try values.decode(PetHabitatState.self, forKey: .configuration)
+        residents = try values.decode([SharedHabitatResident].self, forKey: .residents)
+        appliedCareEventIDs = try values.decodeIfPresent([UUID].self, forKey: .appliedCareEventIDs) ?? []
+    }
+
+    mutating func playWithResidents(at date: Date) {
+        for index in residents.indices {
+            let current = residents[index].vitals.projected(from: residents[index].vitalsUpdatedAt, to: date)
+            residents[index].vitals = PetVitals(fullness: current.fullness,
+                                               happiness: current.happiness + 0.12,
+                                               energy: current.energy - 0.035)
+            residents[index].vitalsUpdatedAt = date
+        }
+    }
+
+    var averageVitals: PetVitals {
+        guard !residents.isEmpty else { return PetVitals(fullness: 0, happiness: 0, energy: 0) }
+        let count = Double(residents.count)
+        let values = residents.map { $0.vitals.projected(from: $0.vitalsUpdatedAt, to: .now) }
+        return PetVitals(fullness: values.reduce(0) { $0 + $1.fullness } / count,
+                         happiness: values.reduce(0) { $0 + $1.happiness } / count,
+                         energy: values.reduce(0) { $0 + $1.energy } / count)
+    }
 
     static func initial(at date: Date = .now) -> SharedPetHabitat {
         let dog = PetLifeState.initial(at: date).profile
@@ -466,7 +557,11 @@ struct SharedPetHabitat: Codable, Equatable, Sendable {
     mutating func reconcile() {
         var seen = Set<UUID>()
         residents = residents.filter { seen.insert($0.id).inserted }
-        configuration.reconcile(availablePetIDs: Set(residents.map(\.id)))
+        // The lead is intentionally absent from the resident payload. Only the
+        // app, which owns the full collection, can decide it has been deleted.
+        var knownIDs = Set(residents.map(\.id))
+        if let lead = configuration.leadDynamicIslandPetID { knownIDs.insert(lead) }
+        configuration.reconcile(availablePetIDs: knownIDs)
         let selected = Set(configuration.residentPetIDs)
         residents = residents.filter { selected.contains($0.id) }
     }
@@ -486,64 +581,27 @@ enum PetHabitatStoreError: Error, LocalizedError {
     }
 }
 
-/// App Group repository shared by the main app, WidgetKit and AppIntents.
+/// Every mutation reads the newest on-disk snapshot under a cross-process lock.
 enum PetHabitatStore {
     static let stateKey = "petHabitatState.v1"
-    private static let backupKey = "petHabitatState.v1.backup"
-    private static let lock = NSLock()
 
     static func load() -> SharedPetHabitat {
-        lock.lock()
-        defer { lock.unlock() }
-        return loadUnlocked()
+        (try? SharedPetStorage.file(for: stateKey, as: SharedPetHabitat.self).load(fallback: initialValue)) ?? initialValue()
     }
 
     static func save(_ habitat: SharedPetHabitat) throws {
-        lock.lock()
-        defer { lock.unlock() }
-        try saveUnlocked(habitat)
+        try update { $0 = habitat }
     }
 
     @discardableResult
     static func update(_ mutation: (inout SharedPetHabitat) -> Void) throws -> SharedPetHabitat {
-        lock.lock()
-        defer { lock.unlock() }
-        var habitat = loadUnlocked()
-        mutation(&habitat)
-        habitat.reconcile()
-        try saveUnlocked(habitat)
-        return habitat
-    }
-
-    private static func loadUnlocked() -> SharedPetHabitat {
-        guard let defaults = UserDefaults(suiteName: PetLifeStore.appGroupIdentifier) else {
-            return .initial()
-        }
-        let decoder = PropertyListDecoder()
-        for key in [stateKey, backupKey] {
-            guard let data = defaults.data(forKey: key),
-                  var habitat = try? decoder.decode(SharedPetHabitat.self, from: data) else { continue }
+        try SharedPetStorage.file(for: stateKey, as: SharedPetHabitat.self).update(fallback: initialValue) { habitat in
+            mutation(&habitat)
             habitat.reconcile()
-            return habitat
         }
-        return .initial()
     }
 
-    private static func saveUnlocked(_ habitat: SharedPetHabitat) throws {
-        guard let defaults = UserDefaults(suiteName: PetLifeStore.appGroupIdentifier) else {
-            throw PetHabitatStoreError.appGroupUnavailable
-        }
-        let encoder = PropertyListEncoder()
-        encoder.outputFormat = .binary
-        let data: Data
-        do {
-            data = try encoder.encode(habitat)
-        } catch {
-            throw PetHabitatStoreError.encodingFailed(error)
-        }
-        if let current = defaults.data(forKey: stateKey) {
-            defaults.set(current, forKey: backupKey)
-        }
-        defaults.set(data, forKey: stateKey)
+    private static func initialValue() -> SharedPetHabitat {
+        SharedPetStorage.legacy(SharedPetHabitat.self, key: stateKey) ?? .initial()
     }
 }

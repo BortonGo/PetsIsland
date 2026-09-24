@@ -1,190 +1,219 @@
 # Pet Island
 
+Pet Island is an independent personal iOS project: a small island for pixel
+companions, with an interactive enclosure, three arcade games, a Home Screen
+widget, and a pet that accompanies you in Dynamic Island and on the Lock Screen.
+
+The app works locally, without an account, a backend, analytics, or advertising.
+The interface is available in English and Russian.
+
+> **Status: active development, ready for iPhone testing.** The latest verified
+> build passed 138 tests, a Release build, and static analysis on September 24,
+> 2026. Simulator checks cover the main flows; physical-device and accessibility
+> testing are still part of the work before a public release.
+
 <p align="center">
   <img src="Docs/Media/dynamic-island-demo.gif" width="635" alt="A shepherd, parrot, and cat moving and resting in Dynamic Island">
 </p>
 
-<p align="center"><sub>Shepherd, parrot, and cat — actual Dynamic Island output captured in the iOS Simulator, not a mockup.</sub></p>
+<p align="center"><sub>Dynamic Island footage recorded in the iOS Simulator.</sub></p>
 
-Pet Island is an open-source iOS app that brings original pixel pets to the
-Home Screen, Dynamic Island, Lock Screen, and an interactive in-app playroom.
-It is inspired by the playful idea behind
-[vscode-pets](https://github.com/tonybaloney/vscode-pets), while the iOS
-architecture, interface, and original Pet Island characters are implemented
-specifically for Apple platforms.
+## Pets and their island
 
-> **Project status: alpha.** The app and extensions build, the core pet
-> collection and habitat are implemented, but the product is not ready for an
-> App Store release yet. Real-device QA, accessibility review, and the final
-> WidgetKit interaction design are still in progress.
+The collection contains **20 visual variants across six species**:
 
-![Pet Island enclosure preview](Design/habitat-checkpoint.png)
+| Species | Available variants |
+| --- | --- |
+| Dogs | German shepherd, Pembroke corgi, Cardigan corgi, Doberman, bull terrier |
+| Cats | Classic cat, British shorthair, Maine coon, Siamese |
+| Foxes | Red fox, arctic fox |
+| Parrots | Classic parrot, cockatiel, budgie, macaw |
+| Penguins | Classic penguin, rockhopper |
+| Lions | Adult male lion, lioness, lion cub |
 
-## Current features
+- Give pets names, choose their variants and coats, or set a custom color.
+- The Corgi card offers Pembroke and Cardigan variants, followed by the same
+  text-based coat selector used for other pets.
+- Keep up to **six residents** in the enclosure and choose from **ten scenes**:
+  five calm environments and five vivid alternatives, including a sunny meadow,
+  a starry night, a warm room, a snowy cove, and sunset dunes.
+- Pet your companions and open the full-screen playroom to throw a ball and
+  play fetch. Grounded movement and gait frames follow the distance travelled.
+- Track fullness, happiness, and energy, with rest and care between games.
 
-- A pixel-pet collection with names, colors, personalities, and visual variants.
-- Dogs: German shepherd, corgi, Doberman, and bull terrier.
-- Cats: classic, British shorthair, Maine coon, and Siamese.
-- Red and arctic foxes.
-- Classic parrot, cockatiel, budgie, and macaw.
-- Classic and rockhopper penguins, plus bear, lizard, and bunny characters.
-- A configurable enclosure with up to six residents and five background themes.
-- A full-screen playroom where animation can run continuously while the app is open.
-- A medium Home Screen widget backed by shared App Group state.
-- A Live Activity for Dynamic Island and the Lock Screen with one lead pet.
-- A sleeping presentation for stale or reduced-luminance/Always-On states.
-- English and Russian localization.
-- Local-only persistence: no account, ads, analytics, or backend service.
+<p align="center">
+  <img src="Docs/Media/colorful-meadow-light.png" width="240" alt="Sunny meadow enclosure">
+  <img src="Docs/Media/colorful-night-dark.png" width="240" alt="Starry night enclosure">
+</p>
 
-## How the surfaces are designed
+## Arcade
 
-| Surface | Purpose | Animation model |
-| --- | --- | --- |
-| iOS app | Collection, habitat editing, and play | Real-time SwiftUI animation while the app is open |
-| Home Screen widget | A glanceable enclosure and quick pet interactions | Polished transitions between persisted moments |
-| Dynamic Island | One companion and short reactions | Two-frame timer pose cycle with a sleeping fallback |
-| Always-On Display | Calm ambient presence | Static sleeping pose |
+Three games share your pet collection and local progress:
 
-### Why the widget is not a tiny game engine
+| Game | Play |
+| --- | --- |
+| Pets Dash | Run along an island trail, change lanes, jump over obstacles, and collect coins |
+| Sky Paws | Flap through gaps between clouds |
+| Sky Hop | Jump between floating platforms and climb higher |
 
-WidgetKit does not keep the extension running while a widget is visible. The
-extension creates timeline entries, iOS archives their views, and a system
-process renders those archived representations. As a result, continuous sprite
-animation, video, a game loop, or a reliable 10-second run cannot be implemented
-inside a Home Screen widget.
+Games include records, coin rewards, pause/resume, and a local shop with food,
+treats, toys, and vitamins. The shop uses earned in-game coins; it does not make
+real-money purchases. Backgrounding a game pauses the action.
 
-The current product direction is therefore **Pet Moments**: tapping an action
-such as pet, feed, or throw ball changes the saved scene and produces a short,
-intentional system animation. For example, throwing the ball can transition
-from an alert pose to the pet holding the ball and finally to a happy resting
-pose. Tapping **Play** opens the matching enclosure in the app, where movement,
-physics, and multi-frame running are unrestricted. This avoids presenting a
-single sprite sliding across the widget as if it were running.
+## Appearance
 
-The compact Dynamic Island view uses a public system timer rendered with an
-original Pet Island sprite font. The timer itself becomes the pet: its final
-digit alternates two movement poses for seven seconds, then selects a sleeping
-pose for three seconds. The timer's other glyphs are clipped, so the island
-contains only one 32-point pet and no trailing status icon. This path avoids
-private clock APIs. Automatic frame changes after the app is closed are verified
-in the iOS 26.5 Simulator; physical-device/AOD QA is still required before an
-App Store release.
+The **Quiet Island** interface has a graphite dark theme, a gentle light theme,
+and a system-following option. Haptics and reduced pet motion are configurable.
 
-Apple references:
+<p align="center">
+  <img src="Docs/Media/quiet-island-light.png" width="240" alt="Quiet Island light theme">
+  <img src="Docs/Media/quiet-island-dark.png" width="240" alt="Quiet Island dark theme">
+</p>
 
-- [Bring widgets to life (WWDC23)](https://developer.apple.com/videos/play/wwdc2023/10028/)
-- [Animating data updates in widgets and Live Activities](https://developer.apple.com/documentation/widgetkit/animating-data-updates-in-widgets-and-live-activities)
-- [Emoji Rangers sample](https://developer.apple.com/documentation/widgetkit/emoji-rangers-supporting-live-activities-interactivity-and-animations)
+The original app icon remains the default. **Settings → App icon** offers it
+alongside five alternatives: Quiet Island, Together, Moon nap, Pixel friend,
+and Warm paw. Selecting one changes the actual Home Screen icon; the original
+can be restored at any time.
 
-## Requirements
+<p align="center">
+  <img src="Docs/Media/app-icons.png" width="1000" alt="The five optional Pet Island app icons">
+</p>
 
-- macOS with a current Xcode installation.
-- iOS 17.0 or newer (the project deployment target is iOS 17).
-- An iPhone or iOS Simulator for the main app and Home Screen widget.
-- An iPhone with Dynamic Island, or a matching Simulator, for the compact and
-  expanded Dynamic Island presentations.
-- A compatible physical iPhone for Always-On Display testing.
+## Dynamic Island and Lock Screen
 
-## Getting started
+Take one pet from the island with you in a Live Activity. The compact and
+minimal Dynamic Island presentations show the pet; the expanded presentation
+also provides short run and play interactions.
 
-1. Clone the repository and open `PetIsland.xcodeproj`.
-2. In Xcode's scheme picker, select **PetIsland** — not
-   `PetIslandLiveActivity`.
-3. Open the project settings and select the **PetIsland** target.
-4. Under **Signing & Capabilities**, choose your Apple development team and
-   replace `org.bortongo.PetIsland` with a unique bundle identifier.
-5. Repeat for **PetIslandLiveActivity**. Its identifier must be different, for
-   example `com.yourname.PetIsland.LiveActivity`.
-6. Create an App Group such as `group.com.yourname.PetIsland` and assign the
-   exact same group to both targets.
-7. Replace the existing App Group identifier in these three files:
-   - `PetIsland/PetIsland.entitlements`
-   - `PetIslandLiveActivity/PetIslandLiveActivity.entitlements`
-   - `PetIsland/Shared/PetLifeState.swift`
-8. Select a Simulator or connected iPhone and press **Run** (`Command-R`).
+In **Island → Island setup** you can choose:
 
-The main application embeds the widget/Live Activity extension, so you should
-normally run only the `PetIsland` scheme. Running the extension scheme directly
-asks Xcode to preview a widget and is not the normal app launch path.
+- **Pet mode:** run, walk, sleep, run + sleep, walk + sleep, or run + walk + sleep.
+- **Time on the island:** 20 minutes, 40 minutes, 1 hour, 2 hours, or 4 hours.
+- **Card color:** five presets or any custom color, with a preview and a reset
+  to the default background. Text contrast adjusts automatically.
 
-## Testing the Home Screen widget
+Saving a card color updates the current Live Activity and future sessions.
+Changing the movement mode or duration takes effect on the next session.
+The card color applies to the **Lock Screen only**: Dynamic Island has no added
+colored outline. On an iPhone without Dynamic Island, the Live Activity is
+still available on the Lock Screen.
 
-1. Run Pet Island once and configure at least one enclosure resident.
-2. Return to the Home Screen.
-3. Long-press an empty area and choose **Edit** → **Add Widget**.
-4. Search for **Pet Island**, select the medium widget, and add it.
+The system presentations use registered pet artwork and timer fonts with
+consistent sizing and ground alignment. iOS controls their rendering and update
+opportunities; they do not run the app's continuous animation loop. The pet
+rests when the activity becomes stale or the display enters its reduced-luminance
+Always-On state.
 
-iOS does not allow an app to place its own widget automatically. If Pet Island
-does not appear in the gallery, confirm that the main app was installed, the
-extension is embedded, and both targets use the same Team and App Group.
+## Home Screen widget
 
-## Testing Dynamic Island
+The medium enclosure widget shares residents, background, and care state with
+the app through an App Group. It displays timeline snapshots and short care
+reactions. **Play** opens the interactive playroom in the app.
 
-1. Run the main `PetIsland` scheme on a compatible device or Simulator.
-2. Choose a lead pet and place it in **Dynamic Island** from the app.
-3. Go to the Home Screen to see the compact presentation.
-4. Long-press the island to inspect the expanded presentation and actions.
-5. On a compatible physical device, lock the phone to verify the sleeping
-   Always-On presentation.
+To add it, launch Pet Island once, choose enclosure residents, then open the
+Home Screen widget gallery and select **Pet Island → Enclosure**. The app cannot
+place a widget on the Home Screen automatically.
 
-On an iPhone without Dynamic Island, the same Live Activity appears on the Lock
-Screen instead.
+## Build and run
 
-## Repository layout
+### Requirements
 
-```text
-PetIsland/                 Main SwiftUI application
-  App/                     App lifecycle and session controller
-  Data/                    Local persistence
-  Domain/                  Pet models and behavior
-  Features/                Collection, habitat, and playroom screens
-  Shared/                  Models shared with the extension
-PetIslandLiveActivity/     Home Screen widget and Live Activity
-PetIslandTests/            Unit tests
-SharedResources/           Shared sprite asset catalog
-Design/                    Source art and visual previews
+- macOS and Xcode with an installed iOS Simulator runtime.
+- iOS **17.0 or later**; recent simulator verification used **iOS 26.5**.
+- A compatible iPhone or simulator for Dynamic Island testing, and a physical
+  iPhone with Always-On Display to verify that behaviour on hardware.
+- No external package dependencies are required to build the iOS app.
+
+### Xcode
+
+1. Open `PetIsland.xcodeproj` and select the **PetIsland** scheme.
+2. Choose an iPhone simulator, or connect an iPhone and select it as the destination.
+3. For a physical device, select your development team under **Signing &
+   Capabilities** for both `PetIsland` and `PetIslandLiveActivity`.
+4. Confirm that both targets have access to the same App Group.
+5. Run with **Command-R**.
+
+The project currently uses these identifiers:
+
+| Target / capability | Identifier |
+| --- | --- |
+| Main app | `org.bortongo.PetIsland` |
+| Widget and Live Activity extension | `org.bortongo.PetIsland.LiveActivity` |
+| Shared App Group | `group.org.bortongo.PetIsland` |
+
+If signing with another team, use identifiers available to that team. Update
+the App Group in both entitlement files and in
+`PetIsland/Shared/PetLifeState.swift` together.
+
+The main app embeds the extension. Run the **PetIsland** scheme for normal
+testing; launching the extension scheme directly opens a widget preview flow.
+
+## Check the current features on iPhone
+
+1. Add pets, switch between the two corgi variants, and try coats and custom colors.
+2. Change the enclosure residents and scene; open the playroom and throw the ball.
+3. Start each arcade, pause it, background the app, and return to the game.
+4. Take a pet to Dynamic Island, inspect the compact and expanded views, and
+   check the Lock Screen with the display awake and in Always-On mode.
+5. Open **Island → Island setup → Card color**, save a light or dark color, and
+   verify the active Lock Screen card. Try resetting it to the default.
+6. Open **Settings → App icon**, choose an alternative, check it on the Home
+   Screen, and switch back to the original.
+7. Add the enclosure widget and check that resident and scene changes reach it.
+
+In Russian, the new settings are **Остров → Настройка острова → Цвет карточки**
+and **Настройки → Иконка приложения**.
+
+## Tests and validation
+
+Run the **PetIsland** test action with **Command-U** in Xcode. The latest verified
+suite has **138 passing tests**, including save recovery, pet placement, arcade
+rules, movement geometry, sprite registration, Live Activity color persistence
+and contrast, and alternate-icon configuration.
+
+For the full automated check, install the Python tooling dependencies and run:
+
+```sh
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r Tools/requirements-dev.txt
+bash Tools/check_project.sh
 ```
 
-## Development status and roadmap
+The script validates timer fonts, natural gaits, and the bundled lion/Cardigan frames;
+then runs the simulator tests, a Release build, and static analysis. Reports go
+to `outputs/qa/`. Set `PET_TEST_DESTINATION` to select a particular simulator,
+`PET_PYTHON` to choose a Python interpreter, or `PET_REPORT_DIR` to choose a new
+report directory. Pillow and fontTools are development-only dependencies.
 
-Completed foundations:
+These checks use only committed application resources and do not require artwork
+drafts or generation tools. Automated and simulator checks do not replace
+physical-device coverage, complete VoiceOver and Dynamic Type checks,
+minimum-supported-iOS testing, or performance measurements.
 
-- [x] SwiftUI application and shared widget extension
-- [x] App Group persistence
-- [x] Multi-pet collection and visual variants
-- [x] Configurable six-resident habitat
-- [x] Dynamic Island/Lock Screen Live Activity
-- [x] Unit tests for domain and habitat state
+## Project structure
 
-Before the first public release:
+```text
+PetIsland/
+  App/                     App lifecycle and session controller
+  Data/                    Local saves and recovery
+  Domain/                  Pet, care, and arcade rules
+  Features/                Island, collection, playroom, games, and settings
+  Shared/                  Shared models, artwork, and Live Activity payloads
+  Assets.xcassets/         App assets, default and alternate icons
+PetIslandLiveActivity/     Home Screen widget and Live Activity extension
+PetIslandTests/            Automated tests
+SharedResources/          Sprite catalog shared with the extension
+Docs/Media/               Screenshots and illustrations used by the README
+Tools/                    Resource validation and automated build checks
+```
 
-- [ ] Replace experimental widget locomotion with the Pet Moments interaction model
-- [ ] Finish real-time playroom behavior and ball physics
-- [ ] Perform real-device testing for widget, Dynamic Island, and Always-On Display
-- [ ] Complete VoiceOver, Dynamic Type, Reduce Motion, and localization QA
-- [ ] Audit every bundled sprite and third-party notice before App Store submission
-- [ ] Add screenshots, App Store metadata, and a TestFlight release checklist
+## Further development
 
-## Inspiration and attribution
-
-Pet Island is inspired by `vscode-pets`, but it is not intended to be a direct
-port. Pet behavior concepts are adapted to native Swift and the iOS lifecycle.
-Some specifically identified third-party sprite frames may be included under
-their original terms; all such material must remain documented in
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-Do not assume that a repository's source-code license automatically covers every
-image in that repository. New Pet Island characters should use original artwork
-unless the exact asset license and attribution have been verified.
-
-## Contributing
-
-Issues and pull requests are welcome while the project is in alpha. Please keep
-platform constraints explicit, add tests for behavior/state changes, and document
-the origin and license of every new visual asset.
+The next focus is device testing and polishing the existing pet, enclosure, and
+arcade experience. Pet habits, cozy objects, island finds, postcards, and a future
+way to support the author are ideas for later, not current features.
 
 ## License
 
-Pet Island source code is released under the [MIT License](LICENSE). Third-party
-materials, where present, retain their own notices and terms as listed in
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The project's source code is licensed under the [MIT License](LICENSE).

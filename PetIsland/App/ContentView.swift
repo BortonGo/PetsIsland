@@ -26,7 +26,7 @@ struct ContentView: View {
             PlayYardView(pets: pets)
         } else if ProcessInfo.processInfo.arguments.contains("-settings-preview") {
             HomeDebugHostView(showsSettings: true)
-        } else if ProcessInfo.processInfo.arguments.contains("-home-preview") {
+        } else if ProcessInfo.processInfo.arguments.contains("-home-preview") || ProcessInfo.processInfo.arguments.contains("-design-preview") {
             HomeDebugHostView()
         } else if ProcessInfo.processInfo.arguments.contains("-collection-preview") {
             PetCollectionDebugPreview()
@@ -40,7 +40,16 @@ struct ContentView: View {
 
 #if DEBUG
     fileprivate static var previewParty: [PetProfile] {
-        [
+        if ProcessInfo.processInfo.arguments.contains("-new-pets-preview") {
+            let cast: [(String, PetSpecies, PetBreed)] = [
+                ("Лев", .lion, .adultLion), ("Львица", .lion, .lioness),
+                ("Львёнок", .lion, .lionCub), ("Кардиган", .dog, .cardigan)
+            ]
+            return cast.map { name, species, breed in
+                PetProfile(id: UUID(), name: name, species: species, coat: .sunrise, createdAt: .now, breed: breed)
+            }
+        }
+        return [
             PetProfile(
                 id: UUID(), name: "Мейн-кун", species: .cat, coat: .sunrise,
                 createdAt: .now, breed: .maineCoon
@@ -70,6 +79,15 @@ struct ContentView: View {
             if controller.operation == .loading {
                 ProgressView("Preparing your island…")
                     .controlSize(.large)
+            } else if controller.operation == .loadFailed {
+                ContentUnavailableView {
+                    Label("Your island needs a moment", systemImage: "externaldrive.badge.exclamationmark")
+                } description: {
+                    Text("We couldn’t read your saved island. Your files have been kept. Try again after unlocking your iPhone.")
+                } actions: {
+                    Button("Try again") { Task { await controller.bootstrap() } }
+                        .buttonStyle(.borderedProminent)
+                }
             } else {
                 HomeView(controller: controller)
             }
@@ -90,7 +108,7 @@ struct ContentView: View {
         .onOpenURL { controller.handleDeepLink($0) }
         .fullScreenCover(
             isPresented: Binding(
-                get: { controller.operation != .loading && !controller.completedOnboarding },
+                get: { controller.operation != .loading && controller.operation != .loadFailed && !controller.completedOnboarding },
                 set: { _ in }
             )
         ) {
@@ -108,6 +126,7 @@ struct ContentView: View {
             Text(controller.alertMessage ?? "")
         }
         .preferredColorScheme(controller.settings.appearance.colorScheme)
+        .environment(\.petMinimizeMotion, controller.settings.minimizeMotion)
     }
 }
 
@@ -124,12 +143,30 @@ private extension AppAppearance {
 #if DEBUG
 private struct HomeDebugHostView: View {
     @StateObject private var controller: PetSessionController
+    @State private var preparedPreviewHabitat = false
     let showsSettings: Bool
 
     init(showsSettings: Bool = false) {
         self.showsSettings = showsSettings
         var state = PersistedAppState()
         state.completedOnboarding = true
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("-design-preview") {
+            let cat = PetProfile(id: UUID(), name: "Pixel", species: .cat, coat: .sunrise, createdAt: .now, breed: .maineCoon)
+            let fox = PetProfile(id: UUID(), name: "Лис", species: .fox, coat: .sunrise, createdAt: .now, breed: .redFox)
+            let bird = PetProfile(id: UUID(), name: "Кеша", species: .parrot, coat: .sunrise, createdAt: .now, breed: .cockatiel)
+            state.pets = [cat, fox, bird]
+            if arguments.contains("-design-crowded") {
+                state.pets = ContentView.previewParty + [fox]
+            }
+            state.activePetIDs = state.pets.map(\.id)
+        }
+        if arguments.contains("-design-dark") { state.settings.appearance = .dark }
+        if arguments.contains("-new-pets-preview") {
+            state.pets = ContentView.previewParty
+            state.activePetIDs = state.pets.map(\.id)
+        }
+        if arguments.contains("-design-light") { state.settings.appearance = .light }
         _controller = StateObject(
             wrappedValue: PetSessionController(
                 store: InMemoryPetStore(state),
@@ -142,11 +179,40 @@ private struct HomeDebugHostView: View {
         Group {
             if showsSettings {
                 SettingsView(controller: controller, showsDismissButton: false)
+            } else if controller.operation == .loadFailed {
+                ContentUnavailableView {
+                    Label("Your island needs a moment", systemImage: "externaldrive.badge.exclamationmark")
+                } description: {
+                    Text("We couldn’t read your saved island. Your files have been kept. Try again after unlocking your iPhone.")
+                } actions: {
+                    Button("Try again") { Task { await controller.bootstrap() } }
+                        .buttonStyle(.borderedProminent)
+                }
             } else {
                 HomeView(controller: controller)
             }
         }
-        .task { await controller.bootstrap() }
+        .task {
+            await controller.bootstrap()
+            let arguments = ProcessInfo.processInfo.arguments
+            preparePreviewHabitat()
+            if arguments.contains("-design-pets") { controller.selectedTab = .pets }
+            if arguments.contains("-design-arcade") { controller.selectedTab = .arcade }
+            if arguments.contains("-design-settings") { controller.selectedTab = .settings }
+        }
+        .preferredColorScheme(controller.settings.appearance.colorScheme)
+        .environment(\.petMinimizeMotion, controller.settings.minimizeMotion)
+        .onChange(of: controller.isBusy) { _, busy in
+            // Wait for all bootstrap writes before installing the QA cast.
+            if !busy { preparePreviewHabitat() }
+        }
+    }
+
+    private func preparePreviewHabitat() {
+        guard !preparedPreviewHabitat,
+              ProcessInfo.processInfo.arguments.contains("-design-preview"),
+              !controller.isBusy else { return }
+        preparedPreviewHabitat = controller.saveHabitat(theme: .meadow, residentPetIDs: controller.pets.map(\.id))
     }
 }
 
@@ -283,6 +349,18 @@ private struct PetLiveActivitySmokeHostView: View {
                 .frame(width: 80, height: 68)
             Text("Pet Live Activity smoke test")
                 .font(.title2.bold())
+            HStack {
+                Button("Light background") {
+                    Task { await updateBackground(.init(red: 0.86, green: 0.89, blue: 0.94)) }
+                }
+                Button("Dark background") {
+                    Task { await updateBackground(.init(red: 0.15, green: 0.27, blue: 0.44)) }
+                }
+                Button("Default background") {
+                    Task { await updateBackground(nil) }
+                }
+            }
+            .buttonStyle(.bordered)
             Text(status)
                 .font(.body.monospaced())
                 .multilineTextAlignment(.center)
@@ -290,6 +368,14 @@ private struct PetLiveActivitySmokeHostView: View {
         }
         .padding(24)
         .task { await startPetActivity() }
+    }
+
+    @MainActor
+    private func updateBackground(_ color: PetColorSelection?) async {
+        guard let activity else { return }
+        var state = activity.content.state
+        state.backgroundColor = color
+        await activity.update(ActivityContent(state: state, staleDate: activity.attributes.endsAt))
     }
 
     @MainActor
@@ -412,8 +498,7 @@ private struct PetCollectionDebugPreview: View {
                 populated = true
                 let party = ContentView.previewParty
                 await controller.completeOnboarding(profile: party[0])
-                _ = await controller.addPet(party[1])
-                _ = await controller.addPet(party[2])
+                for pet in party.dropFirst() { _ = await controller.addPet(pet) }
             }
     }
 }

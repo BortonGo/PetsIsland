@@ -15,6 +15,16 @@ struct PetActivityAttributes: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         var snapshot: PetSnapshot
         var lastInteraction: String?
+        var backgroundColor: PetColorSelection? = nil
+
+        var appearance: PetActivityAppearance { PetActivityAppearance(background: backgroundColor) }
+
+        func updating(snapshot: PetSnapshot, lastInteraction: String?) -> Self {
+            var updated = self
+            updated.snapshot = snapshot
+            updated.lastInteraction = lastInteraction
+            return updated
+        }
     }
 
     var sessionID: UUID
@@ -163,7 +173,7 @@ struct PetLiveActionIntent: LiveActivityIntent {
         for (index, snapshot) in snapshots.enumerated() {
             await activity.update(
                 ActivityContent(
-                    state: .init(
+                    state: activity.content.state.updating(
                         snapshot: snapshot,
                         lastInteraction: "\(action.rawValue)-\(index)"
                     ),

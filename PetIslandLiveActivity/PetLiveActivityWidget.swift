@@ -8,8 +8,8 @@ struct PetLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: PetActivityAttributes.self) { context in
             LockScreenPetView(context: context)
-                .activityBackgroundTint(Color(red: 0.07, green: 0.08, blue: 0.14))
-                .activitySystemActionForegroundColor(.white)
+                .activityBackgroundTint(context.state.appearance.backgroundColor)
+                .activitySystemActionForegroundColor(context.state.appearance.foregroundColor)
                 .widgetURL(deepLink(for: context.attributes.sessionID))
         } dynamicIsland: { context in
             DynamicIsland {
@@ -74,7 +74,6 @@ struct PetLiveActivityWidget: Widget {
                     viewport: CGSize(width: 28, height: 25)
                 )
             }
-            .keylineTint(accent(for: context.attributes.pet))
             .widgetURL(deepLink(for: context.attributes.sessionID))
         }
     }
@@ -139,16 +138,22 @@ private struct CompactTimerPet: View {
                 for: context.attributes.pet,
                 mode: context.attributes.motionMode
             ) {
-                LiveTimerGlyphPet(
+                PetTimerGlyph(
                     timerStart: context.attributes.startedAt,
+                    timerEnd: context.attributes.endsAt,
                     fontName: fontName,
-                    viewport: viewport
+                    viewport: viewport,
+                    direction: snapshot.direction
                 )
+                .petCoat(species: context.attributes.pet.species,
+                         coat: context.attributes.pet.coat, customColor: context.attributes.pet.customColor)
             } else {
                 compactArtwork(pose: snapshot.pose, step: 0)
             }
         }
         .frame(width: viewport.width, height: viewport.height)
+        .contentTransition(.identity)
+        .transaction { $0.animation = nil }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(
             Text(verbatim: context.attributes.pet.name) + Text(", pet session")
@@ -166,32 +171,6 @@ private struct CompactTimerPet: View {
             step: step,
             animatesMotion: false
         )
-    }
-}
-
-/// The timer text may contain hours and separators, but only its final glyph
-/// is placed inside the compact viewport. All preceding glyphs remain clipped.
-private struct LiveTimerGlyphPet: View {
-    let timerStart: Date
-    let fontName: String
-    let viewport: CGSize
-
-    var body: some View {
-        // The generated sbix font contains a native 108 px bitmap strike.
-        // Rendering it at 36 pt on a @3x Dynamic Island screen selects that
-        // strike without vectorizing or independently moving sprite pixels.
-        let glyphSize: CGFloat = 36
-
-        Text(timerStart, style: .timer)
-            .font(.custom(fontName, fixedSize: glyphSize))
-            .lineLimit(1)
-            .frame(width: glyphSize * 9, height: glyphSize)
-            .multilineTextAlignment(.trailing)
-            .offset(x: -glyphSize * 4)
-            .offset(y: -1)
-            .environment(\.locale, Locale(identifier: "en_US_POSIX"))
-            .frame(width: viewport.width, height: viewport.height)
-            .clipped()
     }
 }
 
@@ -216,7 +195,9 @@ private struct LockScreenPetView: View {
                 Label(context.attributes.pet.name, systemImage: "pawprint.fill")
                     .font(.headline)
                     .lineLimit(1)
-                    .foregroundStyle(accent(for: context.attributes.pet))
+                    .foregroundStyle(context.state.backgroundColor == nil
+                        ? accent(for: context.attributes.pet)
+                        : context.state.appearance.foregroundColor)
                 Spacer()
                 Label(
                     isLuminanceReduced || context.isStale
@@ -225,7 +206,7 @@ private struct LockScreenPetView: View {
                     systemImage: symbol(for: resolvedSnapshot.pose)
                 )
                 .font(.caption.bold())
-                .foregroundStyle(.secondary)
+                .foregroundStyle(context.state.appearance.foregroundColor)
             }
             LockScreenTimerPetTrack(
                 context: context,
@@ -277,7 +258,7 @@ private struct LockScreenTimerPetTrack: View {
 
             ZStack(alignment: .bottom) {
                 Capsule()
-                    .fill(.white.opacity(context.isStale ? 0.07 : 0.12))
+                    .fill(context.state.appearance.foregroundColor.opacity(context.isStale ? 0.07 : 0.12))
                     .frame(height: 4)
                     .offset(y: -7)
 
@@ -310,17 +291,22 @@ private struct LockScreenTimerPet: View {
                 for: context.attributes.pet,
                 mode: context.attributes.motionMode
             ) {
-                LockScreenTimerGlyphPet(
+                PetTimerGlyph(
                     timerStart: context.attributes.startedAt,
                     timerEnd: context.attributes.endsAt,
                     fontName: fontName,
-                    viewport: viewport
+                    viewport: viewport,
+                    direction: snapshot.direction
                 )
+                .petCoat(species: context.attributes.pet.species,
+                         coat: context.attributes.pet.coat, customColor: context.attributes.pet.customColor)
             } else {
                 artwork(pose: snapshot.pose)
             }
         }
         .frame(width: viewport.width, height: viewport.height)
+        .contentTransition(.identity)
+        .transaction { $0.animation = nil }
     }
 
     private func artwork(pose: PetPose) -> some View {
@@ -334,41 +320,6 @@ private struct LockScreenTimerPet: View {
             step: 0,
             animatesMotion: false
         )
-    }
-}
-
-private struct LockScreenTimerGlyphPet: View {
-    let timerStart: Date
-    let timerEnd: Date
-    let fontName: String
-    let viewport: CGSize
-
-    var body: some View {
-        let glyphSize = viewport.height
-        // WidgetKit may keep the last rendered Live Activity snapshot past
-        // staleDate. Keep the invisible digit timer valid during that window
-        // so it never replaces the pet glyph with its "--" placeholder.
-        let renderingGracePeriod: TimeInterval = 24 * 60 * 60
-        let validEnd = max(
-            timerEnd.addingTimeInterval(renderingGracePeriod),
-            timerStart.addingTimeInterval(1)
-        )
-
-        Text(
-            timerInterval: timerStart...validEnd,
-            countsDown: true,
-            showsHours: true
-        )
-            .font(.custom(fontName, fixedSize: glyphSize))
-            .unredacted()
-            .lineLimit(1)
-            .frame(width: glyphSize * 9, height: glyphSize)
-            .multilineTextAlignment(.trailing)
-            .offset(x: -glyphSize * 4)
-            .offset(y: -1)
-            .environment(\.locale, Locale(identifier: "en_US_POSIX"))
-            .frame(width: viewport.width, height: viewport.height)
-            .clipped()
     }
 }
 
@@ -416,6 +367,7 @@ private enum LiveTimerPetFontRegistry {
         case .dog:
             switch pet.breed ?? .shepherd {
             case .corgi: "PetIslandTimerDogCorgi"
+            case .cardigan: "PetIslandTimerDogCardigan"
             case .doberman: "PetIslandTimerDogDoberman"
             case .bullTerrier: "PetIslandTimerDogBullTerrier"
             default: "PetIslandTimerDogShepherd"
@@ -442,6 +394,12 @@ private enum LiveTimerPetFontRegistry {
             pet.breed == .rockhopper
                 ? "PetIslandTimerPenguinRockhopper"
                 : "PetIslandTimerPenguinClassic"
+        case .lion:
+            switch pet.breed ?? .adultLion {
+            case .lioness: "PetIslandTimerLioness"
+            case .lionCub: "PetIslandTimerLionCub"
+            default: "PetIslandTimerLionAdult"
+            }
         }
     }
 }

@@ -6,6 +6,7 @@ enum PetSpecies: String, Codable, CaseIterable, Identifiable, Hashable, Sendable
     case fox
     case parrot
     case penguin
+    case lion
 
     var id: String { rawValue }
 
@@ -20,6 +21,7 @@ enum PetSpecies: String, Codable, CaseIterable, Identifiable, Hashable, Sendable
 enum PetBreed: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
     case shepherd
     case corgi
+    case cardigan
     case doberman
     case bullTerrier
 
@@ -39,20 +41,36 @@ enum PetBreed: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
     case classicPenguin
     case rockhopper
 
+    case adultLion
+    case lioness
+    case lionCub
+
     var id: String { rawValue }
 
     static func available(for species: PetSpecies) -> [PetBreed] {
         switch species {
-        case .dog: [.shepherd, .corgi, .doberman, .bullTerrier]
+        case .dog: [.shepherd, .corgi, .cardigan, .doberman, .bullTerrier]
         case .cat: [.classicCat, .britishShorthair, .maineCoon, .siamese]
         case .fox: [.redFox, .arcticFox]
         case .parrot: [.classicParrot, .cockatiel, .budgie, .macaw]
         case .penguin: [.classicPenguin, .rockhopper]
+        case .lion: [.adultLion, .lioness, .lionCub]
         }
     }
 
     static func defaultVariant(for species: PetSpecies) -> PetBreed? {
         available(for: species).first
+    }
+
+    /// Registered artwork shared by the enclosure, activities and arcades.
+    var companionArtworkToken: String? {
+        switch self {
+        case .adultLion: "lion_adult"
+        case .lioness: "lioness"
+        case .lionCub: "lion_cub"
+        case .cardigan: "dog_cardigan"
+        default: nil
+        }
     }
 }
 
@@ -128,6 +146,31 @@ struct PetColorSelection: Codable, Equatable, Hashable, Sendable {
     }
 }
 
+/// Shared by the settings preview and the Live Activity extension.
+struct PetActivityAppearance {
+    static let defaultBackground = PetColorSelection(red: 0.07, green: 0.08, blue: 0.14)
+    let background: PetColorSelection
+
+    init(background: PetColorSelection?) {
+        self.background = background ?? Self.defaultBackground
+    }
+
+    var relativeLuminance: Double {
+        func linear(_ channel: Double) -> Double {
+            let value = min(max(channel, 0), 1)
+            return value <= 0.04045 ? value / 12.92 : pow((value + 0.055) / 1.055, 2.4)
+        }
+        return 0.2126 * linear(background.red)
+            + 0.7152 * linear(background.green)
+            + 0.0722 * linear(background.blue)
+    }
+
+    var usesDarkText: Bool {
+        // Pick whichever of black or white gives the higher contrast ratio.
+        (relativeLuminance + 0.05) / 0.05 >= 1.05 / (relativeLuminance + 0.05)
+    }
+}
+
 struct PetProfile: Codable, Equatable, Hashable, Identifiable, Sendable {
     var id: UUID
     var name: String
@@ -152,6 +195,7 @@ struct PetProfile: Codable, Equatable, Hashable, Identifiable, Sendable {
         case .fox: .calm
         case .parrot: .curious
         case .penguin: .playful
+        case .lion: .calm
         }
     }
 
@@ -246,9 +290,11 @@ struct AppSettings: Codable, Equatable, Sendable {
     var minimizeMotion = false
     var dynamicIslandMotionMode: DynamicIslandMotionMode = .runSleep
     var appearance: AppAppearance = .system
+    var liveActivityBackgroundColor: PetColorSelection? = nil
 
     private enum CodingKeys: String, CodingKey {
         case defaultSessionMinutes, hapticsEnabled, minimizeMotion, dynamicIslandMotionMode, appearance
+        case liveActivityBackgroundColor
     }
 
     init(
@@ -256,18 +302,20 @@ struct AppSettings: Codable, Equatable, Sendable {
         hapticsEnabled: Bool = true,
         minimizeMotion: Bool = false,
         dynamicIslandMotionMode: DynamicIslandMotionMode = .runSleep,
-        appearance: AppAppearance = .system
+        appearance: AppAppearance = .system,
+        liveActivityBackgroundColor: PetColorSelection? = nil
     ) {
-        self.defaultSessionMinutes = defaultSessionMinutes
+        self.defaultSessionMinutes = min(max(defaultSessionMinutes, 10), 480)
         self.hapticsEnabled = hapticsEnabled
         self.minimizeMotion = minimizeMotion
         self.dynamicIslandMotionMode = dynamicIslandMotionMode
         self.appearance = appearance
+        self.liveActivityBackgroundColor = liveActivityBackgroundColor
     }
 
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        defaultSessionMinutes = try values.decodeIfPresent(Int.self, forKey: .defaultSessionMinutes) ?? 20
+        defaultSessionMinutes = min(max(try values.decodeIfPresent(Int.self, forKey: .defaultSessionMinutes) ?? 20, 10), 480)
         hapticsEnabled = try values.decodeIfPresent(Bool.self, forKey: .hapticsEnabled) ?? true
         minimizeMotion = try values.decodeIfPresent(Bool.self, forKey: .minimizeMotion) ?? false
         dynamicIslandMotionMode = try values.decodeIfPresent(
@@ -275,6 +323,7 @@ struct AppSettings: Codable, Equatable, Sendable {
             forKey: .dynamicIslandMotionMode
         ) ?? .runSleep
         appearance = try values.decodeIfPresent(AppAppearance.self, forKey: .appearance) ?? .system
+        liveActivityBackgroundColor = try values.decodeIfPresent(PetColorSelection.self, forKey: .liveActivityBackgroundColor)
     }
 }
 
@@ -286,6 +335,7 @@ struct PersistedAppState: Codable, Equatable, Sendable {
     var pets: [PetProfile]
     /// Ordered identifiers. The first pet is the lead pet shown in compact UI.
     var activePetIDs: [UUID]
+    var dismissedActivitySessionID: UUID? = nil
     var activeSession: PetSession?
     var history: PetHistory
     var settings: AppSettings
@@ -343,6 +393,9 @@ struct PersistedAppState: Codable, Equatable, Sendable {
             activePetIDs = [firstPetID]
         }
         activePetIDs = Array(activePetIDs.prefix(Self.maximumActivePets))
+        if let session = activeSession, !knownPetIDs.contains(session.petID) {
+            activeSession = nil
+        }
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -351,6 +404,7 @@ struct PersistedAppState: Codable, Equatable, Sendable {
         case pets
         case activePetIDs
         case activeSession
+        case dismissedActivitySessionID
         case history
         case settings
         case completedOnboarding
@@ -361,6 +415,7 @@ struct PersistedAppState: Codable, Equatable, Sendable {
         let decodedVersion = try container.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
 
         schemaVersion = decodedVersion <= 1 ? Self.schemaVersion : decodedVersion
+        dismissedActivitySessionID = try container.decodeIfPresent(UUID.self, forKey: .dismissedActivitySessionID)
         activeSession = try container.decodeIfPresent(PetSession.self, forKey: .activeSession)
         history = try container.decodeIfPresent(PetHistory.self, forKey: .history) ?? PetHistory()
         settings = try container.decodeIfPresent(AppSettings.self, forKey: .settings) ?? AppSettings()
@@ -388,6 +443,7 @@ struct PersistedAppState: Codable, Equatable, Sendable {
         try container.encode(Self.schemaVersion, forKey: .schemaVersion)
         try container.encode(pets, forKey: .pets)
         try container.encode(activePetIDs, forKey: .activePetIDs)
+        try container.encodeIfPresent(dismissedActivitySessionID, forKey: .dismissedActivitySessionID)
         try container.encodeIfPresent(activeSession, forKey: .activeSession)
         try container.encode(history, forKey: .history)
         try container.encode(settings, forKey: .settings)

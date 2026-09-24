@@ -8,8 +8,12 @@ struct ThrowBallIntent: AppIntent {
     static let openAppWhenRun = false
 
     func perform() async throws -> some IntentResult {
+        let now = Date.now
+        try PetHabitatStore.update { habitat in
+            habitat.playWithResidents(at: now)
+        }
         try PetLifeStore.update { state in
-            state.throwBall(at: .now)
+            state.throwBall(at: now)
         }
         WidgetCenter.shared.reloadTimelines(ofKind: PetEnclosureWidget.kind)
         return .result()
@@ -131,34 +135,23 @@ private struct PetEnclosureView: View {
 
                     ForEach(entry.petProjections) { projection in
                         if let resident = entry.habitat.residents.first(where: { $0.id == projection.petID }) {
-                            WidgetPetArtwork(
-                                profile: resident.profile,
+                            PetArtwork(
+                                species: resident.profile.species,
+                                coat: resident.profile.coat,
+                                customColor: resident.profile.customColor,
+                                breed: resident.profile.resolvedBreed,
                                 pose: effectivePose(for: projection),
-                                direction: effectiveDirection(for: projection),
-                                framePhase: Double(effectiveStep(for: projection))
+                                direction: projection.direction,
+                                step: projection.spriteStep,
+                                animatesMotion: false
                             )
                             .frame(width: petSize, height: petSize * 0.86)
                             .shadow(color: .black.opacity(0.24), radius: 2, y: 3)
                             .position(
-                                x: horizontalPosition(effectivePosition(for: projection), in: proxy.size.width, inset: 35),
-                                y: min(max(effectiveVerticalPosition(for: projection) * proxy.size.height, 58), proxy.size.height - 28)
+                                x: horizontalPosition(projection.position, in: proxy.size.width, inset: 35),
+                                y: min(max(projection.verticalPosition * proxy.size.height, 58), proxy.size.height - 28)
                             )
-                            .animation(
-                                .linear(duration: PetLifeEngine.widgetMotionSegmentDuration),
-                                value: effectivePosition(for: projection)
-                            )
-                            .animation(
-                                .easeInOut(duration: PetLifeEngine.widgetMotionSegmentDuration),
-                                value: effectiveVerticalPosition(for: projection)
-                            )
-                            .animation(
-                                .easeInOut(duration: 0.24),
-                                value: effectivePose(for: projection)
-                            )
-                            .animation(
-                                .linear(duration: PetLifeEngine.widgetMotionSegmentDuration),
-                                value: effectiveStep(for: projection)
-                            )
+                            .contentTransition(.identity)
                             .zIndex(Double(projection.depth + 2))
                         }
                     }
@@ -269,17 +262,17 @@ private struct PetEnclosureView: View {
             VStack(alignment: .leading, spacing: 1) {
                 Text(headerTitle)
                     .font(.system(size: 14, weight: .black, design: .rounded))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(themePalette.foreground)
                     .lineLimit(1)
                 Label(activityLabel, systemImage: activitySymbol)
                     .font(.system(size: 9, weight: .bold, design: .rounded))
-                    .foregroundStyle(.white.opacity(0.82))
+                    .foregroundStyle(themePalette.foreground.opacity(0.82))
                     .lineLimit(1)
             }
             .shadow(color: .black.opacity(0.18), radius: 1, y: 1)
 
             Spacer(minLength: 4)
-            VitalsStrip(vitals: presentation.vitals)
+            VitalsStrip(vitals: entry.habitat.averageVitals)
         }
     }
 
@@ -293,6 +286,14 @@ private struct PetEnclosureView: View {
                 .background(.black.opacity(0.24), in: Capsule())
 
             Spacer()
+
+            Link(destination: URL(string: "petisland://playroom")!) {
+                Label("Play", systemImage: "play.fill")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(7)
+                    .background(.black.opacity(0.24), in: Capsule())
+            }
 
             Button(intent: ThrowBallIntent()) {
                 Label("Ball", systemImage: "tennisball.fill")
@@ -380,45 +381,17 @@ private struct PetEnclosureView: View {
     private var headerTitle: String {
         let residents = entry.habitat.residents
         if residents.count == 1 { return residents[0].profile.name }
-        return "\(residents.count) friends"
+        return String.localizedStringWithFormat(String(localized: "%lld friends"), residents.count)
     }
 
     private func effectivePose(for projection: HabitatPetProjection) -> PetPose {
-        guard presentation.activity == .playing else { return projection.pose }
-        if residentProfile(for: projection)?.species == .parrot { return .fly }
-        return presentation.pose
-    }
-
-    private func effectiveDirection(for projection: HabitatPetProjection) -> PetDirection {
-        guard presentation.activity == .playing else { return projection.direction }
-        return presentation.direction
-    }
-
-    private func effectivePosition(for projection: HabitatPetProjection) -> Double {
-        guard presentation.activity == .playing else { return projection.position }
-        let index = Double(entry.petProjections.firstIndex(where: { $0.id == projection.id }) ?? 0)
-        let trailingOffset = index * 0.09
-        let position = presentation.direction == .right
-            ? presentation.position - trailingOffset
-            : presentation.position + trailingOffset
-        return min(max(position, 0.08), 0.92)
-    }
-
-    private func effectiveVerticalPosition(for projection: HabitatPetProjection) -> Double {
-        guard presentation.activity == .playing else { return projection.verticalPosition }
-        let jumpOffset = presentation.lane - 0.75
-        let flightOffset = residentProfile(for: projection)?.species == .parrot ? -0.08 : 0
-        return min(max(projection.verticalPosition + jumpOffset + flightOffset, 0.38), 0.88)
-    }
-
-    private func effectiveStep(for projection: HabitatPetProjection) -> Int {
-        guard presentation.activity == .playing else { return projection.spriteStep }
-        let phaseOffset = (entry.petProjections.firstIndex(where: { $0.id == projection.id }) ?? 0) * 2
-        return presentation.spriteStep + phaseOffset
-    }
-
-    private func residentProfile(for projection: HabitatPetProjection) -> PetProfile? {
-        entry.habitat.residents.first(where: { $0.id == projection.petID })?.profile
+        // WidgetKit displays persisted moments. A static running frame moved
+        // across the widget looks like skating and cannot guarantee a gait.
+        if presentation.ball != nil { return .play }
+        switch projection.pose {
+        case .walk, .run, .fly: return .idle
+        default: return projection.pose
+        }
     }
 
     private var themePalette: WidgetHabitatPalette {
@@ -426,165 +399,33 @@ private struct PetEnclosureView: View {
     }
 }
 
-/// SwiftUI interpolates `framePhase` while the timeline entry transitions.
-/// Rounding that value selects successive pixel-art frames, so the legs cycle
-/// during the same system animation that moves the pet across the enclosure.
-private struct WidgetPetArtwork: View, Animatable {
-    let profile: PetProfile
-    let pose: PetPose
-    let direction: PetDirection
-    var framePhase: Double
-
-    var animatableData: Double {
-        get { framePhase }
-        set { framePhase = newValue }
-    }
-
-    var body: some View {
-        sprite
-            .contentTransition(.identity)
-            .offset(x: strideOffsetX, y: strideOffsetY)
-    }
-
-    @ViewBuilder
-    private var sprite: some View {
-        if let atlas = WidgetSpriteAtlasLibrary.descriptor(for: profile, pose: pose) {
-            WidgetAtlasSprite(
-                profile: profile,
-                direction: direction,
-                atlas: atlas,
-                framePhase: framePhase
-            )
-        } else {
-            PetArtwork(
-                species: profile.species,
-                coat: profile.coat,
-                customColor: profile.customColor,
-                breed: profile.resolvedBreed,
-                pose: pose,
-                direction: direction,
-                step: Int(floor(framePhase)),
-                animatesMotion: false
-            )
-        }
-    }
-
-    private var isStridePose: Bool {
-        pose == .run || pose == .walk || pose == .fly
-    }
-
-    /// Integer-pixel contact motion preserves the crisp sprite while making
-    /// each planted foot produce a short, visible push instead of a float.
-    private var strideOffsetY: CGFloat {
-        guard isStridePose else { return 0 }
-        let contact = abs(sin(framePhase * .pi / 2))
-        return -round(contact * (pose == .fly ? 3 : 2))
-    }
-
-    private var strideOffsetX: CGFloat {
-        guard isStridePose else { return 0 }
-        let push = round(sin(framePhase * .pi / 2))
-        return direction == .right ? push : -push
-    }
-}
-
-private struct WidgetSpriteAtlasDescriptor {
-    let assetName: String
-    let frameCount: Int
-}
-
-/// All movement frames live in one bitmap. WidgetKit therefore sees one stable
-/// image node while SwiftUI interpolates only numeric crop coordinates.
-private enum WidgetSpriteAtlasLibrary {
-    static func descriptor(
-        for profile: PetProfile,
-        pose: PetPose
-    ) -> WidgetSpriteAtlasDescriptor? {
-        guard pose == .run || pose == .walk || pose == .fly else { return nil }
-
-        return switch (profile.species, profile.resolvedBreed) {
-        case (.dog, .shepherd): .init(assetName: "widget_atlas_dog_shepherd_run", frameCount: 6)
-        case (.dog, .corgi): .init(assetName: "widget_atlas_dog_corgi_run", frameCount: 4)
-        case (.dog, .doberman): .init(assetName: "widget_atlas_dog_doberman_run", frameCount: 4)
-        case (.dog, .bullTerrier): .init(assetName: "widget_atlas_dog_bull_terrier_run", frameCount: 4)
-        case (.cat, .classicCat): .init(assetName: "widget_atlas_cat_classic_run", frameCount: 4)
-        case (.cat, .britishShorthair): .init(assetName: "widget_atlas_cat_british_run", frameCount: 4)
-        case (.cat, .maineCoon): .init(assetName: "widget_atlas_cat_maine_coon_run", frameCount: 4)
-        case (.cat, .siamese): .init(assetName: "widget_atlas_cat_siamese_run", frameCount: 4)
-        case (.fox, .redFox): .init(assetName: "widget_atlas_fox_red_run", frameCount: 4)
-        case (.fox, .arcticFox): .init(assetName: "widget_atlas_fox_arctic_run", frameCount: 4)
-        case (.parrot, .classicParrot): .init(assetName: "widget_atlas_parrot_classic_fly", frameCount: 8)
-        case (.parrot, .cockatiel): .init(assetName: "widget_atlas_parrot_cockatiel_fly", frameCount: 8)
-        case (.parrot, .budgie): .init(assetName: "widget_atlas_parrot_budgie_fly", frameCount: 8)
-        case (.parrot, .macaw): .init(assetName: "widget_atlas_parrot_macaw_fly", frameCount: 8)
-        case (.penguin, .classicPenguin): .init(assetName: "widget_atlas_penguin_classic_run", frameCount: 4)
-        case (.penguin, .rockhopper): .init(assetName: "widget_atlas_penguin_rockhopper_run", frameCount: 4)
-        default: nil
-        }
-    }
-}
-
-private struct WidgetAtlasSprite: View {
-    let profile: PetProfile
-    let direction: PetDirection
-    let atlas: WidgetSpriteAtlasDescriptor
-    let framePhase: Double
-
-    var body: some View {
-        atlasCanvas
-            .overlay {
-                if let customColor = profile.customColor {
-                    Color(
-                        red: customColor.red,
-                        green: customColor.green,
-                        blue: customColor.blue
-                    )
-                    .blendMode(.color)
-                    .opacity(0.58)
-                    .mask(atlasCanvas)
-                }
-            }
-            .scaleEffect(x: direction == .right ? 1 : -1, y: 1)
-            .aspectRatio(1.25, contentMode: .fit)
-            .compositingGroup()
-            .accessibilityHidden(true)
-    }
-
-    private var atlasCanvas: some View {
-        Canvas(opaque: false, colorMode: .nonLinear, rendersAsynchronously: false) { context, size in
-            let rawFrame = Int(floor(framePhase))
-            let frame = ((rawFrame % atlas.frameCount) + atlas.frameCount) % atlas.frameCount
-            let visibleRect = CGRect(origin: .zero, size: size)
-            context.clip(to: Path(visibleRect))
-            context.draw(
-                Image(atlas.assetName).interpolation(.none),
-                in: CGRect(
-                    x: -CGFloat(frame) * size.width,
-                    y: 0,
-                    width: size.width * CGFloat(atlas.frameCount),
-                    height: size.height
-                )
-            )
-        }
-    }
-}
-
 private struct WidgetHabitatPalette {
     let sky: [Color]
     let ground: Color
     let light: Color
+    var foreground: Color = .white
 
     static func palette(for theme: HabitatTheme) -> WidgetHabitatPalette {
         switch theme {
         case .meadow:
-            WidgetHabitatPalette(sky: [.blue.opacity(0.8), .mint.opacity(0.55)], ground: .green, light: .yellow)
+            WidgetHabitatPalette(sky: [Color(.secondarySystemBackground), Color(.systemGray5)], ground: Color(.systemGray3), light: Color(.systemGray4), foreground: .primary)
         case .cozyRoom:
-            WidgetHabitatPalette(sky: [.orange.opacity(0.82), .brown.opacity(0.62)], ground: .brown, light: .yellow)
+            WidgetHabitatPalette(sky: [Color(.secondarySystemBackground), Color(.systemGray5)], ground: Color(red: 0.57, green: 0.53, blue: 0.49), light: Color(.systemGray4), foreground: .primary)
         case .moonlitGarden:
-            WidgetHabitatPalette(sky: [.indigo.opacity(0.94), .purple.opacity(0.7)], ground: Color(red: 0.08, green: 0.3, blue: 0.23), light: .white)
+            WidgetHabitatPalette(sky: [Color(red: 0.15, green: 0.17, blue: 0.23), Color(red: 0.22, green: 0.24, blue: 0.31)], ground: Color(red: 0.3, green: 0.33, blue: 0.39), light: .white)
         case .arcticCove:
-            WidgetHabitatPalette(sky: [.cyan.opacity(0.72), .white], ground: Color(red: 0.7, green: 0.88, blue: 0.93), light: .white)
+            WidgetHabitatPalette(sky: [Color(.secondarySystemBackground), Color(.systemGray6)], ground: Color(.systemGray4), light: .white, foreground: .primary)
         case .desertCamp:
+            WidgetHabitatPalette(sky: [Color(.secondarySystemBackground), Color(.systemGray5)], ground: Color(red: 0.6, green: 0.57, blue: 0.52), light: Color(.systemGray4), foreground: .primary)
+        case .sunnyMeadow:
+            WidgetHabitatPalette(sky: [.blue.opacity(0.8), .mint.opacity(0.55)], ground: .green, light: .yellow)
+        case .warmRoom:
+            WidgetHabitatPalette(sky: [.orange.opacity(0.82), .brown.opacity(0.62)], ground: .brown, light: .yellow)
+        case .starryNight:
+            WidgetHabitatPalette(sky: [.indigo.opacity(0.94), .purple.opacity(0.7)], ground: Color(red: 0.08, green: 0.3, blue: 0.23), light: .white)
+        case .snowyCove:
+            WidgetHabitatPalette(sky: [.cyan.opacity(0.72), .white], ground: Color(red: 0.7, green: 0.88, blue: 0.93), light: .white)
+        case .sunsetDunes:
             WidgetHabitatPalette(sky: [.orange.opacity(0.86), .yellow.opacity(0.64)], ground: Color(red: 0.68, green: 0.38, blue: 0.17), light: .yellow)
         }
     }

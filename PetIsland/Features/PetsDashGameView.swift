@@ -3,7 +3,7 @@ import SwiftUI
 struct PetsDashGameView: View {
     let pet: PetProfile
     let highScore: Int
-    let onFinish: (Int) async -> ArcadePayout?
+    let onFinish: (Int, UUID) async -> ArcadePayout?
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
@@ -12,11 +12,14 @@ struct PetsDashGameView: View {
     @State private var payout: ArcadePayout?
     @State private var isSavingResult = false
     @State private var didSaveResult = false
+    @State private var runID = UUID()
+    @State private var isPaused = false
+    @State private var didHandleSwipe = false
 
     var body: some View {
         GeometryReader { proxy in
-            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: scenePhase != .active)) { timeline in
-                let animationFrame = frame(at: timeline.date)
+            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: scenePhase != .active || isPaused || engine.phase != .playing)) { timeline in
+                let animationFrame = engine.animationFrame
 
                 ZStack {
                     PetsDashTrack(progress: engine.trackProgress)
@@ -27,21 +30,34 @@ struct PetsDashGameView: View {
                     }
 
                     player(frame: animationFrame, in: proxy.size)
-                        .zIndex(2)
+                        .zIndex(Double(PetsDashEngine.playerProgress))
 
-                    gameHUD(topInset: proxy.safeAreaInsets.top)
+                    gameHUD(insets: proxy.safeAreaInsets)
+                        .disabled(isPaused)
+                        .accessibilityHidden(isPaused)
                         .zIndex(4)
 
+                    if isPaused {
+                        GamePausePanel(safeArea: proxy.safeAreaInsets) {
+                            lastTick = nil
+                            isPaused = false
+                        } onExit: { dismiss() }
+                        .zIndex(100)
+                    }
                     if engine.phase == .ready {
-                        startOverlay(size: proxy.size, frame: animationFrame)
+                        GamePanelViewport(safeArea: proxy.safeAreaInsets) {
+                            startOverlay(size: proxy.size, frame: animationFrame)
+                        }
                             .zIndex(5)
                     } else if engine.phase == .gameOver {
-                        gameOverOverlay(size: proxy.size)
+                        GamePanelViewport(safeArea: proxy.safeAreaInsets) {
+                            gameOverOverlay(size: proxy.size)
+                        }
                             .zIndex(5)
                     }
                 }
                 .contentShape(Rectangle())
-                .gesture(swipeGesture)
+                .gesture(swipeGesture, including: engine.phase == .playing && !isPaused ? .all : .subviews)
                 .onChange(of: timeline.date) { oldDate, newDate in
                     tick(from: oldDate, to: newDate, size: proxy.size)
                 }
@@ -55,136 +71,106 @@ struct PetsDashGameView: View {
         .ignoresSafeArea()
         .persistentSystemOverlays(.hidden)
         .onChange(of: scenePhase) { _, phase in
-            if phase != .active { lastTick = nil }
+            if phase != .active {
+                lastTick = nil
+                didHandleSwipe = false
+                if engine.phase == .playing { isPaused = true }
+            }
         }
     }
 
     private func player(frame: Int, in size: CGSize) -> some View {
-        PetsDashPlayerArtwork(pet: pet, frame: frame)
-            .frame(width: 118, height: 118)
-            .scaleEffect(x: engine.isJumping ? 0.98 : 1, y: engine.isJumping ? 1.03 : 1)
-            .position(
-                x: PetsDashLayout.laneX(engine.lane, progress: PetsDashEngine.playerProgress, in: size),
-                y: PetsDashLayout.playerY(in: size) - engine.jumpHeight * 150
-            )
-            .animation(.spring(response: 0.22, dampingFraction: 0.72), value: engine.lane)
-            .transaction { transaction in
-                if engine.lane == engine.previousLane { transaction.animation = nil }
+        let x = PetsDashLayout.laneX(engine.lanePosition, progress: PetsDashEngine.playerProgress, in: size)
+        let ground = PetsDashLayout.playerY(in: size)
+        let lift = engine.jumpHeight * 160
+        return ZStack {
+            Ellipse()
+                .fill(ArcadePalette.ink.opacity(0.24 - Double(engine.jumpHeight) * 0.16))
+                .frame(width: 52 - engine.jumpHeight * 28, height: 14 - engine.jumpHeight * 5)
+                .position(x: x, y: ground + 2)
+            PetsDashPlayerArtwork(pet: pet, frame: pet.species == .parrot ? Int(engine.elapsedTime * 12) : (engine.isJumping ? 1 : frame))
+                .frame(width: 108, height: 108)
+                .rotationEffect(.degrees(Double(CGFloat(engine.lane) - engine.lanePosition) * 8), anchor: .bottom)
+                // All rear sprites share a 160 px canvas and a 150 px foot line.
+                .position(x: x, y: ground - 47.25 - lift)
+            let age = engine.elapsedTime - engine.lastCoinTime
+            if age >= 0, age < 0.5 {
+                Text(verbatim: "+50")
+                    .font(.system(.subheadline, design: .rounded).bold())
+                    .foregroundStyle(ArcadePalette.ink)
+                    .padding(.horizontal, 8).padding(.vertical, 4)
+                    .background(ArcadePalette.gold, in: Capsule())
+                    .opacity(1 - age / 0.5)
+                    .position(x: x + 38, y: ground - 85 - CGFloat(age * 45))
+                    .accessibilityHidden(true)
             }
-            .shadow(color: .black.opacity(0.22), radius: 5, y: 5)
-            .accessibilityLabel(
-                pet.species == .parrot
-                    ? "\(pet.name), flying in lane \(engine.lane + 1)"
-                    : "\(pet.name), running in lane \(engine.lane + 1)"
-            )
+        }
+        .transaction { $0.animation = nil }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            pet.species == .parrot
+                ? "\(pet.name), flying in lane \(engine.lane + 1)"
+                : "\(pet.name), running in lane \(engine.lane + 1)"
+        )
     }
 
-    @ViewBuilder
     private func dashObject(_ object: PetsDashObject, in size: CGSize) -> some View {
         let scale = PetsDashLayout.scale(for: object.progress)
-        let x = PetsDashLayout.laneX(object.lane, progress: object.progress, in: size)
+        let x = PetsDashLayout.laneX(CGFloat(object.lane), progress: object.progress, in: size)
         let y = PetsDashLayout.y(for: object.progress, in: size)
-
-        Group {
-            switch object.kind {
-            case .barrier:
-                PetsDashBarrier()
-                    .frame(width: 76, height: 66)
-            case .rock:
-                PetsDashRock()
-                    .frame(width: 72, height: 54)
-            case .coin:
-                ZStack {
-                    Circle().fill(.yellow)
-                    Circle().stroke(.orange, lineWidth: 5)
-                    Image(systemName: "pawprint.fill")
-                        .font(.system(size: 23, weight: .black))
-                        .foregroundStyle(.orange)
+        return ZStack {
+            Ellipse().fill(ArcadePalette.ink.opacity(object.kind == .coin ? 0.10 : 0.22))
+                .frame(width: 60 * scale, height: 13 * scale)
+                .position(x: x, y: y + 2 * scale)
+            Group {
+                switch object.kind {
+                case .barrier:
+                    PetsDashBarrier().frame(width: 76, height: 60)
+                case .rock:
+                    PetsDashRock().frame(width: 68, height: 48)
+                case .coin:
+                    ZStack {
+                        Circle().fill(ArcadePalette.gold)
+                        Circle().stroke(Color(red: 0.75, green: 0.44, blue: 0.16), lineWidth: 3)
+                        Circle().stroke(.white.opacity(0.65), lineWidth: 2).padding(5)
+                        Image(systemName: "pawprint.fill")
+                            .font(.system(size: 18, weight: .black))
+                            .foregroundStyle(Color(red: 0.68, green: 0.39, blue: 0.13))
+                    }
+                    .frame(width: 37, height: 37)
+                    .scaleEffect(x: 0.82 + 0.18 * abs(cos(engine.elapsedTime * 4)))
                 }
-                .frame(width: 54, height: 54)
-                .rotation3DEffect(
-                    .degrees(Double(engine.trackProgress * 720)),
-                    axis: (x: 0, y: 1, z: 0)
-                )
-                .shadow(color: .orange.opacity(0.32), radius: 7)
             }
+            .scaleEffect(scale, anchor: .bottom)
+            .frame(width: 80, height: 60, alignment: .bottom)
+            .position(x: x, y: y - 30 - (object.kind == .coin ? 18 * scale : 0))
         }
-        .scaleEffect(scale)
-        .opacity(object.progress < -0.02 || (object.kind == .coin && object.didResolve) ? 0 : 1)
-        .position(x: x, y: y)
+        .opacity(object.progress < 0 || object.didResolve && object.kind == .coin ? 0 : min(Double(object.progress * 12), 1))
         .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 
-    private func gameHUD(topInset: CGFloat) -> some View {
+    private func gameHUD(insets: EdgeInsets) -> some View {
         VStack {
-            HStack(spacing: 12) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.headline)
-                        .frame(width: 42, height: 42)
-                        .background(.ultraThinMaterial, in: Circle())
-                }
-                .buttonStyle(.plain)
-
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("SCORE")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.white.opacity(0.74))
-                    Text("\(engine.score)")
-                        .font(.title2.bold().monospacedDigit())
-                        .foregroundStyle(.white)
-                }
-
-                if engine.coinsCollected > 0 {
-                    Label("\(engine.coinsCollected)", systemImage: "pawprint.fill")
-                        .font(.caption.bold().monospacedDigit())
-                        .foregroundStyle(.yellow)
-                        .padding(.horizontal, 9)
-                        .padding(.vertical, 6)
-                        .background(.black.opacity(0.18), in: Capsule())
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 1) {
-                    Text("BEST")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.white.opacity(0.74))
-                    Text("\(max(highScore, engine.score))")
-                        .font(.headline.monospacedDigit())
-                        .foregroundStyle(.white)
-                }
+            ArcadeHUD(score: engine.score, highScore: highScore, coins: engine.coinsCollected,
+                      playing: engine.phase == .playing) {
+                if engine.phase == .playing { isPaused = true } else { dismiss() }
             }
-            .padding(.horizontal, 18)
-            .padding(.top, max(topInset, 58) + 38)
-
+            .padding(.top, max(insets.top, 54) + 8)
             Spacer()
-
             if engine.phase == .playing {
-                HStack(spacing: 20) {
-                    controlButton(symbol: "arrow.left") { engine.moveLane(-1) }
-                    controlButton(
-                        symbol: pet.species == .parrot ? "arrow.up" : "figure.jumprope"
-                    ) { engine.jump() }
-                    controlButton(symbol: "arrow.right") { engine.moveLane(1) }
+                HStack(spacing: 22) {
+                    Button { engine.moveLane(-1) } label: { Image(systemName: "arrow.left") }
+                        .buttonStyle(ArcadeControlStyle())
+                    Button { engine.jump() } label: { Image(systemName: "arrow.up") }
+                        .buttonStyle(ArcadeControlStyle(prominent: true))
+                        .accessibilityLabel(pet.species == .parrot ? Text("Flap") : Text("Jump"))
+                    Button { engine.moveLane(1) } label: { Image(systemName: "arrow.right") }
+                        .buttonStyle(ArcadeControlStyle())
                 }
-                .padding(.bottom, 28)
+                .padding(.bottom, max(insets.bottom, 24) + 8)
             }
         }
-    }
-
-    private func controlButton(symbol: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.title3.bold())
-                .foregroundStyle(.white)
-                .frame(width: 54, height: 54)
-                .background(.ultraThinMaterial, in: Circle())
-                .overlay(Circle().stroke(.white.opacity(0.22), lineWidth: 1))
-        }
-        .buttonStyle(.plain)
     }
 
     private func startOverlay(size: CGSize, frame: Int) -> some View {
@@ -193,19 +179,20 @@ struct PetsDashGameView: View {
                 .frame(width: 124, height: 124)
 
             Text("Ready to dash?")
-                .font(.largeTitle.bold())
+                .font(.system(.title2, design: .rounded).bold())
 
             Text(
                 pet.species == .parrot
-                    ? "Switch lanes, flap over obstacles and collect paw coins."
-                    : "Switch lanes, jump over obstacles and collect paw coins."
+                    ? String(localized: "Switch lanes, flap over obstacles and collect paw coins.")
+                    : String(localized: "Switch lanes, jump over obstacles and collect paw coins.")
             )
             .foregroundStyle(.secondary)
             .multilineTextAlignment(.center)
 
             HStack(spacing: 16) {
                 Label("Swipe", systemImage: "arrow.left.and.right")
-                Label(pet.species == .parrot ? "Flap" : "Jump", systemImage: "arrow.up")
+                Label(pet.species == .parrot
+                      ? String(localized: "Flap") : String(localized: "Jump"), systemImage: "arrow.up")
             }
             .font(.caption.bold())
             .foregroundStyle(.secondary)
@@ -216,8 +203,9 @@ struct PetsDashGameView: View {
                 Label("Start running", systemImage: "play.fill")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(PetPrimaryButtonStyle())
             .controlSize(.large)
+            Button("Back to Arcade") { dismiss() }
         }
         .padding(24)
         .frame(maxWidth: 340)
@@ -227,8 +215,9 @@ struct PetsDashGameView: View {
 
     private func gameOverOverlay(size: CGSize) -> some View {
         VStack(spacing: 14) {
-            Text(payout?.isNewHighScore == true ? "New record!" : "Great dash!")
-                .font(.largeTitle.bold())
+            Text(payout?.isNewHighScore == true
+                 ? String(localized: "New record!") : String(localized: "Great dash!"))
+                .font(.system(.title2, design: .rounded).bold())
 
             Text("\(engine.score) points · \(engine.coinsCollected) paw coins")
                 .font(.title3.monospacedDigit())
@@ -259,11 +248,17 @@ struct PetsDashGameView: View {
                 Label("Run again", systemImage: "arrow.counterclockwise")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(PetPrimaryButtonStyle())
             .controlSize(.large)
-            .disabled(isSavingResult)
+            .disabled(isSavingResult || !didSaveResult)
 
-            Button("Back to Arcade") { dismiss() }
+            if payout == nil && !isSavingResult {
+                Text("Your reward is not saved yet. Retry before starting another game.")
+                    .font(.caption).foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                Button("Save reward again") { saveResultIfNeeded() }
+            }
+            Button(payout == nil ? "Leave without reward" : "Back to Arcade") { dismiss() }
                 .disabled(isSavingResult)
         }
         .padding(24)
@@ -273,21 +268,24 @@ struct PetsDashGameView: View {
     }
 
     private var swipeGesture: some Gesture {
-        DragGesture(minimumDistance: 18)
-            .onEnded { value in
-                guard engine.phase == .playing else { return }
+        DragGesture(minimumDistance: 16)
+            .onChanged { value in
+                guard engine.phase == .playing, !isPaused, !didHandleSwipe else { return }
                 let horizontal = value.translation.width
                 let vertical = value.translation.height
                 if abs(horizontal) > abs(vertical) {
                     engine.moveLane(horizontal > 0 ? 1 : -1)
+                    didHandleSwipe = true
                 } else if vertical < -16 {
                     engine.jump()
+                    didHandleSwipe = true
                 }
             }
+            .onEnded { _ in didHandleSwipe = false }
     }
 
     private func tick(from oldDate: Date, to newDate: Date, size: CGSize) {
-        guard engine.phase == .playing, scenePhase == .active else {
+        guard engine.phase == .playing, scenePhase == .active, !isPaused else {
             lastTick = nil
             return
         }
@@ -304,12 +302,9 @@ struct PetsDashGameView: View {
         if engine.phase == .gameOver { saveResultIfNeeded() }
     }
 
-    private func frame(at date: Date) -> Int {
-        let framesPerSecond = engine.phase == .playing ? 10.0 : 4.0
-        return Int(date.timeIntervalSinceReferenceDate * framesPerSecond) % 4
-    }
-
     private func restart(in size: CGSize) {
+        isPaused = false
+        runID = UUID()
         payout = nil
         isSavingResult = false
         didSaveResult = false
@@ -318,12 +313,13 @@ struct PetsDashGameView: View {
     }
 
     private func saveResultIfNeeded() {
-        guard !didSaveResult else { return }
+        guard !didSaveResult, !isSavingResult else { return }
         didSaveResult = true
         isSavingResult = true
         let finalScore = engine.score
         Task {
-            payout = await onFinish(finalScore)
+            payout = await onFinish(finalScore, runID)
+            didSaveResult = payout != nil
             isSavingResult = false
         }
     }
@@ -340,11 +336,18 @@ struct PetsDashPlayerArtwork: View {
         )
 
         if !assets.isEmpty {
-            Image(assets[positiveModulo(frame, assets.count)])
-                .resizable()
-                .interpolation(.none)
-                .scaledToFit()
-                .accessibilityHidden(true)
+            GeometryReader { proxy in
+                let registration = PetsDashArtworkLibrary.registration(for: pet.resolvedBreed, frame: frame)
+                let scale = min(proxy.size.width, proxy.size.height) / 160
+                Image(assets[positiveModulo(frame, assets.count)])
+                    .resizable()
+                    .interpolation(.none)
+                    .scaledToFit()
+                    .petCoat(species: pet.species, coat: pet.coat, customColor: pet.customColor)
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+                    .offset(x: registration.width * scale, y: registration.height * scale)
+            }
+            .accessibilityHidden(true)
         } else {
             PetArtwork(
                 species: pet.species,
@@ -369,7 +372,30 @@ enum PetsDashArtworkLibrary {
         return (0..<4).map { "pets_dash_\(token)_\(String(format: "%02d", $0))" }
     }
 
+    /// Register the head/torso, not the changing wingspan. Coordinates are in
+    /// the original 160 px canvas; ground animals already share a fixed foot line.
+    static func registration(for breed: PetBreed?, frame: Int) -> CGSize {
+        let index = ((frame % 4) + 4) % 4
+        let offsets: [CGSize]
+        switch breed {
+        case .classicParrot:
+            offsets = [CGSize(width: 0, height: -9), .zero, .zero, .zero]
+        case .cockatiel:
+            offsets = [CGSize(width: 0, height: -11), .zero,
+                       CGSize(width: 16, height: 0), CGSize(width: 3, height: 0)]
+        case .budgie:
+            offsets = [CGSize(width: 0, height: -9), .zero, .zero, CGSize(width: 2, height: 0)]
+        case .macaw:
+            offsets = [CGSize(width: 0, height: -13), .zero,
+                       CGSize(width: 20, height: 0), CGSize(width: 3, height: 0)]
+        default:
+            return .zero
+        }
+        return offsets[index]
+    }
+
     private static func token(for species: PetSpecies, breed: PetBreed?) -> String? {
+        if let token = (breed ?? PetBreed.defaultVariant(for: species))?.companionArtworkToken { return token }
         switch species {
         case .cat:
             return switch breed ?? .classicCat {
@@ -396,6 +422,8 @@ enum PetsDashArtworkLibrary {
             }
         case .penguin:
             return breed == .rockhopper ? "penguin_rockhopper" : "penguin_classic"
+        case .lion:
+            return "lion_adult"
         }
     }
 }
@@ -427,12 +455,20 @@ struct PetsDashEngine {
 
     var phase: Phase = .ready
     var lane = 1
-    private(set) var previousLane = 1
+    private(set) var lanePosition: CGFloat = 1
+    private var laneStart: CGFloat = 1
+    private var laneTransition: CGFloat = 1
     var jumpHeight: CGFloat = 0
     var score = 0
     var coinsCollected = 0
     var objects: [PetsDashObject] = []
-    var trackProgress: CGFloat = 0
+    private(set) var trackProgress: CGFloat = 0
+    private(set) var elapsedTime: TimeInterval = 0
+    private(set) var lastCoinTime: TimeInterval = -10
+    private var gaitDistance: CGFloat = 0
+    private var clock = ArcadeSimulationClock()
+
+    var animationFrame: Int { Int(gaitDistance * 44) % 4 }
 
     var isJumping: Bool { jumpHeight > 0.02 }
 
@@ -447,7 +483,13 @@ struct PetsDashEngine {
         guard size.width > 180, size.height > 320 else { return }
         phase = .playing
         lane = 1
-        previousLane = 1
+        lanePosition = 1
+        laneStart = 1
+        laneTransition = 1
+        elapsedTime = 0
+        lastCoinTime = -10
+        gaitDistance = 0
+        clock = ArcadeSimulationClock()
         jumpHeight = 0
         jumpVelocity = 0
         score = 0
@@ -463,25 +505,37 @@ struct PetsDashEngine {
 
     mutating func moveLane(_ direction: Int) {
         guard phase == .playing, direction != 0 else { return }
-        previousLane = lane
-        lane = min(max(lane + (direction > 0 ? 1 : -1), 0), 2)
+        let target = min(max(lane + (direction > 0 ? 1 : -1), 0), 2)
+        guard target != lane else { return }
+        laneStart = lanePosition
+        laneTransition = 0
+        lane = target
     }
 
     mutating func jump() {
-        guard phase == .playing, jumpHeight <= 0.025 else { return }
+        guard phase == .playing, jumpHeight == 0, jumpVelocity == 0 else { return }
         jumpVelocity = 2.45
     }
 
     mutating func update(deltaTime rawDeltaTime: TimeInterval, in size: CGSize) {
-        guard phase == .playing, size.width > 0, size.height > 0 else { return }
-        let deltaTime = min(max(rawDeltaTime, 0), 1.0 / 24.0)
-        guard deltaTime > 0 else { return }
-        let dt = CGFloat(deltaTime)
+        guard phase == .playing, rawDeltaTime.isFinite, size.width > 0, size.height > 0 else { return }
+        let steps = clock.steps(for: rawDeltaTime)
+        for _ in 0..<steps where phase == .playing {
+            advance(by: ArcadeSimulationClock.step)
+        }
+    }
 
+    private mutating func advance(by deltaTime: TimeInterval) {
+        let dt = CGFloat(deltaTime)
+        elapsedTime += deltaTime
         let difficulty = min(CGFloat(score) / 3_200, 1)
         let speed = 0.30 + difficulty * 0.14
-        trackProgress = (trackProgress + dt * (0.72 + difficulty * 0.38))
-            .truncatingRemainder(dividingBy: 1)
+        let travel = speed * dt
+        trackProgress = (trackProgress + travel).arcadeWrapped(1.4)
+        if !isJumping { gaitDistance += travel }
+        laneTransition = min(laneTransition + dt / 0.18, 1)
+        let eased = laneTransition * laneTransition * (3 - 2 * laneTransition)
+        lanePosition = laneStart + (CGFloat(lane) - laneStart) * eased
 
         if jumpHeight > 0 || jumpVelocity > 0 {
             jumpVelocity -= (5.5 + difficulty * 0.25) * dt
@@ -505,7 +559,7 @@ struct PetsDashEngine {
 
         resolveObjects()
         objects.removeAll {
-            $0.progress > 1.12 || ($0.kind == .coin && $0.didResolve)
+            $0.progress > 1.35 || ($0.kind == .coin && $0.didResolve)
         }
         score = max(Int(scoreDistance.rounded(.down)) + scoreBonus, 0)
     }
@@ -526,32 +580,32 @@ struct PetsDashEngine {
         for index in objects.indices where !objects[index].didResolve {
             let object = objects[index]
 
-            if object.kind == .coin,
-               object.lane == lane,
-               object.progress >= 0.78 {
+            let overlapsLane = abs(CGFloat(object.lane) - lanePosition) < 0.48
+            let contactStart = Self.playerProgress - 0.04
+            let contactEnd = Self.playerProgress + 0.04
+            if object.kind == .coin, overlapsLane,
+               object.progress >= contactStart, object.progress <= contactEnd,
+               jumpHeight < 0.34 {
                 objects[index].didResolve = true
                 coinsCollected += 1
+                lastCoinTime = elapsedTime
                 scoreBonus += 50
                 continue
             }
 
-            if object.kind.isObstacle,
-               object.lane == lane,
-               object.progress >= 0.82,
-               object.progress <= 1.01 {
-                if jumpHeight < 0.18 {
-                    phase = .gameOver
-                    jumpVelocity = 0
-                    return
-                }
-                objects[index].didResolve = true
-                scoreBonus += 100
-                continue
+            if object.kind.isObstacle, overlapsLane,
+               object.progress >= contactStart, object.progress <= contactEnd,
+               jumpHeight < 0.30 {
+                phase = .gameOver
+                jumpVelocity = 0
+                return
             }
 
-            if object.progress > 1.0 {
+            // Remain collidable throughout the crossing: landing early on a
+            // hurdle must not grant immunity after one airborne frame.
+            if object.progress > contactEnd {
                 objects[index].didResolve = true
-                if object.kind.isObstacle { scoreBonus += 40 }
+                if object.kind.isObstacle { scoreBonus += overlapsLane ? 100 : 40 }
             }
         }
     }
@@ -594,185 +648,186 @@ struct PetsDashEngine {
     }
 }
 
-private enum PetsDashLayout {
-    static func laneX(_ lane: Int, progress rawProgress: CGFloat, in size: CGSize) -> CGFloat {
-        let progress = min(max(rawProgress, 0), 1)
-        let topSpacing = size.width * 0.12
-        let bottomSpacing = size.width * 0.29
-        let spacing = topSpacing + (bottomSpacing - topSpacing) * pow(progress, 1.1)
-        return size.width / 2 + CGFloat(lane - 1) * spacing
+/// A single ground projection for the trail, lane guides, scenery and hitboxes.
+/// Progress is world distance; ground objects never use a separate scroll speed.
+enum PetsDashLayout {
+    static func horizon(in size: CGSize) -> CGFloat { size.height * 0.31 }
+    static func depth(_ progress: CGFloat) -> CGFloat {
+        let p = max(progress, 0)
+        return 0.13 + 0.87 * p * p
     }
-
-    static func y(for rawProgress: CGFloat, in size: CGSize) -> CGFloat {
-        let progress = min(max(rawProgress, 0), 1.1)
-        let horizon = max(size.height * 0.30, 225)
-        return horizon + pow(progress, 1.42) * (size.height - horizon + 45)
+    static func laneX(_ lane: CGFloat, progress: CGFloat, in size: CGSize) -> CGFloat {
+        size.width / 2 + (lane - 1) * size.width * 0.30 * depth(progress)
     }
-
-    static func playerY(in size: CGSize) -> CGFloat {
-        y(for: PetsDashEngine.playerProgress, in: size)
+    static func y(for progress: CGFloat, in size: CGSize) -> CGFloat {
+        let p = max(progress, 0)
+        return horizon(in: size) + p * p * (size.height * 0.88 - horizon(in: size))
     }
-
-    static func scale(for rawProgress: CGFloat) -> CGFloat {
-        let progress = min(max(rawProgress, 0), 1)
-        return 0.23 + progress * 0.95
+    static func playerY(in size: CGSize) -> CGFloat { y(for: PetsDashEngine.playerProgress, in: size) }
+    static func scale(for progress: CGFloat) -> CGFloat {
+        depth(progress) / depth(PetsDashEngine.playerProgress)
     }
 }
 
-private struct PetsDashTrack: View {
+struct PetsDashTrack: View {
     let progress: CGFloat
 
     var body: some View {
-        GeometryReader { proxy in
-            let size = proxy.size
-            let horizon = max(size.height * 0.30, 225)
-
-            ZStack {
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.28, green: 0.63, blue: 0.96),
-                        Color(red: 0.72, green: 0.9, blue: 1)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-
-                Circle()
-                    .fill(.yellow.opacity(0.82))
-                    .frame(width: 92, height: 92)
-                    .position(x: size.width * 0.78, y: horizon * 0.47)
-
-                PetsDashHorizon()
-                    .frame(height: 104)
-                    .position(x: size.width / 2, y: horizon - 32)
-
-                Path { path in
-                    path.move(to: CGPoint(x: size.width * 0.31, y: horizon))
-                    path.addLine(to: CGPoint(x: size.width * 0.69, y: horizon))
-                    path.addLine(to: CGPoint(x: size.width * 1.08, y: size.height + 30))
-                    path.addLine(to: CGPoint(x: -size.width * 0.08, y: size.height + 30))
-                    path.closeSubpath()
-                }
-                .fill(
-                    LinearGradient(
-                        colors: [Color(red: 0.29, green: 0.31, blue: 0.36), Color(red: 0.12, green: 0.13, blue: 0.17)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-
-                laneEdges(in: size, horizon: horizon)
-                laneDashes(in: size)
+        Canvas { context, size in
+            let w = size.width, h = size.height
+            let horizon = PetsDashLayout.horizon(in: size)
+            context.fill(Path(CGRect(origin: .zero, size: size)), with: .linearGradient(
+                Gradient(colors: [ArcadePalette.sky, ArcadePalette.mist]),
+                startPoint: .zero, endPoint: CGPoint(x: 0, y: horizon)))
+            context.fill(Path(ellipseIn: CGRect(x: w * 0.73, y: horizon * 0.50, width: 48, height: 48)),
+                         with: .color(Color(red: 1, green: 0.93, blue: 0.73)))
+            for i in 0..<4 {
+                let x = CGFloat(i) * w * 0.34 - 40
+                context.fill(ArcadeCloudShape().path(in: CGRect(x: x, y: horizon * (i.isMultiple(of: 2) ? 0.45 : 0.68),
+                                                                width: 92, height: 28)), with: .color(.white.opacity(0.44)))
             }
-        }
-        .ignoresSafeArea()
-    }
-
-    private func laneEdges(in size: CGSize, horizon: CGFloat) -> some View {
-        ZStack {
-            ForEach([-1, 1], id: \.self) { edge in
-                Path { path in
-                    path.move(to: CGPoint(x: size.width / 2 + CGFloat(edge) * size.width * 0.19, y: horizon))
-                    path.addLine(to: CGPoint(x: size.width / 2 + CGFloat(edge) * size.width * 0.58, y: size.height + 30))
-                }
-                .stroke(.white.opacity(0.34), lineWidth: 3)
+            for layer in 0..<3 {
+                var hill = Path()
+                let base = horizon + CGFloat(layer) * 13
+                hill.move(to: CGPoint(x: -10, y: base + 40))
+                hill.addLine(to: CGPoint(x: -10, y: base - 18))
+                hill.addCurve(to: CGPoint(x: w * 0.5, y: base),
+                              control1: CGPoint(x: w * 0.15, y: base - 110 + CGFloat(layer) * 22),
+                              control2: CGPoint(x: w * 0.30, y: base - 55))
+                hill.addCurve(to: CGPoint(x: w + 10, y: base - 20),
+                              control1: CGPoint(x: w * 0.75, y: base - 80),
+                              control2: CGPoint(x: w * 0.95, y: base - 85 + CGFloat(layer) * 20))
+                hill.addLine(to: CGPoint(x: w + 10, y: base + 40)); hill.closeSubpath()
+                let colors = [Color(red: 0.56, green: 0.72, blue: 0.71),
+                              Color(red: 0.43, green: 0.65, blue: 0.60), ArcadePalette.grass]
+                context.fill(hill, with: .color(colors[layer]))
             }
-        }
-    }
-
-    private func laneDashes(in size: CGSize) -> some View {
-        ZStack {
-            ForEach(0..<13, id: \.self) { index in
-                let raw = CGFloat(index) / 13 + progress
-                let dashProgress = raw.truncatingRemainder(dividingBy: 1)
-                ForEach([0, 1], id: \.self) { boundary in
-                    Capsule()
-                        .fill(.white.opacity(0.72))
-                        .frame(width: 4 + dashProgress * 5, height: 10 + dashProgress * 30)
-                        .position(
-                            x: size.width / 2 + CGFloat(boundary == 0 ? -1 : 1) * (size.width * (0.063 + dashProgress * 0.13)),
-                            y: PetsDashLayout.y(for: dashProgress, in: size)
-                        )
-                }
+            context.fill(Path(CGRect(x: 0, y: horizon + 25, width: w, height: h)), with: .linearGradient(
+                Gradient(colors: [ArcadePalette.grass, ArcadePalette.grassLight]),
+                startPoint: CGPoint(x: 0, y: horizon), endPoint: CGPoint(x: 0, y: h)))
+            // Broad banks frame the trail without pretending to be extra lanes.
+            drawStrip(context, size: size, left: -0.65, right: 2.65, color: Color(red: 0.74, green: 0.73, blue: 0.48))
+            drawStrip(context, size: size, left: -0.5, right: 2.5, color: ArcadePalette.sand)
+            for lane in 0..<3 {
+                drawStrip(context, size: size, left: CGFloat(lane) - 0.34,
+                          right: CGFloat(lane) + 0.34, color: .white.opacity(0.075))
             }
-        }
-    }
-}
-
-private struct PetsDashHorizon: View {
-    var body: some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .bottom) {
-                Rectangle().fill(Color(red: 0.22, green: 0.68, blue: 0.35))
-                HStack(alignment: .bottom, spacing: 12) {
-                    ForEach(0..<11, id: \.self) { index in
-                        VStack(spacing: -5) {
-                            Circle()
-                                .fill(index.isMultiple(of: 2) ? Color.green : Color.mint)
-                                .frame(width: 42, height: 42)
-                            RoundedRectangle(cornerRadius: 3)
-                                .fill(.brown)
-                                .frame(width: 8, height: 28)
-                        }
+            // Pebbled boundaries and ground flecks share object travel exactly.
+            for i in 0..<19 {
+                let p = (CGFloat(i) / 19 * 1.4 + progress).arcadeWrapped(1.4)
+                let scale = PetsDashLayout.scale(for: p)
+                let y = PetsDashLayout.y(for: p, in: size)
+                for lane in [CGFloat(0.5), 1.5] {
+                    let x = PetsDashLayout.laneX(lane, progress: p, in: size)
+                    context.fill(Path(ellipseIn: CGRect(x: x - 2 * scale, y: y,
+                                                        width: 4 * scale, height: 7 * scale)),
+                                 with: .color(Color(red: 0.63, green: 0.53, blue: 0.38).opacity(0.32)))
+                }
+                for side in [-1, 1] {
+                    let lane = CGFloat(side) * (1.9 + CGFloat(i % 3) * 0.18) + 1
+                    let x = PetsDashLayout.laneX(lane, progress: p, in: size)
+                    var tuft = Path()
+                    tuft.move(to: CGPoint(x: x - 7 * scale, y: y))
+                    tuft.addLine(to: CGPoint(x: x - 3 * scale, y: y - 10 * scale))
+                    tuft.addLine(to: CGPoint(x: x, y: y - 3 * scale))
+                    tuft.addLine(to: CGPoint(x: x + 5 * scale, y: y - 13 * scale))
+                    tuft.addLine(to: CGPoint(x: x + 7 * scale, y: y)); tuft.closeSubpath()
+                    context.fill(tuft, with: .color(ArcadePalette.grass.opacity(0.75)))
+                    if i.isMultiple(of: 3) {
+                        context.fill(Path(ellipseIn: CGRect(x: x, y: y - 8 * scale, width: 4 * scale, height: 4 * scale)),
+                                     with: .color(Color(red: 1, green: 0.94, blue: 0.77)))
                     }
                 }
-                .frame(width: proxy.size.width)
             }
+            // Trees ordered by depth. Their roots sit on the same plane as rocks.
+            let trees = (0..<16).map { id -> (id: Int, depth: CGFloat, lane: CGFloat) in
+                let side: CGFloat = id.isMultiple(of: 2) ? -1 : 1
+                let offset: CGFloat = side > 0 ? 0.085 : 0
+                let depth = (CGFloat(id / 2) / 8 * 1.4 + progress + offset).arcadeWrapped(1.4)
+                return (id, depth, 1 + side * (2.4 + CGFloat(id % 3) * 0.3))
+            }.sorted { $0.depth < $1.depth }
+            for item in trees {
+                let scale = PetsDashLayout.scale(for: item.depth)
+                let x = PetsDashLayout.laneX(item.lane, progress: item.depth, in: size)
+                let y = PetsDashLayout.y(for: item.depth, in: size)
+                tree(context, at: CGPoint(x: x, y: y),
+                     scale: scale * (item.id.isMultiple(of: 3) ? 1.13 : 1),
+                     alternate: item.id.isMultiple(of: 3))
+            }
+            // Bottom vignette gives touch controls contrast without covering paws.
+            context.fill(Path(CGRect(x: 0, y: h * 0.88, width: w, height: h * 0.12)), with: .linearGradient(
+                Gradient(colors: [.clear, ArcadePalette.ink.opacity(0.18)]),
+                startPoint: CGPoint(x: 0, y: h * 0.88), endPoint: CGPoint(x: 0, y: h)))
         }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+
+    private func drawStrip(_ context: GraphicsContext, size: CGSize, left: CGFloat, right: CGFloat, color: Color) {
+        var p = Path()
+        p.move(to: CGPoint(x: PetsDashLayout.laneX(left, progress: 0, in: size), y: PetsDashLayout.y(for: 0, in: size)))
+        p.addLine(to: CGPoint(x: PetsDashLayout.laneX(right, progress: 0, in: size), y: PetsDashLayout.y(for: 0, in: size)))
+        p.addLine(to: CGPoint(x: PetsDashLayout.laneX(right, progress: 1.4, in: size), y: PetsDashLayout.y(for: 1.4, in: size)))
+        p.addLine(to: CGPoint(x: PetsDashLayout.laneX(left, progress: 1.4, in: size), y: PetsDashLayout.y(for: 1.4, in: size)))
+        p.closeSubpath()
+        context.fill(p, with: .color(color))
+    }
+
+    private func tree(_ context: GraphicsContext, at point: CGPoint, scale s: CGFloat, alternate: Bool) {
+        var c = context
+        c.translateBy(x: point.x, y: point.y); c.scaleBy(x: s, y: s)
+        c.fill(Path(ellipseIn: CGRect(x: -27, y: -4, width: 68, height: 13)), with: .color(ArcadePalette.ink.opacity(0.12)))
+        c.fill(Path(CGRect(x: -4, y: -40, width: 8, height: 40)), with: .color(Color(red: 0.42, green: 0.40, blue: 0.30)))
+        var crown = Path()
+        crown.move(to: CGPoint(x: -32, y: -31)); crown.addLine(to: CGPoint(x: -25, y: -68))
+        crown.addLine(to: CGPoint(x: -8, y: -91)); crown.addLine(to: CGPoint(x: 16, y: -85))
+        crown.addLine(to: CGPoint(x: 32, y: -57)); crown.addLine(to: CGPoint(x: 27, y: -27)); crown.closeSubpath()
+        c.fill(crown, with: .color(alternate ? Color(red: 0.24, green: 0.48, blue: 0.41) : Color(red: 0.34, green: 0.55, blue: 0.39)))
+        var light = Path()
+        light.move(to: CGPoint(x: -25, y: -68)); light.addLine(to: CGPoint(x: -8, y: -91))
+        light.addLine(to: CGPoint(x: 16, y: -85)); light.addLine(to: CGPoint(x: 9, y: -48))
+        light.addLine(to: CGPoint(x: -32, y: -31)); light.closeSubpath()
+        c.fill(light, with: .color(ArcadePalette.grassLight.opacity(0.35)))
     }
 }
 
 private struct PetsDashBarrier: View {
     var body: some View {
-        ZStack(alignment: .bottom) {
-            HStack(spacing: 45) {
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color(red: 0.24, green: 0.18, blue: 0.15))
-                    .frame(width: 9, height: 48)
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(Color(red: 0.24, green: 0.18, blue: 0.15))
-                    .frame(width: 9, height: 48)
+        Canvas { c, size in
+            let w = size.width, h = size.height
+            for x in [CGFloat(9), w - 16] {
+                c.fill(Path(roundedRect: CGRect(x: x, y: 8, width: 9, height: h - 8), cornerRadius: 2),
+                       with: .color(Color(red: 0.42, green: 0.29, blue: 0.22)))
             }
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .fill(.orange)
-                .frame(height: 31)
-                .overlay {
-                    HStack(spacing: 7) {
-                        ForEach(0..<4, id: \.self) { _ in
-                            Rectangle()
-                                .fill(.white)
-                                .frame(width: 10)
-                                .rotationEffect(.degrees(-25))
-                        }
-                    }
-                    .clipped()
-                }
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(.black.opacity(0.34), lineWidth: 3))
-                .offset(y: -15)
+            c.fill(Path(roundedRect: CGRect(x: 0, y: 12, width: w, height: 22), cornerRadius: 3),
+                   with: .color(ArcadePalette.coral))
+            c.fill(Path(CGRect(x: 3, y: 13, width: w - 6, height: 4)), with: .color(.white.opacity(0.28)))
+            for x in [w * 0.26, w * 0.63] {
+                var flag = Path()
+                flag.move(to: CGPoint(x: x, y: 14)); flag.addLine(to: CGPoint(x: x + 10, y: 14))
+                flag.addLine(to: CGPoint(x: x + 5, y: 28)); flag.closeSubpath()
+                c.fill(flag, with: .color(Color(red: 1, green: 0.89, blue: 0.65)))
+            }
         }
     }
 }
 
 private struct PetsDashRock: View {
     var body: some View {
-        ZStack(alignment: .bottom) {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color(red: 0.32, green: 0.36, blue: 0.42))
-                .frame(width: 66, height: 42)
-            Circle()
-                .fill(Color(red: 0.46, green: 0.51, blue: 0.57))
-                .frame(width: 34, height: 34)
-                .offset(x: -13, y: -17)
-            Capsule()
-                .fill(.white.opacity(0.3))
-                .frame(width: 23, height: 7)
-                .rotationEffect(.degrees(-18))
-                .offset(x: -15, y: -25)
+        Canvas { c, size in
+            let w = size.width, h = size.height
+            var rock = Path()
+            rock.move(to: CGPoint(x: 0, y: h * 0.77)); rock.addLine(to: CGPoint(x: w * 0.16, y: h * 0.22))
+            rock.addLine(to: CGPoint(x: w * 0.46, y: 0)); rock.addLine(to: CGPoint(x: w * 0.80, y: h * 0.14))
+            rock.addLine(to: CGPoint(x: w, y: h * 0.73)); rock.addLine(to: CGPoint(x: w * 0.83, y: h))
+            rock.addLine(to: CGPoint(x: w * 0.16, y: h)); rock.closeSubpath()
+            c.fill(rock, with: .color(Color(red: 0.33, green: 0.42, blue: 0.47)))
+            var facet = Path()
+            facet.move(to: CGPoint(x: w * 0.16, y: h * 0.22)); facet.addLine(to: CGPoint(x: w * 0.46, y: 0))
+            facet.addLine(to: CGPoint(x: w * 0.80, y: h * 0.14)); facet.addLine(to: CGPoint(x: w * 0.59, y: h * 0.59))
+            facet.addLine(to: CGPoint(x: w * 0.12, y: h * 0.69)); facet.closeSubpath()
+            c.fill(facet, with: .color(Color(red: 0.53, green: 0.62, blue: 0.63)))
         }
-        .overlay(
-            RoundedRectangle(cornerRadius: 18)
-                .stroke(.black.opacity(0.24), lineWidth: 3)
-        )
     }
 }
 
@@ -845,7 +900,7 @@ private struct PetsDashArtworkQAPreview: View {
     PetsDashGameView(
         pet: .starter,
         highScore: 1_200,
-        onFinish: { _ in nil }
+        onFinish: { _, _ in nil }
     )
 }
 
@@ -856,7 +911,7 @@ private struct PetsDashArtworkQAPreview: View {
             createdAt: .now, breed: .macaw
         ),
         highScore: 850,
-        onFinish: { _ in nil }
+        onFinish: { _, _ in nil }
     )
 }
 

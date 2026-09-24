@@ -1,4 +1,33 @@
 import SwiftUI
+import UIKit
+
+extension PetActivityAppearance {
+    var backgroundColor: Color {
+        Color(.sRGB, red: background.red, green: background.green, blue: background.blue, opacity: 1)
+    }
+
+    var foregroundColor: Color { usesDarkText ? .black : .white }
+}
+
+private struct PetMinimizeMotionKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var petMinimizeMotion: Bool {
+        get { self[PetMinimizeMotionKey.self] }
+        set { self[PetMinimizeMotionKey.self] = newValue }
+    }
+}
+
+/// The system accessibility preference is read-only. Combine it with the
+/// app setting without overriding the user's system preference.
+@propertyWrapper
+struct PetReduceMotion: DynamicProperty {
+    @Environment(\.accessibilityReduceMotion) private var systemValue
+    @Environment(\.petMinimizeMotion) private var appValue
+    var wrappedValue: Bool { systemValue || appValue }
+}
 
 extension PetSpecies {
     var displayName: LocalizedStringKey {
@@ -8,6 +37,7 @@ extension PetSpecies {
         case .fox: "Fox"
         case .parrot: "Parrot"
         case .penguin: "Penguin"
+        case .lion: "Lion"
         }
     }
 
@@ -15,7 +45,7 @@ extension PetSpecies {
         switch self {
         case .cat, .parrot: "curious"
         case .dog, .penguin: "playful"
-        case .fox: "calm"
+        case .fox, .lion: "calm"
         }
     }
 }
@@ -35,6 +65,7 @@ extension PetBreed {
         switch self {
         case .shepherd: "Shepherd"
         case .corgi: "Corgi"
+        case .cardigan: "Cardigan Welsh corgi"
         case .doberman: "Doberman"
         case .bullTerrier: "Bull terrier"
         case .classicCat: "Classic cat"
@@ -49,6 +80,9 @@ extension PetBreed {
         case .macaw: "Macaw"
         case .classicPenguin: "Classic penguin"
         case .rockhopper: "Rockhopper"
+        case .adultLion: "Adult lion"
+        case .lioness: "Lioness"
+        case .lionCub: "Lion cub"
         }
     }
 }
@@ -92,6 +126,9 @@ struct PetColors: Equatable {
         case (.penguin, .sunrise): PetColors(primary: Color(red: 0.08, green: 0.14, blue: 0.22), secondary: .white, detail: Color(red: 0.08, green: 0.1, blue: 0.15))
         case (.penguin, .cloud): PetColors(primary: Color(red: 0.2, green: 0.39, blue: 0.56), secondary: Color(red: 0.9, green: 0.97, blue: 1), detail: Color(red: 0.05, green: 0.14, blue: 0.24))
         case (.penguin, .midnight): PetColors(primary: Color(red: 0.08, green: 0.07, blue: 0.13), secondary: Color(red: 0.72, green: 0.78, blue: 0.96), detail: .white)
+        case (.lion, .sunrise): PetColors(primary: Color(red: 0.83, green: 0.53, blue: 0.24), secondary: Color(red: 0.98, green: 0.82, blue: 0.54), detail: Color(red: 0.31, green: 0.16, blue: 0.09))
+        case (.lion, .cloud): PetColors(primary: Color(red: 0.78, green: 0.74, blue: 0.68), secondary: .white, detail: Color(red: 0.27, green: 0.23, blue: 0.20))
+        case (.lion, .midnight): PetColors(primary: Color(red: 0.23, green: 0.19, blue: 0.24), secondary: Color(red: 0.67, green: 0.59, blue: 0.47), detail: .white)
         }
     }
 }
@@ -104,10 +141,11 @@ struct PetColors: Equatable {
 struct PetAnimationClip: Equatable, Sendable {
     let frames: [String]
     let frameDuration: TimeInterval
+    private let frameDurations: [TimeInterval]?
 
     /// Foreground SwiftUI timelines may sample slightly faster than the
     /// quickest clip. Individual clips still decide when their frame changes.
-    static let foregroundRefreshInterval: TimeInterval = 1.0 / 15.0
+    static let foregroundRefreshInterval: TimeInterval = 1.0 / 30.0
 
     init(frames: [String], frameDuration: TimeInterval) {
         precondition(!frames.isEmpty, "A pet animation clip requires at least one frame")
@@ -117,10 +155,19 @@ struct PetAnimationClip: Equatable, Sendable {
         )
         self.frames = frames
         self.frameDuration = frameDuration
+        self.frameDurations = nil
+    }
+
+    init(frames: [String], frameDurations: [TimeInterval]) {
+        precondition(!frames.isEmpty && frames.count == frameDurations.count)
+        precondition(frameDurations.allSatisfy { $0.isFinite && $0 > 0 })
+        self.frames = frames
+        self.frameDuration = frameDurations[0]
+        self.frameDurations = frameDurations
     }
 
     var cycleDuration: TimeInterval {
-        frameDuration * Double(frames.count)
+        frameDurations?.reduce(0, +) ?? frameDuration * Double(frames.count)
     }
 
     /// Returns a stable, looping frame index without allowing a long-running
@@ -130,7 +177,16 @@ struct PetAnimationClip: Equatable, Sendable {
 
         let remainder = elapsedTime.truncatingRemainder(dividingBy: cycleDuration)
         let cycleTime = remainder >= 0 ? remainder : remainder + cycleDuration
-        let timeIndex = Int(floor(cycleTime / frameDuration))
+        let timeIndex: Int
+        if let frameDurations {
+            var end: TimeInterval = 0
+            timeIndex = frameDurations.firstIndex { duration in
+                end += duration
+                return cycleTime < end
+            } ?? frames.count - 1
+        } else {
+            timeIndex = Int(floor(cycleTime / frameDuration))
+        }
         let normalizedTimeIndex = positiveModulo(timeIndex, frames.count)
         let normalizedPhase = positiveModulo(phaseOffset, frames.count)
         return positiveModulo(normalizedTimeIndex + normalizedPhase, frames.count)
@@ -142,6 +198,23 @@ struct PetAnimationClip: Equatable, Sendable {
 
     func frameName(forStep step: Int) -> String {
         frames[positiveModulo(step, frames.count)]
+    }
+
+    /// A planted foot advances with travel, so stopping cannot leave the pet
+    /// running in place and a slow walk cannot play a fast gallop cycle.
+    func frameIndex(distance: Double, strideLength: Double, phaseOffset: Int = 0) -> Int {
+        guard distance.isFinite, strideLength.isFinite, strideLength > 0 else { return 0 }
+        let cycles = distance / strideLength
+        return frameIndex(at: cycles.truncatingRemainder(dividingBy: 1) * cycleDuration,
+                          phaseOffset: phaseOffset)
+    }
+
+    /// A full pair of steps covers a small part of the sprite canvas. Using
+    /// nearly a whole canvas per cycle left each paw frozen while the pet slid.
+    func travelFrameIndex(distance: Double, canvasWidth: Double, pose: PetPose, phaseOffset: Int = 0) -> Int {
+        frameIndex(distance: distance,
+                   strideLength: canvasWidth * (pose == .run ? 0.26 : 0.18),
+                   phaseOffset: phaseOffset)
     }
 
     private func positiveModulo(_ value: Int, _ divisor: Int) -> Int {
@@ -159,8 +232,9 @@ struct PetArtwork: View {
     var direction: PetDirection = .right
     var step = 0
     var animatesMotion = true
+    var usesNaturalGait = false
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @PetReduceMotion private var reduceMotion
 
     var body: some View {
         if animatesMotion {
@@ -182,10 +256,13 @@ struct PetArtwork: View {
             customColor: customColor,
             breed: breed,
             pose: pose,
-            step: step
+            step: step,
+            usesNaturalGait: usesNaturalGait
         )
         .scaleEffect(x: direction == .right ? 1 : -1, y: 1)
-        .animation(reduceMotion ? nil : .snappy(duration: 0.42), value: pose)
+        // Sprite frames and facing are discrete. Interpolating their layout
+        // produces sliding paws and a sideways squash at every turn.
+        .transaction { $0.animation = nil }
         .aspectRatio(1.25, contentMode: .fit)
         .accessibilityHidden(true)
     }
@@ -207,31 +284,196 @@ private struct ImportedPetSprite: View {
     let breed: PetBreed?
     let pose: PetPose
     let step: Int
+    var usesNaturalGait = false
 
     var body: some View {
-        let clip = PetAnimationLibrary.clip(for: species, breed: breed, pose: pose)
+        let clip = usesNaturalGait
+            ? PetAnimationLibrary.naturalClip(for: species, breed: breed, pose: pose)
+            : PetAnimationLibrary.clip(for: species, breed: breed, pose: pose)
         let assetName = clip.frameName(forStep: step)
-        let image = Image(assetName)
-            .renderingMode(.original)
-            .resizable()
-            .interpolation(.none)
-            .scaledToFit()
-        let treatment = SpriteColorTreatment(
-            species: species,
-            coat: coat,
-            customColor: customColor
-        )
+        let image = GroundedPetImage(assetName: assetName, usesNaturalGait: usesNaturalGait)
+        image.petCoat(species: species, coat: coat, customColor: customColor)
+    }
+}
 
-        image
-            .saturation(treatment.saturation)
+/// Uses the original pixels with a shared 220 × 176 canvas and ground at 160.
+/// No per-frame fit-to-bounds scaling: changing the stance must not resize the
+/// animal. Old square shepherd frames are adapted to the same coordinate space.
+struct PetSpriteGeometry {
+    let sourceSize: CGSize
+    let visibleBounds: CGRect
+    let scale: CGFloat
+    let horizontalAnchor: CGFloat
+    let preservesAuthoredBaseline: Bool
+
+    static let canvas = CGSize(width: 220, height: 176)
+    static let baseline: CGFloat = 160
+
+    init(sourceSize: CGSize, visibleBounds: CGRect, assetName: String) {
+        self.sourceSize = sourceSize
+        preservesAuthoredBaseline = assetName.hasPrefix("fluid_") || assetName.hasPrefix("companion_")
+        self.visibleBounds = visibleBounds
+        horizontalAnchor = sourceSize == Self.canvas || preservesAuthoredBaseline
+            ? sourceSize.width / 2
+            : (assetName.contains("_lie_") ? 161.5 : 203.5)
+        if assetName.hasPrefix("sprite_dog_") {
+            scale = assetName.contains("_lie_")
+                ? 180 / 259
+                : 148 / 273
+        } else {
+            scale = 1
+        }
+    }
+
+    func rect(in size: CGSize) -> CGRect {
+        let fit = min(size.width / Self.canvas.width, size.height / Self.canvas.height)
+        let origin = CGPoint(x: (size.width - Self.canvas.width * fit) / 2,
+                             y: (size.height - Self.canvas.height * fit) / 2)
+        // Retain the authored horizontal registration for original sheets.
+        return CGRect(x: origin.x + (Self.canvas.width / 2 - horizontalAnchor * scale) * fit,
+                      y: origin.y + (preservesAuthoredBaseline ? 0 : Self.baseline - visibleBounds.maxY * scale) * fit,
+                      width: sourceSize.width * scale * fit,
+                      height: sourceSize.height * scale * fit)
+    }
+
+    static func load(assetName: String) -> PetSpriteGeometry? {
+        if let cached = cache.object(forKey: assetName as NSString) { return cached.geometry }
+        guard let cgImage = UIImage(named: assetName)?.cgImage else { return nil }
+        let width = cgImage.width, height = cgImage.height
+        var pixels = [UInt8](repeating: 0, count: width * height * 4)
+        let didDraw = pixels.withUnsafeMutableBytes { buffer -> Bool in
+            guard let context = CGContext(data: buffer.baseAddress, width: width, height: height,
+                                          bitsPerComponent: 8, bytesPerRow: width * 4,
+                                          space: CGColorSpaceCreateDeviceRGB(),
+                                          bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return false }
+            context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+            return true
+        }
+        guard didDraw else { return nil }
+        var left = width, right = 0, top = height, bottom = 0
+        for y in 0..<height {
+            for x in 0..<width where pixels[(y * width + x) * 4 + 3] > 8 {
+                left = min(left, x); right = max(right, x + 1)
+                top = min(top, y); bottom = max(bottom, y + 1)
+            }
+        }
+        guard right > left, bottom > top else { return nil }
+        let geometry = PetSpriteGeometry(
+            sourceSize: CGSize(width: width, height: height),
+            visibleBounds: CGRect(x: left, y: top, width: right - left, height: bottom - top),
+            assetName: assetName
+        )
+        cache.setObject(CachedGeometry(geometry), forKey: assetName as NSString)
+        return geometry
+    }
+
+    private final class CachedGeometry: NSObject {
+        let geometry: PetSpriteGeometry
+        init(_ geometry: PetSpriteGeometry) { self.geometry = geometry }
+    }
+    private static let cache = NSCache<NSString, CachedGeometry>()
+}
+
+/// Font glyphs and PNGs share the same canvas, including transparent margins.
+/// Timer font ascenders are generated at 176/220 em with zero descent.
+struct PetTimerSpriteLayout {
+    let canvasSize: CGSize
+
+    init(viewport: CGSize) {
+        let fit = min(viewport.width / PetSpriteGeometry.canvas.width,
+                      viewport.height / PetSpriteGeometry.canvas.height)
+        canvasSize = CGSize(width: PetSpriteGeometry.canvas.width * fit,
+                            height: PetSpriteGeometry.canvas.height * fit)
+    }
+
+    var fontSize: CGFloat { canvasSize.width }
+}
+
+/// Clip from the trailing edge instead of offsetting a guessed number of
+/// characters. This keeps the final timer glyph fixed across minute/hour rolls.
+struct PetTimerGlyph: View {
+    let timerStart: Date
+    let timerEnd: Date
+    let fontName: String
+    let viewport: CGSize
+    var direction: PetDirection = .right
+
+    var body: some View {
+        let validEnd = max(timerEnd.addingTimeInterval(24 * 60 * 60),
+                           timerStart.addingTimeInterval(1))
+        PetTimerGlyphViewport(
+            text: Text(timerInterval: timerStart...validEnd, countsDown: false, showsHours: true),
+            fontName: fontName, viewport: viewport, direction: direction
+        )
+    }
+}
+
+struct PetTimerGlyphViewport: View {
+    let text: Text
+    let fontName: String
+    let viewport: CGSize
+    var direction: PetDirection = .right
+
+    var body: some View {
+        let layout = PetTimerSpriteLayout(viewport: viewport)
+        text
+            .font(.custom(fontName, fixedSize: layout.fontSize))
+            .environment(\.locale, Locale(identifier: "en_US_POSIX"))
+            .unredacted()
+            .lineLimit(1)
+            .multilineTextAlignment(.trailing)
+            // Archived system timers need an explicit proposed width. Their
+            // live text can grow beyond the intrinsic size captured at launch.
+            .frame(width: layout.fontSize * 12, height: layout.canvasSize.height, alignment: .trailing)
+            .frame(width: layout.canvasSize.width, height: layout.canvasSize.height, alignment: .trailing)
+            .clipped()
+            .scaleEffect(x: direction == .right ? 1 : -1, y: 1)
+            .frame(width: viewport.width, height: viewport.height)
+            .contentTransition(.identity)
+            .transaction { $0.animation = nil }
+    }
+}
+
+private struct GroundedPetImage: View {
+    let assetName: String
+    var usesNaturalGait = false
+
+    var body: some View {
+        GeometryReader { proxy in
+            // Foreground gait sheets have a fixed 12px gutter on both sides.
+            // Give extended paws drawing space without moving or scaling the
+            // original 220px character coordinate system between poses.
+            let gutter = usesNaturalGait ? 12 * min(proxy.size.width / 220, proxy.size.height / 176) : 0
+            Canvas { context, _ in
+                let rect = PetSpriteGeometry.load(assetName: assetName)?.rect(in: proxy.size)
+                    ?? CGRect(origin: .zero, size: proxy.size)
+                context.draw(Image(assetName).interpolation(.none), in: rect.offsetBy(dx: gutter, dy: 0))
+            }
+            .frame(width: proxy.size.width + gutter * 2, height: proxy.size.height)
+            .position(x: proxy.size.width / 2, y: proxy.size.height / 2)
+        }
+    }
+}
+
+extension View {
+    func petCoat(species: PetSpecies, coat: PetCoat, customColor: PetColorSelection?) -> some View {
+        modifier(PetCoatModifier(species: species, coat: coat, customColor: customColor))
+    }
+}
+
+private struct PetCoatModifier: ViewModifier {
+    let species: PetSpecies
+    let coat: PetCoat
+    let customColor: PetColorSelection?
+
+    func body(content: Content) -> some View {
+        let treatment = SpriteColorTreatment(species: species, coat: coat, customColor: customColor)
+        content.saturation(treatment.saturation)
             .brightness(treatment.brightness)
             .contrast(treatment.contrast)
             .overlay {
                 if let tint = treatment.tint {
-                    tint
-                    .blendMode(.color)
-                    .opacity(treatment.tintOpacity)
-                    .mask(image)
+                    tint.opacity(treatment.tintOpacity).blendMode(.sourceAtop)
                 }
             }
             .compositingGroup()
@@ -289,11 +531,38 @@ private struct SpriteColorTreatment {
 }
 
 enum PetAnimationLibrary {
+    static func naturalClip(for species: PetSpecies, breed: PetBreed?, pose: PetPose) -> PetAnimationClip {
+        if let clip = companionClip(for: species, breed: breed, pose: pose) { return clip }
+        if pose == .walk || pose == .run {
+            let token: String? = switch breed ?? PetBreed.defaultVariant(for: species) {
+            case .shepherd: "dog_shepherd"
+            case .maineCoon: "cat_maine_coon"
+            case .corgi: "dog_corgi"
+            case .doberman: "dog_doberman"
+            case .bullTerrier: "dog_bull_terrier"
+            case .classicCat: "cat"
+            case .britishShorthair: "cat_british"
+            case .siamese: "cat_siamese"
+            case .redFox: "fox"
+            case .arcticFox: "fox_arctic"
+            case .classicPenguin: "penguin"
+            case .rockhopper: "penguin_rockhopper"
+            default: nil
+            }
+            if let token {
+                return PetAnimationClip(frames: (0..<8).map { "fluid_\(token)_\(pose.rawValue)_\($0)" },
+                                        frameDuration: pose == .run ? 0.08 : 0.11)
+            }
+        }
+        return clip(for: species, breed: breed, pose: pose)
+    }
+
     static func clip(
         for species: PetSpecies,
         breed: PetBreed?,
         pose: PetPose
     ) -> PetAnimationClip {
+        if let clip = companionClip(for: species, breed: breed, pose: pose) { return clip }
         let frames: [String]
         if species == .dog,
            let dogFrames = originalDogBreedFrames(for: breed ?? .shepherd, pose: pose) {
@@ -311,6 +580,24 @@ enum PetAnimationLibrary {
         }
 
         return PetAnimationClip(frames: frames, frameDuration: frameDuration(for: pose))
+    }
+
+    private static func companionClip(for species: PetSpecies, breed: PetBreed?, pose: PetPose) -> PetAnimationClip? {
+        let variants = PetBreed.available(for: species)
+        let variant = breed.flatMap { variants.contains($0) ? $0 : nil } ?? variants.first
+        guard let token = variant?.companionArtworkToken else { return nil }
+        let state: String
+        let durations: [TimeInterval]
+        switch pose {
+        case .walk: state = "walk"; durations = Array(repeating: 0.11, count: 8)
+        case .run: state = "run"; durations = Array(repeating: 0.08, count: 8)
+        case .idle: state = "idle"; durations = [1.8, 0.14]
+        case .jump, .fly: state = "jump"; durations = [0.18, 0.22]
+        case .play, .eat: state = "play"; durations = [0.24, 0.24]
+        case .sleep: state = "sleep"; durations = [0.8, 0.8]
+        }
+        let frames = durations.indices.map { "companion_\(token)_\(state)_\(String(format: "%02d", $0))" }
+        return PetAnimationClip(frames: frames, frameDurations: durations)
     }
 
     /// Movement clips are intentionally quicker than expressive or resting
@@ -345,7 +632,8 @@ enum PetAnimationLibrary {
                 token = "doberman"
             case .bullTerrier:
                 token = "bull_terrier"
-            case .classicCat, .britishShorthair, .maineCoon, .siamese,
+            case .cardigan, .adultLion, .lioness, .lionCub,
+                 .classicCat, .britishShorthair, .maineCoon, .siamese,
                  .redFox, .arcticFox, .classicParrot, .cockatiel, .budgie,
                  .macaw, .classicPenguin, .rockhopper:
                 return nil
@@ -372,7 +660,8 @@ enum PetAnimationLibrary {
             token = "doberman"
         case .bullTerrier:
             token = "bull_terrier"
-        case .classicCat, .britishShorthair, .maineCoon, .siamese,
+        case .cardigan, .adultLion, .lioness, .lionCub,
+             .classicCat, .britishShorthair, .maineCoon, .siamese,
              .redFox, .arcticFox, .classicParrot, .cockatiel, .budgie,
              .macaw, .classicPenguin, .rockhopper:
             return nil
@@ -637,7 +926,7 @@ private struct PixelPetCanvas: View {
 private enum PixelPetLibrary {
     static func rows(for species: PetSpecies) -> [String] {
         switch species {
-        case .cat: cat
+        case .cat, .lion: cat
         case .dog: dog
         case .fox: fox
         case .parrot: parrot
@@ -648,7 +937,7 @@ private enum PixelPetLibrary {
     static func accent(for species: PetSpecies) -> Color {
         switch species {
         case .parrot, .penguin: Color(red: 1, green: 0.66, blue: 0.12)
-        case .cat, .dog, .fox: Color(red: 1, green: 0.48, blue: 0.55)
+        case .cat, .dog, .fox, .lion: Color(red: 1, green: 0.48, blue: 0.55)
         }
     }
 
@@ -810,7 +1099,7 @@ struct PetHabitatView: View {
     let snapshot: PetSnapshot
     var animated = true
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @PetReduceMotion private var reduceMotion
 
     var body: some View {
         GeometryReader { proxy in

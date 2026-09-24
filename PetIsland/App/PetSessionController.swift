@@ -8,6 +8,7 @@ import WidgetKit
 final class PetSessionController: ObservableObject {
     enum Operation: Equatable {
         case loading
+        case loadFailed
         case idle
         case starting
         case active
@@ -40,6 +41,8 @@ final class PetSessionController: ObservableObject {
     @Published var showsPetEditor = false
     @Published var showsSettings = false
     @Published var showsSessionSummary = false
+    @Published var selectedTab: AppTab = .island
+    @Published var showsPlayYard = false
     @Published private(set) var liveActivitiesEnabled = true
     @Published private(set) var liveActivityConnection: LiveActivityConnection = .inactive
     @Published private(set) var placement: PetPlacement = .enclosure
@@ -57,7 +60,10 @@ final class PetSessionController: ObservableObject {
     private var activityObservationTask: Task<Void, Never>?
     private var authorizationTask: Task<Void, Never>?
     private var didBootstrap = false
-    private var shouldReconnectMissingActivity = true
+    private var bootstrapTask: Task<Void, Never>?
+    private var shouldReconnectMissingActivity = false
+    @Published private(set) var isSavingChanges = false
+    private var saveWaiters: [CheckedContinuation<Void, Never>] = []
 
     init(
         store: any PetStore = FilePetStore(),
@@ -67,13 +73,37 @@ final class PetSessionController: ObservableObject {
         self.arcadeStore = arcadeStore
     }
 
-    var isBusy: Bool { operation == .starting || operation == .stopping || operation == .loading }
+    var isBusy: Bool { isSavingChanges || operation == .starting || operation == .stopping || operation == .loading || operation == .loadFailed }
 
     func bootstrap() async {
+        if let bootstrapTask {
+            await bootstrapTask.value
+            return
+        }
+        let task = Task { await self.performBootstrap() }
+        bootstrapTask = task
+        await task.value
+        bootstrapTask = nil
+    }
+
+    private func performBootstrap() async {
+        guard operation != .starting, operation != .stopping, !isSavingChanges else { return }
+        await beginSave()
+        defer { finishSave() }
         if !didBootstrap {
-            state = await store.load()
-            arcadeState = await arcadeStore.load()
+            operation = .loading
+            do {
+                let loadedState = try await store.load()
+                let loadedArcade = try await arcadeStore.load()
+                state = loadedState
+                arcadeState = loadedArcade
+            } catch {
+                operation = .loadFailed
+                return
+            }
             arcadeState.reconcile(with: state.pets)
+            _ = await flushCareEvents()
+            arcadeState.mergeVitals(from: PetHabitatStore.load())
             publishPetCollection()
             synchronizeSharedLifeState()
             synchronizeSharedHabitat()
@@ -83,8 +113,9 @@ final class PetSessionController: ObservableObject {
             didBootstrap = true
             observeAuthorization()
             await persist()
-            await persistArcade()
+            _ = await commitArcade(arcadeState)
         }
+        _ = await flushCareEvents()
         reloadSharedLifeState()
         if placement == .dynamicIsland {
             await reconcileActivities(at: .now)
@@ -93,120 +124,153 @@ final class PetSessionController: ObservableObject {
         }
     }
 
-    func completeOnboarding(profile newProfile: PetProfile) async {
+    @discardableResult
+    func completeOnboarding(profile newProfile: PetProfile) async -> Bool {
+        await beginSave()
+        defer { finishSave() }
         var profile = newProfile
         profile.normalizeName()
-        state.pets = [profile]
-        state.activePetIDs = [profile.id]
-        publishPetCollection()
-        completedOnboarding = true
-        state.completedOnboarding = true
-        await persist()
-        await persistArcade()
-        synchronizeSharedLifeState()
-        synchronizeSharedHabitat()
+        var candidate = state
+        candidate.pets = [profile]
+        candidate.activePetIDs = [profile.id]
+        candidate.completedOnboarding = true
+        return await commitState(candidate)
     }
 
-    func updateProfile(_ newProfile: PetProfile) async {
-        _ = await updatePet(newProfile)
+    @discardableResult
+    func updateProfile(_ newProfile: PetProfile) async -> Bool {
+        await updatePet(newProfile)
     }
 
-    /// Adds a pet to the collection. It joins the active party when a slot is
-    /// available and no session is currently running.
     @discardableResult
     func addPet(_ newPet: PetProfile) async -> Bool {
-        guard !state.pets.contains(where: { $0.id == newPet.id }) else { return false }
+        await beginSave()
+        defer { finishSave() }
+        guard !state.pets.contains(where: { $0.id == newPet.id }), state.pets.count < 12 else { return false }
         var normalized = newPet
         normalized.normalizeName()
-        state.pets.append(normalized)
-        if session == nil, state.activePetIDs.count < PersistedAppState.maximumActivePets {
-            state.activePetIDs.append(normalized.id)
+        var candidate = state
+        candidate.pets.append(normalized)
+        if session == nil, candidate.activePetIDs.count < PersistedAppState.maximumActivePets {
+            candidate.activePetIDs.append(normalized.id)
         }
-        publishPetCollection()
-        await persist()
-        await persistArcade()
-        synchronizeSharedLifeState()
-        synchronizeSharedHabitat()
-        return true
+        return await commitState(candidate)
     }
 
     @discardableResult
     func updatePet(_ updatedPet: PetProfile) async -> Bool {
-        guard let index = state.pets.firstIndex(where: { $0.id == updatedPet.id }) else { return false }
+        await beginSave()
+        defer { finishSave() }
+        guard session?.petID != updatedPet.id,
+              let index = state.pets.firstIndex(where: { $0.id == updatedPet.id }) else { return false }
         var normalized = updatedPet
         normalized.normalizeName()
-        state.pets[index] = normalized
-        publishPetCollection()
-        await persist()
-        synchronizeSharedLifeState()
-        synchronizeSharedHabitat()
-        return true
+        var candidate = state
+        candidate.pets[index] = normalized
+        return await commitState(candidate)
     }
 
-    /// Removes a pet without ever leaving the collection or party empty.
-    /// The pet leading a running session is protected until the session ends.
     @discardableResult
     func removePet(id: UUID) async -> Bool {
-        guard state.pets.count > 1,
-              state.pets.contains(where: { $0.id == id }),
-              session?.petID != id,
-              session == nil || !state.activePetIDs.contains(id) else { return false }
-
-        state.pets.removeAll { $0.id == id }
-        state.activePetIDs.removeAll { $0 == id }
-        publishPetCollection()
-        await persist()
-        await persistArcade()
-        synchronizeSharedHabitat()
-        return true
+        await beginSave()
+        defer { finishSave() }
+        guard state.pets.count > 1, state.pets.contains(where: { $0.id == id }),
+              session?.petID != id else { return false }
+        var candidate = state
+        candidate.pets.removeAll { $0.id == id }
+        candidate.activePetIDs.removeAll { $0 == id }
+        return await commitState(candidate)
     }
 
-    /// Toggles party membership. Party membership is locked for the duration
-    /// of a Live Activity because ActivityKit attributes are immutable.
     @discardableResult
     func togglePetActive(id: UUID) async -> Bool {
+        await beginSave()
+        defer { finishSave() }
         guard session == nil, state.pets.contains(where: { $0.id == id }) else { return false }
-        if let index = state.activePetIDs.firstIndex(of: id) {
-            guard state.activePetIDs.count > 1 else { return false }
-            state.activePetIDs.remove(at: index)
+        var candidate = state
+        if let index = candidate.activePetIDs.firstIndex(of: id) {
+            guard candidate.activePetIDs.count > 1 else { return false }
+            candidate.activePetIDs.remove(at: index)
         } else {
-            guard state.activePetIDs.count < PersistedAppState.maximumActivePets else { return false }
-            state.activePetIDs.append(id)
+            guard candidate.activePetIDs.count < PersistedAppState.maximumActivePets else { return false }
+            candidate.activePetIDs.append(id)
         }
-        publishPetCollection()
-        await persist()
-        return true
+        return await commitState(candidate)
     }
 
-    /// Promotes a pet to the first party position. An inactive pet is added;
-    /// when the party is full, the last companion yields its slot.
     @discardableResult
     func makeLeadPet(id: UUID) async -> Bool {
+        await beginSave()
+        defer { finishSave() }
         guard session == nil, state.pets.contains(where: { $0.id == id }) else { return false }
-        state.activePetIDs.removeAll { $0 == id }
-        state.activePetIDs.insert(id, at: 0)
-        state.activePetIDs = Array(state.activePetIDs.prefix(PersistedAppState.maximumActivePets))
-        publishPetCollection()
-        await persist()
-        return true
+        var candidate = state
+        candidate.activePetIDs.removeAll { $0 == id }
+        candidate.activePetIDs.insert(id, at: 0)
+        candidate.activePetIDs = Array(candidate.activePetIDs.prefix(PersistedAppState.maximumActivePets))
+        return await commitState(candidate)
     }
 
-    func updateSettings(_ newSettings: AppSettings) async {
-        settings = newSettings
-        state.settings = newSettings
-        await persist()
+    @discardableResult
+    func updateSettings(_ newSettings: AppSettings) async -> Bool {
+        await beginSave()
+        defer { finishSave() }
+        var candidate = state
+        candidate.settings = newSettings
+        return await commitState(candidate, syncPets: false)
     }
 
-    func updateDynamicIslandSettings(
-        mode: DynamicIslandMotionMode? = nil,
-        durationMinutes: Int? = nil
-    ) async {
-        if let mode { settings.dynamicIslandMotionMode = mode }
-        if let durationMinutes {
-            settings.defaultSessionMinutes = min(max(durationMinutes, 20), 240)
+    func updateDynamicIslandSettings(mode: DynamicIslandMotionMode? = nil, durationMinutes: Int? = nil) async {
+        await beginSave()
+        defer { finishSave() }
+        var candidate = state
+        if let mode { candidate.settings.dynamicIslandMotionMode = mode }
+        if let durationMinutes { candidate.settings.defaultSessionMinutes = min(max(durationMinutes, 20), 240) }
+        _ = await commitState(candidate, syncPets: false)
+    }
+
+    @discardableResult
+    func updateLiveActivityBackgroundColor(_ color: PetColorSelection?) async -> Bool {
+        await beginSave()
+        defer { finishSave() }
+        var candidate = state
+        candidate.settings.liveActivityBackgroundColor = color
+        return await commitState(candidate, syncPets: false)
+    }
+
+    private func beginSave() async {
+        if isSavingChanges {
+            await withCheckedContinuation { saveWaiters.append($0) }
+        } else {
+            isSavingChanges = true
         }
-        state.settings = settings
-        await persist()
+    }
+
+    private func finishSave() {
+        if saveWaiters.isEmpty { isSavingChanges = false }
+        else { saveWaiters.removeFirst().resume() }
+    }
+
+    private func commitState(_ candidate: PersistedAppState, syncPets: Bool = true) async -> Bool {
+        do { try await store.save(candidate) }
+        catch {
+            alertMessage = String(localized: "Your changes could not be saved. Please try again.")
+            return false
+        }
+        let activityColorChanged = settings.liveActivityBackgroundColor != candidate.settings.liveActivityBackgroundColor
+        state = candidate
+        settings = candidate.settings
+        completedOnboarding = candidate.completedOnboarding
+        publishPetCollection()
+        if syncPets {
+            synchronizeSharedLifeState()
+            synchronizeSharedHabitat()
+        }
+        if activityColorChanged, let activity {
+            var content = activity.content.state
+            content.backgroundColor = settings.liveActivityBackgroundColor
+            await activity.update(ActivityContent(state: content, staleDate: activity.attributes.endsAt))
+        }
+        return true
     }
 
     var habitatResidents: [PetProfile] {
@@ -215,62 +279,109 @@ final class PetSessionController: ObservableObject {
     }
 
     var habitatVitalsByPetID: [UUID: PetVitals] {
-        arcadeState.vitalsByPetID
+        Dictionary(uniqueKeysWithValues: state.pets.map { ($0.id, vitals(for: $0.id)) })
     }
 
-    func vitals(for petID: UUID) -> PetVitals {
-        arcadeState.vitalsByPetID[petID] ?? PetVitals()
+    func vitals(for petID: UUID, at date: Date = .now) -> PetVitals {
+        (arcadeState.vitalsByPetID[petID] ?? PetVitals()).projected(
+            from: arcadeState.vitalsUpdatedAtByPetID[petID] ?? .distantPast, to: date)
     }
 
     func completeMiniGame(
-        _ game: MiniGameKind,
-        score: Int,
-        petID: UUID,
-        at date: Date = .now
+        _ game: MiniGameKind, score: Int, petID: UUID, at date: Date = .now,
+        runID: UUID = UUID()
     ) async -> ArcadePayout? {
-        guard state.pets.contains(where: { $0.id == petID }) else { return nil }
-
-        let currentVitals = vitals(for: petID)
-        let payout = arcadeState.progress.record(
-            game: game,
-            score: score,
-            wasTired: currentVitals.energy < ArcadeEconomy.tiredEnergyThreshold,
-            at: date
-        )
-        arcadeState.vitalsByPetID[petID] = ArcadeEconomy.vitalsAfterPlaying(currentVitals)
-        arcadeProgress = arcadeState.progress
-        await persistArcade()
-        synchronizeGameVitalsWithHabitat()
+        await beginSave()
+        defer { finishSave() }
+        if let saved = arcadeState.completedRuns.first(where: { $0.id == runID }) { return saved.payout }
+        guard state.pets.contains(where: { $0.id == petID }), await flushCareEvents() else { return nil }
+        arcadeState.mergeVitals(from: PetHabitatStore.load())
+        var candidate = arcadeState
+        let currentVitals = vitals(for: petID, at: date)
+        let payout = candidate.progress.record(game: game, score: score,
+                                               wasTired: currentVitals.energy < ArcadeEconomy.tiredEnergyThreshold,
+                                               at: date)
+        let event = PetCareEvent(petID: petID, fullness: -0.02, happiness: 0.08, energy: -0.055, date: date)
+        candidate.vitalsByPetID[petID] = event.applying(to: currentVitals)
+        candidate.vitalsUpdatedAtByPetID[petID] = date
+        candidate.pendingCareEvents.append(event)
+        candidate.completedRuns.append(CompletedArcadeRun(id: runID, payout: payout))
+        candidate.completedRuns = Array(candidate.completedRuns.suffix(128))
+        guard await commitArcade(candidate) else { return nil }
+        _ = await flushCareEvents()
         Haptics.success(enabled: settings.hapticsEnabled)
         return payout
     }
 
     func purchaseArcadeItem(_ item: ArcadeItemKind) async -> Bool {
-        guard arcadeState.progress.purchase(item) else { return false }
-        arcadeProgress = arcadeState.progress
-        await persistArcade()
+        await beginSave()
+        defer { finishSave() }
+        var candidate = arcadeState
+        guard candidate.progress.purchase(item), await commitArcade(candidate) else { return false }
         Haptics.success(enabled: settings.hapticsEnabled)
         return true
     }
 
     func useArcadeItem(_ item: ArcadeItemKind, for petID: UUID) async -> Bool {
-        guard state.pets.contains(where: { $0.id == petID }),
-              arcadeState.progress.consume(item) else { return false }
-
-        arcadeState.vitalsByPetID[petID] = ArcadeEconomy.vitals(
-            vitals(for: petID),
-            afterUsing: item
-        )
-        arcadeProgress = arcadeState.progress
-        await persistArcade()
-        synchronizeGameVitalsWithHabitat()
+        await beginSave()
+        defer { finishSave() }
+        guard state.pets.contains(where: { $0.id == petID }), await flushCareEvents() else { return false }
+        arcadeState.mergeVitals(from: PetHabitatStore.load())
+        var candidate = arcadeState
+        guard candidate.progress.consume(item) else { return false }
+        let neutral = PetVitals(fullness: 0.5, happiness: 0.5, energy: 0.5)
+        let effect = ArcadeEconomy.vitals(neutral, afterUsing: item)
+        let event = PetCareEvent(petID: petID, fullness: effect.fullness - 0.5,
+                                 happiness: effect.happiness - 0.5, energy: effect.energy - 0.5, date: .now)
+        candidate.vitalsByPetID[petID] = event.applying(to: vitals(for: petID))
+        candidate.vitalsUpdatedAtByPetID[petID] = event.date
+        candidate.pendingCareEvents.append(event)
+        guard await commitArcade(candidate) else { return false }
+        _ = await flushCareEvents()
         Haptics.success(enabled: settings.hapticsEnabled)
         return true
     }
 
+    private func commitArcade(_ candidate: ArcadeState) async -> Bool {
+        do { try await arcadeStore.save(candidate) }
+        catch {
+            alertMessage = String(localized: "Arcade progress could not be saved. Please try again.")
+            return false
+        }
+        arcadeState = candidate
+        arcadeProgress = candidate.progress
+        return true
+    }
+
+    /// The local commit contains both the reward and an outbox. A failed shared
+    /// write can be replayed after launch without losing or duplicating care.
+    private func flushCareEvents() async -> Bool {
+        guard !arcadeState.pendingCareEvents.isEmpty else { return true }
+        do {
+            let events = arcadeState.pendingCareEvents
+            habitat = try PetHabitatStore.update { shared in
+                for event in events { shared.apply(event) }
+            }
+            var acknowledged = arcadeState
+            for resident in habitat.residents {
+                acknowledged.vitalsByPetID[resident.id] = resident.vitals
+                acknowledged.vitalsUpdatedAtByPetID[resident.id] = resident.vitalsUpdatedAt
+            }
+            acknowledged.pendingCareEvents = []
+            guard await commitArcade(acknowledged) else { return false }
+            WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
+            return true
+        } catch {
+            alertMessage = String(localized: "Pet rewards are saved and will sync when the enclosure is available.")
+            return false
+        }
+    }
+
     /// Saves the enclosure composition and theme as one atomic App Group
     /// snapshot, so the Home Screen widget observes a consistent update.
-    func saveHabitat(theme: HabitatTheme, residentPetIDs: [UUID]) {
+    @discardableResult
+    func saveHabitat(theme: HabitatTheme, residentPetIDs: [UUID]) -> Bool {
+        guard !isBusy else { return false }
         do {
             habitat = try PetHabitatStore.update { shared in
                 shared.configuration.setTheme(theme)
@@ -278,24 +389,33 @@ final class PetSessionController: ObservableObject {
                 let selected = Set(shared.configuration.residentPetIDs)
                 shared.residents = state.pets.compactMap { pet in
                     guard selected.contains(pet.id) else { return nil }
+                    if var existing = shared.residents.first(where: { $0.id == pet.id }) {
+                        existing.profile = pet
+                        return existing
+                    }
                     return SharedHabitatResident(
                         profile: pet,
-                        vitals: arcadeState.vitalsByPetID[pet.id] ?? PetVitals()
+                        vitals: arcadeState.vitalsByPetID[pet.id] ?? PetVitals(),
+                        vitalsUpdatedAt: arcadeState.vitalsUpdatedAtByPetID[pet.id] ?? .distantPast
                     )
                 }
             }
             WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
             Haptics.success(enabled: settings.hapticsEnabled)
+            return true
         } catch {
             alertMessage = String(localized: "The enclosure could not be saved.")
+            return false
         }
     }
 
     func startSession(duration: TimeInterval) async {
-        guard operation == .idle else { return }
+        guard operation == .idle, !isSavingChanges else { return }
+        await beginSave()
+        defer { finishSave() }
         operation = .starting
         let now = Date.now
-        let clampedDuration = min(max(duration, 10 * 60), 8 * 60 * 60)
+        let clampedDuration = duration.isFinite ? min(max(duration, 10 * 60), 8 * 60 * 60) : 20 * 60
         let party = activeParty.isEmpty ? [profile] : activeParty
         let leadPet = party[0]
         var snapshot = behavior.initialSnapshot(for: leadPet.species, at: now)
@@ -310,11 +430,18 @@ final class PetSessionController: ObservableObject {
         }
         activity = nil
         shouldReconnectMissingActivity = true
-        _ = requestLiveActivity(for: newSession, party: party, reportsFailure: true)
+        guard requestLiveActivity(for: newSession, party: party, reportsFailure: true) != nil else {
+            operation = .idle
+            updateSharedPlacement(.enclosure)
+            synchronizeSharedHabitat()
+            return
+        }
 
         session = newSession
         state.activeSession = newSession
         operation = .active
+        updateSharedPlacement(.dynamicIsland)
+        synchronizeSharedHabitat()
         showsSessionComposer = false
         await persist()
         scheduleExpiry(for: newSession)
@@ -345,7 +472,9 @@ final class PetSessionController: ObservableObject {
                     movesToEnclosure: false
                 )
             } else {
+                await beginSave()
                 await clearLiveActivityState()
+                finishSave()
             }
             moveLeadInSharedHabitat(toDynamicIsland: false)
             updateSharedPlacement(newPlacement)
@@ -358,7 +487,11 @@ final class PetSessionController: ObservableObject {
     /// Explicit user action for recovering a session whose system Live
     /// Activity was removed or could not be registered during installation.
     func reconnectLiveActivity() async {
-        guard let session, !session.isExpired(at: .now) else { return }
+        guard !isBusy, let session, !session.isExpired(at: .now) else { return }
+        await beginSave()
+        defer { finishSave() }
+        operation = .starting
+        defer { operation = .active }
         for existing in Activity<PetActivityAttributes>.activities {
             await existing.end(nil, dismissalPolicy: .immediate)
         }
@@ -366,9 +499,12 @@ final class PetSessionController: ObservableObject {
         shouldReconnectMissingActivity = true
         let party = activeParty.isEmpty ? [profile] : activeParty
         _ = requestLiveActivity(for: session, party: party, reportsFailure: true)
+        await persist()
     }
 
     func interact(_ interaction: PetInteraction) async {
+        await beginSave()
+        defer { finishSave() }
         guard operation == .active, var current = session else { return }
         let pet = state.pets.first(where: { $0.id == current.petID }) ?? profile
         let snapshot = behavior.reacting(
@@ -391,7 +527,7 @@ final class PetSessionController: ObservableObject {
             }
             await activity.update(
                 ActivityContent(
-                    state: .init(snapshot: snapshot, lastInteraction: label),
+                    state: activity.content.state.updating(snapshot: snapshot, lastInteraction: label),
                     staleDate: current.endsAt
                 )
             )
@@ -405,6 +541,8 @@ final class PetSessionController: ObservableObject {
         recordsHistory: Bool = true,
         movesToEnclosure: Bool = true
     ) async {
+        await beginSave()
+        defer { finishSave() }
         guard operation == .active, let current = session else { return }
         operation = .stopping
         expiryTask?.cancel()
@@ -428,7 +566,7 @@ final class PetSessionController: ObservableObject {
                 : .after(Date.now.addingTimeInterval(15 * 60))
             await activity.end(
                 ActivityContent(
-                    state: .init(snapshot: finalSnapshot, lastInteraction: "finished"),
+                    state: activity.content.state.updating(snapshot: finalSnapshot, lastInteraction: "finished"),
                     staleDate: Date.now
                 ),
                 dismissalPolicy: policy
@@ -442,24 +580,35 @@ final class PetSessionController: ObservableObject {
         await persist()
         if movesToEnclosure {
             updateSharedPlacement(.enclosure)
+            synchronizeSharedHabitat()
             WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
         }
         Haptics.success(enabled: settings.hapticsEnabled)
     }
 
     func handleDeepLink(_ url: URL) {
-        guard url.scheme == "petisland" else { return }
+        guard url.scheme?.lowercased() == "petisland" else { return }
+        switch url.host?.lowercased() {
+        case "play", "playroom":
+            selectedTab = .island
+            showsPlayYard = true
+        case "enclosure", "island", "session":
+            selectedTab = .island
+        default:
+            return
+        }
         if session != nil { showsSessionComposer = false }
     }
 
     func sceneBecameActive() async {
         await bootstrap()
-        reloadSharedLifeState()
     }
 
     /// The compact Live Activity uses a system-rendered timer and needs no
     /// background frame updates. Persist once before iOS suspends the app.
     func sceneEnteredBackground() async {
+        await beginSave()
+        defer { finishSave() }
         guard operation == .active else { return }
         await persist()
     }
@@ -479,7 +628,7 @@ final class PetSessionController: ObservableObject {
             session = savedSession
             operation = .active
             scheduleExpiry(for: savedSession)
-            if restoredActivity == nil, shouldReconnectMissingActivity {
+            if restoredActivity == nil, shouldReconnectMissingActivity, state.dismissedActivitySessionID != savedSession.id {
                 let party = [profile]
                 restoredActivity = requestLiveActivity(
                     for: savedSession,
@@ -515,6 +664,7 @@ final class PetSessionController: ObservableObject {
             operation = .idle
             if placement == .dynamicIsland {
                 updateSharedPlacement(.enclosure)
+                synchronizeSharedHabitat()
                 WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
             }
         }
@@ -531,6 +681,8 @@ final class PetSessionController: ObservableObject {
             liveActivityConnection = liveActivitiesEnabled ? .inactive : .unavailable
         } else if !liveActivitiesEnabled {
             liveActivityConnection = .unavailable
+        } else {
+            liveActivityConnection = .dismissed
         }
     }
 
@@ -561,10 +713,14 @@ final class PetSessionController: ObservableObject {
     }
 
     private func activityWasDismissed(activityID: String) async {
+        await beginSave()
+        defer { finishSave() }
         guard activity?.id == activityID else { return }
         activity = nil
         shouldReconnectMissingActivity = false
+        state.dismissedActivitySessionID = session?.id
         liveActivityConnection = .dismissed
+        await persist()
     }
 
     private func observeAuthorization() {
@@ -583,6 +739,11 @@ final class PetSessionController: ObservableObject {
     private func publishPetCollection() {
         state.normalizePetCollection()
         arcadeState.reconcile(with: state.pets)
+        // Initialize rest only after the bootstrap merge: an unknown local
+        // timestamp must not hide older, valid care performed by a widget.
+        for pet in state.pets where arcadeState.vitalsUpdatedAtByPetID[pet.id] == nil || arcadeState.vitalsUpdatedAtByPetID[pet.id] == .distantPast {
+            arcadeState.vitalsUpdatedAtByPetID[pet.id] = .now
+        }
         pets = state.pets
         activePetIDs = state.activePetIDs
         activeParty = state.activeParty
@@ -611,7 +772,7 @@ final class PetSessionController: ObservableObject {
             liveActivitiesEnabled = false
             liveActivityConnection = .unavailable
             if reportsFailure {
-                alertMessage = String(localized: "The session started in the app. Enable Live Activities in Settings to see your pet outside the app.")
+                alertMessage = String(localized: "Enable Live Activities in Settings to take your pet to Dynamic Island.")
             }
             return nil
         }
@@ -635,7 +796,8 @@ final class PetSessionController: ObservableObject {
         let content = ActivityContent(
             state: PetActivityAttributes.ContentState(
                 snapshot: session.snapshot,
-                lastInteraction: nil
+                lastInteraction: nil,
+                backgroundColor: settings.liveActivityBackgroundColor
             ),
             staleDate: session.endsAt
         )
@@ -647,13 +809,14 @@ final class PetSessionController: ObservableObject {
                 pushType: nil
             )
             activity = requested
+            state.dismissedActivitySessionID = nil
             updateLiveActivityConnection(requested.activityState)
             observeCurrentActivity()
             return requested
         } catch {
             liveActivityConnection = .failed
             if reportsFailure {
-                alertMessage = String(localized: "The session started in the app, but Live Activity could not start.")
+                alertMessage = String(localized: "Live Activity could not start. Please try again.")
             }
             return nil
         }
@@ -690,15 +853,16 @@ final class PetSessionController: ObservableObject {
     }
 
     private func synchronizeSharedLifeState() {
-        var shared = PetLifeStore.load()
-        shared.profile = profile
-        if state.activeSession != nil {
-            shared.move(to: .dynamicIsland)
-        }
         do {
-            try PetLifeStore.save(shared)
-            lifeState = shared
-            placement = shared.placement
+            lifeState = try PetLifeStore.update { shared in
+                if shared.profile.id != profile.id {
+                    shared = PetLifeState(profile: profile, placement: placement,
+                                          vitals: vitals(for: profile.id))
+                }
+                shared.profile = profile
+                if state.activeSession != nil { shared.move(to: .dynamicIsland) }
+            }
+            placement = lifeState.placement
             WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
         } catch {
             alertMessage = String(localized: "Pixel's widget state could not be saved.")
@@ -714,7 +878,9 @@ final class PetSessionController: ObservableObject {
                 if placement == .dynamicIsland {
                     shared.configuration.setDynamicIslandLead(profile.id)
                 } else if shared.configuration.leadDynamicIslandPetID != nil {
-                    _ = shared.configuration.returnDynamicIslandLeadToHabitat()
+                    if !shared.configuration.returnDynamicIslandLeadToHabitat() {
+                        shared.configuration.setDynamicIslandLead(nil)
+                    }
                 }
 
                 if shared.configuration.residentPetIDs.isEmpty,
@@ -725,9 +891,14 @@ final class PetSessionController: ObservableObject {
                 let selected = Set(shared.configuration.residentPetIDs)
                 shared.residents = state.pets.compactMap { pet in
                     guard selected.contains(pet.id) else { return nil }
+                    if var existing = shared.residents.first(where: { $0.id == pet.id }) {
+                        existing.profile = pet
+                        return existing
+                    }
                     return SharedHabitatResident(
                         profile: pet,
-                        vitals: arcadeState.vitalsByPetID[pet.id] ?? PetVitals()
+                        vitals: arcadeState.vitalsByPetID[pet.id] ?? PetVitals(),
+                        vitalsUpdatedAt: arcadeState.vitalsUpdatedAtByPetID[pet.id] ?? .distantPast
                     )
                 }
             }
@@ -742,18 +913,26 @@ final class PetSessionController: ObservableObject {
             habitat = try PetHabitatStore.update { shared in
                 if toDynamicIsland {
                     shared.configuration.setDynamicIslandLead(profile.id)
-                } else if !shared.configuration.returnDynamicIslandLeadToHabitat(),
-                          shared.configuration.leadDynamicIslandPetID == nil,
-                          shared.configuration.residentPetIDs.isEmpty {
-                    shared.configuration.setResidents([profile.id])
+                } else {
+                    if !shared.configuration.returnDynamicIslandLeadToHabitat() {
+                        shared.configuration.setDynamicIslandLead(nil)
+                    }
+                    if shared.configuration.residentPetIDs.isEmpty {
+                        shared.configuration.setResidents([profile.id])
+                    }
                 }
 
                 let selected = Set(shared.configuration.residentPetIDs)
                 shared.residents = state.pets.compactMap { pet in
                     guard selected.contains(pet.id) else { return nil }
+                    if var existing = shared.residents.first(where: { $0.id == pet.id }) {
+                        existing.profile = pet
+                        return existing
+                    }
                     return SharedHabitatResident(
                         profile: pet,
-                        vitals: arcadeState.vitalsByPetID[pet.id] ?? PetVitals()
+                        vitals: arcadeState.vitalsByPetID[pet.id] ?? PetVitals(),
+                        vitalsUpdatedAt: arcadeState.vitalsUpdatedAtByPetID[pet.id] ?? .distantPast
                     )
                 }
             }
@@ -762,25 +941,13 @@ final class PetSessionController: ObservableObject {
         }
     }
 
-    private func synchronizeGameVitalsWithHabitat() {
-        do {
-            habitat = try PetHabitatStore.update { shared in
-                shared.residents = shared.residents.map { resident in
-                    var updated = resident
-                    updated.vitals = arcadeState.vitalsByPetID[resident.id] ?? resident.vitals
-                    return updated
-                }
-            }
-            WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
-        } catch {
-            alertMessage = String(localized: "Pet rewards could not be synchronized with the enclosure.")
-        }
-    }
-
     private func reloadSharedLifeState() {
         lifeState = PetLifeStore.load()
         placement = lifeState.placement
         habitat = PetHabitatStore.load()
+        let previous = arcadeState
+        arcadeState.mergeVitals(from: habitat)
+        if previous != arcadeState { Task { await persistArcade() } }
     }
 
     private func updateSharedPlacement(_ newPlacement: PetPlacement) {
@@ -817,6 +984,8 @@ final class PetSessionController: ObservableObject {
     }
 
     private func persistArcade() async {
+        await beginSave()
+        defer { finishSave() }
         do {
             try await arcadeStore.save(arcadeState)
         } catch {

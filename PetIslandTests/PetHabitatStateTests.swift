@@ -2,6 +2,70 @@ import XCTest
 @testable import PetIsland
 
 final class PetHabitatStateTests: XCTestCase {
+    func testWidgetCareMergesIntoArcadeWithoutOverwritingNewerAppCare() throws {
+        let pet = makePets(count: 1, createdAt: .now)[0]
+        let date = Date(timeIntervalSince1970: 50_000)
+        var shared = SharedPetHabitat(configuration: PetHabitatState(residentPetIDs: [pet.id]),
+                                     residents: [SharedHabitatResident(profile: pet, vitals: PetVitals())])
+        var arcade = ArcadeState(progress: ArcadeProgress(coins: 42))
+        arcade.reconcile(with: [pet])
+        shared.playWithResidents(at: date)
+        arcade.mergeVitals(from: shared)
+        XCTAssertEqual(arcade.vitalsByPetID[pet.id], shared.residents[0].vitals)
+        XCTAssertEqual(arcade.progress.coins, 42)
+        let newer = PetVitals(fullness: 1, happiness: 1, energy: 1)
+        arcade.vitalsByPetID[pet.id] = newer
+        arcade.vitalsUpdatedAtByPetID[pet.id] = date.addingTimeInterval(1)
+        arcade.mergeVitals(from: shared)
+        XCTAssertEqual(arcade.vitalsByPetID[pet.id], newer)
+        let restored = try JSONDecoder().decode(ArcadeState.self, from: JSONEncoder().encode(arcade))
+        XCTAssertEqual(restored, arcade)
+    }
+
+    func testOldResidentPayloadDecodesWithoutCareTimestamp() throws {
+        let pet = makePets(count: 1, createdAt: .now)[0]
+        let payload = LegacyResident(profile: pet, vitals: PetVitals())
+        let decoded = try JSONDecoder().decode(SharedHabitatResident.self, from: JSONEncoder().encode(payload))
+        XCTAssertEqual(decoded.profile, pet)
+        XCTAssertEqual(decoded.vitalsUpdatedAt, .distantPast)
+    }
+
+    func testSharedPayloadKeepsLeadOutsideResidentListAcrossRoundTrip() throws {
+        let pets = makePets(count: 2, createdAt: .now)
+        var shared = SharedPetHabitat(
+            configuration: PetHabitatState(residentPetIDs: pets.map(\.id)),
+            residents: pets.map { SharedHabitatResident(profile: $0, vitals: PetVitals()) }
+        )
+        shared.configuration.setDynamicIslandLead(pets[0].id)
+        shared.residents.removeFirst()
+        shared.reconcile()
+        shared = try PropertyListDecoder().decode(SharedPetHabitat.self, from: PropertyListEncoder().encode(shared))
+        shared.reconcile()
+        XCTAssertEqual(shared.configuration.leadDynamicIslandPetID, pets[0].id)
+        XCTAssertEqual(shared.configuration.residentPetIDs, [pets[1].id])
+        XCTAssertTrue(shared.configuration.returnDynamicIslandLeadToHabitat())
+        shared.residents.append(SharedHabitatResident(profile: pets[0], vitals: PetVitals()))
+        shared.reconcile()
+        XCTAssertEqual(shared.configuration.residentPetIDs, [pets[1].id, pets[0].id])
+        XCTAssertNil(shared.configuration.leadDynamicIslandPetID)
+    }
+
+    func testAllSpeciesRemainContinuousAtEveryWalkRunTurnAndCycleBoundary() throws {
+        let epoch = Date(timeIntervalSince1970: 35_000)
+        let pets = makePets(count: 6, createdAt: epoch)
+        let state = PetHabitatState(residentPetIDs: pets.map(\.id), simulationEpoch: epoch)
+        var previous = PetHabitatEngine.projections(for: state, pets: pets, at: epoch)
+        for frame in 1...6_000 {
+            let next = PetHabitatEngine.projections(for: state, pets: pets,
+                                                   at: epoch.addingTimeInterval(Double(frame) / 30))
+            for (a, b) in zip(previous, next) {
+                XCTAssertLessThan(abs(a.position - b.position), 0.004)
+                XCTAssertEqual(a.verticalPosition, b.verticalPosition)
+            }
+            previous = next
+        }
+    }
+
     func testResidentsAreUniqueLimitedAndExcludeDynamicIslandLead() {
         let ids = (0..<8).map { _ in UUID() }
         let state = PetHabitatState(
@@ -9,7 +73,7 @@ final class PetHabitatStateTests: XCTestCase {
             leadDynamicIslandPetID: ids[1]
         )
 
-        XCTAssertEqual(state.residentPetIDs.count, PetHabitatState.maximumResidents)
+        XCTAssertEqual(state.residentPetIDs.count, PetHabitatState.maximumResidents - 1)
         XCTAssertEqual(Set(state.residentPetIDs).count, state.residentPetIDs.count)
         XCTAssertFalse(state.residentPetIDs.contains(ids[1]))
     }
@@ -46,6 +110,46 @@ final class PetHabitatStateTests: XCTestCase {
 
         XCTAssertEqual(decoded.theme, .meadow)
         XCTAssertTrue(decoded.residentPetIDs.isEmpty)
+    }
+
+    func testColorfulThemesSurviveSharedSnapshotWithoutChangingResidentsOrMotion() throws {
+        let epoch = Date(timeIntervalSince1970: 12_345)
+        let pets = makePets(count: 3, createdAt: epoch)
+        var shared = SharedPetHabitat(
+            configuration: PetHabitatState(residentPetIDs: pets.map(\.id), simulationEpoch: epoch),
+            residents: pets.map { SharedHabitatResident(profile: $0, vitals: PetVitals()) }
+        )
+        let initialProjections = PetHabitatEngine.projections(for: shared.configuration, pets: pets, at: epoch)
+        let themes: [HabitatTheme] = [.sunnyMeadow, .starryNight, .warmRoom, .snowyCove, .sunsetDunes]
+        for theme in themes {
+            XCTAssertTrue(shared.configuration.setTheme(theme))
+            let data = try PropertyListEncoder().encode(shared)
+            var restored = try PropertyListDecoder().decode(SharedPetHabitat.self, from: data)
+            restored.reconcile()
+            XCTAssertEqual(restored, shared)
+            XCTAssertEqual(restored.configuration.theme, theme)
+            let projections = PetHabitatEngine.projections(for: restored.configuration, pets: pets, at: epoch)
+            // The widget's refresh frame can advance with the snapshot revision;
+            // changing scenery must preserve the actual placement and behavior.
+            XCTAssertEqual(projections.map(\.position), initialProjections.map(\.position))
+            XCTAssertEqual(projections.map(\.verticalPosition), initialProjections.map(\.verticalPosition))
+            XCTAssertEqual(projections.map(\.direction), initialProjections.map(\.direction))
+            XCTAssertEqual(projections.map(\.pose), initialProjections.map(\.pose))
+        }
+    }
+
+    func testExistingThemeIdentifiersKeepTheirSavedSelection() throws {
+        let identifiers: [(String, HabitatTheme)] = [
+            ("meadow", .meadow), ("cozyRoom", .cozyRoom), ("moonlitGarden", .moonlitGarden),
+            ("arcticCove", .arcticCove), ("desertCamp", .desertCamp)
+        ]
+        let residentID = UUID()
+        for (identifier, theme) in identifiers {
+            let data = Data("{\"theme\":\"\(identifier)\",\"residentPetIDs\":[\"\(residentID.uuidString)\"]}".utf8)
+            let restored = try JSONDecoder().decode(PetHabitatState.self, from: data)
+            XCTAssertEqual(restored.theme, theme)
+            XCTAssertEqual(restored.residentPetIDs, [residentID])
+        }
     }
 
     func testProjectionIsDeterministicAndCollisionSafeForSixPets() {
@@ -180,4 +284,9 @@ final class PetHabitatStateTests: XCTestCase {
 private struct LegacyHabitatState: Encodable {
     let theme: HabitatTheme
     let residentPetIDs: [UUID]
+}
+
+private struct LegacyResident: Encodable {
+    let profile: PetProfile
+    let vitals: PetVitals
 }

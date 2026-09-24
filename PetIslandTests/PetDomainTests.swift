@@ -1,7 +1,761 @@
 import XCTest
+import CoreText
+import SwiftUI
 @testable import PetIsland
 
 final class PetDomainTests: XCTestCase {
+
+    func testAllSelectableAppIconsAreBundledWithPreviews() throws {
+        let bundleIcons = try XCTUnwrap(Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any])
+        let primary = try XCTUnwrap(bundleIcons["CFBundlePrimaryIcon"] as? [String: Any])
+        XCTAssertEqual(primary["CFBundleIconName"] as? String, "AppIcon")
+        let alternates = try XCTUnwrap(bundleIcons["CFBundleAlternateIcons"] as? [String: Any])
+        let expected = Set(AppIconChoice.allCases.compactMap(\.alternateName))
+        XCTAssertEqual(expected.count, 5)
+        XCTAssertEqual(Set(alternates.keys), expected)
+        XCTAssertNil(AppIconChoice.classic.alternateName)
+        for choice in AppIconChoice.allCases {
+            XCTAssertNotNil(UIImage(named: choice.previewName), "Missing preview for \(choice)")
+            guard let name = choice.alternateName else { continue }
+            let icon = try XCTUnwrap(alternates[name] as? [String: Any])
+            XCTAssertEqual(icon["CFBundleIconName"] as? String, name)
+        }
+    }
+
+    @MainActor
+    func testUnreadableSaveBlocksBootstrapWithoutReplacingFiles() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let file = folder.appendingPathComponent("state.json")
+        let broken = Data("unreadable save".utf8)
+        try broken.write(to: file)
+        try broken.write(to: file.appendingPathExtension("backup"))
+        let controller = PetSessionController(store: FilePetStore(fileURL: file), arcadeStore: InMemoryArcadeStore())
+        await controller.bootstrap()
+        XCTAssertEqual(controller.operation, .loadFailed)
+        XCTAssertTrue(controller.isBusy)
+        XCTAssertEqual(try Data(contentsOf: file), broken)
+        XCTAssertEqual(try Data(contentsOf: file.appendingPathExtension("backup")), broken)
+        var recovered = PersistedAppState()
+        recovered.profile.name = "Recovered companion"
+        try await FilePetStore(fileURL: file).save(recovered)
+        await controller.bootstrap()
+        XCTAssertEqual(controller.operation, .idle)
+        XCTAssertEqual(controller.profile.name, recovered.profile.name)
+    }
+
+    func testUnreadableArcadeSaveThrowsInsteadOfResettingWallet() async throws {
+        let file = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: file) }
+        let broken = Data("broken wallet".utf8)
+        try broken.write(to: file)
+        do {
+            _ = try await FileArcadeStore(fileURL: file).load()
+            XCTFail("Corruption must not look like a fresh installation")
+        } catch {
+            XCTAssertEqual(try Data(contentsOf: file), broken)
+        }
+    }
+
+    func testRestRestoresEnergyWithoutPenalizingAbsenceOrClockChanges() {
+        let date = Date(timeIntervalSince1970: 10_000)
+        let tired = PetVitals(fullness: 0.4, happiness: 0.5, energy: 0.2)
+        let rested = tired.projected(from: date, to: date.addingTimeInterval(5 * 3600))
+        XCTAssertEqual(rested.energy, 0.4, accuracy: 0.000001)
+        XCTAssertEqual(rested.fullness, tired.fullness)
+        XCTAssertEqual(rested.happiness, tired.happiness)
+        XCTAssertEqual(tired.projected(from: date, to: date.addingTimeInterval(-3600)), tired)
+        XCTAssertEqual(tired.projected(from: .distantPast, to: date), tired)
+        XCTAssertEqual(tired.projected(from: date, to: date.addingTimeInterval(7 * 24 * 3600)).energy, 1)
+    }
+
+    func testRestAndWidgetCareAreMaterializedExactlyOnce() {
+        let date = Date(timeIntervalSince1970: 20_000)
+        let pet = PetProfile.starter
+        var shared = SharedPetHabitat(configuration: PetHabitatState(residentPetIDs: [pet.id]),
+            residents: [SharedHabitatResident(profile: pet, vitals: PetVitals(energy: 0.2), vitalsUpdatedAt: date)])
+        let event = PetCareEvent(petID: pet.id, fullness: 0, happiness: 0, energy: -0.05,
+                                 date: date.addingTimeInterval(5 * 3600))
+        shared.apply(event)
+        shared.apply(event)
+        XCTAssertEqual(shared.residents[0].vitals.energy, 0.35, accuracy: 0.000001)
+        shared.playWithResidents(at: event.date.addingTimeInterval(3600))
+        XCTAssertEqual(shared.residents[0].vitals.energy, 0.355, accuracy: 0.000001)
+    }
+
+    func testDismissedActivityChoiceSurvivesSaveAndLegacyStateStillLoads() throws {
+        var state = PersistedAppState()
+        state.dismissedActivitySessionID = UUID()
+        let encoded = try JSONEncoder().encode(state)
+        let decoded = try JSONDecoder().decode(PersistedAppState.self, from: encoded)
+        XCTAssertEqual(decoded.dismissedActivitySessionID, state.dismissedActivitySessionID)
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        json.removeValue(forKey: "dismissedActivitySessionID")
+        let legacy = try JSONDecoder().decode(PersistedAppState.self, from: JSONSerialization.data(withJSONObject: json))
+        XCTAssertNil(legacy.dismissedActivitySessionID)
+        XCTAssertEqual(legacy.pets, state.pets)
+    }
+
+    @MainActor
+    func testCoatDoesNotChangeTimerGlyphGeometry() throws {
+        try registerTimerFonts()
+        let viewport = CGSize(width: 84, height: 72)
+        for coat in PetCoat.allCases {
+            for customColor in [nil, PetColorSelection(red: 0.6, green: 0.2, blue: 0.9)] {
+                let glyph = PetTimerGlyphViewport(text: Text("12:00:00"), fontName: "PetIslandLockTimerDogShepherdRun", viewport: viewport)
+                let colored = glyph.petCoat(species: .dog, coat: coat, customColor: customColor)
+                XCTAssertEqual(try renderedBounds(glyph), try renderedBounds(colored))
+            }
+        }
+    }
+
+    @MainActor
+    func testEnclosureKeepsExistingPositionsWhenResidentsChange() {
+        let simulation = HabitatMotionSimulation()
+        let pets = (0..<6).map { PetProfile(id: UUID(), name: "Pet \($0)", species: .cat, coat: .sunrise, createdAt: .now) }
+        let size = CGSize(width: 345, height: 240)
+        simulation.configure(pets: Array(pets.prefix(3)), size: size)
+        for _ in 0..<300 { simulation.advance(by: 1.0 / 60) }
+        let before = simulation.actors
+        simulation.configure(pets: pets, size: size)
+        for actor in before {
+            let after = simulation.actors.first { $0.id == actor.id }!
+            XCTAssertEqual(actor.position, after.position)
+            XCTAssertEqual(actor.gaitPhase, after.gaitPhase)
+        }
+        simulation.configure(pets: Array(pets.dropFirst()), size: size)
+        for actor in before.dropFirst() {
+            XCTAssertEqual(simulation.actors.first { $0.id == actor.id }?.position, actor.position)
+        }
+    }
+
+    @MainActor
+    func testEnclosureMovesContinuouslyAndFreezesForReduceMotion() {
+        let simulation = HabitatMotionSimulation()
+        let pets = (0..<6).map { PetProfile(id: UUID(), name: "Pet \($0)", species: .dog, coat: .sunrise, createdAt: .now) }
+        simulation.configure(pets: pets, size: CGSize(width: 320, height: 240), petScale: 1.2)
+        var travelled = 0.0
+        for _ in 0..<3600 {
+            let before = simulation.actors
+            simulation.advance(by: 1.0 / 60)
+            for (old, new) in zip(before, simulation.actors) {
+                let distance = hypot(new.position.x - old.position.x, new.position.y - old.position.y)
+                XCTAssertLessThan(distance, 1.5)
+                XCTAssertTrue(new.position.x.isFinite && new.position.y.isFinite)
+                XCTAssertTrue((30...290).contains(new.position.x))
+                travelled += distance
+            }
+        }
+        XCTAssertGreaterThan(travelled, 1000)
+        simulation.start(reduceMotion: true, active: true)
+        let positions = simulation.actors.map(\.position)
+        simulation.advance(by: 1)
+        XCTAssertEqual(positions, simulation.actors.map(\.position))
+    }
+
+    func testNaturalGaitFramesAreCompleteWithoutChangingSystemClips() {
+        for species in PetSpecies.allCases where species != .parrot {
+            for breed in PetBreed.available(for: species) {
+                for pose in [PetPose.walk, .run] {
+                    let clip = PetAnimationLibrary.naturalClip(for: species, breed: breed, pose: pose)
+                    XCTAssertEqual(clip.frames.count, 8)
+                    XCTAssertEqual(Set(clip.frames).count, 8)
+                    for name in clip.frames {
+                        XCTAssertNotNil(UIImage(named: name), name)
+                        let geometry = PetSpriteGeometry.load(assetName: name)
+                        let origin = breed.companionArtworkToken == nil ? CGPoint(x: -12, y: 0) : .zero
+                        XCTAssertEqual(geometry?.rect(in: PetSpriteGeometry.canvas).origin, origin, name)
+                        XCTAssertEqual(geometry?.scale, 1, name)
+                    }
+                    XCTAssertEqual(PetAnimationLibrary.clip(for: species, breed: breed, pose: pose).frames.count,
+                                   breed.companionArtworkToken == nil ? 2 : 8)
+                }
+            }
+        }
+    }
+
+    @MainActor
+    func testFailedPetSaveKeepsCollectionAndAllowsRetry() async {
+        let store = FailablePetStore()
+        let controller = PetSessionController(store: store, arcadeStore: InMemoryArcadeStore())
+        await controller.bootstrap()
+        let original = controller.pets
+        let pet = PetProfile(id: UUID(), name: "Retry", species: .cat, coat: .cloud, createdAt: .now)
+        await store.setFailure(true)
+        let failed = await controller.addPet(pet)
+        XCTAssertFalse(failed)
+        XCTAssertEqual(controller.pets, original)
+        XCTAssertNotNil(controller.alertMessage)
+        await store.setFailure(false)
+        let saved = await controller.addPet(pet)
+        XCTAssertTrue(saved)
+        XCTAssertEqual(controller.pets.filter { $0.id == pet.id }.count, 1)
+    }
+
+    @MainActor
+    func testFailedRewardDoesNotChangeWalletAndRetryIsIdempotent() async {
+        let store = FailableArcadeStore()
+        let controller = PetSessionController(store: InMemoryPetStore(), arcadeStore: store)
+        await controller.bootstrap()
+        let run = UUID()
+        let original = controller.arcadeProgress
+        await store.setFailure(true)
+        let failed = await controller.completeMiniGame(.skyPaws, score: 400, petID: controller.profile.id, runID: run)
+        XCTAssertNil(failed)
+        XCTAssertEqual(controller.arcadeProgress, original)
+        await store.setFailure(false)
+        let reward = await controller.completeMiniGame(.skyPaws, score: 400, petID: controller.profile.id, runID: run)
+        let coins = controller.arcadeProgress.coins
+        let repeated = await controller.completeMiniGame(.skyPaws, score: 400, petID: controller.profile.id, runID: run)
+        XCTAssertNotNil(reward)
+        XCTAssertEqual(reward, repeated)
+        XCTAssertEqual(controller.arcadeProgress.coins, coins)
+        XCTAssertEqual(controller.arcadeProgress.gamesPlayed, 1)
+    }
+
+    @MainActor
+    func testFailedPurchaseDoesNotSpendCoinsOrAddInventory() async {
+        let store = FailableArcadeStore(ArcadeState(progress: ArcadeProgress(coins: 100)))
+        let controller = PetSessionController(store: InMemoryPetStore(), arcadeStore: store)
+        await controller.bootstrap()
+        await store.setFailure(true)
+        let result = await controller.purchaseArcadeItem(.food)
+        XCTAssertFalse(result)
+        XCTAssertEqual(controller.arcadeProgress.coins, 100)
+        XCTAssertEqual(controller.arcadeProgress.inventory[.food], 0)
+    }
+
+    func testSharedSnapshotRecoversAgainAfterReplacingCorruptPrimary() throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let file = SharedSnapshotFile<[Int]>(url: root.appending(path: "snapshot.plist"))
+        try file.update(fallback: { [0] }) { $0 = [10] }
+        try file.update(fallback: { [0] }) { $0 = [20] }
+        try Data("broken".utf8).write(to: file.url)
+        XCTAssertEqual(try file.load(fallback: { [0] }), [10])
+        try Data("broken again".utf8).write(to: file.url)
+        XCTAssertEqual(try file.load(fallback: { [0] }), [10])
+    }
+
+    func testSharedSnapshotRejectsUnreadableStateInsteadOfResettingIt() throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        let file = SharedSnapshotFile<[Int]>(url: root.appending(path: "snapshot.plist"))
+        let broken = Data("unrecoverable".utf8)
+        try broken.write(to: file.url)
+        XCTAssertThrowsError(try file.update(fallback: { [0] }) { $0[0] += 1 })
+        XCTAssertEqual(try Data(contentsOf: file.url), broken)
+    }
+
+    func testCareOutboxCombinesWidgetAndAppChangesExactlyOnce() {
+        let pet = PetProfile.starter
+        var habitat = SharedPetHabitat(configuration: PetHabitatState(residentPetIDs: [pet.id]),
+            residents: [SharedHabitatResident(profile: pet, vitals: PetVitals(fullness: 0.5, happiness: 0.5, energy: 0.5))])
+        let event = PetCareEvent(petID: pet.id, fullness: -0.02, happiness: 0.08, energy: -0.055, date: .now)
+        habitat.playWithResidents(at: .now)
+        habitat.apply(event)
+        habitat.apply(event)
+        XCTAssertEqual(habitat.residents[0].vitals.happiness, 0.7, accuracy: 0.00001)
+        XCTAssertEqual(habitat.residents[0].vitals.energy, 0.41, accuracy: 0.00001)
+        XCTAssertEqual(habitat.appliedCareEventIDs, [event.id])
+    }
+
+    func testTravellingPetHasAReservedBerthAndAlwaysReturns() {
+        let pets = (0..<8).map { _ in UUID() }
+        var habitat = PetHabitatState(residentPetIDs: Array(pets.prefix(6)))
+        habitat.setDynamicIslandLead(pets[6])
+        habitat.setResidents(Array(pets.prefix(6)))
+        XCTAssertEqual(habitat.residentPetIDs.count, 5)
+        XCTAssertTrue(habitat.returnDynamicIslandLeadToHabitat())
+        XCTAssertEqual(habitat.residentPetIDs.count, 6)
+        XCTAssertTrue(habitat.residentPetIDs.contains(pets[6]))
+        XCTAssertNil(habitat.leadDynamicIslandPetID)
+    }
+
+    func testHabitatPawsTakeSeveralStepsPerBodyLengthWithoutMovingWhenStopped() {
+        for pose in [PetPose.walk, .run] {
+            let clip = PetAnimationLibrary.clip(for: .dog, breed: .shepherd, pose: pose)
+            let width = 90.0
+            let frames = (0...90).map { distance in
+                clip.travelFrameIndex(distance: Double(distance), canvasWidth: width, pose: pose)
+            }
+            let changes = zip(frames, frames.dropFirst()).filter { $0 != $1 }.count
+            XCTAssertGreaterThanOrEqual(changes, 7, "Paws should not slide over a whole body length")
+            XCTAssertLessThanOrEqual(changes, 12, "Avoid flickering through steps")
+            for _ in 0..<30 {
+                XCTAssertEqual(clip.travelFrameIndex(distance: 37, canvasWidth: width, pose: pose), frames[37])
+            }
+        }
+    }
+
+    @MainActor
+    func testTimerGlyphMatchesPNGSizeGroundAndDirectionIncludingSleepFallback() throws {
+        try registerTimerFonts()
+        let samples: [(PetSpecies, PetBreed, String)] = [
+            (.dog, .shepherd, "DogShepherd"), (.dog, .corgi, "DogCorgi"),
+            (.dog, .doberman, "DogDoberman"), (.dog, .bullTerrier, "DogBullTerrier"),
+            (.cat, .classicCat, "CatClassic"), (.cat, .britishShorthair, "CatBritish"),
+            (.cat, .maineCoon, "CatMaineCoon"), (.cat, .siamese, "CatSiamese"),
+            (.fox, .redFox, "FoxRed"), (.fox, .arcticFox, "FoxArctic"),
+            (.parrot, .classicParrot, "ParrotClassic"), (.parrot, .cockatiel, "ParrotCockatiel"),
+            (.parrot, .budgie, "ParrotBudgie"), (.parrot, .macaw, "ParrotMacaw"),
+            (.penguin, .classicPenguin, "PenguinClassic"), (.penguin, .rockhopper, "PenguinRockhopper"),
+            (.dog, .cardigan, "DogCardigan"), (.lion, .adultLion, "LionAdult"),
+            (.lion, .lioness, "Lioness"), (.lion, .lionCub, "LionCub")
+        ]
+        for (species, breed, token) in samples {
+            for viewport in [CGSize(width: 36, height: 30), CGSize(width: 28, height: 25), CGSize(width: 84, height: 72)] {
+                let family = viewport.width == 84 ? "PetIslandLockTimer" : "PetIslandTimer"
+                for pose in [PetPose.run, .walk, .sleep] {
+                    let suffix = pose == .run ? "Run" : pose == .walk ? "Walk" : "Sleep"
+                    for direction in [PetDirection.left, .right] {
+                        let glyph = PetTimerGlyphViewport(text: Text("0"),
+                            fontName: family + token + suffix, viewport: viewport, direction: direction)
+                        let artwork = PetArtwork(species: species, breed: breed, pose: pose,
+                                                 direction: direction, step: 0, animatesMotion: false)
+                            .frame(width: viewport.width, height: viewport.height)
+                        let fontBounds = try renderedBounds(glyph)
+                        let pngBounds = try renderedBounds(artwork)
+                        let sample = "\(breed), \(pose), \(viewport)"
+                        XCTAssertEqual(fontBounds.minX, pngBounds.minX, accuracy: 1.5, sample)
+                        XCTAssertEqual(fontBounds.maxX, pngBounds.maxX, accuracy: 1.5, sample)
+                        XCTAssertEqual(fontBounds.minY, pngBounds.minY, accuracy: 1.5, sample)
+                        XCTAssertEqual(fontBounds.maxY, pngBounds.maxY, accuracy: 1.5, sample)
+                    }
+                }
+            }
+        }
+    }
+
+    @MainActor
+    func testTimerDoesNotShiftAcrossGaitStatesOrMinuteAndHourRollovers() throws {
+        try registerTimerFonts()
+        let viewport = CGSize(width: 84, height: 72)
+        let name = "PetIslandLockTimerDogShepherdRunWalkSleep"
+        var bottoms: [CGFloat] = []
+        for digit in 0...9 {
+            let bounds = try renderedBounds(PetTimerGlyphViewport(text: Text("\(digit)"), fontName: name, viewport: viewport))
+            bottoms.append(bounds.maxY)
+        }
+        XCTAssertLessThanOrEqual(try XCTUnwrap(bottoms.max()) - XCTUnwrap(bottoms.min()), 1)
+        let reference = try renderedBounds(PetTimerGlyphViewport(text: Text("0"), fontName: name, viewport: viewport))
+        for timer in ["0:00", "1:00", "10:00", "1:00:00", "24:00:00", "100:00:00"] {
+            let bounds = try renderedBounds(PetTimerGlyphViewport(text: Text(timer), fontName: name, viewport: viewport))
+            XCTAssertEqual(bounds, reference, timer)
+        }
+    }
+
+    private func registerTimerFonts() throws {
+        for family in ["PetIslandTimer", "PetIslandLockTimer"] {
+            let name = family + "DogShepherdRun"
+            if CTFontCopyPostScriptName(CTFontCreateWithName(name as CFString, 84, nil)) as String != name {
+                let url = Bundle.main.bundleURL
+                    .appendingPathComponent("PlugIns/PetIslandLiveActivity.appex/\(family)Pets.ttc")
+                XCTAssertTrue(FileManager.default.fileExists(atPath: url.path))
+                CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
+            }
+            let font = CTFontCreateWithName(name as CFString, 84, nil)
+            XCTAssertEqual(CTFontCopyPostScriptName(font) as String, name)
+        }
+    }
+
+    @MainActor
+    private func renderedBounds<V: View>(_ view: V) throws -> CGRect {
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = 3
+        let image = try XCTUnwrap(renderer.cgImage)
+        var pixels = [UInt8](repeating: 0, count: image.width * image.height * 4)
+        try pixels.withUnsafeMutableBytes { buffer in
+            let context = try XCTUnwrap(CGContext(data: buffer.baseAddress, width: image.width, height: image.height,
+                bitsPerComponent: 8, bytesPerRow: image.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+            context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        }
+        var left = image.width, top = image.height, right = 0, bottom = 0
+        for y in 0..<image.height {
+            for x in 0..<image.width where pixels[(y * image.width + x) * 4 + 3] > 32 {
+                left = min(left, x); top = min(top, y)
+                right = max(right, x + 1); bottom = max(bottom, y + 1)
+            }
+        }
+        XCTAssertGreaterThan(right, left, "The timer sprite must stay visible")
+        return CGRect(x: CGFloat(left) / 3, y: CGFloat(top) / 3,
+                      width: CGFloat(right - left) / 3, height: CGFloat(bottom - top) / 3)
+    }
+
+    func testSkyHopKeepsEveryPlatformReachableOnWideScreens() {
+        for seed in 0..<30 {
+            var engine = SkyHopEngine()
+            engine.start(in: CGSize(width: 1024, height: 1366), seed: UInt64(seed))
+            for (a, b) in zip(engine.platforms, engine.platforms.dropFirst()) {
+                XCTAssertLessThanOrEqual(abs(a.x - b.x), SkyHopEngine.maximumPlatformShift)
+            }
+        }
+    }
+
+    func testAllArcadeEnginesIgnoreNonFiniteTimeSteps() {
+        let size = CGSize(width: 393, height: 852)
+        var hop = SkyHopEngine(), paws = SkyPawsEngine(), dash = PetsDashEngine()
+        hop.start(in: size, seed: 1)
+        paws.start(in: size, seed: 1)
+        dash.start(in: size, seed: 1)
+        let hopPosition = hop.playerPosition, pawsPosition = paws.playerY
+        for dt in [Double.nan, .infinity, -.infinity, -1, 0] {
+            hop.update(deltaTime: dt, in: size)
+            paws.update(deltaTime: dt, in: size)
+            dash.update(deltaTime: dt, in: size)
+        }
+        XCTAssertEqual(hop.playerPosition, hopPosition)
+        XCTAssertEqual(paws.playerY, pawsPosition)
+        XCTAssertEqual(dash.score, 0)
+        XCTAssertEqual(dash.trackProgress, 0)
+    }
+
+    func testSavedSessionCannotReferenceDeletedPet() {
+        var state = PersistedAppState()
+        state.activeSession = PetSession(id: UUID(), petID: UUID(), startedAt: .now,
+                                        endsAt: .distantFuture, snapshot: .initial(at: .now))
+        state.normalizePetCollection()
+        XCTAssertNil(state.activeSession)
+    }
+
+    func testPersistedDurationIsClampedBeforeConvertingToSeconds() throws {
+        let data = Data("{\"defaultSessionMinutes\":9223372036854775807}".utf8)
+        let settings = try JSONDecoder().decode(AppSettings.self, from: data)
+        XCTAssertEqual(settings.defaultSessionMinutes, 480)
+        XCTAssertEqual(AppSettings(defaultSessionMinutes: -1).defaultSessionMinutes, 10)
+    }
+
+    func testStrideFramesAreDrivenByDistanceAndHoldWhenStopped() {
+        let clip = PetAnimationClip(frames: ["contact-left", "contact-right"], frameDuration: 0.13)
+        XCTAssertEqual(clip.frameIndex(distance: 0, strideLength: 60), 0)
+        XCTAssertEqual(clip.frameIndex(distance: 29, strideLength: 60), 0)
+        XCTAssertEqual(clip.frameIndex(distance: 30, strideLength: 60), 1)
+        XCTAssertEqual(clip.frameIndex(distance: 60, strideLength: 60), 0)
+        for _ in 0..<100 { XCTAssertEqual(clip.frameIndex(distance: 45, strideLength: 60), 1) }
+        XCTAssertEqual(clip.frameIndex(distance: .infinity, strideLength: 60), 0)
+    }
+
+    func testDogWalkAndRunUseOneGroundPlaneWithoutRescaling() {
+        let size = CGSize(width: 88, height: 70.4)
+        let walk = PetSpriteGeometry(sourceSize: .init(width: 220, height: 176),
+                                     visibleBounds: .init(x: 42, y: 54, width: 136, height: 117),
+                                     assetName: "island_dog_corgi_walk_0")
+        let run = PetSpriteGeometry(sourceSize: .init(width: 220, height: 176),
+                                    visibleBounds: .init(x: 23, y: 45, width: 173, height: 115),
+                                    assetName: "island_dog_corgi_run_0")
+        let walkRect = walk.rect(in: size), runRect = run.rect(in: size)
+        XCTAssertEqual(walkRect.width, runRect.width)
+        XCTAssertEqual(walkRect.minY + walk.visibleBounds.maxY * 0.4, 64, accuracy: 0.001)
+        XCTAssertEqual(runRect.minY + run.visibleBounds.maxY * 0.4, 64, accuracy: 0.001)
+    }
+
+    func testShepherdLegacyPosesHaveAConstantScale() {
+        let idle = PetSpriteGeometry(sourceSize: .init(width: 362, height: 362),
+                                     visibleBounds: .init(x: 70, y: 78, width: 267, height: 273),
+                                     assetName: "sprite_dog_idle_0")
+        let play = PetSpriteGeometry(sourceSize: .init(width: 362, height: 362),
+                                     visibleBounds: .init(x: 62, y: 136, width: 268, height: 215),
+                                     assetName: "sprite_dog_swipe_0")
+        XCTAssertEqual(idle.scale, play.scale)
+        XCTAssertEqual(idle.scale * 273, 148, accuracy: 0.001)
+        XCTAssertEqual(idle.rect(in: PetSpriteGeometry.canvas), play.rect(in: PetSpriteGeometry.canvas))
+    }
+
+    func testEverySelectablePetPoseHasVisibleBundledArtwork() throws {
+        for species in PetSpecies.allCases {
+            for breed in PetBreed.available(for: species) {
+                for pose in PetPose.allCases {
+                    for name in PetAnimationLibrary.clip(for: species, breed: breed, pose: pose).frames {
+                        let geometry = try XCTUnwrap(PetSpriteGeometry.load(assetName: name), name)
+                        XCTAssertGreaterThan(geometry.visibleBounds.width, 0)
+                        XCTAssertGreaterThan(geometry.visibleBounds.height, 0)
+                        let rect = geometry.rect(in: PetSpriteGeometry.canvas)
+                        let foot = rect.minY + geometry.visibleBounds.maxY * geometry.scale
+                        if breed.companionArtworkToken != nil {
+                            XCTAssertEqual(rect.origin, .zero, name)
+                            XCTAssertLessThanOrEqual(foot, PetSpriteGeometry.baseline + 1, name)
+                            if [.walk, .idle, .play, .sleep, .eat].contains(pose) {
+                                XCTAssertEqual(foot, PetSpriteGeometry.baseline, accuracy: 1, name)
+                            }
+                        } else {
+                            XCTAssertEqual(foot, PetSpriteGeometry.baseline, accuracy: 0.001, name)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    func testRepairedWalkFramesKeepTheirGroundAndUpperBodyRegistration() throws {
+        for breed in ["cat_maine_coon", "cat_siamese", "fox"] {
+            let first = try XCTUnwrap(PetSpriteGeometry.load(assetName: "island_\(breed)_walk_0"))
+            let second = try XCTUnwrap(PetSpriteGeometry.load(assetName: "island_\(breed)_walk_1"))
+            XCTAssertEqual(first.sourceSize, PetSpriteGeometry.canvas)
+            XCTAssertEqual(second.sourceSize, PetSpriteGeometry.canvas)
+            XCTAssertEqual(first.visibleBounds.minY, second.visibleBounds.minY)
+            XCTAssertEqual(first.visibleBounds.maxX, second.visibleBounds.maxX)
+            XCTAssertEqual(first.visibleBounds.maxY, PetSpriteGeometry.baseline)
+            XCTAssertEqual(second.visibleBounds.maxY, PetSpriteGeometry.baseline)
+            XCTAssertEqual(first.rect(in: PetSpriteGeometry.canvas).origin, .zero)
+            XCTAssertEqual(second.rect(in: PetSpriteGeometry.canvas).origin, .zero)
+        }
+    }
+
+    @MainActor
+    func testPlayYardFetchesForAllSixResidentsWithoutGroundedJitter() throws {
+        let pets = (0..<6).map { index in
+            PetProfile(id: UUID(), name: "Pet \(index)", species: PetSpecies.allCases[index % 5],
+                       coat: .sunrise, createdAt: .now)
+        }
+        let yard = PlayYardSimulation(pets: pets, hapticsEnabled: false)
+        yard.configure(roomSize: CGSize(width: 393, height: 740))
+        XCTAssertEqual(yard.frame.actors.count, 6)
+        for round in 0..<6 {
+            yard.throwAccessibleBall()
+            XCTAssertEqual(yard.frame.fetcherID, pets[round].id)
+            var previous = yard.frame.actors
+            for _ in 0..<900 where yard.frame.phase != .ready {
+                yard.advance(by: 1.0 / 30.0)
+                for (old, new) in zip(previous, yard.frame.actors) {
+                    if (old.pose == .run || old.pose == .walk),
+                       (new.pose == .run || new.pose == .walk), !old.isAirborne, !new.isAirborne {
+                        XCTAssertEqual(old.position.y, new.position.y, accuracy: 0.001)
+                    }
+                    XCTAssertLessThanOrEqual(abs(new.position.x - old.position.x), 8)
+                    let dx = new.position.x - old.position.x
+                    if abs(dx) > 0.1 {
+                        XCTAssertEqual(new.direction, dx > 0 ? .right : .left)
+                    }
+                    XCTAssertTrue(new.position.x.isFinite && new.position.y.isFinite)
+                }
+                previous = yard.frame.actors
+            }
+            XCTAssertEqual(yard.frame.phase, .ready)
+            XCTAssertEqual(yard.frame.score, round + 1)
+        }
+    }
+
+    @MainActor
+    func testPlayYardReleasesItsDisplayLinkAndCancelsInterruptedDrag() {
+        var yard: PlayYardSimulation? = PlayYardSimulation(pets: [.starter], hapticsEnabled: false)
+        weak let weakYard = yard
+        yard?.configure(roomSize: CGSize(width: 393, height: 740))
+        yard?.start(reduceMotion: false)
+        yard?.dragBall(to: CGPoint(x: 180, y: 400))
+        yard?.stop()
+        XCTAssertEqual(yard?.frame.isDraggingBall, false)
+        yard?.start(reduceMotion: false)
+        yard = nil
+        XCTAssertNil(weakYard)
+    }
+
+    @MainActor
+    func testChangingLeadUpdatesSharedProfileAndWidgetNavigation() async {
+        let controller = PetSessionController(store: InMemoryPetStore(), arcadeStore: InMemoryArcadeStore())
+        await controller.bootstrap()
+        let cat = PetProfile(id: UUID(), name: "Milo", species: .cat, coat: .cloud, createdAt: .now)
+        _ = await controller.addPet(cat)
+        _ = await controller.makeLeadPet(id: cat.id)
+        XCTAssertEqual(controller.lifeState.profile.id, cat.id)
+        XCTAssertEqual(PetLifeStore.load().profile.id, cat.id)
+        controller.selectedTab = .settings
+        controller.handleDeepLink(URL(string: "petisland://playroom")!)
+        XCTAssertEqual(controller.selectedTab, .island)
+        XCTAssertTrue(controller.showsPlayYard)
+        controller.showsPlayYard = false
+        controller.selectedTab = .pets
+        controller.handleDeepLink(URL(string: "https://playroom")!)
+        XCTAssertEqual(controller.selectedTab, .pets)
+        XCTAssertFalse(controller.showsPlayYard)
+    }
+
+    func testCollectionAndArcadeRecoverTheirLastGoodSave() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let petURL = folder.appendingPathComponent("state.json")
+        let store = FilePetStore(fileURL: petURL)
+        var original = PersistedAppState()
+        original.profile.name = "Saved friend"
+        try await store.save(original)
+        var changed = original
+        changed.profile.name = "Next save"
+        try await store.save(changed)
+        try Data("broken json".utf8).write(to: petURL)
+        let recovered = try await store.load()
+        XCTAssertEqual(recovered.profile.name, "Saved friend")
+        XCTAssertEqual(recovered.profile.id, original.profile.id)
+
+        let arcadeURL = folder.appendingPathComponent("arcade.json")
+        let arcadeStore = FileArcadeStore(fileURL: arcadeURL)
+        let arcade = ArcadeState(progress: ArcadeProgress(coins: 42))
+        try await arcadeStore.save(arcade)
+        try await arcadeStore.save(ArcadeState(progress: ArcadeProgress(coins: 50)))
+        try Data("broken json".utf8).write(to: arcadeURL)
+        let recoveredArcade = try await arcadeStore.load()
+        XCTAssertEqual(recoveredArcade.progress.coins, 42)
+    }
+
+    func testArcadeSimulationClockPreservesLowFrameRateTimeAndBoundsStalls() {
+        var clock = ArcadeSimulationClock()
+        XCTAssertEqual(clock.steps(for: 1.0 / 15), 8)
+        XCTAssertEqual(clock.steps(for: 4), 30)
+        XCTAssertEqual(clock.steps(for: .nan), 0)
+        XCTAssertEqual(clock.steps(for: -1), 0)
+    }
+
+    func testArcadePhysicsMatchesAt30And60And120FPS() {
+        let size = CGSize(width: 393, height: 852)
+        func simulate(fps: Int) -> (SkyHopEngine, SkyPawsEngine, PetsDashEngine) {
+            var hop = SkyHopEngine(), paws = SkyPawsEngine(), dash = PetsDashEngine()
+            hop.start(in: size, seed: 1); paws.start(in: size, seed: 1); dash.start(in: size, seed: 1)
+            hop.setSteering(1); paws.flap(); dash.jump(); dash.moveLane(-1)
+            for _ in 0..<(fps / 2) {
+                hop.update(deltaTime: 1 / Double(fps), in: size)
+                paws.update(deltaTime: 1 / Double(fps), in: size)
+                dash.update(deltaTime: 1 / Double(fps), in: size)
+            }
+            return (hop, paws, dash)
+        }
+        let reference = simulate(fps: 120)
+        for fps in [30, 60] {
+            let run = simulate(fps: fps)
+            XCTAssertEqual(run.0.playerPosition.x, reference.0.playerPosition.x, accuracy: 0.001)
+            XCTAssertEqual(run.0.playerPosition.y, reference.0.playerPosition.y, accuracy: 0.001)
+            XCTAssertEqual(run.1.playerY, reference.1.playerY, accuracy: 0.001)
+            XCTAssertEqual(run.1.gates, reference.1.gates)
+            XCTAssertEqual(run.2.jumpHeight, reference.2.jumpHeight, accuracy: 0.001)
+            XCTAssertEqual(run.2.lanePosition, reference.2.lanePosition, accuracy: 0.001)
+            XCTAssertEqual(run.2.trackProgress, reference.2.trackProgress, accuracy: 0.001)
+        }
+    }
+
+    func testDashSceneryAndObstaclesCoverTheSameWorldDistance() {
+        let size = CGSize(width: 393, height: 852)
+        var engine = PetsDashEngine()
+        engine.start(in: size, seed: 1)
+        engine.objects = [PetsDashObject(id: 99, kind: .rock, lane: 0, progress: 0.25)]
+        for _ in 0..<30 { engine.update(deltaTime: 1.0 / 60, in: size) }
+        XCTAssertEqual(engine.objects[0].progress - 0.25, engine.trackProgress, accuracy: 0.0001)
+    }
+
+    func testDashLaneChangeHasContinuousPositionAndArrivesWithoutOvershoot() {
+        let size = CGSize(width: 393, height: 852)
+        var engine = PetsDashEngine()
+        engine.start(in: size, seed: 1)
+        engine.moveLane(1)
+        XCTAssertEqual(engine.lanePosition, 1)
+        engine.update(deltaTime: 0.09, in: size)
+        XCTAssertGreaterThan(engine.lanePosition, 1)
+        XCTAssertLessThan(engine.lanePosition, 2)
+        engine.update(deltaTime: 0.12, in: size)
+        XCTAssertEqual(engine.lanePosition, 2)
+        engine.moveLane(-1)
+        engine.update(deltaTime: 0.05, in: size)
+        let beforeReversal = engine.lanePosition
+        engine.moveLane(1)
+        XCTAssertEqual(engine.lanePosition, beforeReversal)
+        engine.update(deltaTime: 0.2, in: size)
+        XCTAssertEqual(engine.lanePosition, 2)
+    }
+
+    func testDashCollisionFollowsVisibleLaneInsteadOfInstantTargetLane() {
+        let size = CGSize(width: 393, height: 852)
+        var engine = PetsDashEngine()
+        engine.start(in: size, seed: 1)
+        engine.objects = [PetsDashObject(id: 99, kind: .rock, lane: 0, progress: 0.84)]
+        engine.moveLane(-1)
+        engine.update(deltaTime: 1.0 / 60, in: size)
+        XCTAssertEqual(engine.phase, .playing, "The pet has not reached the new lane yet")
+        engine.objects = [PetsDashObject(id: 100, kind: .rock, lane: 1, progress: 0.84)]
+        engine.update(deltaTime: 1.0 / 60, in: size)
+        XCTAssertEqual(engine.phase, .gameOver, "The pet is still physically in its old lane")
+    }
+
+    func testDashLandingOnObstacleDoesNotGetEarlyJumpImmunity() {
+        let size = CGSize(width: 393, height: 852)
+        var engine = PetsDashEngine()
+        engine.start(in: size, seed: 1)
+        engine.jumpHeight = 0.5
+        engine.objects = [PetsDashObject(id: 99, kind: .rock, lane: 1, progress: 0.83)]
+        engine.update(deltaTime: 1.0 / 60, in: size)
+        XCTAssertEqual(engine.phase, .playing)
+        XCTAssertFalse(engine.objects[0].didResolve)
+        engine.jumpHeight = 0
+        engine.update(deltaTime: 1.0 / 60, in: size)
+        XCTAssertEqual(engine.phase, .gameOver)
+    }
+
+    func testDashWellTimedJumpClearsObstacleAndAwardsOnlyOnce() {
+        let size = CGSize(width: 393, height: 852)
+        var engine = PetsDashEngine()
+        engine.start(in: size, seed: 1)
+        engine.objects = [PetsDashObject(id: 99, kind: .barrier, lane: 1, progress: 0.70)]
+        engine.jump()
+        for _ in 0..<4 { engine.update(deltaTime: 0.25, in: size) }
+        XCTAssertEqual(engine.phase, .playing)
+        XCTAssertEqual(engine.objects.first { $0.id == 99 }?.didResolve, true)
+        XCTAssertGreaterThanOrEqual(engine.score, 124)
+        XCTAssertLessThan(engine.score, 130)
+        engine.update(deltaTime: 0.25, in: size)
+        XCTAssertLessThan(engine.score, 140, "Passing the same obstacle must not reward it again")
+    }
+
+    func testDashCollectsOnlyAtPetDepthAndBelowTheCoin() {
+        let size = CGSize(width: 393, height: 852)
+        var engine = PetsDashEngine()
+        engine.start(in: size, seed: 1)
+        engine.objects = [PetsDashObject(id: 99, kind: .coin, lane: 1, progress: 0.76)]
+        engine.update(deltaTime: 1.0 / 60, in: size)
+        XCTAssertEqual(engine.coinsCollected, 0)
+        engine.objects[0].progress = 0.84
+        engine.jumpHeight = 0.5
+        engine.update(deltaTime: 1.0 / 60, in: size)
+        XCTAssertEqual(engine.coinsCollected, 0)
+        engine.jumpHeight = 0
+        engine.update(deltaTime: 1.0 / 60, in: size)
+        XCTAssertEqual(engine.coinsCollected, 1)
+    }
+
+    func testHopButtonNudgeReleasesSteeringAndCanBeOverriddenByHold() {
+        let size = CGSize(width: 393, height: 852)
+        var engine = SkyHopEngine()
+        engine.start(in: size, seed: 1)
+        engine.nudgeSteering(1)
+        engine.update(deltaTime: 0.20, in: size)
+        XCTAssertEqual(engine.steering, 0)
+        engine.nudgeSteering(-1)
+        engine.setSteering(1)
+        engine.update(deltaTime: 0.20, in: size)
+        XCTAssertEqual(engine.steering, 1)
+        engine.setSteering(0)
+        XCTAssertEqual(engine.steering, 0)
+    }
+
+    func testPetsDashCannotCollectCoinsAlreadyBehindPlayer() {
+        var engine = PetsDashEngine()
+        let size = CGSize(width: 393, height: 852)
+        engine.start(in: size)
+        engine.objects = [PetsDashObject(id: 1, kind: .coin, lane: 1, progress: 1.04)]
+        engine.update(deltaTime: 1.0 / 60, in: size)
+        XCTAssertEqual(engine.coinsCollected, 0)
+    }
+
+    func testPetsDashRepeatedJumpCannotBoostTakeoff() {
+        let size = CGSize(width: 393, height: 852)
+        var once = PetsDashEngine()
+        once.start(in: size, seed: 1)
+        once.jump()
+        once.update(deltaTime: 0.005, in: size)
+        var repeated = once
+        repeated.jump()
+        once.update(deltaTime: 0.01, in: size)
+        repeated.update(deltaTime: 0.01, in: size)
+        XCTAssertEqual(once.jumpHeight, repeated.jumpHeight)
+    }
+
     func testTwoFrameAnimationClipLoopsAtItsOwnCadence() {
         let clip = PetAnimationClip(frames: ["walk-0", "walk-1"], frameDuration: 0.125)
 
@@ -196,7 +950,7 @@ final class PetDomainTests: XCTestCase {
         let size = CGSize(width: 393, height: 852)
         engine.start(in: size, seed: 1)
         engine.objects = [
-            PetsDashObject(id: 7, kind: .coin, lane: 1, progress: 0.78)
+            PetsDashObject(id: 7, kind: .coin, lane: 1, progress: 0.82)
         ]
 
         engine.update(deltaTime: 1.0 / 60.0, in: size)
@@ -297,20 +1051,80 @@ final class PetDomainTests: XCTestCase {
     }
 
     func testCatalogContainsSupportedSpecies() {
-        XCTAssertEqual(PetSpecies.allCases.count, 5)
-        XCTAssertEqual(PetSpecies.selectableCases, [.cat, .dog, .fox, .parrot, .penguin])
+        XCTAssertEqual(PetSpecies.allCases.count, 6)
+        XCTAssertEqual(PetSpecies.selectableCases, [.cat, .dog, .fox, .parrot, .penguin, .lion])
+    }
+
+    func testNewCompanionsPersistAndHaveDedicatedArcadeArtwork() throws {
+        for (species, breed) in [(PetSpecies.lion, PetBreed.adultLion), (.lion, .lioness),
+                                  (.lion, .lionCub), (.dog, .cardigan)] {
+            let profile = PetProfile(id: UUID(), name: "New pet", species: species, coat: .sunrise,
+                                     createdAt: Date(timeIntervalSince1970: 1000), breed: breed)
+            let decoded = try JSONDecoder().decode(PetProfile.self, from: JSONEncoder().encode(profile))
+            XCTAssertEqual(decoded, profile)
+            XCTAssertEqual(decoded.resolvedBreed, breed)
+            let rear = PetsDashArtworkLibrary.assetNames(for: species, breed: breed)
+            let plane = SkyPawsArtworkLibrary.assetNames(for: species, breed: breed)
+            XCTAssertEqual(rear.count, 4)
+            XCTAssertEqual(Set(rear).count, 4)
+            XCTAssertEqual(plane.count, 1)
+            for name in rear + plane {
+                let image = try XCTUnwrap(UIImage(named: name), name)
+                XCTAssertGreaterThan(image.size.width, 0, name)
+                XCTAssertTrue(name.contains(try XCTUnwrap(breed.companionArtworkToken)), name)
+            }
+        }
+    }
+
+    func testNewCompanionBlinksBrieflyInsteadOfClosingEyesHalfTheTime() {
+        let clip = PetAnimationLibrary.naturalClip(for: .lion, breed: .adultLion, pose: .idle)
+        XCTAssertEqual(clip.cycleDuration, 1.94, accuracy: 0.0001)
+        XCTAssertEqual(clip.frameIndex(at: 0), 0)
+        XCTAssertEqual(clip.frameIndex(at: 1.79), 0)
+        XCTAssertEqual(clip.frameIndex(at: 1.81), 1)
+        XCTAssertEqual(clip.frameIndex(at: 1.93), 1)
+        XCTAssertEqual(clip.frameIndex(at: 1.95), 0)
+        XCTAssertEqual(clip.frameIndex(at: -0.01), 1)
+        XCTAssertEqual(clip.frameIndex(at: 1.81, phaseOffset: 1), 0)
+    }
+
+    func testLionRunKeepsItsHeadRegisteredWithoutGroundingAirborneFeet() throws {
+        let clip = PetAnimationLibrary.naturalClip(for: .lion, breed: .adultLion, pose: .run)
+        let geometry = try clip.frames.map { try XCTUnwrap(PetSpriteGeometry.load(assetName: $0)) }
+        let tops = geometry.map { $0.visibleBounds.minY }
+        XCTAssertLessThanOrEqual(try XCTUnwrap(tops.max()) - XCTUnwrap(tops.min()), 6)
+        for index in geometry.indices {
+            XCTAssertEqual(geometry[index].rect(in: PetSpriteGeometry.canvas).origin, .zero)
+            XCTAssertLessThanOrEqual(abs(tops[index] - tops[(index + 1) % tops.count]), 3)
+        }
+        XCTAssertLessThan(geometry[4].visibleBounds.maxY, geometry[0].visibleBounds.maxY - 8)
+    }
+
+    @MainActor
+    func testAllNewCompanionTimerModesAreRegistered() throws {
+        try registerTimerFonts()
+        for family in ["PetIslandTimer", "PetIslandLockTimer"] {
+            for breed in ["LionAdult", "Lioness", "LionCub", "DogCardigan"] {
+                for mode in ["Run", "Walk", "Sleep", "RunSleep", "WalkSleep", "RunWalkSleep"] {
+                    let name = family + breed + mode
+                    let font = CTFontCreateWithName(name as CFString, 36, nil)
+                    XCTAssertEqual(CTFontCopyPostScriptName(font) as String, name)
+                }
+            }
+        }
     }
 
     func testVisualVariantsAreScopedToTheirSpecies() {
         XCTAssertEqual(
             PetBreed.available(for: .dog),
-            [.shepherd, .corgi, .doberman, .bullTerrier]
+            [.shepherd, .corgi, .cardigan, .doberman, .bullTerrier]
         )
         XCTAssertEqual(
             PetBreed.available(for: .cat),
             [.classicCat, .britishShorthair, .maineCoon, .siamese]
         )
         XCTAssertEqual(PetBreed.available(for: .fox), [.redFox, .arcticFox])
+        XCTAssertEqual(PetBreed.available(for: .lion), [.adultLion, .lioness, .lionCub])
         XCTAssertEqual(
             PetBreed.available(for: .parrot),
             [.classicParrot, .cockatiel, .budgie, .macaw]
@@ -1176,6 +1990,95 @@ final class PetDomainTests: XCTestCase {
         XCTAssertEqual(settings.appearance, .system)
         XCTAssertFalse(settings.hapticsEnabled)
         XCTAssertTrue(settings.minimizeMotion)
+        XCTAssertNil(settings.liveActivityBackgroundColor)
+    }
+
+    func testLiveActivityColorSurvivesSettingsRoundTrip() throws {
+        let color = PetColorSelection(red: 0.94, green: 0.87, blue: 0.76)
+        let settings = AppSettings(appearance: .light, liveActivityBackgroundColor: color)
+        let decoded = try JSONDecoder().decode(AppSettings.self, from: JSONEncoder().encode(settings))
+        XCTAssertEqual(decoded, settings)
+    }
+
+    func testLegacyLiveActivityContentStillDecodes() throws {
+        let content = PetActivityAttributes.ContentState(snapshot: .initial(at: .now), lastInteraction: nil)
+        let encoded = try JSONEncoder().encode(content)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        XCTAssertNil(json["backgroundColor"])
+        let decoded = try JSONDecoder().decode(PetActivityAttributes.ContentState.self, from: encoded)
+        XCTAssertNil(decoded.backgroundColor)
+        XCTAssertEqual(decoded.appearance.background, PetActivityAppearance.defaultBackground)
+    }
+
+    func testLiveActivityReactionsPreserveCustomBackground() throws {
+        let color = PetColorSelection(red: 0.74, green: 0.68, blue: 0.88)
+        let initial = PetSnapshot.initial(at: .now)
+        let content = PetActivityAttributes.ContentState(snapshot: initial, lastInteraction: nil, backgroundColor: color)
+        let snapshots = PetLiveMotionSequence.snapshots(from: initial, action: .run, species: .lion)
+        for snapshot in snapshots {
+            let updated = content.updating(snapshot: snapshot, lastInteraction: "run")
+            XCTAssertEqual(updated.backgroundColor, color)
+            XCTAssertEqual(updated.snapshot, snapshot)
+            XCTAssertEqual(updated.lastInteraction, "run")
+            XCTAssertEqual(try JSONDecoder().decode(PetActivityAttributes.ContentState.self,
+                from: JSONEncoder().encode(updated)), updated)
+        }
+    }
+
+    func testLiveActivityTextContrastAcrossRGBColors() {
+        for red in 0...10 {
+            for green in 0...10 {
+                for blue in 0...10 {
+                    let palette = PetActivityAppearance(background: .init(
+                        red: Double(red) / 10, green: Double(green) / 10, blue: Double(blue) / 10))
+                    let luminance = palette.relativeLuminance
+                    let contrast = palette.usesDarkText ? (luminance + 0.05) / 0.05 : 1.05 / (luminance + 0.05)
+                    XCTAssertGreaterThanOrEqual(contrast, 4.5)
+                }
+            }
+        }
+        XCTAssertFalse(PetActivityAppearance(background: nil).usesDarkText)
+        XCTAssertTrue(PetActivityAppearance(background: .init(red: 1, green: 1, blue: 1)).usesDarkText)
+    }
+
+    @MainActor
+    func testActivityColorSaveAndResetPreserveOtherSettingsAndPet() async throws {
+        let store = InMemoryPetStore()
+        let controller = PetSessionController(store: store, arcadeStore: InMemoryArcadeStore())
+        await controller.bootstrap()
+        await controller.updateDynamicIslandSettings(mode: .walkSleep, durationMinutes: 120)
+        let profile = controller.profile
+        let color = PetColorSelection(red: 0.86, green: 0.89, blue: 0.94)
+        let saved = await controller.updateLiveActivityBackgroundColor(color)
+        XCTAssertTrue(saved)
+        let persisted = await store.load()
+        XCTAssertEqual(persisted.settings.liveActivityBackgroundColor, color)
+        XCTAssertEqual(controller.settings.liveActivityBackgroundColor, color)
+        XCTAssertEqual(controller.settings.dynamicIslandMotionMode, .walkSleep)
+        XCTAssertEqual(controller.settings.defaultSessionMinutes, 120)
+        XCTAssertEqual(controller.profile, profile)
+        let reset = await controller.updateLiveActivityBackgroundColor(nil)
+        XCTAssertTrue(reset)
+        let resetState = await store.load()
+        XCTAssertNil(resetState.settings.liveActivityBackgroundColor)
+        XCTAssertEqual(resetState.settings.dynamicIslandMotionMode, .walkSleep)
+    }
+
+    @MainActor
+    func testFailedActivityColorSaveKeepsPreviousColor() async throws {
+        let store = FailablePetStore()
+        let controller = PetSessionController(store: store, arcadeStore: InMemoryArcadeStore())
+        await controller.bootstrap()
+        let previous = PetColorSelection(red: 0.15, green: 0.27, blue: 0.44)
+        let saved = await controller.updateLiveActivityBackgroundColor(previous)
+        XCTAssertTrue(saved)
+        await store.setFailure(true)
+        let reset = await controller.updateLiveActivityBackgroundColor(nil)
+        XCTAssertFalse(reset)
+        XCTAssertEqual(controller.settings.liveActivityBackgroundColor, previous)
+        let persisted = await store.load()
+        XCTAssertEqual(persisted.settings.liveActivityBackgroundColor, previous)
+        XCTAssertNotNil(controller.alertMessage)
     }
 
     func testAppearancePreferenceSurvivesPersistenceRoundTrip() throws {
@@ -1197,4 +2100,27 @@ private struct LegacyPersistedAppState: Encodable {
     var history: PetHistory
     var settings: AppSettings
     var completedOnboarding: Bool
+}
+
+private actor FailablePetStore: PetStore {
+    private var value = PersistedAppState()
+    private var fails = false
+    func setFailure(_ value: Bool) { fails = value }
+    func load() async -> PersistedAppState { value }
+    func save(_ state: PersistedAppState) async throws {
+        if fails { throw CocoaError(.fileWriteOutOfSpace) }
+        value = state
+    }
+}
+
+private actor FailableArcadeStore: ArcadeStore {
+    private var value: ArcadeState
+    private var fails = false
+    init(_ value: ArcadeState = ArcadeState()) { self.value = value }
+    func setFailure(_ value: Bool) { fails = value }
+    func load() async -> ArcadeState { value }
+    func save(_ state: ArcadeState) async throws {
+        if fails { throw CocoaError(.fileWriteOutOfSpace) }
+        value = state
+    }
 }

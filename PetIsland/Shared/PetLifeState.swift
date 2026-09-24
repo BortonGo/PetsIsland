@@ -1,4 +1,5 @@
 import Foundation
+import Darwin
 
 /// The single authoritative location of the pet. Keeping this in the shared
 /// state prevents it from appearing in two surfaces at the same time.
@@ -23,12 +24,9 @@ struct PetVitals: Codable, Equatable, Hashable, Sendable {
     }
 
     func projected(from anchor: Date, to date: Date) -> PetVitals {
-        let elapsedHours = max(date.timeIntervalSince(anchor), 0) / 3_600
-        return PetVitals(
-            fullness: fullness - elapsedHours * 0.004,
-            happiness: happiness - elapsedHours * 0.002,
-            energy: energy - elapsedHours * 0.003
-        )
+        guard anchor != .distantPast, anchor <= date else { return self }
+        let elapsedHours = min(max(date.timeIntervalSince(anchor), 0) / 3_600, 24)
+        return PetVitals(fullness: fullness, happiness: happiness, energy: energy + elapsedHours * 0.04)
     }
 
     private static func clamp(_ value: Double) -> Double {
@@ -89,7 +87,7 @@ struct PetLifeState: Codable, Equatable, Sendable {
         )
     }
 
-    /// Materializes natural vital decay before applying an explicit mutation.
+    /// Materializes gentle rest recovery before applying an explicit mutation.
     /// The controller should call this before feeding or moving the pet.
     mutating func materializeVitals(at date: Date) {
         vitals = vitals.projected(from: vitalsUpdatedAt, to: date)
@@ -317,69 +315,88 @@ enum PetLifeStoreError: Error, LocalizedError {
     }
 }
 
-/// App Group repository used by the app, WidgetKit provider, and AppIntent.
-/// A last-known-good backup is kept so a partial or incompatible write never
-/// resets the user's pet.
+/// Atomic snapshots guarded by an OS file lock shared by the app and extension.
+/// The lock file is never replaced; only the data file is atomically renamed.
+struct SharedSnapshotFile<Value: Codable> {
+    let url: URL
+
+    func load(fallback: () -> Value) throws -> Value {
+        try update(fallback: fallback, writesChanges: false) { _ in }
+    }
+
+    @discardableResult
+    func update(fallback: () -> Value, writesChanges: Bool = true, _ mutation: (inout Value) throws -> Void) throws -> Value {
+        try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let descriptor = open(url.appendingPathExtension("lock").path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR)
+        guard descriptor >= 0 else { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+        defer { close(descriptor) }
+        while flock(descriptor, LOCK_EX) != 0 {
+            if errno != EINTR { throw POSIXError(POSIXErrorCode(rawValue: errno) ?? .EIO) }
+        }
+        defer { flock(descriptor, LOCK_UN) }
+
+        let decoder = PropertyListDecoder()
+        let backup = url.appendingPathExtension("backup")
+        let primaryData = try? Data(contentsOf: url)
+        let previous = primaryData.flatMap { try? decoder.decode(Value.self, from: $0) }
+        let recovered = (try? Data(contentsOf: backup)).flatMap { try? decoder.decode(Value.self, from: $0) }
+        if previous == nil && recovered == nil,
+           FileManager.default.fileExists(atPath: url.path) || FileManager.default.fileExists(atPath: backup.path) {
+            throw CocoaError(.fileReadCorruptFile)
+        }
+        var value = previous ?? recovered ?? fallback()
+        try mutation(&value)
+        if !writesChanges, previous != nil { return value }
+        let encoder = PropertyListEncoder()
+        encoder.outputFormat = .binary
+        let encoded = try encoder.encode(value)
+        // A read of a healthy snapshot does not rewrite files or rotate backup.
+        if encoded != primaryData {
+            if previous != nil, let primaryData {
+                try primaryData.write(to: backup, options: .atomic)
+            }
+            try encoded.write(to: url, options: .atomic)
+        }
+        return value
+    }
+}
+
+enum SharedPetStorage {
+    static func file<Value: Codable>(for key: String, as type: Value.Type) throws -> SharedSnapshotFile<Value> {
+        guard let root = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: PetLifeStore.appGroupIdentifier) else {
+            throw PetLifeStoreError.appGroupUnavailable
+        }
+        return SharedSnapshotFile(url: root.appending(path: "Snapshots/\(key).plist"))
+    }
+
+    static func legacy<Value: Decodable>(_ type: Value.Type, key: String) -> Value? {
+        guard let defaults = UserDefaults(suiteName: PetLifeStore.appGroupIdentifier) else { return nil }
+        for candidate in [key, key + ".backup"] {
+            if let data = defaults.data(forKey: candidate),
+               let value = try? PropertyListDecoder().decode(type, from: data) { return value }
+        }
+        return nil
+    }
+}
+
 enum PetLifeStore {
     static let appGroupIdentifier = "group.org.bortongo.PetIsland"
     static let stateKey = "petLifeState.v1"
 
-    private static let backupKey = "petLifeState.v1.backup"
-    private static let lock = NSLock()
-
     static func load() -> PetLifeState {
-        lock.lock()
-        defer { lock.unlock() }
-        return loadUnlocked()
+        (try? SharedPetStorage.file(for: stateKey, as: PetLifeState.self).load(fallback: initialValue)) ?? initialValue()
     }
 
     static func save(_ state: PetLifeState) throws {
-        lock.lock()
-        defer { lock.unlock() }
-        try saveUnlocked(state)
+        try update { $0 = state }
     }
 
     @discardableResult
     static func update(_ mutation: (inout PetLifeState) -> Void) throws -> PetLifeState {
-        lock.lock()
-        defer { lock.unlock() }
-        var state = loadUnlocked()
-        mutation(&state)
-        try saveUnlocked(state)
-        return state
+        try SharedPetStorage.file(for: stateKey, as: PetLifeState.self).update(fallback: initialValue, mutation)
     }
 
-    private static func loadUnlocked() -> PetLifeState {
-        guard let defaults = UserDefaults(suiteName: appGroupIdentifier) else {
-            return .initial()
-        }
-
-        let decoder = PropertyListDecoder()
-        for key in [stateKey, backupKey] {
-            guard let data = defaults.data(forKey: key),
-                  let state = try? decoder.decode(PetLifeState.self, from: data) else { continue }
-            return state
-        }
-        return .initial()
-    }
-
-    private static func saveUnlocked(_ state: PetLifeState) throws {
-        guard let defaults = UserDefaults(suiteName: appGroupIdentifier) else {
-            throw PetLifeStoreError.appGroupUnavailable
-        }
-
-        let encoder = PropertyListEncoder()
-        encoder.outputFormat = .binary
-        let data: Data
-        do {
-            data = try encoder.encode(state)
-        } catch {
-            throw PetLifeStoreError.encodingFailed(error)
-        }
-
-        if let current = defaults.data(forKey: stateKey) {
-            defaults.set(current, forKey: backupKey)
-        }
-        defaults.set(data, forKey: stateKey)
+    private static func initialValue() -> PetLifeState {
+        SharedPetStorage.legacy(PetLifeState.self, key: stateKey) ?? .initial()
     }
 }

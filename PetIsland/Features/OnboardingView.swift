@@ -3,6 +3,9 @@ import SwiftUI
 struct OnboardingView: View {
     @ObservedObject var controller: PetSessionController
     @State private var page = 0
+    @PetReduceMotion private var reduceMotion
+    @State private var isSaving = false
+    @State private var saveFailed = false
     @State private var draft = PetProfile(
         id: UUID(),
         name: "Pixel",
@@ -19,32 +22,55 @@ struct OnboardingView: View {
                     choosePet.tag(1)
                     firstSession.tag(2)
                 }
-                .tabViewStyle(.page(indexDisplayMode: .always))
-                .animation(.easeInOut, value: page)
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .animation(reduceMotion ? nil : .easeInOut, value: page)
+
+                HStack(spacing: 7) {
+                    ForEach(0..<3) { index in
+                        Capsule().fill(index == page ? PetDesign.accent : PetDesign.separator)
+                            .frame(width: index == page ? 22 : 6, height: 6)
+                    }
+                }
+                .accessibilityHidden(true)
 
                 Button {
                     if page < 2 { page += 1 }
-                    else { Task { await controller.completeOnboarding(profile: draft) } }
+                    else {
+                        isSaving = true
+                        Task {
+                            if !(await controller.completeOnboarding(profile: draft)) {
+                                controller.alertMessage = nil
+                                saveFailed = true
+                            }
+                            isSaving = false
+                        }
+                    }
                 } label: {
-                    Text(page == 2 ? "Meet my pet" : "Continue")
+                    Text(page == 2 ? String(localized: "Meet my pet") : String(localized: "Continue"))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 7)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(PetPrimaryButtonStyle())
                 .controlSize(.large)
+                .disabled(isSaving)
             }
             .padding(20)
-            .background(Color(.systemGroupedBackground))
+            .petPage()
         }
         .interactiveDismissDisabled()
+        .alert("Your pet could not be saved", isPresented: $saveFailed) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Your draft is still here. Please try saving again.")
+        }
     }
 
     private var welcome: some View {
         OnboardingPage(
-            title: "A small companion with a life of its own",
-            message: "Pixel lives in the enclosure widget. When you want company, take him with you to Dynamic Island."
+            title: "Meet your pet",
+            message: "Give your pet a home on the island. Stroke them, play together, and choose a favorite landscape."
         ) {
-            PetHabitatView(profile: draft, snapshot: .init(pose: .jump, position: 0.5, direction: .right, revision: 1, generatedAt: .now))
+            HabitatEditorCanvas(theme: .meadow, pets: [draft], vitalsByPetID: [:], petScale: 1.4)
                 .frame(height: 270)
         }
     }
@@ -52,7 +78,7 @@ struct OnboardingView: View {
     private var choosePet: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
-                Text("Choose your first pet").font(.title2.bold())
+                Text("Choose your first pet").font(PetDesign.title(.title2))
                 Text("Give your new friend a name, then choose an animal and appearance.")
                     .foregroundStyle(.secondary)
                 PetPicker(profile: $draft, allowedSpecies: PetSpecies.selectableCases)
@@ -65,8 +91,8 @@ struct OnboardingView: View {
 
     private var firstSession: some View {
         OnboardingPage(
-            title: "Home or Dynamic Island",
-            message: "Move Pixel between the enclosure and Dynamic Island whenever you like. Throw the ball from the widget and watch his mood change."
+            title: "Take your pet with you",
+            message: "Your pet can join you on the Lock Screen and Dynamic Island on supported iPhones. You can bring them home whenever you like."
         ) {
             VStack(spacing: 18) {
                 PetPortraitArtwork(
@@ -77,7 +103,7 @@ struct OnboardingView: View {
                     pose: .sleep
                 )
                     .frame(width: 190, height: 150)
-                Label("No timer · works offline", systemImage: "pawprint.fill")
+                Label("Your pets · works offline", systemImage: "pawprint.fill")
                     .font(.headline)
                     .padding(12)
                     .background(.thinMaterial, in: Capsule())
@@ -100,12 +126,14 @@ private struct OnboardingPage<Content: View>: View {
     @ViewBuilder let content: Content
 
     var body: some View {
-        VStack(spacing: 18) {
-            Spacer(minLength: 10)
-            content
-            Text(title).font(.largeTitle.bold()).multilineTextAlignment(.center)
-            Text(message).font(.body).foregroundStyle(.secondary).multilineTextAlignment(.center)
-            Spacer(minLength: 36)
+        ScrollView {
+            VStack(spacing: 18) {
+                Spacer(minLength: 10)
+                content
+                Text(title).font(PetDesign.title()).multilineTextAlignment(.center)
+                Text(message).font(.body).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                Spacer(minLength: 36)
+            }
         }
     }
 }

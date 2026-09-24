@@ -36,6 +36,29 @@ PetIslandLiveActivity/Resources/PetTimerFaces/
 # Local sprite-generation, simulator capture, and visual QA artifacts
 outputs/
 
+# Artwork drafts, prompts, review archives and local generation tools.
+# Shipped artwork stays tracked in the application's asset catalogs.
+/Design/
+/Tools/import_new_pets.py
+/Tools/pack_new_pet_artwork.py
+/Tools/pack_natural_gaits.py
+/Tools/prepare_walk_sprites.py
+/Tools/rebuild_timer_fonts.py
+/Tools/update_walk_fonts.py
+
+# Internal planning and dated QA notes; README media stays versioned.
+/Docs/*.md
+/Docs/Media/repaired-walk-cycles.gif
+
+# Local assistant state and Python environments
+/.codex/
+/.agents/
+/.venv/
+/venv/
+/.pytest_cache/
+/.mypy_cache/
+/.ruff_cache/
+
 # Local asset-generation utilities (not required to build the app)
 Design/tools/
 Scripts/

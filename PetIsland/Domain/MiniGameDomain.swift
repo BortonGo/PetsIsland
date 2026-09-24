@@ -38,7 +38,7 @@ struct ArcadeInventory: Codable, Equatable, Sendable {
     }
 }
 
-struct ArcadePayout: Equatable, Sendable {
+struct ArcadePayout: Codable, Equatable, Sendable {
     let score: Int
     let coinsEarned: Int
     let isNewHighScore: Bool
@@ -156,6 +156,9 @@ struct ArcadeState: Codable, Equatable, Sendable {
     var schemaVersion: Int
     var progress: ArcadeProgress
     var vitalsByPetID: [UUID: PetVitals]
+    var vitalsUpdatedAtByPetID: [UUID: Date] = [:]
+    var pendingCareEvents: [PetCareEvent] = []
+    var completedRuns: [CompletedArcadeRun] = []
 
     init(
         progress: ArcadeProgress = ArcadeProgress(),
@@ -169,25 +172,45 @@ struct ArcadeState: Codable, Equatable, Sendable {
     mutating func reconcile(with pets: [PetProfile]) {
         let petIDs = Set(pets.map(\.id))
         vitalsByPetID = vitalsByPetID.filter { petIDs.contains($0.key) }
+        vitalsUpdatedAtByPetID = vitalsUpdatedAtByPetID.filter { petIDs.contains($0.key) }
         for petID in petIDs where vitalsByPetID[petID] == nil {
             vitalsByPetID[petID] = PetVitals()
         }
     }
 
+    /// Widget actions run in another process. Merge only newer care changes,
+    /// preserving inventory/coins and any more recent action inside the app.
+    mutating func mergeVitals(from habitat: SharedPetHabitat) {
+        for resident in habitat.residents where vitalsByPetID[resident.id] != nil {
+            if resident.vitalsUpdatedAt > (vitalsUpdatedAtByPetID[resident.id] ?? .distantPast) {
+                vitalsByPetID[resident.id] = resident.vitals
+                vitalsUpdatedAtByPetID[resident.id] = resident.vitalsUpdatedAt
+            }
+        }
+    }
+
     private enum CodingKeys: String, CodingKey {
-        case schemaVersion, progress, vitalsByPetID
+        case schemaVersion, progress, vitalsByPetID, vitalsUpdatedAtByPetID, pendingCareEvents, completedRuns
     }
 
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
+        pendingCareEvents = try values.decodeIfPresent([PetCareEvent].self, forKey: .pendingCareEvents) ?? []
+        completedRuns = try values.decodeIfPresent([CompletedArcadeRun].self, forKey: .completedRuns) ?? []
         schemaVersion = Self.schemaVersion
         progress = try values.decodeIfPresent(ArcadeProgress.self, forKey: .progress) ?? ArcadeProgress()
         vitalsByPetID = try values.decodeIfPresent([UUID: PetVitals].self, forKey: .vitalsByPetID) ?? [:]
+        vitalsUpdatedAtByPetID = try values.decodeIfPresent([UUID: Date].self, forKey: .vitalsUpdatedAtByPetID) ?? [:]
     }
 }
 
+struct CompletedArcadeRun: Codable, Equatable, Sendable {
+    let id: UUID
+    let payout: ArcadePayout
+}
+
 protocol ArcadeStore: Sendable {
-    func load() async -> ArcadeState
+    func load() async throws -> ArcadeState
     func save(_ state: ArcadeState) async throws
 }
 
@@ -206,19 +229,12 @@ actor FileArcadeStore: ArcadeStore {
         decoder.dateDecodingStrategy = .iso8601
     }
 
-    func load() async -> ArcadeState {
-        guard let data = try? Data(contentsOf: fileURL),
-              let state = try? decoder.decode(ArcadeState.self, from: data) else {
-            return ArcadeState()
-        }
-        return state
+    func load() async throws -> ArcadeState {
+        try DurableJSON.load(ArcadeState.self, from: fileURL, decoder: decoder) ?? ArcadeState()
     }
 
     func save(_ state: ArcadeState) async throws {
-        let directory = fileURL.deletingLastPathComponent()
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let data = try encoder.encode(state)
-        try data.write(to: fileURL, options: .atomic)
+        try DurableJSON.save(state, to: fileURL, encoder: encoder, decoder: decoder)
     }
 }
 

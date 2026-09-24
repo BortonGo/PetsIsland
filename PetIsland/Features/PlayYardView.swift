@@ -1,18 +1,19 @@
 import SwiftUI
 import UIKit
 
-/// An in-app playground for up to three pets.
+/// An in-app playground for all six enclosure residents.
 ///
 /// The simulation runs only while this view is visible. Dynamic Island artwork
 /// and behavior remain independent from this foreground-only experience.
 struct PlayYardView: View {
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @PetReduceMotion private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var simulation: PlayYardSimulation
 
-    init(pets: [PetProfile]) {
-        let visiblePets = pets.isEmpty ? [PetProfile.starter] : Array(pets.prefix(3))
-        _simulation = StateObject(wrappedValue: PlayYardSimulation(pets: visiblePets))
+    init(pets: [PetProfile], hapticsEnabled: Bool = true) {
+        let visiblePets = pets.isEmpty ? [PetProfile.starter] : Array(pets.prefix(PetHabitatState.maximumResidents))
+        _simulation = StateObject(wrappedValue: PlayYardSimulation(pets: visiblePets, hapticsEnabled: hapticsEnabled))
     }
 
     var body: some View {
@@ -50,8 +51,8 @@ struct PlayYardView: View {
 
                     if simulation.frame.phase != .returning {
                         yardBall
-                            .position(simulation.frame.ballPosition)
                             .rotationEffect(.radians(simulation.frame.ballAngle))
+                            .position(simulation.frame.ballPosition)
                             .zIndex(4)
                     }
 
@@ -94,6 +95,10 @@ struct PlayYardView: View {
         .onChange(of: reduceMotion) { _, newValue in
             simulation.setReduceMotion(newValue)
         }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { simulation.start(reduceMotion: reduceMotion) }
+            else { simulation.stop() }
+        }
         .onDisappear {
             simulation.stop()
         }
@@ -122,6 +127,7 @@ struct PlayYardView: View {
             .accessibilityLabel("Ball")
             .accessibilityHint("Drag and throw it for your pets")
             .accessibilityAddTraits(.isButton)
+            .accessibilityAction { simulation.throwAccessibleBall() }
     }
 
     private var gameHUD: some View {
@@ -221,7 +227,7 @@ private enum PlayYardCoordinateSpace {
     static let name = "pet-island-play-yard"
 }
 
-private enum PlayYardPhase: Equatable {
+enum PlayYardPhase: Equatable {
     case ready
     case inFlight
     case fetching
@@ -240,6 +246,7 @@ enum PlayYardMouthLayout {
         let proportions: (forward: CGFloat, vertical: CGFloat) = switch species {
         case .dog: (0.42, 0.01)
         case .cat: (0.39, -0.01)
+        case .lion: (0.38, -0.03)
         case .fox: (0.43, 0)
         case .penguin: (0.36, -0.04)
         case .parrot: (0.32, -0.07)
@@ -295,7 +302,7 @@ private struct PlayYardPetFigure: View {
     let actor: PlayYardSimulation.Actor
     let carriesBall: Bool
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @PetReduceMotion private var reduceMotion
 
     var body: some View {
         ZStack {
@@ -316,7 +323,7 @@ private struct PlayYardPetFigure: View {
                 pose: actor.pose,
                 direction: actor.direction,
                 step: actor.step,
-                animatesMotion: false
+                animatesMotion: false, usesNaturalGait: true
             )
             .offset(y: bodyLift)
 
@@ -340,28 +347,19 @@ private struct PlayYardPetFigure: View {
         .accessibilityHidden(true)
     }
 
-    private var isMoving: Bool {
-        actor.pose == .walk || actor.pose == .run || actor.pose == .fly
-    }
-
     private var bodyLift: CGFloat {
         guard !reduceMotion else { return 0 }
         if actor.pose == .fly {
             return (sin(actor.motionPhase) * 2.5).rounded()
         }
-        if actor.pose == .run || actor.pose == .walk {
-            return (-abs(sin(actor.motionPhase)) * 2.5).rounded()
-        }
-        if actor.pose == .idle || actor.pose == .play {
-            return (-abs(sin(actor.motionPhase))).rounded()
-        }
+        // The art already contains foot lift. Moving the entire grounded body
+        // adds a second, unrelated bounce and breaks its contact with the floor.
         return 0
     }
 
     private var shadowScale: CGFloat {
         guard !reduceMotion else { return 1 }
-        let amount: CGFloat = isMoving ? 0.1 : 0.03
-        return 1 - abs(sin(actor.motionPhase)) * amount
+        return actor.isAirborne ? 0.85 : 1
     }
 }
 
@@ -531,7 +529,7 @@ enum PlayYardGameRules {
 }
 
 @MainActor
-private final class PlayYardSimulation: NSObject, ObservableObject {
+final class PlayYardSimulation: NSObject, ObservableObject {
     struct Actor: Identifiable {
         let profile: PetProfile
         var position: CGPoint = .zero
@@ -543,6 +541,8 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
         var isAirborne = false
         var landingTimeRemaining: TimeInterval = 0
         var jumpCooldown: TimeInterval = 0
+        var distanceTravelled: CGFloat = 0
+        var gaitPhase = 0.0
         let size: CGFloat
 
         var id: UUID { profile.id }
@@ -577,19 +577,23 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
     private var celebrationTimeRemaining: TimeInterval = 0
     private var roundElapsed: TimeInterval = 0
     private var nextFetcherIndex = 0
+    private let hapticsEnabled: Bool
 #if DEBUG
     private var scheduledDebugThrow = false
 #endif
 
-    init(pets: [PetProfile]) {
+    init(pets: [PetProfile], hapticsEnabled: Bool = true) {
+        self.hapticsEnabled = hapticsEnabled
         frame = Frame(
-            actors: pets.prefix(3).map { profile in
+            actors: pets.prefix(PetHabitatState.maximumResidents).map { profile in
                 let size: CGFloat
                 switch profile.species {
                 case .dog:
                     size = 88
                 case .cat:
                     size = 90
+                case .lion:
+                    size = 96
                 case .fox, .penguin:
                     size = 92
                 case .parrot:
@@ -628,8 +632,8 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
             return
         }
 
-        let link = CADisplayLink(target: self, selector: #selector(update(_:)))
-        link.preferredFramesPerSecond = reduceMotion ? 15 : 30
+        let link = CADisplayLink(target: DisplayLinkTarget(self), selector: #selector(DisplayLinkTarget.update(_:)))
+        link.preferredFramesPerSecond = reduceMotion ? 15 : 60
         link.add(to: .main, forMode: .common)
         displayLink = link
         lastTimestamp = nil
@@ -648,6 +652,14 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
         displayLink?.invalidate()
         displayLink = nil
         lastTimestamp = nil
+        if frame.isDraggingBall {
+            frame.isDraggingBall = false
+            frame.dragOrigin = nil
+            frame.ballPosition = readyBallPoint
+            lastDragPoint = nil
+            lastDragTime = nil
+            sampledDragVelocity = .zero
+        }
     }
 
     func setReduceMotion(_ enabled: Bool) {
@@ -674,6 +686,7 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
             frame.actors[index].isAirborne = false
             frame.actors[index].landingTimeRemaining = 0
             frame.actors[index].jumpCooldown = 0
+            frame.actors[index].distanceTravelled = 0
         }
 
         frame.ballPosition = readyBallPoint
@@ -770,7 +783,21 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
         celebrationTimeRemaining = 0
         roundElapsed = 0
 
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        if hapticsEnabled { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
+    }
+
+    func throwAccessibleBall() {
+        guard frame.phase == .ready else { return }
+        let start = frame.ballPosition
+        dragBall(to: CGPoint(x: start.x + 60, y: start.y - 70))
+        throwBall(toward: CGPoint(x: start.x + 120, y: start.y - 150))
+    }
+
+    @MainActor
+    private final class DisplayLinkTarget: NSObject {
+        weak var simulation: PlayYardSimulation?
+        init(_ simulation: PlayYardSimulation) { self.simulation = simulation }
+        @objc func update(_ link: CADisplayLink) { simulation?.update(link) }
     }
 
     @objc private func update(_ link: CADisplayLink) {
@@ -782,6 +809,13 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
 
         let deltaTime = min(max(link.timestamp - previousTimestamp, 0), 1.0 / 15.0)
         lastTimestamp = link.timestamp
+        advance(by: deltaTime)
+    }
+
+    /// Also drives deterministic physics regression tests without a display link.
+    func advance(by deltaTime: TimeInterval) {
+        guard deltaTime.isFinite, deltaTime > 0, roomSize.width > 1, roomSize.height > 1 else { return }
+        let deltaTime = min(deltaTime, 1.0 / 15.0)
         animationClock += deltaTime
 
         var nextFrame = frame
@@ -887,6 +921,7 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
 
         for index in frame.actors.indices {
             var actor = frame.actors[index]
+            let previousPosition = actor.position
             let isFlying = actor.profile.species == .parrot
             let ground = groundY(for: actor)
             let speed = movementSpeed(for: actor.profile.species)
@@ -913,6 +948,7 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
                     let isRunning = horizontalDistance > 26
                     if isRunning {
                         let direction: CGFloat = dx >= 0 ? 1 : -1
+                        actor.direction = dx >= 0 ? .right : .left
                         let airControl: CGFloat = actor.isAirborne ? 0.84 : 1
                         actor.position.x += direction * min(
                             speed * airControl * deltaTime,
@@ -948,10 +984,7 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
                         actor.position.y = ground
                         actor.pose = .play
                     } else if isRunning {
-                        let contactBounce = reduceMotion
-                            ? 0
-                            : abs(sin(animationClock * 17 + Double(index))) * 1.6
-                        actor.position.y = ground - contactBounce
+                        actor.position.y = ground
                         actor.pose = .run
                     } else {
                         actor.position.y = ground
@@ -978,14 +1011,13 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
                 let home = CGPoint(x: roomSize.width * 0.5, y: homeY)
                 let dx = home.x - actor.position.x
                 let distance = hypot(dx, home.y - actor.position.y)
-                if distance > 10 {
+                if distance > 0.01 {
                     move(&actor, toward: home, speed: speed * 0.72, deltaTime: deltaTime)
-                    actor.direction = dx >= 0 ? .right : .left
                     actor.pose = isFlying ? .fly : .run
                     attachBall(to: actor, in: &frame)
                 } else if carryTimeRemaining > 0 {
                     actor.position = home
-                    actor.pose = isFlying ? .fly : .run
+                    actor.pose = isFlying ? .fly : .idle
                     attachBall(to: actor, in: &frame)
                 } else {
                     actor.position = home
@@ -994,7 +1026,7 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
                     frame.phase = .celebrating
                     frame.score += 1
                     celebrationTimeRemaining = reduceMotion ? 0.35 : 0.85
-                    UINotificationFeedbackGenerator().notificationOccurred(.success)
+                    if hapticsEnabled { UINotificationFeedbackGenerator().notificationOccurred(.success) }
                 }
             } else if isFetcher && frame.phase == .celebrating {
                 actor.position.y = isFlying ? ground - 48 : ground
@@ -1010,12 +1042,20 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
                 )
             }
 
-            let clip = PetAnimationLibrary.clip(
+            let clip = PetAnimationLibrary.naturalClip(
                 for: actor.profile.species,
                 breed: actor.profile.resolvedBreed,
                 pose: actor.pose
             )
-            actor.step = clip.frameIndex(at: animationClock, phaseOffset: index)
+            let travelled = hypot(actor.position.x - previousPosition.x, actor.position.y - previousPosition.y)
+            actor.distanceTravelled += travelled
+            if actor.pose == .walk || actor.pose == .run {
+                actor.gaitPhase = (actor.gaitPhase + travelled / max(actor.size * (actor.pose == .run ? 0.55 : 0.38), 1))
+                    .truncatingRemainder(dividingBy: 1)
+                actor.step = reduceMotion ? 0 : Int(actor.gaitPhase * Double(clip.frames.count))
+            } else {
+                actor.step = reduceMotion ? 0 : clip.frameIndex(at: animationClock, phaseOffset: index)
+            }
             let motionSpeed: Double = switch actor.pose {
             case .run: 13
             case .walk: 8
@@ -1045,7 +1085,7 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
         )
         let dx = target.x - actor.position.x
         let distance = hypot(dx, target.y - actor.position.y)
-        if distance > 6 {
+        if distance > 0.01 {
             move(&actor, toward: target, speed: speed * 0.38, deltaTime: deltaTime)
             actor.direction = dx >= 0 ? .right : .left
             actor.pose = isFlying ? .fly : .walk
@@ -1090,7 +1130,7 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
         carryTimeRemaining = reduceMotion ? 0.35 : 0.8
 #endif
         attachBall(to: actor, in: &frame)
-        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        if hapticsEnabled { UIImpactFeedbackGenerator(style: .medium).impactOccurred() }
     }
 
     private func attachBall(to actor: Actor, in frame: inout Frame) {
@@ -1162,7 +1202,8 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
         switch count {
         case 1: fractions = [0.18]
         case 2: fractions = [0.18, 0.82]
-        default: fractions = [0.14, 0.86, 0.65]
+        case 3: fractions = [0.14, 0.86, 0.65]
+        default: fractions = (0..<count).map { CGFloat($0 + 1) / CGFloat(count + 1) }
         }
         let fraction = fractions[min(index, fractions.count - 1)]
         return min(max(roomSize.width * fraction, 34), max(roomSize.width - 34, 34))
@@ -1178,7 +1219,7 @@ private final class PlayYardSimulation: NSObject, ObservableObject {
     private func movementSpeed(for species: PetSpecies) -> CGFloat {
         switch species {
         case .parrot: 236
-        case .dog, .fox: 214
+        case .dog, .fox, .lion: 214
         case .cat, .penguin: 196
         }
     }

@@ -3,7 +3,7 @@ import SwiftUI
 struct SkyPawsGameView: View {
     let pet: PetProfile
     let highScore: Int
-    let onFinish: (Int) async -> ArcadePayout?
+    let onFinish: (Int, UUID) async -> ArcadePayout?
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
@@ -12,26 +12,42 @@ struct SkyPawsGameView: View {
     @State private var payout: ArcadePayout?
     @State private var isSavingResult = false
     @State private var didSaveResult = false
+    @State private var runID = UUID()
+    @State private var isPaused = false
 
     var body: some View {
         GeometryReader { proxy in
-            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: scenePhase != .active)) { timeline in
+            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: scenePhase != .active || isPaused || engine.phase != .playing)) { timeline in
                 ZStack {
-                    background
+                    ArcadeSky(travel: engine.sceneryTravel)
                     gates(in: proxy.size)
-                    player(frame: wingFrame(at: timeline.date))
-                    hud(topInset: proxy.safeAreaInsets.top)
+                    player(frame: Int(engine.elapsedTime * 12))
+                    hud(insets: proxy.safeAreaInsets)
+                        .disabled(isPaused)
+                        .accessibilityHidden(isPaused)
 
+                    if isPaused {
+                        GamePausePanel(safeArea: proxy.safeAreaInsets) {
+                            lastTick = nil
+                            isPaused = false
+                        } onExit: { dismiss() }
+                        .zIndex(100)
+                    }
                     if engine.phase == .ready {
-                        startOverlay(size: proxy.size)
+                        GamePanelViewport(safeArea: proxy.safeAreaInsets) {
+                            startOverlay(size: proxy.size)
+                        }
                     } else if engine.phase == .gameOver {
-                        gameOverOverlay(size: proxy.size)
+                        GamePanelViewport(safeArea: proxy.safeAreaInsets) {
+                            gameOverOverlay(size: proxy.size)
+                        }
                     }
                 }
                 .contentShape(Rectangle())
                 .gesture(
                     SpatialTapGesture()
-                        .onEnded { _ in handleTap(in: proxy.size) }
+                        .onEnded { _ in handleTap(in: proxy.size) },
+                    including: engine.phase == .playing && !isPaused ? .all : .subviews
                 )
                 .onChange(of: timeline.date) { oldDate, newDate in
                     tick(from: oldDate, to: newDate, size: proxy.size)
@@ -50,30 +66,9 @@ struct SkyPawsGameView: View {
         .ignoresSafeArea()
         .persistentSystemOverlays(.hidden)
         .onChange(of: scenePhase) { _, phase in
-            if phase != .active { lastTick = nil }
-        }
-    }
-
-    private var background: some View {
-        ZStack {
-            LinearGradient(
-                colors: [
-                    Color(red: 0.15, green: 0.48, blue: 0.92),
-                    Color(red: 0.46, green: 0.79, blue: 0.98),
-                    Color(red: 0.77, green: 0.93, blue: 1)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-
-            ForEach(0..<7, id: \.self) { index in
-                SkyPawsBackgroundCloud()
-                    .frame(width: CGFloat(86 + (index % 3) * 24))
-                    .opacity(0.2)
-                    .position(
-                        x: CGFloat((index * 97 + 42) % 410),
-                        y: CGFloat(120 + ((index * 173) % 720))
-                    )
+            if phase != .active {
+                lastTick = nil
+                if engine.phase == .playing { isPaused = true }
             }
         }
     }
@@ -101,52 +96,24 @@ struct SkyPawsGameView: View {
             .accessibilityLabel("\(pet.name), flying")
     }
 
-    private func hud(topInset: CGFloat) -> some View {
+    private func hud(insets: EdgeInsets) -> some View {
         VStack {
-            HStack(spacing: 12) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.headline)
-                        .frame(width: 42, height: 42)
-                        .background(.ultraThinMaterial, in: Circle())
+            ArcadeHUD(score: engine.score, highScore: highScore, playing: engine.phase == .playing) {
+                if engine.phase == .playing { isPaused = true } else { dismiss() }
+            }
+            .padding(.top, max(insets.top, 54) + 8)
+            Spacer()
+            if engine.phase == .playing {
+                Button { engine.flap() } label: {
+                    Label("Tap anywhere to climb", systemImage: "hand.tap.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 18).padding(.vertical, 14)
+                        .background(ArcadePalette.ink.opacity(0.88), in: Capsule())
                 }
                 .buttonStyle(.plain)
-
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("SCORE")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.white.opacity(0.76))
-                    Text("\(engine.score)")
-                        .font(.title2.bold().monospacedDigit())
-                        .foregroundStyle(.white)
-                }
-
-                Spacer()
-
-                VStack(alignment: .trailing, spacing: 1) {
-                    Text("BEST")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.white.opacity(0.76))
-                    Text("\(max(highScore, engine.score))")
-                        .font(.headline.monospacedDigit())
-                        .foregroundStyle(.white)
-                }
-            }
-            .padding(.horizontal, 18)
-            .padding(.top, max(topInset, 58) + 38)
-
-            Spacer()
-
-            if engine.phase == .playing {
-                Label("Tap anywhere to climb", systemImage: "hand.tap.fill")
-                    .font(.caption.bold())
-                    .foregroundStyle(.white.opacity(0.86))
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 9)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .padding(.bottom, 24)
+                .accessibilityLabel("Flap")
+                .padding(.bottom, max(insets.bottom, 24) + 8)
             }
         }
     }
@@ -157,7 +124,7 @@ struct SkyPawsGameView: View {
                 .frame(width: 172, height: 116)
 
             Text("Ready to fly?")
-                .font(.largeTitle.bold())
+                .font(.system(.title2, design: .rounded).bold())
 
             Text("Tap to rise, glide through the cloud gates and keep \(pet.name) in the sky.")
                 .foregroundStyle(.secondary)
@@ -169,8 +136,9 @@ struct SkyPawsGameView: View {
                 Label("Take off", systemImage: "airplane")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(PetPrimaryButtonStyle())
             .controlSize(.large)
+            Button("Back to Arcade") { dismiss() }
         }
         .padding(24)
         .frame(maxWidth: 340)
@@ -180,8 +148,9 @@ struct SkyPawsGameView: View {
 
     private func gameOverOverlay(size: CGSize) -> some View {
         VStack(spacing: 14) {
-            Text(payout?.isNewHighScore == true ? "New record!" : "Good flight!")
-                .font(.largeTitle.bold())
+            Text(payout?.isNewHighScore == true
+                 ? String(localized: "New record!") : String(localized: "Good flight!"))
+                .font(.system(.title2, design: .rounded).bold())
 
             Text("\(engine.score) points · \(engine.gatesPassed) gates")
                 .font(.title3.monospacedDigit())
@@ -211,11 +180,17 @@ struct SkyPawsGameView: View {
                 Label("Fly again", systemImage: "arrow.counterclockwise")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(PetPrimaryButtonStyle())
             .controlSize(.large)
-            .disabled(isSavingResult)
+            .disabled(isSavingResult || !didSaveResult)
 
-            Button("Back to Arcade") { dismiss() }
+            if payout == nil && !isSavingResult {
+                Text("Your reward is not saved yet. Retry before starting another game.")
+                    .font(.caption).foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                Button("Save reward again") { saveResultIfNeeded() }
+            }
+            Button(payout == nil ? "Leave without reward" : "Back to Arcade") { dismiss() }
                 .disabled(isSavingResult)
         }
         .padding(24)
@@ -224,11 +199,8 @@ struct SkyPawsGameView: View {
         .padding(24)
     }
 
-    private func wingFrame(at date: Date) -> Int {
-        Int(date.timeIntervalSinceReferenceDate * 7)
-    }
-
     private func handleTap(in size: CGSize) {
+        guard !isPaused else { return }
         switch engine.phase {
         case .ready:
             restart(in: size)
@@ -240,17 +212,22 @@ struct SkyPawsGameView: View {
     }
 
     private func tick(from oldDate: Date, to newDate: Date, size: CGSize) {
-        guard engine.phase == .playing, scenePhase == .active else {
+        guard engine.phase == .playing, scenePhase == .active, !isPaused else {
             lastTick = nil
             return
         }
         let anchor = lastTick ?? oldDate
         lastTick = newDate
         engine.update(deltaTime: newDate.timeIntervalSince(anchor), in: size)
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-sky-paws-autopilot") { engine.runAutopilot(in: size) }
+#endif
         if engine.phase == .gameOver { saveResultIfNeeded() }
     }
 
     private func restart(in size: CGSize) {
+        isPaused = false
+        runID = UUID()
         payout = nil
         isSavingResult = false
         didSaveResult = false
@@ -259,12 +236,13 @@ struct SkyPawsGameView: View {
     }
 
     private func saveResultIfNeeded() {
-        guard !didSaveResult else { return }
+        guard !didSaveResult, !isSavingResult else { return }
         didSaveResult = true
         isSavingResult = true
         let finalScore = engine.score
         Task {
-            payout = await onFinish(finalScore)
+            payout = await onFinish(finalScore, runID)
+            didSaveResult = payout != nil
             isSavingResult = false
         }
     }
@@ -287,8 +265,9 @@ struct SkyPawsPlayerArtwork: View {
                         .resizable()
                         .interpolation(.none)
                         .scaledToFit()
+                        .petCoat(species: pet.species, coat: pet.coat, customColor: pet.customColor)
 
-                    if pet.species != .parrot {
+                    if pet.species != .parrot && pet.resolvedBreed?.companionArtworkToken == nil {
                         SkyPawsPropeller(frame: frame)
                             .frame(
                                 width: proxy.size.width * 0.23,
@@ -347,6 +326,9 @@ private struct SkyPawsPropeller: View {
 
 enum SkyPawsArtworkLibrary {
     static func assetNames(for species: PetSpecies, breed: PetBreed?) -> [String] {
+        if let token = (breed ?? PetBreed.defaultVariant(for: species))?.companionArtworkToken {
+            return ["sky_paws_\(token)"]
+        }
         switch species {
         case .cat:
             return switch breed ?? .classicCat {
@@ -385,7 +367,8 @@ enum SkyPawsArtworkLibrary {
             return breed == .rockhopper
                 ? ["sky_paws_penguin_rockhopper"]
                 : ["sky_paws_penguin_classic"]
-
+        case .lion:
+            return ["sky_paws_lion_adult"]
         }
     }
 }
@@ -421,6 +404,9 @@ struct SkyPawsEngine {
         Double(min(max(velocityY / 14, -15), 24))
     }
 
+    private(set) var elapsedTime: TimeInterval = 0
+    private(set) var sceneryTravel: CGFloat = 0
+    private var clock = ArcadeSimulationClock()
     private var distanceScore = 0.0
     private var nextGateID = 0
     private var randomState: UInt64 = 0x534B_5950_4157_5326
@@ -436,6 +422,9 @@ struct SkyPawsEngine {
         score = 0
         gatesPassed = 0
         distanceScore = 0
+        elapsedTime = 0
+        sceneryTravel = 0
+        clock = ArcadeSimulationClock()
         nextGateID = 0
         randomState = seed ?? UInt64.random(in: UInt64.min...UInt64.max)
         gates = []
@@ -466,13 +455,19 @@ struct SkyPawsEngine {
     }
 
     mutating func update(deltaTime rawDeltaTime: TimeInterval, in size: CGSize) {
-        guard phase == .playing, size.width > 0, size.height > 0 else { return }
+        guard phase == .playing, rawDeltaTime.isFinite, size.width > 0, size.height > 0 else { return }
         if viewportSize == .zero { viewportSize = size }
-        let dt = CGFloat(min(max(rawDeltaTime, 0), 1.0 / 24.0))
-        guard dt > 0 else { return }
+        let steps = clock.steps(for: rawDeltaTime)
+        for _ in 0..<steps where phase == .playing { advance(in: size) }
+    }
+
+    private mutating func advance(in size: CGSize) {
+        let dt = CGFloat(ArcadeSimulationClock.step)
+        elapsedTime += Double(dt)
 
         let difficulty = min(CGFloat(score) / 2_800, 1)
         let speed = 148 + difficulty * 76
+        sceneryTravel += speed * dt
         velocityY += (735 + difficulty * 65) * dt
         playerY += velocityY * dt
         distanceScore += Double(dt * (14 + difficulty * 7))
@@ -495,6 +490,15 @@ struct SkyPawsEngine {
             velocityY = 0
         }
     }
+
+#if DEBUG
+    mutating func runAutopilot(in size: CGSize) {
+        guard phase == .playing else { return }
+        let next = gates.first { $0.x + Self.gateWidth / 2 > playerX - 25 }
+        let target = next?.gapCenter ?? size.height * 0.48
+        if playerY > target + 18, velocityY > 0 { flap() }
+    }
+#endif
 
     private mutating func recycleGates(in size: CGSize) {
         gates.removeAll { $0.x < -Self.gateWidth }
@@ -562,41 +566,48 @@ private struct SkyPawsCloudColumn: View {
     let edgeAtBottom: Bool
 
     var body: some View {
-        ZStack(alignment: edgeAtBottom ? .bottom : .top) {
-            RoundedRectangle(cornerRadius: 25, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [.white, Color(red: 0.72, green: 0.87, blue: 0.97)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 25, style: .continuous)
-                        .stroke(.white.opacity(0.9), lineWidth: 3)
-                )
-
-            HStack(spacing: -16) {
-                Circle().frame(width: 52, height: 52)
-                Circle().frame(width: 64, height: 64)
-                Circle().frame(width: 48, height: 48)
+        Canvas { context, size in
+            let w = size.width, h = size.height
+            guard h > 1 else { return }
+            var c = context
+            if !edgeAtBottom { c.translateBy(x: 0, y: h); c.scaleBy(x: 1, y: -1) }
+            var cloud = Path()
+            cloud.move(to: CGPoint(x: w * 0.16, y: -2))
+            let end = max(h - 27, 0)
+            let steps = max(Int(ceil(end / 44)), 1)
+            for i in 0..<steps {
+                let y = CGFloat(i) * end / CGFloat(steps)
+                let next = CGFloat(i + 1) * end / CGFloat(steps)
+                cloud.addQuadCurve(to: CGPoint(x: w * 0.16, y: next),
+                                   control: CGPoint(x: -w * 0.14, y: (y + next) / 2))
             }
-            .foregroundStyle(.white)
-            .offset(y: edgeAtBottom ? 22 : -22)
+            cloud.addQuadCurve(to: CGPoint(x: w * 0.39, y: h - 4),
+                               control: CGPoint(x: -w * 0.05, y: h))
+            cloud.addQuadCurve(to: CGPoint(x: w * 0.72, y: h - 5),
+                               control: CGPoint(x: w * 0.56, y: h + 5))
+            cloud.addQuadCurve(to: CGPoint(x: w * 0.84, y: end),
+                               control: CGPoint(x: w * 1.03, y: h))
+            for i in (0..<steps).reversed() {
+                let y = CGFloat(i) * end / CGFloat(steps)
+                let previous = CGFloat(i + 1) * end / CGFloat(steps)
+                cloud.addQuadCurve(to: CGPoint(x: w * 0.84, y: y),
+                                   control: CGPoint(x: w * 1.12, y: (y + previous) / 2))
+            }
+            cloud.addLine(to: CGPoint(x: w * 0.84, y: -2)); cloud.closeSubpath()
+            c.fill(cloud, with: .linearGradient(
+                Gradient(colors: [Color(red: 0.99, green: 0.98, blue: 0.91), Color(red: 0.74, green: 0.86, blue: 0.87)]),
+                startPoint: .zero, endPoint: CGPoint(x: w, y: 0)))
+            c.clip(to: cloud)
+            for i in 0..<steps {
+                let y = CGFloat(i) * end / CGFloat(steps)
+                let oval = CGRect(x: 7, y: y, width: w * 0.5, height: 38)
+                c.fill(Path(ellipseIn: oval), with: .color(.white.opacity(0.18)))
+            }
         }
         .frame(width: SkyPawsEngine.gateWidth, height: height)
-        .shadow(color: .blue.opacity(0.14), radius: 5, x: 2, y: 2)
-    }
-}
-
-private struct SkyPawsBackgroundCloud: View {
-    var body: some View {
-        HStack(spacing: -20) {
-            Circle().frame(width: 54, height: 54)
-            Circle().frame(width: 74, height: 74)
-            Circle().frame(width: 50, height: 50)
-        }
-        .foregroundStyle(.white)
+        .clipped()
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 
@@ -669,7 +680,7 @@ private struct SkyPawsArtworkQAPreview: View {
     SkyPawsGameView(
         pet: .starter,
         highScore: 600,
-        onFinish: { _ in nil }
+        onFinish: { _, _ in nil }
     )
 }
 
@@ -680,7 +691,7 @@ private struct SkyPawsArtworkQAPreview: View {
             createdAt: .now, breed: .macaw
         ),
         highScore: 420,
-        onFinish: { _ in nil }
+        onFinish: { _, _ in nil }
     )
 }
 

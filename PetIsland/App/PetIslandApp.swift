@@ -3,7 +3,7 @@ import SwiftUI
 @main
 struct PetIslandApp: App {
     var body: some Scene {
-        WindowGroup { ContentView() }
+        WindowGroup { ContentView().tint(PetDesign.accent) }
     }
 }
 

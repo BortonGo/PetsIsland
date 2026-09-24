@@ -1,5 +1,12 @@
 # Third-Party Notices
 
+## Original lion family and Cardigan artwork
+
+The adult lion, lioness, lion cub and Cardigan corgi artwork was created for
+Pet Island using imagegen and approved by the project owner. The
+`companion_*`, corresponding `pets_dash_*` and `sky_paws_*` assets and timer
+glyphs are derived from those sources, not from the third-party sprites below.
+
 Pet Island includes selected pixel-art animation frames from
 [tonybaloney/vscode-pets](https://github.com/tonybaloney/vscode-pets), pinned
 at commit `d661785e890c422999bdec739dcc0a6b65d6f1cd`.

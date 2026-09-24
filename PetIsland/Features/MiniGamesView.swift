@@ -16,6 +16,7 @@ struct MiniGamesView: View {
     @ObservedObject var controller: PetSessionController
     var showsDismissButton = true
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var selectedPetID: UUID?
     @State private var activeSession: ActiveArcadeSession?
     @State private var message: String?
@@ -48,7 +49,8 @@ struct MiniGamesView: View {
                             }
                         }
                     }
-                    .padding(.horizontal, 18)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 14)
                     .padding(.bottom, 32)
                 }
                 .onChange(of: selectedPage) { _, _ in
@@ -57,9 +59,11 @@ struct MiniGamesView: View {
                     }
                 }
             }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("Pet Arcade")
+            .background(PetDesign.background)
+            .petPage()
+            .navigationTitle(showsDismissButton ? "Pet Arcade" : "")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar(showsDismissButton ? .visible : .hidden, for: .navigationBar)
             .toolbar {
                 if showsDismissButton {
                     ToolbarItem(placement: .confirmationAction) {
@@ -74,22 +78,22 @@ struct MiniGamesView: View {
                 SkyHopGameView(
                     pet: session.pet,
                     highScore: controller.arcadeProgress.highScore(for: .skyHop)
-                ) { score in
-                    await controller.completeMiniGame(.skyHop, score: score, petID: session.pet.id)
+                ) { score, runID in
+                    await controller.completeMiniGame(.skyHop, score: score, petID: session.pet.id, runID: runID)
                 }
             case .skyPaws:
                 SkyPawsGameView(
                     pet: session.pet,
                     highScore: controller.arcadeProgress.highScore(for: .skyPaws)
-                ) { score in
-                    await controller.completeMiniGame(.skyPaws, score: score, petID: session.pet.id)
+                ) { score, runID in
+                    await controller.completeMiniGame(.skyPaws, score: score, petID: session.pet.id, runID: runID)
                 }
             case .petsDash:
                 PetsDashGameView(
                     pet: session.pet,
                     highScore: controller.arcadeProgress.highScore(for: .petsDash)
-                ) { score in
-                    await controller.completeMiniGame(.petsDash, score: score, petID: session.pet.id)
+                ) { score, runID in
+                    await controller.completeMiniGame(.petsDash, score: score, petID: session.pet.id, runID: runID)
                 }
             }
         }
@@ -161,7 +165,7 @@ struct MiniGamesView: View {
             }
         }
         .padding(.vertical, 10)
-        .background(Color(.systemGroupedBackground))
+        .background(PetDesign.background)
         .zIndex(1)
     }
 
@@ -180,15 +184,15 @@ struct MiniGamesView: View {
             }
 
             HStack(spacing: 8) {
-                compactVital("fork.knife", value: vitals.fullness, color: .green)
-                compactVital("heart.fill", value: vitals.happiness, color: .pink)
-                compactVital("bolt.fill", value: vitals.energy, color: .cyan)
+                compactVital("fork.knife", value: vitals.fullness, color: PetDesign.accent)
+                compactVital("heart.fill", value: vitals.happiness, color: PetDesign.accent)
+                compactVital("bolt.fill", value: vitals.energy, color: PetDesign.accent)
             }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 11)
         .background(
-            Color(.secondarySystemGroupedBackground),
+            PetDesign.surface,
             in: RoundedRectangle(cornerRadius: 18, style: .continuous)
         )
     }
@@ -208,29 +212,15 @@ struct MiniGamesView: View {
     }
 
     private var walletHeader: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle().fill(.yellow.opacity(0.2))
-                Image(systemName: "dollarsign.circle.fill")
-                    .font(.title)
-                    .foregroundStyle(.orange)
-            }
-            .frame(width: 52, height: 52)
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text("Arcade wallet")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Text("\(controller.arcadeProgress.coins) coins")
-                    .font(.title2.bold().monospacedDigit())
-            }
-            Spacer()
+        HStack(alignment: .top, spacing: 12) {
+            PetScreenHeading(title: "Games")
+            Label("\(controller.arcadeProgress.coins)", systemImage: "circle.circle")
+                .font(.subheadline.weight(.medium).monospacedDigit())
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(PetDesign.soft, in: Capsule())
+                .accessibilityLabel("\(controller.arcadeProgress.coins) coins")
         }
-        .padding(18)
-        .background(
-            Color(.secondarySystemGroupedBackground),
-            in: RoundedRectangle(cornerRadius: 24, style: .continuous)
-        )
     }
 
     private var petPicker: some View {
@@ -260,14 +250,14 @@ struct MiniGamesView: View {
                                     .font(.caption.bold())
                                     .lineLimit(1)
                             }
-                            .frame(width: 92, height: 100)
+                            .frame(width: 88, height: 94)
                             .background(
-                                isSelected ? Color.accentColor.opacity(0.16) : Color.secondary.opacity(0.07),
+                                isSelected ? PetDesign.soft : Color.clear,
                                 in: RoundedRectangle(cornerRadius: 18, style: .continuous)
                             )
                             .overlay {
                                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                    .stroke(isSelected ? Color.accentColor : .clear, lineWidth: 2)
+                                    .stroke(isSelected ? PetDesign.separator : .clear, lineWidth: 1)
                             }
                         }
                         .buttonStyle(.plain)
@@ -294,19 +284,19 @@ struct MiniGamesView: View {
                 }
             }
             HStack(spacing: 12) {
-                vital("fork.knife", value: vitals.fullness, color: .green, title: "Full")
-                vital("heart.fill", value: vitals.happiness, color: .pink, title: "Happy")
-                vital("bolt.fill", value: vitals.energy, color: .cyan, title: "Energy")
+                vital("fork.knife", value: vitals.fullness, color: PetDesign.accent, title: "Full")
+                vital("heart.fill", value: vitals.happiness, color: PetDesign.accent, title: "Happy")
+                vital("bolt.fill", value: vitals.energy, color: PetDesign.accent, title: "Energy")
             }
         }
         .padding(16)
         .background(
-            Color(.secondarySystemGroupedBackground),
+            PetDesign.surface,
             in: RoundedRectangle(cornerRadius: 22, style: .continuous)
         )
     }
 
-    private func vital(_ symbol: String, value: Double, color: Color, title: String) -> some View {
+    private func vital(_ symbol: String, value: Double, color: Color, title: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 7) {
             Label(title, systemImage: symbol)
                 .font(.caption.bold())
@@ -321,255 +311,46 @@ struct MiniGamesView: View {
     }
 
     private func skyHopCard(for pet: PetProfile) -> some View {
-        VStack(spacing: 0) {
-            ZStack {
-                LinearGradient(
-                    colors: [.blue.opacity(0.72), .cyan.opacity(0.34)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                Circle()
-                    .fill(.white.opacity(0.28))
-                    .frame(width: 92, height: 92)
-                    .offset(x: 115, y: -58)
-                Capsule().fill(.green).frame(width: 92, height: 12).offset(x: -78, y: 72)
-                Capsule().fill(.mint).frame(width: 74, height: 12).offset(x: 74, y: 8)
-                Capsule()
-                    .fill(.orange)
-                    .overlay(Capsule().stroke(.white.opacity(0.7), style: StrokeStyle(lineWidth: 2, dash: [6, 4])))
-                    .frame(width: 62, height: 12)
-                    .offset(x: -48, y: -62)
-                Image(systemName: "cloud.bolt.rain.fill")
-                    .symbolRenderingMode(.palette)
-                    .foregroundStyle(.white, .indigo, .yellow)
-                    .font(.title)
-                    .offset(x: 92, y: -58)
-                PetArtwork(
-                    species: pet.species,
-                    coat: pet.coat,
-                    customColor: pet.customColor,
-                    breed: pet.resolvedBreed,
-                    pose: pet.species == .parrot ? .fly : .jump,
-                    step: 0,
-                    animatesMotion: false
-                )
-                .frame(width: 72, height: 64)
-                .offset(x: 55, y: 54)
-            }
-            .frame(height: 220)
-            .clipped()
-
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .firstTextBaseline) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Sky Hop")
-                            .font(.title2.bold())
-                        Text("Jump higher, use fragile platforms and dodge hazards.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Image(systemName: "arrow.up.right.circle.fill")
-                        .font(.title)
-                        .foregroundStyle(Color.accentColor)
-                }
-
-                Label("100 points = 1 coin · record +5 · first game today +10", systemImage: "sparkles")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                Button {
-                    activeSession = ActiveArcadeSession(game: .skyHop, pet: pet)
-                } label: {
-                    Label("Play as \(pet.name)", systemImage: "play.fill")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-            }
-            .padding(18)
-        }
-        .background(
-            Color(.secondarySystemGroupedBackground),
-            in: RoundedRectangle(cornerRadius: 26, style: .continuous)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        arcadeGameCard(for: pet, game: .skyHop, title: "Sky Hop",
+                       subtitle: "Jump between platforms and avoid obstacles.")
     }
 
     private func skyPawsCard(for pet: PetProfile) -> some View {
-        VStack(spacing: 0) {
-            ZStack {
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.19, green: 0.52, blue: 0.95),
-                        Color(red: 0.72, green: 0.92, blue: 1)
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-
-                ForEach(0..<4, id: \.self) { index in
-                    HStack(spacing: -14) {
-                        Circle().frame(width: 34, height: 34)
-                        Circle().frame(width: 46, height: 46)
-                        Circle().frame(width: 30, height: 30)
-                    }
-                    .foregroundStyle(.white.opacity(0.62))
-                    .offset(
-                        x: CGFloat([-108, 104, -78, 88][index]),
-                        y: CGFloat([-62, -26, 76, 68][index])
-                    )
-                }
-
-                SkyPawsPlayerArtwork(pet: pet, frame: 0)
-                    .frame(width: 128, height: 92)
-                    .offset(x: 24, y: 12)
-            }
-            .frame(height: 220)
-            .clipped()
-
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .firstTextBaseline) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Sky Paws")
-                            .font(.title2.bold())
-                        Text(
-                            pet.species == .parrot
-                                ? "Flap through cloud gates and keep your rhythm."
-                                : "Pilot a tiny plane through the cloud gates."
-                        )
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Image(systemName: "airplane.circle.fill")
-                        .font(.title)
-                        .foregroundStyle(Color.accentColor)
-                }
-
-                Label("Tap to climb · every gate adds 100 points", systemImage: "hand.tap.fill")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                Button {
-                    activeSession = ActiveArcadeSession(game: .skyPaws, pet: pet)
-                } label: {
-                    Label("Fly as \(pet.name)", systemImage: "airplane")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-            }
-            .padding(18)
-        }
-        .background(
-            Color(.secondarySystemGroupedBackground),
-            in: RoundedRectangle(cornerRadius: 26, style: .continuous)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        arcadeGameCard(for: pet, game: .skyPaws, title: "Sky Paws",
+                       subtitle: "Tap to fly through the cloud gates.")
     }
 
     private func petsDashCard(for pet: PetProfile) -> some View {
-        VStack(spacing: 0) {
-            GeometryReader { proxy in
-                let size = proxy.size
-                ZStack {
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.25, green: 0.7, blue: 0.42),
-                            Color(red: 0.62, green: 0.88, blue: 0.45)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
+        arcadeGameCard(for: pet, game: .petsDash, title: "Pets Dash",
+                       subtitle: "Dodge obstacles and collect coins.")
+    }
 
-                    Path { path in
-                        path.move(to: CGPoint(x: size.width * 0.32, y: 0))
-                        path.addLine(to: CGPoint(x: size.width * 0.68, y: 0))
-                        path.addLine(to: CGPoint(x: size.width * 0.92, y: size.height))
-                        path.addLine(to: CGPoint(x: size.width * 0.08, y: size.height))
-                        path.closeSubpath()
+    private func arcadeGameCard(
+        for pet: PetProfile, game: MiniGameKind,
+        title: LocalizedStringKey, subtitle: LocalizedStringKey
+    ) -> some View {
+        Button { activeSession = ActiveArcadeSession(game: game, pet: pet) } label: {
+            HStack(spacing: 16) {
+                ArcadeGameCover(pet: pet, game: game)
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(title).font(PetDesign.title(.title2))
+                    Text(subtitle)
+                        .font(.caption).foregroundStyle(PetDesign.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                    HStack {
+                        Text("Play").font(.caption.weight(.semibold))
+                        Image(systemName: "arrow.up.right").font(.caption)
                     }
-                    .fill(Color(red: 0.17, green: 0.18, blue: 0.22))
-
-                    ForEach([-1, 1], id: \.self) { direction in
-                        Path { path in
-                            path.move(
-                                to: CGPoint(
-                                    x: size.width / 2 + CGFloat(direction) * size.width * 0.06,
-                                    y: 0
-                                )
-                            )
-                            path.addLine(
-                                to: CGPoint(
-                                    x: size.width / 2 + CGFloat(direction) * size.width * 0.15,
-                                    y: size.height
-                                )
-                            )
-                        }
-                        .stroke(.white.opacity(0.65), style: StrokeStyle(lineWidth: 3, dash: [12, 12]))
-                    }
-
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(.orange)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 5)
-                                .stroke(.white, style: StrokeStyle(lineWidth: 4, dash: [12, 7]))
-                        )
-                        .frame(width: 56, height: 32)
-                        .offset(x: -82, y: -26)
-
-                    PetsDashPlayerArtwork(pet: pet, frame: 0)
-                        .frame(width: 112, height: 112)
-                        .offset(x: 34, y: 42)
-                        .shadow(color: .black.opacity(0.22), radius: 4, y: 4)
+                    .padding(.top, 4)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(height: 220)
-            .clipped()
-
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .firstTextBaseline) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text("Pets Dash")
-                            .font(.title2.bold())
-                        Text(
-                            pet.species == .parrot
-                                ? "Fly between three lanes, dodge barriers and collect paw coins."
-                                : "Race down three lanes, dodge barriers and collect paw coins."
-                        )
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Image(systemName: "figure.run.circle.fill")
-                        .font(.title)
-                        .foregroundStyle(Color.accentColor)
-                }
-
-                Label("Swipe between lanes · swipe up to jump", systemImage: "arrow.left.and.right")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                Button {
-                    activeSession = ActiveArcadeSession(game: .petsDash, pet: pet)
-                } label: {
-                    Label(
-                        pet.species == .parrot ? "Fly as \(pet.name)" : "Run as \(pet.name)",
-                        systemImage: "play.fill"
-                    )
-                    .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-            }
-            .padding(18)
+            .padding(16)
+            .petSurface()
+            .contentShape(RoundedRectangle(cornerRadius: 24))
         }
-        .background(
-            Color(.secondarySystemGroupedBackground),
-            in: RoundedRectangle(cornerRadius: 26, style: .continuous)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .buttonStyle(.plain)
+        .accessibilityHint("Play as \(pet.name)")
     }
 
     private func shop(for pet: PetProfile) -> some View {
@@ -583,7 +364,9 @@ struct MiniGamesView: View {
                     .foregroundStyle(.secondary)
             }
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+            LazyVGrid(columns: dynamicTypeSize.isAccessibilitySize
+                      ? [GridItem(.flexible())]
+                      : [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                 ForEach(ArcadeItemKind.allCases) { item in
                     shopItem(item, pet: pet)
                 }
@@ -615,15 +398,17 @@ struct MiniGamesView: View {
             Text(item.effectDescription)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-                .lineLimit(2, reservesSpace: true)
+                .fixedSize(horizontal: false, vertical: true)
 
             HStack(spacing: 8) {
                 Button {
                     Task {
                         if await controller.purchaseArcadeItem(item) {
-                            message = "\(item.title) added to your inventory."
+                            message = String(localized: "\(item.title) added to your inventory.")
+                        } else if controller.arcadeProgress.coins < price {
+                            message = String(localized: "You need \(price) coins to buy \(item.title.lowercased()).")
                         } else {
-                            message = "You need \(price) coins to buy \(item.title.lowercased())."
+                            showShopSaveFailure()
                         }
                     }
                 } label: {
@@ -631,12 +416,15 @@ struct MiniGamesView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
-                .disabled(controller.arcadeProgress.coins < price)
+                .disabled(controller.isBusy || controller.arcadeProgress.coins < price)
+                .accessibilityLabel("Buy \(item.title) for \(price) coins")
 
                 Button {
                     Task {
                         if await controller.useArcadeItem(item, for: pet.id) {
-                            message = "\(pet.name) used \(item.title.lowercased())."
+                            message = String(localized: "\(pet.name) used \(item.title.lowercased()).")
+                        } else {
+                            showShopSaveFailure()
                         }
                     }
                 } label: {
@@ -645,8 +433,8 @@ struct MiniGamesView: View {
                         .minimumScaleFactor(0.78)
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(owned == 0)
+                .buttonStyle(PetPrimaryButtonStyle())
+                .disabled(controller.isBusy || owned == 0)
                 .accessibilityLabel("Give \(item.title) to \(pet.name)")
             }
             .controlSize(.small)
@@ -654,30 +442,99 @@ struct MiniGamesView: View {
         }
         .padding(14)
         .background(
-            Color(.secondarySystemGroupedBackground),
+            PetDesign.surface,
             in: RoundedRectangle(cornerRadius: 20, style: .continuous)
         )
     }
 
+    private func showShopSaveFailure() {
+        message = controller.alertMessage
+            ?? String(localized: "Arcade progress could not be saved. Please try again.")
+        controller.alertMessage = nil
+    }
+
     private var economyCard: some View {
-        VStack(alignment: .leading, spacing: 9) {
-            Label("A fair rhythm", systemImage: "heart.text.square.fill")
-                .font(.headline)
+        DisclosureGroup {
+            Text("Rest gently restores energy. Time away never takes food or happiness away.")
+                .font(.footnote).foregroundStyle(.secondary)
             Text("Playing lifts happiness and spends a little fullness and energy. A tired pet can still play, but earns 25% fewer performance coins. Food and items never expire, and there are no paid currencies.")
+                .font(.footnote)
+                .foregroundStyle(PetDesign.secondary)
+                .padding(.top, 10)
+        } label: {
+            Label("A fair rhythm", systemImage: "heart")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
-        .background(.purple.opacity(0.09), in: RoundedRectangle(cornerRadius: 22))
+        .petSurface()
+    }
+
+}
+
+/// Keeps long instructions and rewards reachable at accessibility text sizes.
+struct GamePanelViewport<Content: View>: View {
+    let safeArea: EdgeInsets
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        ViewThatFits(in: .vertical) {
+            content.fixedSize(horizontal: false, vertical: true)
+            ScrollView {
+                content.fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
+        .padding(.top, max(safeArea.top, 58))
+        .padding(.bottom, max(safeArea.bottom, 24))
+        .accessibilityElement(children: .contain)
+        .accessibilityAddTraits(.isModal)
+    }
+}
+
+struct GamePausePanel: View {
+    let safeArea: EdgeInsets
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let onResume: () -> Void
+    let onExit: () -> Void
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.22).ignoresSafeArea().onTapGesture { }
+                .accessibilityHidden(true)
+            GamePanelViewport(safeArea: safeArea) {
+                panel.padding(.horizontal, 20)
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityAddTraits(.isModal)
+    }
+
+    private var panel: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "moon.zzz").font(.title2)
+            Text("Pause").font(.system(.title2, design: .rounded).bold())
+            Text("Your game is waiting for you.")
+                .font(.subheadline).foregroundStyle(.secondary)
+            Button("Keep playing", action: onResume)
+                .buttonStyle(PetPrimaryButtonStyle())
+            Button("Leave this game", action: onExit)
+                .font(.subheadline)
+            Text("An unfinished game does not earn a reward.")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+        .multilineTextAlignment(.center)
+        .fixedSize(horizontal: false, vertical: true)
+        .padding(24)
+        .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? .infinity : 340)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 28))
     }
 }
 
 private struct SkyHopGameView: View {
     let pet: PetProfile
     let highScore: Int
-    let onFinish: (Int) async -> ArcadePayout?
+    let onFinish: (Int, UUID) async -> ArcadePayout?
 
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
@@ -686,25 +543,40 @@ private struct SkyHopGameView: View {
     @State private var payout: ArcadePayout?
     @State private var isSavingResult = false
     @State private var didSaveResult = false
+    @State private var runID = UUID()
+    @State private var isPaused = false
 
     var body: some View {
         GeometryReader { proxy in
-            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: scenePhase != .active)) { timeline in
+            TimelineView(.animation(minimumInterval: 1.0 / 60.0, paused: scenePhase != .active || isPaused || engine.phase != .playing)) { timeline in
                 ZStack {
-                    gameBackground
+                    ArcadeSky(travel: engine.climbedDistance, vertical: true)
                     platforms
                     obstacles
                     player
-                    gameHUD(topInset: proxy.safeAreaInsets.top)
+                    gameHUD(insets: proxy.safeAreaInsets)
+                        .disabled(isPaused)
+                        .accessibilityHidden(isPaused)
 
+                    if isPaused {
+                        GamePausePanel(safeArea: proxy.safeAreaInsets) {
+                            lastTick = nil
+                            isPaused = false
+                        } onExit: { dismiss() }
+                        .zIndex(100)
+                    }
                     if engine.phase == .ready {
-                        startOverlay(size: proxy.size)
+                        GamePanelViewport(safeArea: proxy.safeAreaInsets) {
+                            startOverlay(size: proxy.size)
+                        }
                     } else if engine.phase == .gameOver {
-                        gameOverOverlay(size: proxy.size)
+                        GamePanelViewport(safeArea: proxy.safeAreaInsets) {
+                            gameOverOverlay(size: proxy.size)
+                        }
                     }
                 }
                 .contentShape(Rectangle())
-                .gesture(steeringGesture(in: proxy.size))
+                .gesture(steeringGesture(in: proxy.size), including: engine.phase == .playing && !isPaused ? .all : .subviews)
                 .onChange(of: timeline.date) { oldDate, newDate in
                     tick(from: oldDate, to: newDate, size: proxy.size)
                 }
@@ -721,58 +593,25 @@ private struct SkyHopGameView: View {
         }
         .ignoresSafeArea()
         .onChange(of: scenePhase) { _, phase in
-            if phase != .active { lastTick = nil }
-        }
-    }
-
-    private var gameBackground: some View {
-        ZStack {
-            LinearGradient(
-                colors: [Color(red: 0.18, green: 0.48, blue: 0.92), Color(red: 0.62, green: 0.9, blue: 0.96)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            ForEach(0..<9, id: \.self) { index in
-                Circle()
-                    .fill(.white.opacity(0.18))
-                    .frame(width: CGFloat(28 + (index % 3) * 18))
-                    .position(
-                        x: CGFloat((index * 83) % 390),
-                        y: CGFloat(70 + ((index * 127) % 720))
-                    )
+            if phase != .active {
+                lastTick = nil
+                engine.setSteering(0)
+                if engine.phase == .playing { isPaused = true }
             }
         }
     }
 
     private var platforms: some View {
         ForEach(engine.platforms) { platform in
-            let crumbleProgress = platform.crumbleProgress
-
-            ZStack {
-                Capsule()
-                    .fill(platformGradient(for: platform.kind))
-                Capsule()
-                    .stroke(
-                        .white.opacity(platform.kind == .fragile ? 0.72 : 0.55),
-                        style: StrokeStyle(
-                            lineWidth: 2,
-                            dash: platform.kind == .fragile ? [7, 4] : []
-                        )
-                    )
-
-                if platform.kind == .fragile {
-                    Image(systemName: "bolt.fill")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.brown.opacity(0.78))
-                        .rotationEffect(.degrees(92))
-                }
-            }
-                .frame(width: platform.width, height: SkyHopEngine.platformHeight)
-                .position(x: platform.x, y: platform.y)
-                .rotationEffect(.degrees(Double(platform.id.isMultiple(of: 2) ? crumbleProgress * 11 : -crumbleProgress * 11)))
-                .scaleEffect(x: 1 - crumbleProgress * 0.16, y: 1 - crumbleProgress * 0.4)
-                .opacity(1 - crumbleProgress)
-                .shadow(color: .black.opacity(0.14), radius: 3, y: 3)
+            let progress = platform.crumbleProgress
+            ArcadePlatformArtwork(fragile: platform.kind == .fragile)
+                .frame(width: platform.width, height: 30)
+                .rotationEffect(.degrees(Double(platform.id.isMultiple(of: 2) ? progress * 11 : -progress * 11)))
+                .scaleEffect(x: 1 - progress * 0.16, y: 1 - progress * 0.4)
+                .opacity(1 - progress)
+                .position(x: platform.x, y: platform.y + 15)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
         }
     }
 
@@ -786,50 +625,8 @@ private struct SkyHopGameView: View {
         }
     }
 
-    @ViewBuilder
     private func obstacleArtwork(_ obstacle: SkyHopObstacle) -> some View {
-        switch obstacle.kind {
-        case .stormCloud:
-            Image(systemName: "cloud.bolt.rain.fill")
-                .resizable()
-                .scaledToFit()
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(.white, .indigo, .yellow)
-        case .spikeOrb:
-            ZStack {
-                ForEach(0..<8, id: \.self) { index in
-                    Capsule()
-                        .fill(Color.red)
-                        .frame(width: 5, height: obstacle.size * 0.48)
-                        .offset(y: -obstacle.size * 0.21)
-                        .rotationEffect(.degrees(Double(index) * 45))
-                }
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [.yellow, .orange, .red],
-                            center: .topLeading,
-                            startRadius: 1,
-                            endRadius: obstacle.size * 0.35
-                        )
-                    )
-                    .frame(width: obstacle.size * 0.52, height: obstacle.size * 0.52)
-                Circle()
-                    .fill(.black.opacity(0.72))
-                    .frame(width: 5, height: 5)
-                    .offset(x: obstacle.size * 0.08, y: -obstacle.size * 0.05)
-            }
-            .rotationEffect(.degrees(engine.elapsedTime * 105))
-        }
-    }
-
-    private func platformGradient(for kind: SkyHopPlatformKind) -> LinearGradient {
-        switch kind {
-        case .stable:
-            LinearGradient(colors: [.green, .mint], startPoint: .top, endPoint: .bottom)
-        case .fragile:
-            LinearGradient(colors: [.yellow, .orange], startPoint: .top, endPoint: .bottom)
-        }
+        ArcadeHazardArtwork(storm: obstacle.kind == .stormCloud, rotation: engine.elapsedTime * 45)
     }
 
     private var player: some View {
@@ -839,8 +636,8 @@ private struct SkyHopGameView: View {
             customColor: pet.customColor,
             breed: pet.resolvedBreed,
             pose: pet.species == .parrot ? .fly : .jump,
-            direction: engine.velocity.dx < 0 ? .left : .right,
-            step: 0,
+            direction: engine.facingLeft ? .left : .right,
+            step: Int(engine.elapsedTime * 10),
             animatesMotion: false
         )
         .frame(width: SkyHopEngine.playerSize.width, height: SkyHopEngine.playerSize.height)
@@ -851,73 +648,36 @@ private struct SkyHopGameView: View {
         .accessibilityLabel("\(pet.name), jumping")
     }
 
-    private func gameHUD(topInset: CGFloat) -> some View {
+    private func gameHUD(insets: EdgeInsets) -> some View {
         VStack {
-            HStack(spacing: 12) {
-                Button {
-                    dismiss()
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.headline)
-                        .frame(width: 42, height: 42)
-                        .background(.ultraThinMaterial, in: Circle())
-                }
-                .buttonStyle(.plain)
-
-                VStack(alignment: .leading, spacing: 1) {
-                    Text("SCORE")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.white.opacity(0.72))
-                    Text("\(engine.score)")
-                        .font(.title2.bold().monospacedDigit())
-                        .foregroundStyle(.white)
-                }
-                Spacer()
-                VStack(alignment: .trailing, spacing: 1) {
-                    Text("BEST")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.white.opacity(0.72))
-                    Text("\(max(highScore, engine.score))")
-                        .font(.headline.monospacedDigit())
-                        .foregroundStyle(.white)
-                }
+            ArcadeHUD(score: engine.score, highScore: highScore, playing: engine.phase == .playing) {
+                if engine.phase == .playing { engine.setSteering(0); isPaused = true } else { dismiss() }
             }
-            .padding(.horizontal, 18)
-            .padding(.top, max(topInset, 58) + 38)
+            .padding(.top, max(insets.top, 54) + 8)
             Spacer()
-
             if engine.phase == .playing {
-                HStack {
+                HStack(spacing: 12) {
                     controlHint(symbol: "arrow.left", direction: -1)
-                    Spacer()
                     Text("Hold either side to steer")
-                        .font(.caption.bold())
-                        .foregroundStyle(.white.opacity(0.82))
-                    Spacer()
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(ArcadePalette.ink)
+                        .multilineTextAlignment(.center)
                     controlHint(symbol: "arrow.right", direction: 1)
                 }
                 .padding(.horizontal, 22)
-                .padding(.bottom, 24)
+                .padding(.bottom, max(insets.bottom, 24) + 8)
             }
         }
     }
 
     private func controlHint(symbol: String, direction: Double) -> some View {
-        Button {
-            engine.steering = direction
-        } label: {
-            Image(systemName: symbol)
-                .font(.title3.bold())
-                .foregroundStyle(.white)
-                .frame(width: 48, height: 48)
-                .background(.ultraThinMaterial, in: Circle())
-        }
-        .buttonStyle(.plain)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in engine.steering = direction }
-                .onEnded { _ in engine.steering = 0 }
-        )
+        Button { engine.nudgeSteering(direction) } label: { Image(systemName: symbol) }
+            .buttonStyle(ArcadeControlStyle())
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in engine.setSteering(direction) }
+                    .onEnded { _ in engine.setSteering(0) }
+            )
     }
 
     private func startOverlay(size: CGSize) -> some View {
@@ -933,7 +693,7 @@ private struct SkyHopGameView: View {
             )
             .frame(width: 110, height: 92)
             Text("Ready, \(pet.name)?")
-                .font(.largeTitle.bold())
+                .font(.system(.title2, design: .rounded).bold())
             Text("Land on platforms and climb as high as you can.")
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -951,8 +711,9 @@ private struct SkyHopGameView: View {
                 Label("Start jumping", systemImage: "play.fill")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(PetPrimaryButtonStyle())
             .controlSize(.large)
+            Button("Back to Arcade") { dismiss() }
         }
         .padding(24)
         .frame(maxWidth: 330)
@@ -963,7 +724,7 @@ private struct SkyHopGameView: View {
     private func gameOverOverlay(size: CGSize) -> some View {
         VStack(spacing: 14) {
             Text(gameOverTitle)
-                .font(.largeTitle.bold())
+                .font(.system(.title2, design: .rounded).bold())
             Text("\(engine.score) points")
                 .font(.title2.monospacedDigit())
 
@@ -999,11 +760,17 @@ private struct SkyHopGameView: View {
                 Label("Play again", systemImage: "arrow.counterclockwise")
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(PetPrimaryButtonStyle())
             .controlSize(.large)
-            .disabled(isSavingResult)
+            .disabled(isSavingResult || !didSaveResult)
 
-            Button("Back to Arcade") { dismiss() }
+            if payout == nil && !isSavingResult {
+                Text("Your reward is not saved yet. Retry before starting another game.")
+                    .font(.caption).foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                Button("Save reward again") { saveResultIfNeeded() }
+            }
+            Button(payout == nil ? "Leave without reward" : "Back to Arcade") { dismiss() }
                 .disabled(isSavingResult)
         }
         .padding(24)
@@ -1015,10 +782,10 @@ private struct SkyHopGameView: View {
     private func steeringGesture(in size: CGSize) -> some Gesture {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
-                guard engine.phase == .playing else { return }
-                engine.steering = value.location.x < size.width / 2 ? -1 : 1
+                guard engine.phase == .playing, !isPaused else { return }
+                engine.setSteering(value.location.x < size.width / 2 ? -1 : 1)
             }
-            .onEnded { _ in engine.steering = 0 }
+            .onEnded { _ in engine.setSteering(0) }
     }
 
     private var gameOverTitle: String {
@@ -1028,7 +795,7 @@ private struct SkyHopGameView: View {
     }
 
     private func tick(from oldDate: Date, to newDate: Date, size: CGSize) {
-        guard engine.phase == .playing, scenePhase == .active else {
+        guard engine.phase == .playing, scenePhase == .active, !isPaused else {
             lastTick = nil
             return
         }
@@ -1039,6 +806,8 @@ private struct SkyHopGameView: View {
     }
 
     private func restart(in size: CGSize) {
+        isPaused = false
+        runID = UUID()
         payout = nil
         isSavingResult = false
         didSaveResult = false
@@ -1047,12 +816,13 @@ private struct SkyHopGameView: View {
     }
 
     private func saveResultIfNeeded() {
-        guard !didSaveResult else { return }
+        guard !didSaveResult, !isSavingResult else { return }
         didSaveResult = true
         isSavingResult = true
         let finalScore = engine.score
         Task {
-            payout = await onFinish(finalScore)
+            payout = await onFinish(finalScore, runID)
+            didSaveResult = payout != nil
             isSavingResult = false
         }
     }
@@ -1133,6 +903,10 @@ struct SkyHopEngine {
     var elapsedTime = 0.0
     var gameOverReason: SkyHopGameOverReason?
 
+    private(set) var climbedDistance: CGFloat = 0
+    private(set) var facingLeft = false
+    private var steeringPulseRemaining: TimeInterval = 0
+    private var clock = ArcadeSimulationClock()
     private var nextPlatformID = 0
     private var nextObstacleID = 0
     private var generatedPlatformCount = 0
@@ -1140,12 +914,15 @@ struct SkyHopEngine {
     private var randomState: UInt64 = 0x534B_5948_4F50_2026
     private var lastLandedPlatformID: Int?
     private var viewportSize = CGSize.zero
+    static let maximumPlatformShift: CGFloat = 160
+    private var heightScore: CGFloat = 0
 
     mutating func start(in size: CGSize, seed: UInt64? = nil) {
         guard size.width > 120, size.height > 240 else { return }
         phase = .playing
         viewportSize = size
         score = 0
+        heightScore = 0
         steering = 0
         randomState = seed ?? UInt64.random(in: UInt64.min...UInt64.max)
         nextPlatformID = 0
@@ -1154,6 +931,10 @@ struct SkyHopEngine {
         stablePlatformStreak = 0
         lastLandedPlatformID = nil
         elapsedTime = 0
+        climbedDistance = 0
+        facingLeft = false
+        steeringPulseRemaining = 0
+        clock = ArcadeSimulationClock()
         gameOverReason = nil
         playerPosition = CGPoint(x: size.width / 2, y: size.height - 125)
         velocity = CGVector(dx: 0, dy: -570)
@@ -1166,7 +947,7 @@ struct SkyHopEngine {
             guard let lowerPlatform = platforms.last else { break }
             y -= random(in: 76...108)
             addPlatform(
-                x: random(in: 52...max(size.width - 52, 53)),
+                x: nextPlatformX(from: lowerPlatform.x, in: size),
                 y: y,
                 width: random(in: 72...112),
                 kind: nextPlatformKind(difficulty: 0)
@@ -1196,12 +977,31 @@ struct SkyHopEngine {
     }
 
     mutating func update(deltaTime rawDeltaTime: TimeInterval, in size: CGSize) {
-        guard phase == .playing, size.width > 0, size.height > 0 else { return }
+        guard phase == .playing, rawDeltaTime.isFinite, size.width > 0, size.height > 0 else { return }
         if viewportSize == .zero { viewportSize = size }
-        let dt = CGFloat(min(max(rawDeltaTime, 0), 1.0 / 24.0))
-        guard dt > 0 else { return }
-        elapsedTime += Double(dt)
+        let steps = clock.steps(for: rawDeltaTime)
+        for _ in 0..<steps where phase == .playing { advance(in: size) }
+    }
 
+    mutating func setSteering(_ direction: Double) {
+        steeringPulseRemaining = 0
+        steering = min(max(direction, -1), 1)
+    }
+
+    // VoiceOver/button activation is a brief nudge, never a stuck held key.
+    mutating func nudgeSteering(_ direction: Double) {
+        guard phase == .playing else { return }
+        steering = min(max(direction, -1), 1)
+        steeringPulseRemaining = 0.18
+    }
+
+    private mutating func advance(in size: CGSize) {
+        let dt = CGFloat(ArcadeSimulationClock.step)
+        elapsedTime += Double(dt)
+        if steeringPulseRemaining > 0 {
+            steeringPulseRemaining = max(0, steeringPulseRemaining - Double(dt))
+            if steeringPulseRemaining == 0 { steering = 0 }
+        }
         let previousPosition = playerPosition
         let acceleration = CGFloat(steering) * 1_450
         velocity.dx += acceleration * dt
@@ -1210,6 +1010,7 @@ struct SkyHopEngine {
         }
         velocity.dx = min(max(velocity.dx, -270), 270)
         velocity.dy += 1_000 * dt
+        if abs(velocity.dx) > 15 { facingLeft = velocity.dx < 0 }
         playerPosition.x += velocity.dx * dt
         playerPosition.y += velocity.dy * dt
 
@@ -1263,10 +1064,13 @@ struct SkyHopEngine {
         let ceiling = size.height * 0.38
         guard playerPosition.y < ceiling else { return }
         let shift = ceiling - playerPosition.y
+        climbedDistance += shift
         playerPosition.y = ceiling
         for index in platforms.indices { platforms[index].y += shift }
         for index in obstacles.indices { obstacles[index].y += shift }
-        score += max(Int(shift * 1.8), 1)
+        let previousScore = Int(heightScore)
+        heightScore += shift * 1.8
+        score += Int(heightScore) - previousScore
     }
 
     private mutating func advanceCrumblingPlatforms(by deltaTime: CGFloat) {
@@ -1308,7 +1112,7 @@ struct SkyHopEngine {
             topY -= random(in: minimumGap...maximumGap)
             let width = random(in: (68 - difficulty * 8)...(108 - difficulty * 14))
             addPlatform(
-                x: random(in: 48...max(size.width - 48, 49)),
+                x: nextPlatformX(from: lowerPlatform.x, in: size),
                 y: topY,
                 width: width,
                 kind: nextPlatformKind(difficulty: difficulty)
@@ -1331,6 +1135,12 @@ struct SkyHopEngine {
         nextPlatformID += 1
         generatedPlatformCount += 1
         stablePlatformStreak = kind == .stable ? stablePlatformStreak + 1 : 0
+    }
+
+    private mutating func nextPlatformX(from previous: CGFloat, in size: CGSize) -> CGFloat {
+        let lower = max(52, previous - Self.maximumPlatformShift)
+        let upper = min(max(size.width - 52, 53), previous + Self.maximumPlatformShift)
+        return random(in: lower...max(lower, upper))
     }
 
     private mutating func nextPlatformKind(difficulty: CGFloat) -> SkyHopPlatformKind {
