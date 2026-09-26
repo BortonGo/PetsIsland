@@ -223,6 +223,11 @@ struct PetAnimationClip: Equatable, Sendable {
     }
 }
 
+enum PetArtworkSurface: String {
+    case standard
+    case dynamicIsland
+}
+
 struct PetArtwork: View {
     let species: PetSpecies
     var coat: PetCoat = .sunrise
@@ -233,6 +238,7 @@ struct PetArtwork: View {
     var step = 0
     var animatesMotion = true
     var usesNaturalGait = false
+    var surface: PetArtworkSurface = .standard
 
     @PetReduceMotion private var reduceMotion
 
@@ -257,7 +263,8 @@ struct PetArtwork: View {
             breed: breed,
             pose: pose,
             step: step,
-            usesNaturalGait: usesNaturalGait
+            usesNaturalGait: usesNaturalGait,
+            surface: surface
         )
         .scaleEffect(x: direction == .right ? 1 : -1, y: 1)
         // Sprite frames and facing are discrete. Interpolating their layout
@@ -285,13 +292,14 @@ private struct ImportedPetSprite: View {
     let pose: PetPose
     let step: Int
     var usesNaturalGait = false
+    var surface: PetArtworkSurface = .standard
 
     var body: some View {
         let clip = usesNaturalGait
             ? PetAnimationLibrary.naturalClip(for: species, breed: breed, pose: pose)
             : PetAnimationLibrary.clip(for: species, breed: breed, pose: pose)
         let assetName = clip.frameName(forStep: step)
-        let image = GroundedPetImage(assetName: assetName, usesNaturalGait: usesNaturalGait)
+        let image = GroundedPetImage(assetName: assetName, usesNaturalGait: usesNaturalGait, surface: surface)
         image.petCoat(species: species, coat: coat, customColor: customColor)
     }
 }
@@ -309,7 +317,8 @@ struct PetSpriteGeometry {
     static let canvas = CGSize(width: 220, height: 176)
     static let baseline: CGFloat = 160
 
-    init(sourceSize: CGSize, visibleBounds: CGRect, assetName: String) {
+    init(sourceSize: CGSize, visibleBounds: CGRect, assetName: String,
+         surface: PetArtworkSurface = .standard) {
         self.sourceSize = sourceSize
         preservesAuthoredBaseline = assetName.hasPrefix("fluid_") || assetName.hasPrefix("companion_")
         self.visibleBounds = visibleBounds
@@ -317,9 +326,9 @@ struct PetSpriteGeometry {
             ? sourceSize.width / 2
             : (assetName.contains("_lie_") ? 161.5 : 203.5)
         if assetName.hasPrefix("sprite_dog_") {
-            scale = assetName.contains("_lie_")
-                ? 180 / 259
-                : 148 / 273
+            // Preserve the established DI footprint. Only the app and Lock Screen
+            // use the smaller curled pose from the original shepherd sheet.
+            scale = surface == .dynamicIsland && assetName.contains("_lie_") ? 180 / 259 : 148 / 273
         } else {
             scale = 1
         }
@@ -336,8 +345,9 @@ struct PetSpriteGeometry {
                       height: sourceSize.height * scale * fit)
     }
 
-    static func load(assetName: String) -> PetSpriteGeometry? {
-        if let cached = cache.object(forKey: assetName as NSString) { return cached.geometry }
+    static func load(assetName: String, surface: PetArtworkSurface = .standard) -> PetSpriteGeometry? {
+        let key = "\(surface.rawValue):\(assetName)" as NSString
+        if let cached = cache.object(forKey: key) { return cached.geometry }
         guard let cgImage = UIImage(named: assetName)?.cgImage else { return nil }
         let width = cgImage.width, height = cgImage.height
         var pixels = [UInt8](repeating: 0, count: width * height * 4)
@@ -361,9 +371,10 @@ struct PetSpriteGeometry {
         let geometry = PetSpriteGeometry(
             sourceSize: CGSize(width: width, height: height),
             visibleBounds: CGRect(x: left, y: top, width: right - left, height: bottom - top),
-            assetName: assetName
+            assetName: assetName,
+            surface: surface
         )
-        cache.setObject(CachedGeometry(geometry), forKey: assetName as NSString)
+        cache.setObject(CachedGeometry(geometry), forKey: key)
         return geometry
     }
 
@@ -387,6 +398,21 @@ struct PetTimerSpriteLayout {
     }
 
     var fontSize: CGFloat { canvasSize.width }
+}
+
+enum PetLockScreenSpriteAlignment {
+    static let lineHeight: CGFloat = 4
+    static let lineBottomInset: CGFloat = 7
+
+    static func centerY(trackHeight: CGFloat, viewport: CGSize, breed: PetBreed?) -> CGFloat {
+        guard breed == .corgi || breed == .cardigan else { return trackHeight / 2 }
+        let fit = min(viewport.width / PetSpriteGeometry.canvas.width,
+                      viewport.height / PetSpriteGeometry.canvas.height)
+        let groundBelowCenter = (PetSpriteGeometry.baseline - PetSpriteGeometry.canvas.height / 2) * fit
+        // Align the authored ground, including transparent margins, with the
+        // top of the track. Use one position for both timer and sleeping PNG.
+        return trackHeight - lineBottomInset - lineHeight - groundBelowCenter
+    }
 }
 
 /// Clip from the trailing edge instead of offsetting a guessed number of
@@ -437,6 +463,7 @@ struct PetTimerGlyphViewport: View {
 private struct GroundedPetImage: View {
     let assetName: String
     var usesNaturalGait = false
+    var surface: PetArtworkSurface = .standard
 
     var body: some View {
         GeometryReader { proxy in
@@ -445,7 +472,7 @@ private struct GroundedPetImage: View {
             // original 220px character coordinate system between poses.
             let gutter = usesNaturalGait ? 12 * min(proxy.size.width / 220, proxy.size.height / 176) : 0
             Canvas { context, _ in
-                let rect = PetSpriteGeometry.load(assetName: assetName)?.rect(in: proxy.size)
+                let rect = PetSpriteGeometry.load(assetName: assetName, surface: surface)?.rect(in: proxy.size)
                     ?? CGRect(origin: .zero, size: proxy.size)
                 context.draw(Image(assetName).interpolation(.none), in: rect.offsetBy(dx: gutter, dy: 0))
             }

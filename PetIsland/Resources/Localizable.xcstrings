@@ -5113,6 +5113,7 @@
       }
     },
     "Taking your pet with you…" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

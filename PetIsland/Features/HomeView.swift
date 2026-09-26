@@ -190,39 +190,6 @@ private struct IslandView: View {
             }
             .buttonStyle(.plain)
             .disabled(controller.isBusy)
-
-            if controller.placement == .dynamicIsland {
-                liveActivityStatus.font(.caption)
-                    .padding(.horizontal, 4)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var liveActivityStatus: some View {
-        switch controller.liveActivityConnection {
-        case .active:
-            Label("\(controller.profile.name) is on Dynamic Island", systemImage: "checkmark.circle.fill")
-                .foregroundStyle(PetDesign.secondary)
-        case .stale:
-            Label("\(controller.profile.name) is sleeping on Dynamic Island", systemImage: "moon.zzz.fill")
-                .foregroundStyle(.secondary)
-        case .starting:
-            HStack(spacing: 8) {
-                ProgressView().controlSize(.small)
-                Text("Taking your pet with you…")
-            }
-        case .unavailable:
-            Label("Live Activities are disabled", systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
-        case .inactive, .dismissed, .failed:
-            HStack {
-                Label("Dynamic Island is not connected", systemImage: "exclamationmark.circle.fill")
-                    .foregroundStyle(.orange)
-                Spacer()
-                Button("Retry") { Task { await controller.reconnectLiveActivity() } }
-                    .buttonStyle(.bordered)
-            }
         }
     }
 

@@ -169,7 +169,8 @@ private struct CompactTimerPet: View {
             pose: pose,
             direction: context.state.snapshot.direction,
             step: step,
-            animatesMotion: false
+            animatesMotion: false,
+            surface: .dynamicIsland
         )
     }
 }
@@ -259,14 +260,16 @@ private struct LockScreenTimerPetTrack: View {
             ZStack(alignment: .bottom) {
                 Capsule()
                     .fill(context.state.appearance.foregroundColor.opacity(context.isStale ? 0.07 : 0.12))
-                    .frame(height: 4)
-                    .offset(y: -7)
+                    .frame(height: PetLockScreenSpriteAlignment.lineHeight)
+                    .offset(y: -PetLockScreenSpriteAlignment.lineBottomInset)
 
                 LockScreenTimerPet(
                     context: context,
                     viewport: spriteSize
                 )
-                .position(x: centerX, y: proxy.size.height / 2)
+                .position(x: centerX, y: PetLockScreenSpriteAlignment.centerY(
+                    trackHeight: proxy.size.height, viewport: spriteSize, breed: context.attributes.pet.breed
+                ))
             }
         }
         .accessibilityElement(children: .ignore)
@@ -476,7 +479,8 @@ private struct ActivityAnimatedPet: View {
             pose: isSleeping ? .sleep : snapshot.pose,
             direction: direction,
             step: PetLiveMotionSequence.spriteStep(for: snapshot, phaseOffset: index),
-            animatesMotion: false
+            animatesMotion: false,
+            surface: .dynamicIsland
         )
         .contentTransition(.identity)
     }

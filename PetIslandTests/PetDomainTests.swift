@@ -314,7 +314,8 @@ final class PetDomainTests: XCTestCase {
                         let glyph = PetTimerGlyphViewport(text: Text("0"),
                             fontName: family + token + suffix, viewport: viewport, direction: direction)
                         let artwork = PetArtwork(species: species, breed: breed, pose: pose,
-                                                 direction: direction, step: 0, animatesMotion: false)
+                                                 direction: direction, step: 0, animatesMotion: false,
+                                                 surface: viewport.width == 84 ? .standard : .dynamicIsland)
                             .frame(width: viewport.width, height: viewport.height)
                         let fontBounds = try renderedBounds(glyph)
                         let pngBounds = try renderedBounds(artwork)
@@ -462,6 +463,118 @@ final class PetDomainTests: XCTestCase {
         XCTAssertEqual(idle.scale, play.scale)
         XCTAssertEqual(idle.scale * 273, 148, accuracy: 0.001)
         XCTAssertEqual(idle.rect(in: PetSpriteGeometry.canvas), play.rect(in: PetSpriteGeometry.canvas))
+    }
+
+    func testSleepingShepherdStaysCurledWithinItsStandingSize() throws {
+        let idleName = PetAnimationLibrary.clip(for: .dog, breed: .shepherd, pose: .idle).frames[0]
+        let idle = try XCTUnwrap(PetSpriteGeometry.load(assetName: idleName))
+        let sleep = PetAnimationLibrary.clip(for: .dog, breed: .shepherd, pose: .sleep)
+        XCTAssertEqual(PetAnimationLibrary.naturalClip(for: .dog, breed: .shepherd, pose: .sleep).frames,
+                       sleep.frames, "The habitat and system surfaces must share the sleeping artwork")
+        for name in sleep.frames {
+            let geometry = try XCTUnwrap(PetSpriteGeometry.load(assetName: name))
+            XCTAssertEqual(geometry.scale, idle.scale, "Sleeping must not magnify the original pixels")
+            XCTAssertLessThanOrEqual(geometry.visibleBounds.width * geometry.scale,
+                                     idle.visibleBounds.width * idle.scale, name)
+            XCTAssertLessThan(geometry.visibleBounds.height * geometry.scale,
+                              idle.visibleBounds.height * idle.scale * 0.65, name)
+            for viewport in [PetSpriteGeometry.canvas, CGSize(width: 84, height: 72),
+                             CGSize(width: 36, height: 30), CGSize(width: 28, height: 25)] {
+                let fit = min(viewport.width / PetSpriteGeometry.canvas.width,
+                              viewport.height / PetSpriteGeometry.canvas.height)
+                let rect = geometry.rect(in: viewport)
+                let idleRect = idle.rect(in: viewport)
+                XCTAssertEqual(rect.minY + geometry.visibleBounds.maxY * geometry.scale * fit,
+                               idleRect.minY + idle.visibleBounds.maxY * idle.scale * fit,
+                               accuracy: 0.001, "Sleep must keep the same ground line")
+                XCTAssertEqual(rect.minX + geometry.visibleBounds.midX * geometry.scale * fit,
+                               viewport.width / 2, accuracy: 0.001, "Sleep must stay centered")
+            }
+        }
+    }
+
+    @MainActor
+    func testShepherdMixedTimerSleepMatchesEachSurfacesStaticArtwork() throws {
+        try registerTimerFonts()
+        for viewport in [CGSize(width: 36, height: 30), CGSize(width: 28, height: 25),
+                         CGSize(width: 84, height: 72)] {
+            let family = viewport.width == 84 ? "PetIslandLockTimer" : "PetIslandTimer"
+            for direction in [PetDirection.left, .right] {
+                let artwork = PetArtwork(species: .dog, breed: .shepherd, pose: .sleep,
+                                         direction: direction, animatesMotion: false, usesNaturalGait: true,
+                                         surface: viewport.width == 84 ? .standard : .dynamicIsland)
+                    .frame(width: viewport.width, height: viewport.height)
+                let pngBounds = try renderedBounds(artwork)
+                for mode in ["RunSleep", "WalkSleep", "RunWalkSleep"] {
+                    for digit in 7...9 {
+                        let glyph = PetTimerGlyphViewport(text: Text("\(digit)"),
+                            fontName: family + "DogShepherd" + mode, viewport: viewport, direction: direction)
+                        let bounds = try renderedBounds(glyph)
+                        let sample = "\(family), \(mode), \(digit), \(direction)"
+                        XCTAssertEqual(bounds.minX, pngBounds.minX, accuracy: 1.5, sample)
+                        XCTAssertEqual(bounds.maxX, pngBounds.maxX, accuracy: 1.5, sample)
+                        XCTAssertEqual(bounds.minY, pngBounds.minY, accuracy: 1.5, sample)
+                        XCTAssertEqual(bounds.maxY, pngBounds.maxY, accuracy: 1.5, sample)
+                    }
+                }
+            }
+        }
+    }
+
+    func testDynamicIslandKeepsItsOriginalShepherdSleepSizeAndOtherPetsGeometry() throws {
+        for species in PetSpecies.allCases {
+            for breed in PetBreed.available(for: species) {
+                for pose in PetPose.allCases {
+                    for name in PetAnimationLibrary.clip(for: species, breed: breed, pose: pose).frames {
+                        let standard = try XCTUnwrap(PetSpriteGeometry.load(assetName: name))
+                        let island = try XCTUnwrap(PetSpriteGeometry.load(assetName: name, surface: .dynamicIsland))
+                        if species == .dog && breed == .shepherd && pose == .sleep {
+                            XCTAssertEqual(island.visibleBounds.width * island.scale, 180, accuracy: 0.001)
+                            XCTAssertLessThan(standard.scale, island.scale)
+                            let rect = island.rect(in: PetSpriteGeometry.canvas)
+                            XCTAssertEqual(rect.minY + island.visibleBounds.maxY * island.scale, 160, accuracy: 0.001)
+                        } else {
+                            XCTAssertEqual(standard.scale, island.scale, name)
+                            XCTAssertEqual(standard.rect(in: PetSpriteGeometry.canvas),
+                                           island.rect(in: PetSpriteGeometry.canvas), name)
+                        }
+                        // A shared asset loaded for DI must not replace its app geometry in the cache.
+                        XCTAssertEqual(PetSpriteGeometry.load(assetName: name)?.scale, standard.scale)
+                    }
+                }
+            }
+        }
+    }
+
+    @MainActor
+    func testBothCorgiBreedsMeetLockScreenLineInTimerAndSleepingArtwork() throws {
+        try registerTimerFonts()
+        let viewport = CGSize(width: 84, height: 72)
+        let trackHeight: CGFloat = 86
+        let lineTop = trackHeight - 7 - 4
+        let breeds: [(PetBreed, String)] = [(.corgi, "DogCorgi"), (.cardigan, "DogCardigan")]
+        for (breed, token) in breeds {
+            let center = PetLockScreenSpriteAlignment.centerY(trackHeight: trackHeight, viewport: viewport, breed: breed)
+            for direction in [PetDirection.left, .right] {
+                for digit in 0...9 {
+                    let bounds = try renderedBounds(PetTimerGlyphViewport(text: Text("\(digit)"),
+                        fontName: "PetIslandLockTimer" + token + "RunWalkSleep", viewport: viewport, direction: direction))
+                    XCTAssertEqual(center - viewport.height / 2 + bounds.maxY, lineTop, accuracy: 1, token)
+                }
+                for step in PetAnimationLibrary.clip(for: .dog, breed: breed, pose: .sleep).frames.indices {
+                    let bounds = try renderedBounds(PetArtwork(species: .dog, breed: breed, pose: .sleep,
+                        direction: direction, step: step, animatesMotion: false)
+                        .frame(width: viewport.width, height: viewport.height))
+                    XCTAssertEqual(center - viewport.height / 2 + bounds.maxY, lineTop, accuracy: 1, token)
+                }
+            }
+        }
+        for breed in PetBreed.allCases where breed != .corgi && breed != .cardigan {
+            XCTAssertEqual(PetLockScreenSpriteAlignment.centerY(trackHeight: trackHeight, viewport: viewport, breed: breed),
+                           trackHeight / 2, "Preserve other pets' positions")
+        }
+        XCTAssertEqual(PetLockScreenSpriteAlignment.centerY(trackHeight: trackHeight, viewport: viewport, breed: nil),
+                       trackHeight / 2)
     }
 
     func testEverySelectablePetPoseHasVisibleBundledArtwork() throws {

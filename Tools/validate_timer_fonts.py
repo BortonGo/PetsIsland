@@ -51,7 +51,7 @@ def asset_for_digit(breed, mode, digit):
 
 
 @lru_cache(maxsize=None)
-def registered_canvas(asset):
+def registered_canvas(asset, dynamic_island=False):
     image = Image.open(CATALOG / f'{asset}.imageset' / f'{asset}.png').convert('RGBA')
     bounds = image.getchannel('A').point(lambda a: 255 if a > 8 else 0).getbbox()
     assert bounds, asset
@@ -59,7 +59,7 @@ def registered_canvas(asset):
         assert image.size == CANVAS
         return image
     # Keep this registration consistent with PetSpriteGeometry.
-    scale = 180 / 259 if asset.startswith('sprite_dog_lie_') else 1
+    scale = (180 / 259 if dynamic_island else 148 / 273) if asset.startswith('sprite_dog_lie_') else 1
     anchor = 161.5 if asset.startswith('sprite_dog_lie_') else image.width / 2
     result = Image.new('RGBA', CANVAS)
     size = (round(image.width * scale), round(image.height * scale))
@@ -69,8 +69,8 @@ def registered_canvas(asset):
 
 
 @lru_cache(maxsize=None)
-def strike_bitmap(asset, ppem):
-    image = registered_canvas(asset).resize((ppem, round(ppem * CANVAS[1] / CANVAS[0])),
+def strike_bitmap(asset, ppem, dynamic_island=False):
+    image = registered_canvas(asset, dynamic_island).resize((ppem, round(ppem * CANVAS[1] / CANVAS[0])),
                                              Image.Resampling.NEAREST)
     image.putalpha(image.getchannel('A').point(lambda a: 255 if a > 8 else 0))
     if asset.startswith('companion_'):
@@ -103,7 +103,7 @@ for filename, prefix in [('PetIslandTimerPets', 'PetIslandTimer'),
                 assert image.size == (ppem, round(ppem * CANVAS[1] / CANVAS[0])), name
                 breed, mode = next((b, m) for b in PREFIXES for m in MODES if name == prefix + b + m)
                 asset = asset_for_digit(breed, mode, digit)
-                expected = strike_bitmap(asset, ppem)
+                expected = strike_bitmap(asset, ppem, dynamic_island=prefix == 'PetIslandTimer')
                 assert image.tobytes() == expected.tobytes(), (name, digit, 'bitmap differs from app registration')
                 if not asset.startswith('companion_'):
                     assert image.getbbox()[3] == round(BASELINE * ppem / CANVAS[0]), (name, digit)
