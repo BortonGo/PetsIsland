@@ -1,7 +1,7 @@
 # Pet Island
 
 Pet Island is an independent personal iOS project: a small island for pixel
-companions, with an interactive enclosure, discovery walks, three arcade games,
+companions, with an interactive enclosure, discovery walks, four arcade games,
 a Home Screen widget, and a pet that accompanies you in Dynamic Island and on
 the Lock Screen.
 
@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 224 tests, a Release build, and static analysis on September 27,
+> build passed 242 tests, a Release build, and static analysis on September 27,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -92,13 +92,28 @@ or the playroom cover it.
 
 ## Arcade
 
-Three games share your pet collection and local progress:
+Four games share your pet collection and local progress:
 
 | Game | Play |
 | --- | --- |
+| Bubble Paws (Пузырьки) | Aim a toy cannon, match three connected bubbles, and drop unsupported clusters |
 | Pets Dash | Run along an island trail, change lanes, jump over obstacles, and collect coins |
 | Sky Paws | Flap through gaps between clouds |
 | Sky Hop | Jump between floating platforms and climb higher |
+
+**Bubble Paws** has five increasingly difficult rounds in a twilight clearing.
+Six shuffled field silhouettes, random gaps, and fresh color layouts keep new runs
+varied; adjacent rounds never reuse the same silhouette. Small color clusters
+require building pairs and planning bank shots, with four colors initially and
+five from the second round.
+Drag to aim and release to shoot; the dotted guide follows the same wall bounces
+as the actual shot. Tap the next bubble to swap colors, or use the left/right
+and Shoot buttons. Five shots without a match lower the ceiling (four from round
+three); successful matches do not reset that counter. Reaching the dotted danger
+line ends the run. Clear all five rounds to win.
+Each color also has its own symbol. Scores and earned coins use the existing
+arcade wallet, with duplicate reward protection. Animation runs only during
+shots and effects; leaving the app pauses the game without advancing the board.
 
 Games include records, coin rewards, pause/resume, and a local shop with enclosure
 furniture, food, treats, toys, and vitamins. The shop uses earned in-game coins; it does not make

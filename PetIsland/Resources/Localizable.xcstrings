@@ -711,6 +711,23 @@
         }
       }
     },
+    "%lld misses before the ceiling lowers" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld misses before the ceiling lowers"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "До снижения потолка — %lld промахов"
+          }
+        }
+      }
+    },
     "%lld more coins needed. Earn coins in arcade games." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1177,6 +1194,23 @@
         }
       }
     },
+    "A little more sparkle!" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A little more sparkle!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ещё немного волшебства!"
+          }
+        }
+      }
+    },
     "A little playtime" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1539,6 +1573,74 @@
         }
       }
     },
+    "Aim left" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aim left"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прицел влево"
+          }
+        }
+      }
+    },
+    "Aim right" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aim right"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прицел вправо"
+          }
+        }
+      }
+    },
+    "Aim, match colors and clear the sky." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aim, match colors and clear the sky."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прицеливайся, собирай цвета и очищай небо."
+          }
+        }
+      }
+    },
+    "Aim, release, pop! Match 3 of the same color. Cut a cluster loose to drop the bubbles below it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aim, release, pop! Match 3 of the same color. Cut a cluster loose to drop the bubbles below it."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прицелься и отпусти палец. Собери от трёх шариков одного цвета — они лопнут, а шарики без опоры упадут."
+          }
+        }
+      }
+    },
     "Almost back" : {
       "localizations" : {
         "en" : {
@@ -1871,6 +1973,23 @@
         }
       }
     },
+    "Blue drop" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blue drop"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Голубая капля"
+          }
+        }
+      }
+    },
     "Blue hour" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -1972,6 +2091,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Британец"
+          }
+        }
+      }
+    },
+    "Bubble field" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bubble field"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поле с шариками"
+          }
+        }
+      }
+    },
+    "Bubble Paws" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bubble Paws"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пузырьки"
           }
         }
       }
@@ -2189,6 +2342,27 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Лови!"
+          }
+        }
+      }
+    },
+    "Ceiling in %@ misses" : {
+      "comment" : "A label that shows the player's current ceiling, represented by a series of filled circles, and the number of misses remaining.",
+      "isCommentAutoGenerated" : true
+    },
+    "Ceiling in %lld misses" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ceiling in %lld misses"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "До снижения: %lld промахов"
           }
         }
       }
@@ -2752,6 +2926,23 @@
         }
       }
     },
+    "Drag to aim, release to shoot. You can also use the aim and shoot buttons below." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag to aim, release to shoot. You can also use the aim and shoot buttons below."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Веди пальцем, чтобы прицелиться, и отпусти для выстрела. Внизу также есть кнопки прицела и выстрела."
+          }
+        }
+      }
+    },
     "Driftwood" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -3080,6 +3271,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Альбом находок"
+          }
+        }
+      }
+    },
+    "Five fresh layouts per run. Misses accumulate: the ceiling lowers after 5, or 4 in the later rounds. Swap colors and use wall bounces." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Five fresh layouts per run. Misses accumulate: the ceiling lowers after 5, or 4 in the later rounds. Swap colors and use wall bounces."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пять новых полей в каждой партии. После 5 промахов поле опускается, а с третьего раунда — после 4. Меняй шарики и используй отскоки от стен."
           }
         }
       }
@@ -3802,6 +4010,23 @@
         }
       }
     },
+    "Let's pop!" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Let's pop!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поехали!"
+          }
+        }
+      }
+    },
     "License" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4158,6 +4383,23 @@
         }
       }
     },
+    "Mint leaf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mint leaf"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мятный листик"
+          }
+        }
+      }
+    },
     "MIT Open Source" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4314,7 +4556,6 @@
       }
     },
     "New record!" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -4370,6 +4611,23 @@
         }
       }
     },
+    "Next round" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next round"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Следующий раунд"
+          }
+        }
+      }
+    },
     "Nice jump!" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4383,6 +4641,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отличный прыжок!"
+          }
+        }
+      }
+    },
+    "Nice popping!" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nice popping!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Хорошая игра!"
           }
         }
       }
@@ -4938,6 +5213,23 @@
         }
       }
     },
+    "Pink heart" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pink heart"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Розовое сердечко"
+          }
+        }
+      }
+    },
     "Pixel friend" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5244,6 +5536,23 @@
         }
       }
     },
+    "Purple moon" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purple moon"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сиреневая луна"
+          }
+        }
+      }
+    },
     "Quick paws, little adventures." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5302,6 +5611,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Бегите по трём полосам, обходите препятствия и собирайте монеты."
+          }
+        }
+      }
+    },
+    "Ready for the next round?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready for the next round?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готов к следующему раунду?"
           }
         }
       }
@@ -5549,6 +5875,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Хохлатый"
+          }
+        }
+      }
+    },
+    "Round %@ of %@" : {
+      "comment" : "A label displaying the current round number and a progress bar that visually represents the current round.",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Round %1$@ of %2$@"
+          }
+        }
+      }
+    },
+    "Round %lld of %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Round %lld of %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Раунд %lld из %lld"
           }
         }
       }
@@ -5934,6 +6289,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Овчарка"
+          }
+        }
+      }
+    },
+    "Shoot" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shoot"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пуск"
           }
         }
       }
@@ -6387,6 +6759,40 @@
         }
       }
     },
+    "Swap" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swap"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сменить"
+          }
+        }
+      }
+    },
+    "Swap bubbles" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Swap bubbles"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поменять шарики местами"
+          }
+        }
+      }
+    },
     "Swipe" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6769,6 +7175,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сессия началась в приложении. Включите Live Activities в настройках, чтобы видеть питомца вне приложения."
+          }
+        }
+      }
+    },
+    "The sky is clear!" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The sky is clear!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Небо чистое!"
           }
         }
       }
@@ -7313,6 +7736,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Кто пойдёт?"
+          }
+        }
+      }
+    },
+    "Yellow star" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yellow star"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Жёлтая звезда"
           }
         }
       }

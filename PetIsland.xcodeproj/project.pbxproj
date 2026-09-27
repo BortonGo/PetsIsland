@@ -57,6 +57,9 @@
 		B10000000000000000000002 /* PetCozyBoxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000002 /* PetCozyBoxTests.swift */; };
 		B10000000000000000000003 /* HabitatFurnitureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* HabitatFurnitureView.swift */; };
 		B10000000000000000000004 /* PetFurnitureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000004 /* PetFurnitureTests.swift */; };
+		F10000000000000000000021 /* BubblePawsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000021 /* BubblePawsEngine.swift */; };
+		F10000000000000000000022 /* BubblePawsGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000022 /* BubblePawsGameView.swift */; };
+		F10000000000000000000023 /* BubblePawsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000023 /* BubblePawsTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -139,6 +142,9 @@
 		B20000000000000000000002 /* PetCozyBoxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetCozyBoxTests.swift; sourceTree = "<group>"; };
 		B20000000000000000000003 /* HabitatFurnitureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitatFurnitureView.swift; sourceTree = "<group>"; };
 		B20000000000000000000004 /* PetFurnitureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetFurnitureTests.swift; sourceTree = "<group>"; };
+		F20000000000000000000021 /* BubblePawsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BubblePawsEngine.swift; sourceTree = "<group>"; };
+		F20000000000000000000022 /* BubblePawsGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BubblePawsGameView.swift; sourceTree = "<group>"; };
+		F20000000000000000000023 /* BubblePawsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BubblePawsTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -251,6 +257,7 @@
 				D20000000000000000000001 /* PetDomain.swift */,
 				C20000000000000000000001 /* PetDiscoveries.swift */,
 				G20000000000000000000001 /* MiniGameDomain.swift */,
+				F20000000000000000000021 /* BubblePawsEngine.swift */,
 			);
 			path = Domain;
 			sourceTree = "<group>";
@@ -278,6 +285,7 @@
 				G20000000000000000000003 /* SkyPawsGameView.swift */,
 				G20000000000000000000004 /* PetsDashGameView.swift */,
 				G20000000000000000000005 /* ArcadePresentation.swift */,
+				F20000000000000000000022 /* BubblePawsGameView.swift */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -291,6 +299,7 @@
 				H20000000000000000000003 /* PetHabitatStateTests.swift */,
 				B20000000000000000000002 /* PetCozyBoxTests.swift */,
 				B20000000000000000000004 /* PetFurnitureTests.swift */,
+				F20000000000000000000023 /* BubblePawsTests.swift */,
 			);
 			path = PetIslandTests;
 			sourceTree = "<group>";
@@ -466,6 +475,8 @@
 				G10000000000000000000003 /* SkyPawsGameView.swift in Sources */,
 				G10000000000000000000004 /* PetsDashGameView.swift in Sources */,
 				G10000000000000000000005 /* ArcadePresentation.swift in Sources */,
+				F10000000000000000000022 /* BubblePawsGameView.swift in Sources */,
+				F10000000000000000000021 /* BubblePawsEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -495,6 +506,7 @@
 				H10000000000000000000004 /* PetHabitatStateTests.swift in Sources */,
 				B10000000000000000000002 /* PetCozyBoxTests.swift in Sources */,
 				B10000000000000000000004 /* PetFurnitureTests.swift in Sources */,
+				F10000000000000000000023 /* BubblePawsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -4,6 +4,7 @@ enum MiniGameKind: String, Codable, CaseIterable, Identifiable, Hashable, Sendab
     case skyHop
     case skyPaws
     case petsDash
+    case bubblePaws
 
     var id: String { rawValue }
 }

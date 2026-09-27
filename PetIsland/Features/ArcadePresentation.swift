@@ -228,6 +228,8 @@ struct ArcadeGameCover: View {
     var body: some View {
         ZStack {
             switch game {
+            case .bubblePaws:
+                BubblePawsCover(pet: pet)
             case .petsDash:
                 PetsDashTrack(progress: 0.14)
                 PetsDashPlayerArtwork(pet: pet, frame: 0)

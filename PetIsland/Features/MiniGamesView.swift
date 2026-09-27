@@ -95,6 +95,13 @@ struct MiniGamesView: View {
                 ) { score, runID in
                     await controller.completeMiniGame(.petsDash, score: score, petID: session.pet.id, runID: runID)
                 }
+            case .bubblePaws:
+                BubblePawsGameView(
+                    pet: session.pet,
+                    highScore: controller.arcadeProgress.highScore(for: .bubblePaws)
+                ) { score, runID in
+                    await controller.completeMiniGame(.bubblePaws, score: score, petID: session.pet.id, runID: runID)
+                }
             }
         }
         .alert("Pet Arcade", isPresented: messageIsPresented) {
@@ -107,7 +114,11 @@ struct MiniGamesView: View {
             } else {
                 selectedPetID = petIDs.first
             }
-            if ProcessInfo.processInfo.arguments.contains("-pets-dash-preview"),
+            if ProcessInfo.processInfo.arguments.contains("-bubble-paws-preview"),
+               activeSession == nil,
+               let selectedPet, !controller.isPetOnDiscoveryWalk(selectedPet.id) {
+                activeSession = ActiveArcadeSession(game: .bubblePaws, pet: selectedPet)
+            } else if ProcessInfo.processInfo.arguments.contains("-pets-dash-preview"),
                activeSession == nil,
                let selectedPet, !controller.isPetOnDiscoveryWalk(selectedPet.id) {
                 activeSession = ActiveArcadeSession(game: .petsDash, pet: selectedPet)
@@ -150,6 +161,8 @@ struct MiniGamesView: View {
                         .petSurface(radius: 20)
                 }
                 vitalsCard(for: pet)
+                arcadeGameCard(for: pet, game: .bubblePaws, title: "Bubble Paws",
+                               subtitle: "Aim, match colors and clear the sky.")
                 skyHopCard(for: pet)
                 skyPawsCard(for: pet)
                 petsDashCard(for: pet)
@@ -367,6 +380,7 @@ struct MiniGamesView: View {
         .buttonStyle(.plain)
         .disabled(controller.isPetOnDiscoveryWalk(pet.id))
         .accessibilityHint("Play as \(pet.name)")
+        .accessibilityIdentifier("arcade.\(game.rawValue)")
     }
 
     private func shop(for pet: PetProfile) -> some View {
