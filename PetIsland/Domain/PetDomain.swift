@@ -340,6 +340,7 @@ struct PersistedAppState: Codable, Equatable, Sendable {
     var history: PetHistory
     var settings: AppSettings
     var completedOnboarding: Bool
+    var discoveries: PetDiscoveriesState
 
     /// Compatibility bridge for the original single-pet UI. New code should use
     /// `pets`, `activePetIDs`, and `activeParty`.
@@ -372,6 +373,7 @@ struct PersistedAppState: Codable, Equatable, Sendable {
         history = PetHistory()
         settings = AppSettings()
         completedOnboarding = false
+        discoveries = PetDiscoveriesState()
     }
 
     mutating func normalizePetCollection() {
@@ -408,6 +410,7 @@ struct PersistedAppState: Codable, Equatable, Sendable {
         case history
         case settings
         case completedOnboarding
+        case discoveries
     }
 
     init(from decoder: Decoder) throws {
@@ -420,6 +423,7 @@ struct PersistedAppState: Codable, Equatable, Sendable {
         history = try container.decodeIfPresent(PetHistory.self, forKey: .history) ?? PetHistory()
         settings = try container.decodeIfPresent(AppSettings.self, forKey: .settings) ?? AppSettings()
         completedOnboarding = try container.decodeIfPresent(Bool.self, forKey: .completedOnboarding) ?? false
+        discoveries = try container.decodeIfPresent(PetDiscoveriesState.self, forKey: .discoveries) ?? PetDiscoveriesState()
 
         if decodedVersion <= 1 {
             let legacyProfile = try container.decodeIfPresent(PetProfile.self, forKey: .profile) ?? .starter
@@ -448,6 +452,7 @@ struct PersistedAppState: Codable, Equatable, Sendable {
         try container.encode(history, forKey: .history)
         try container.encode(settings, forKey: .settings)
         try container.encode(completedOnboarding, forKey: .completedOnboarding)
+        try container.encode(discoveries, forKey: .discoveries)
     }
 }
 

@@ -126,8 +126,68 @@ final class PetDomainTests: XCTestCase {
         }
         simulation.configure(pets: Array(pets.dropFirst()), size: size)
         for actor in before.dropFirst() {
-            XCTAssertEqual(simulation.actors.first { $0.id == actor.id }?.position, actor.position)
+            let remaining = simulation.actors.first { $0.id == actor.id }
+            XCTAssertEqual(remaining?.position, actor.position)
+            XCTAssertEqual(remaining?.target, actor.target)
+            XCTAssertEqual(remaining?.velocity, actor.velocity)
+            XCTAssertEqual(remaining?.gaitPhase, actor.gaitPhase)
+            XCTAssertEqual(remaining?.step, actor.step)
+            XCTAssertEqual(remaining?.pose, actor.pose)
+            XCTAssertEqual(remaining?.facing, actor.facing)
+            XCTAssertEqual(remaining?.waiting, actor.waiting)
         }
+    }
+
+    @MainActor
+    func testEmptyEnclosureStopsRenderingAndPublishesNoAnimationFrames() {
+        let simulation = HabitatMotionSimulation()
+        let size = CGSize(width: 345, height: 240)
+        simulation.configure(pets: [.starter], size: size)
+        simulation.start(reduceMotion: false, active: true)
+        XCTAssertTrue(simulation.isRunning)
+
+        simulation.configure(pets: [], size: size)
+        XCTAssertFalse(simulation.isRunning)
+        var framePublications = 0
+        let observation = simulation.objectWillChange.sink { framePublications += 1 }
+        defer { observation.cancel(); simulation.stop() }
+        simulation.start(reduceMotion: false, active: true)
+        XCTAssertFalse(simulation.isRunning)
+        for _ in 0..<600 { simulation.advance(by: 1.0 / 60) }
+        XCTAssertEqual(framePublications, 0)
+        XCTAssertTrue(simulation.actors.isEmpty)
+    }
+
+    @MainActor
+    func testReturningResidentAnimatesOnlyWhenActiveAndMotionIsAllowed() {
+        let simulation = HabitatMotionSimulation()
+        let size = CGSize(width: 345, height: 240)
+        simulation.configure(pets: [], size: size)
+        simulation.start(reduceMotion: false, active: true)
+        XCTAssertFalse(simulation.isRunning)
+
+        simulation.configure(pets: [.starter], size: size)
+        simulation.start(reduceMotion: false, active: false)
+        XCTAssertFalse(simulation.isRunning)
+        simulation.start(reduceMotion: true, active: true)
+        XCTAssertFalse(simulation.isRunning)
+        let stillPosition = simulation.actors[0].position
+        for _ in 0..<120 { simulation.advance(by: 1.0 / 60) }
+        XCTAssertEqual(simulation.actors[0].position, stillPosition)
+
+        simulation.start(reduceMotion: false, active: true)
+        defer { simulation.stop() }
+        XCTAssertTrue(simulation.isRunning)
+        var travelled = 0.0
+        for _ in 0..<600 {
+            let previous = simulation.actors[0].position
+            simulation.advance(by: 1.0 / 60)
+            let current = simulation.actors[0].position
+            travelled += hypot(current.x - previous.x, current.y - previous.y)
+        }
+        XCTAssertGreaterThan(travelled, 1)
+        simulation.start(reduceMotion: false, active: false)
+        XCTAssertFalse(simulation.isRunning)
     }
 
     @MainActor

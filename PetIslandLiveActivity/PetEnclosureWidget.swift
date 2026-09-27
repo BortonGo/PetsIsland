@@ -9,11 +9,13 @@ struct ThrowBallIntent: AppIntent {
 
     func perform() async throws -> some IntentResult {
         let now = Date.now
-        try PetHabitatStore.update { habitat in
+        let habitat = try PetHabitatStore.update { habitat in
             habitat.playWithResidents(at: now)
         }
         try PetLifeStore.update { state in
-            state.throwBall(at: now)
+            if !habitat.isPetAway(state.profile.id, at: now) {
+                state.throwBall(at: now)
+            }
         }
         WidgetCenter.shared.reloadTimelines(ofKind: PetEnclosureWidget.kind)
         return .result()
@@ -43,13 +45,12 @@ struct PetEnclosureProvider: TimelineProvider {
         let state = PetLifeStore.load()
         let habitat = PetHabitatStore.load()
         let now = Date.now
-        let dates = timelineDates(for: state, startingAt: now)
+        let dates = timelineDates(for: state, habitat: habitat, startingAt: now)
         let entries = dates.map { entry(for: state, habitat: habitat, at: $0) }
         completion(Timeline(entries: entries, policy: .after(dates.last ?? now.addingTimeInterval(120))))
     }
 
     private func entry(for state: PetLifeState, habitat: SharedPetHabitat = .initial(), at date: Date) -> PetEnclosureEntry {
-        let pets = habitat.residents.map(\.profile)
         var enclosureState = state
         enclosureState.placement = .enclosure
         return PetEnclosureEntry(
@@ -57,15 +58,11 @@ struct PetEnclosureProvider: TimelineProvider {
             state: state,
             habitat: habitat,
             presentation: PetLifeEngine.presentation(for: enclosureState, at: date),
-            petProjections: PetHabitatEngine.projections(
-                for: habitat.configuration,
-                pets: pets,
-                at: date
-            )
+            petProjections: habitat.visibleProjections(at: date)
         )
     }
 
-    private func timelineDates(for state: PetLifeState, startingAt now: Date) -> [Date] {
+    private func timelineDates(for state: PetLifeState, habitat: SharedPetHabitat, startingAt now: Date) -> [Date] {
         var dates = [now]
 
         // AppIntent-triggered fetch gets a handful of short-lived states. The
@@ -83,7 +80,10 @@ struct PetEnclosureProvider: TimelineProvider {
         for step in 1...30 {
             dates.append(ambientStart.addingTimeInterval(TimeInterval(step) * 120))
         }
-        return dates
+        if let returnDate = habitat.discoveryWalk?.endsAt, returnDate > now {
+            dates.append(returnDate)
+        }
+        return Array(Set(dates)).sorted()
     }
 }
 
@@ -110,6 +110,10 @@ private struct PetEnclosureView: View {
 
     private var presentation: PetLifePresentation { entry.presentation }
     private var petIsHere: Bool { !entry.petProjections.isEmpty }
+    private var walkIsAway: Bool {
+        guard let walk = entry.habitat.discoveryWalk else { return false }
+        return entry.habitat.isPetAway(walk.pet.id, at: entry.date)
+    }
 
     var body: some View {
         GeometryReader { proxy in
@@ -272,7 +276,7 @@ private struct PetEnclosureView: View {
             .shadow(color: .black.opacity(0.18), radius: 1, y: 1)
 
             Spacer(minLength: 4)
-            VitalsStrip(vitals: entry.habitat.averageVitals)
+            VitalsStrip(vitals: entry.habitat.averageVitals(at: entry.date))
         }
     }
 
@@ -312,9 +316,9 @@ private struct PetEnclosureView: View {
 
     private var awayState: some View {
         VStack(spacing: 4) {
-            Image(systemName: entry.state.placement == .dynamicIsland ? "rectangle.inset.filled.and.person.filled" : "house.fill")
+            Image(systemName: walkIsAway ? "leaf" : entry.state.placement == .dynamicIsland ? "rectangle.inset.filled.and.person.filled" : "house.fill")
                 .font(.title2)
-            Text(entry.state.placement == .dynamicIsland ? "Exploring Dynamic Island" : "Playing in the app")
+            Text(walkIsAway ? "On a walk" : entry.state.placement == .dynamicIsland ? "Exploring Dynamic Island" : "Playing in the app")
                 .font(.caption2.bold())
         }
         .foregroundStyle(.white.opacity(0.83))
@@ -328,7 +332,8 @@ private struct PetEnclosureView: View {
     }
 
     private var activityLabel: LocalizedStringKey {
-        switch presentation.activity {
+        if walkIsAway && !petIsHere { return "On a walk" }
+        return switch presentation.activity {
         case .away: "Away from the yard"
         case .watching: "Watching butterflies"
         case .patrolling: "Exploring the yard"
@@ -339,7 +344,8 @@ private struct PetEnclosureView: View {
     }
 
     private var activitySymbol: String {
-        switch presentation.activity {
+        if walkIsAway && !petIsHere { return "leaf" }
+        return switch presentation.activity {
         case .away: "location.fill"
         case .watching: "sparkles"
         case .patrolling: "pawprint.fill"
@@ -349,7 +355,8 @@ private struct PetEnclosureView: View {
     }
 
     private var placementLabel: LocalizedStringKey {
-        switch entry.state.placement {
+        if walkIsAway && !petIsHere { return "On a walk" }
+        return switch entry.state.placement {
         case .home: "In the app"
         case .dynamicIsland: "On Dynamic Island"
         case .enclosure: "In the enclosure"
@@ -357,7 +364,8 @@ private struct PetEnclosureView: View {
     }
 
     private var placementSymbol: String {
-        switch entry.state.placement {
+        if walkIsAway && !petIsHere { return "leaf" }
+        return switch entry.state.placement {
         case .home: "house.fill"
         case .dynamicIsland: "capsule.fill"
         case .enclosure: "leaf.fill"
@@ -379,8 +387,9 @@ private struct PetEnclosureView: View {
     }
 
     private var headerTitle: String {
-        let residents = entry.habitat.residents
+        let residents = entry.habitat.visibleResidents(at: entry.date)
         if residents.count == 1 { return residents[0].profile.name }
+        if residents.isEmpty && walkIsAway, let walk = entry.habitat.discoveryWalk { return walk.pet.name }
         return String.localizedStringWithFormat(String(localized: "%lld friends"), residents.count)
     }
 

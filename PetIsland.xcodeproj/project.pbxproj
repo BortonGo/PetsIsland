@@ -48,6 +48,11 @@
 		L10000000000000000000004 /* PetIslandTimerPets.ttc in Resources */ = {isa = PBXBuildFile; fileRef = L20000000000000000000004 /* PetIslandTimerPets.ttc */; };
 		L10000000000000000000005 /* PetIslandLockTimerPets.ttc in Resources */ = {isa = PBXBuildFile; fileRef = L20000000000000000000005 /* PetIslandLockTimerPets.ttc */; };
 		F10000000000000000000001 /* NaturalGaits.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000001 /* NaturalGaits.xcassets */; };
+		C10000000000000000000001 /* PetDiscoveries.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000001 /* PetDiscoveries.swift */; };
+		C10000000000000000000002 /* PetDiscoveries.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000001 /* PetDiscoveries.swift */; };
+		C10000000000000000000003 /* PetDiscoveriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000002 /* PetDiscoveriesView.swift */; };
+		C10000000000000000000004 /* PetDiscoveriesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000003 /* PetDiscoveriesTests.swift */; };
+		C10000000000000000000005 /* PetDiscoveryControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000004 /* PetDiscoveryControllerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -122,6 +127,10 @@
 		L20000000000000000000004 /* PetIslandTimerPets.ttc */ = {isa = PBXFileReference; lastKnownFileType = file; path = PetIslandTimerPets.ttc; sourceTree = "<group>"; };
 		L20000000000000000000005 /* PetIslandLockTimerPets.ttc */ = {isa = PBXFileReference; lastKnownFileType = file; path = PetIslandLockTimerPets.ttc; sourceTree = "<group>"; };
 		F20000000000000000000001 /* NaturalGaits.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = NaturalGaits.xcassets; sourceTree = "<group>"; };
+		C20000000000000000000001 /* PetDiscoveries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDiscoveries.swift; sourceTree = "<group>"; };
+		C20000000000000000000002 /* PetDiscoveriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDiscoveriesView.swift; sourceTree = "<group>"; };
+		C20000000000000000000003 /* PetDiscoveriesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDiscoveriesTests.swift; sourceTree = "<group>"; };
+		C20000000000000000000004 /* PetDiscoveryControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDiscoveryControllerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -232,6 +241,7 @@
 			isa = PBXGroup;
 			children = (
 				D20000000000000000000001 /* PetDomain.swift */,
+				C20000000000000000000001 /* PetDiscoveries.swift */,
 				G20000000000000000000001 /* MiniGameDomain.swift */,
 			);
 			path = Domain;
@@ -248,6 +258,7 @@
 			children = (
 				E20000000000000000000001 /* PetDesign.swift */,
 				D20000000000000000000004 /* HomeView.swift */,
+				C20000000000000000000002 /* PetDiscoveriesView.swift */,
 				D20000000000000000000005 /* OnboardingView.swift */,
 				D20000000000000000000006 /* Sheets.swift */,
 				D20000000000000000000009 /* PetCollectionView.swift */,
@@ -265,6 +276,8 @@
 			isa = PBXGroup;
 			children = (
 				T20000000000000000000001 /* PetDomainTests.swift */,
+				C20000000000000000000003 /* PetDiscoveriesTests.swift */,
+				C20000000000000000000004 /* PetDiscoveryControllerTests.swift */,
 				H20000000000000000000003 /* PetHabitatStateTests.swift */,
 			);
 			path = PetIslandTests;
@@ -421,6 +434,8 @@
 				A10000000000000000000003 /* PetSessionController.swift in Sources */,
 				A10000000000000000000005 /* PetPixelArtwork.swift in Sources */,
 				D10000000000000000000001 /* PetDomain.swift in Sources */,
+				C10000000000000000000001 /* PetDiscoveries.swift in Sources */,
+				C10000000000000000000003 /* PetDiscoveriesView.swift in Sources */,
 				D10000000000000000000002 /* PetStore.swift in Sources */,
 				D10000000000000000000003 /* PetActivityAttributes.swift in Sources */,
 				E10000000000000000000001 /* PetDesign.swift in Sources */,
@@ -448,6 +463,7 @@
 				A10000000000000000000008 /* PetLiveActivityWidget.swift in Sources */,
 				A1000000000000000000000A /* PetPixelArtwork.swift in Sources */,
 				D10000000000000000000007 /* PetDomain.swift in Sources */,
+				C10000000000000000000002 /* PetDiscoveries.swift in Sources */,
 				D10000000000000000000008 /* PetActivityAttributes.swift in Sources */,
 				W10000000000000000000002 /* PetLifeState.swift in Sources */,
 				H10000000000000000000002 /* PetHabitatState.swift in Sources */,
@@ -460,6 +476,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				T10000000000000000000001 /* PetDomainTests.swift in Sources */,
+				C10000000000000000000004 /* PetDiscoveriesTests.swift in Sources */,
+				C10000000000000000000005 /* PetDiscoveryControllerTests.swift in Sources */,
 				H10000000000000000000004 /* PetHabitatStateTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

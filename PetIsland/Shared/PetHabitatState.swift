@@ -497,6 +497,26 @@ struct SharedPetHabitat: Codable, Equatable, Sendable {
     var configuration: PetHabitatState
     var residents: [SharedHabitatResident]
     var appliedCareEventIDs: [UUID] = []
+    /// Residents keep their reserved slot while away. Widget timelines can
+    /// return them at the scheduled date without opening the app or claiming a find.
+    var discoveryWalk: PetDiscoveryWalk?
+
+    func isPetAway(_ petID: UUID, at date: Date) -> Bool {
+        guard let discoveryWalk, discoveryWalk.pet.id == petID,
+              date.timeIntervalSinceReferenceDate.isFinite else { return false }
+        return date < discoveryWalk.endsAt
+    }
+
+    func visibleResidents(at date: Date) -> [SharedHabitatResident] {
+        residents.filter { !isPetAway($0.id, at: date) }
+    }
+
+    func visibleProjections(at date: Date) -> [HabitatPetProjection] {
+        // Filter after projection so a departing resident does not change the
+        // lane, spacing, or animation phase of companions who stayed home.
+        PetHabitatEngine.projections(for: configuration, pets: residents.map(\.profile), at: date)
+            .filter { !isPetAway($0.petID, at: date) }
+    }
 
     mutating func apply(_ event: PetCareEvent) {
         guard !appliedCareEventIDs.contains(event.id) else { return }
@@ -509,11 +529,12 @@ struct SharedPetHabitat: Codable, Equatable, Sendable {
         appliedCareEventIDs = Array(appliedCareEventIDs.suffix(512))
     }
 
-    private enum CodingKeys: String, CodingKey { case configuration, residents, appliedCareEventIDs }
+    private enum CodingKeys: String, CodingKey { case configuration, residents, appliedCareEventIDs, discoveryWalk }
 
-    init(configuration: PetHabitatState, residents: [SharedHabitatResident]) {
+    init(configuration: PetHabitatState, residents: [SharedHabitatResident], discoveryWalk: PetDiscoveryWalk? = nil) {
         self.configuration = configuration
         self.residents = residents
+        self.discoveryWalk = discoveryWalk
     }
 
     init(from decoder: Decoder) throws {
@@ -521,10 +542,11 @@ struct SharedPetHabitat: Codable, Equatable, Sendable {
         configuration = try values.decode(PetHabitatState.self, forKey: .configuration)
         residents = try values.decode([SharedHabitatResident].self, forKey: .residents)
         appliedCareEventIDs = try values.decodeIfPresent([UUID].self, forKey: .appliedCareEventIDs) ?? []
+        discoveryWalk = try values.decodeIfPresent(PetDiscoveryWalk.self, forKey: .discoveryWalk)
     }
 
     mutating func playWithResidents(at date: Date) {
-        for index in residents.indices {
+        for index in residents.indices where !isPetAway(residents[index].id, at: date) {
             let current = residents[index].vitals.projected(from: residents[index].vitalsUpdatedAt, to: date)
             residents[index].vitals = PetVitals(fullness: current.fullness,
                                                happiness: current.happiness + 0.12,
@@ -534,9 +556,14 @@ struct SharedPetHabitat: Codable, Equatable, Sendable {
     }
 
     var averageVitals: PetVitals {
-        guard !residents.isEmpty else { return PetVitals(fullness: 0, happiness: 0, energy: 0) }
-        let count = Double(residents.count)
-        let values = residents.map { $0.vitals.projected(from: $0.vitalsUpdatedAt, to: .now) }
+        averageVitals(at: .now)
+    }
+
+    func averageVitals(at date: Date) -> PetVitals {
+        let visible = visibleResidents(at: date)
+        guard !visible.isEmpty else { return PetVitals(fullness: 0, happiness: 0, energy: 0) }
+        let count = Double(visible.count)
+        let values = visible.map { $0.vitals.projected(from: $0.vitalsUpdatedAt, to: date) }
         return PetVitals(fullness: values.reduce(0) { $0 + $1.fullness } / count,
                          happiness: values.reduce(0) { $0 + $1.happiness } / count,
                          energy: values.reduce(0) { $0 + $1.energy } / count)

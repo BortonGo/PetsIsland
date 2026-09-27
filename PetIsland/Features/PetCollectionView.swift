@@ -100,6 +100,7 @@ struct PetCollectionView: View {
     private func petRow(_ pet: PetProfile) -> some View {
         let partyIndex = controller.activePetIDs.firstIndex(of: pet.id)
         let isLead = partyIndex == 0
+        let isAway = controller.isPetOnDiscoveryWalk(pet.id)
 
         return VStack(alignment: .leading, spacing: 0) {
             Button { editorRoute = PetEditorRoute(profile: pet, isNew: false) } label: {
@@ -124,7 +125,8 @@ struct PetCollectionView: View {
             .disabled(controller.isBusy)
             HStack {
                 Group {
-                    if isLead { Label("Lead pet", systemImage: "crown") }
+                    if isAway { Label("Out exploring", systemImage: "pawprint") }
+                    else if isLead { Label("Lead pet", systemImage: "crown") }
                     else if controller.habitat.configuration.residentPetIDs.contains(pet.id) { Text("In the enclosure") }
                     else if controller.habitat.configuration.leadDynamicIslandPetID == pet.id { Text("On Dynamic Island") }
                     else { Text("At home") }
@@ -155,7 +157,7 @@ struct PetCollectionView: View {
                     } label: {
                         Label("Remove pet", systemImage: "trash")
                     }
-                    .disabled(controller.session?.petID == pet.id)
+                    .disabled(controller.session?.petID == pet.id || isAway)
                 }
             } label: {
                 Image(systemName: "ellipsis")

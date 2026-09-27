@@ -1,14 +1,15 @@
 # Pet Island
 
 Pet Island is an independent personal iOS project: a small island for pixel
-companions, with an interactive enclosure, three arcade games, a Home Screen
-widget, and a pet that accompanies you in Dynamic Island and on the Lock Screen.
+companions, with an interactive enclosure, discovery walks, three arcade games,
+a Home Screen widget, and a pet that accompanies you in Dynamic Island and on
+the Lock Screen.
 
 The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 138 tests, a Release build, and static analysis on September 24,
+> build passed 190 tests, a Release build, and static analysis on September 27,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -45,6 +46,31 @@ The collection contains **20 visual variants across six species**:
   <img src="Docs/Media/colorful-meadow-light.png" width="240" alt="Sunny meadow enclosure">
   <img src="Docs/Media/colorful-night-dark.png" width="240" alt="Starry night enclosure">
 </p>
+
+## Walks and finds
+
+Open **Island → Little adventures** to send a pet along one of three paths:
+the quiet garden (20 minutes), the seashore (40 minutes), or the little grove
+(60 minutes). Each path has four collectible finds, for **12 finds** in total.
+
+One pet can explore at a time. It leaves the enclosure while its place stays
+reserved, and returns automatically at the end of the walk. During the walk it
+cannot join Dynamic Island or start an arcade game. Bring a pet home from
+Dynamic Island before sending it exploring. Ending a walk early brings it home
+without a find.
+
+Walks continue while the app is closed. A ready find waits until you collect
+it, with no missed-day penalty. The **Finds album** saves each discovery with
+its pet, date, and a short story that can be shared as text. Progress stays on
+the device and survives app restarts. Walks do not change pet artwork,
+animation, care, or coins.
+
+Walks use a saved deadline, with no background polling. Their visible countdown
+updates once a minute, and empty enclosures stop the display-link animation loop.
+Animations pause when the app becomes inactive. Actual battery and thermal
+behaviour still needs measurement on a physical iPhone.
+
+In Russian, open **Остров → Прогулки → Альбом находок**.
 
 ## Arcade
 
@@ -160,6 +186,9 @@ testing; launching the extension scheme directly opens a widget preview flow.
 6. Open **Settings → App icon**, choose an alternative, check it on the Home
    Screen, and switch back to the original.
 7. Add the enclosure widget and check that resident and scene changes reach it.
+8. Start a discovery walk, close and reopen the app, and check that the pet
+   stays away until its return time. Collect its find, open the album, and
+   try ending another walk early.
 
 In Russian, the new settings are **Остров → Настройка острова → Цвет карточки**
 and **Настройки → Иконка приложения**.
@@ -167,9 +196,10 @@ and **Настройки → Иконка приложения**.
 ## Tests and validation
 
 Run the **PetIsland** test action with **Command-U** in Xcode. The latest verified
-suite has **138 passing tests**, including save recovery, pet placement, arcade
+suite has **190 passing tests**, including save recovery, pet placement, arcade
 rules, movement geometry, sprite registration, Live Activity color persistence
-and contrast, and alternate-icon configuration.
+and contrast, alternate-icon configuration, discovery persistence, automatic
+returns, and exclusion between walks and Live Activities.
 
 For the full automated check, install the Python tooling dependencies and run:
 
@@ -211,7 +241,7 @@ Tools/                    Resource validation and automated build checks
 ## Further development
 
 The next focus is device testing and polishing the existing pet, enclosure, and
-arcade experience. Pet habits, cozy objects, island finds, postcards, and a future
+arcade experience. Pet habits, cozy objects, illustrated postcards, and a future
 way to support the author are ideas for later, not current features.
 
 ## License

@@ -109,15 +109,15 @@ struct MiniGamesView: View {
             }
             if ProcessInfo.processInfo.arguments.contains("-pets-dash-preview"),
                activeSession == nil,
-               let selectedPet {
+               let selectedPet, !controller.isPetOnDiscoveryWalk(selectedPet.id) {
                 activeSession = ActiveArcadeSession(game: .petsDash, pet: selectedPet)
             } else if ProcessInfo.processInfo.arguments.contains("-sky-paws-preview"),
                activeSession == nil,
-               let selectedPet {
+               let selectedPet, !controller.isPetOnDiscoveryWalk(selectedPet.id) {
                 activeSession = ActiveArcadeSession(game: .skyPaws, pet: selectedPet)
             } else if ProcessInfo.processInfo.arguments.contains("-sky-hop-preview"),
                       activeSession == nil,
-                      let selectedPet {
+                      let selectedPet, !controller.isPetOnDiscoveryWalk(selectedPet.id) {
                 activeSession = ActiveArcadeSession(game: .skyHop, pet: selectedPet)
             }
         }
@@ -140,6 +140,15 @@ struct MiniGamesView: View {
         switch selectedPage {
         case .games:
             VStack(spacing: 18) {
+                if controller.isPetOnDiscoveryWalk(pet.id) {
+                    Label("\(pet.name) is out exploring. Choose another player or wait for the walk to finish.", systemImage: "pawprint")
+                        .font(.subheadline)
+                        .foregroundStyle(PetDesign.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(16)
+                        .petSurface(radius: 20)
+                }
                 vitalsCard(for: pet)
                 skyHopCard(for: pet)
                 skyPawsCard(for: pet)
@@ -329,7 +338,10 @@ struct MiniGamesView: View {
         for pet: PetProfile, game: MiniGameKind,
         title: LocalizedStringKey, subtitle: LocalizedStringKey
     ) -> some View {
-        Button { activeSession = ActiveArcadeSession(game: game, pet: pet) } label: {
+        Button {
+            guard !controller.isPetOnDiscoveryWalk(pet.id) else { return }
+            activeSession = ActiveArcadeSession(game: game, pet: pet)
+        } label: {
             HStack(spacing: 16) {
                 ArcadeGameCover(pet: pet, game: game)
                 VStack(alignment: .leading, spacing: 8) {
@@ -350,6 +362,7 @@ struct MiniGamesView: View {
             .contentShape(RoundedRectangle(cornerRadius: 24))
         }
         .buttonStyle(.plain)
+        .disabled(controller.isPetOnDiscoveryWalk(pet.id))
         .accessibilityHint("Play as \(pet.name)")
     }
 

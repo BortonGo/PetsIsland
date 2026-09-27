@@ -9,6 +9,7 @@ struct HabitatEditorView: View {
     @Binding var selectedPetIDs: [UUID]
     @Binding var selectedTheme: HabitatTheme
     var vitalsByPetID: [UUID: PetVitals]
+    var unavailablePetIDs: Set<UUID>
     var maximumPets: Int
     var onSave: () -> Bool
     @State private var saveFailed = false
@@ -18,6 +19,7 @@ struct HabitatEditorView: View {
         selectedPetIDs: Binding<[UUID]>,
         selectedTheme: Binding<HabitatTheme>,
         vitalsByPetID: [UUID: PetVitals] = [:],
+        unavailablePetIDs: Set<UUID> = [],
         maximumPets: Int = 3,
         onSave: @escaping () -> Bool = { true }
     ) {
@@ -25,6 +27,7 @@ struct HabitatEditorView: View {
         _selectedPetIDs = selectedPetIDs
         _selectedTheme = selectedTheme
         self.vitalsByPetID = vitalsByPetID
+        self.unavailablePetIDs = unavailablePetIDs
         self.maximumPets = max(maximumPets, 1)
         self.onSave = onSave
     }
@@ -56,7 +59,7 @@ struct HabitatEditorView: View {
     private var habitatPreview: some View {
         HabitatEditorCanvas(
             theme: selectedTheme,
-            pets: selectedPets,
+            pets: presentPets,
             vitalsByPetID: vitalsByPetID
         )
         .frame(height: 236)
@@ -64,7 +67,7 @@ struct HabitatEditorView: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text("Your enclosure")
                     .font(.headline)
-                Text("\(selectedPets.count)/\(maximumPets) residents")
+                Text("\(presentPets.count)/\(maximumPets) residents")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
             }
@@ -149,6 +152,11 @@ struct HabitatEditorView: View {
                     .font(.caption)
                     .foregroundStyle(PetDesign.secondary)
             }
+            if selectedPets.contains(where: { unavailablePetIDs.contains($0.id) }) {
+                Text("A space is kept for your exploring pet.")
+                    .font(.caption)
+                    .foregroundStyle(PetDesign.secondary)
+            }
             if pets.isEmpty {
                 ContentUnavailableView(
                     "No pets yet",
@@ -173,6 +181,7 @@ struct HabitatEditorView: View {
         let isSelected = selectedPets.contains { $0.id == pet.id }
         let selectionIsFull = selectedPets.count >= maximumPets
         let cannotRemoveLast = isSelected && selectedPets.count == 1
+        let isAway = unavailablePetIDs.contains(pet.id)
 
         return Button {
             toggleSelection(of: pet.id)
@@ -191,7 +200,7 @@ struct HabitatEditorView: View {
                     )
                     .frame(width: 66, height: 56)
 
-                    Image(systemName: isSelected ? "checkmark.circle.fill" : "plus.circle.fill")
+                    Image(systemName: isAway ? "clock.fill" : isSelected ? "checkmark.circle.fill" : "plus.circle.fill")
                         .font(.title3)
                         .symbolRenderingMode(.palette)
                         .foregroundStyle(
@@ -204,7 +213,7 @@ struct HabitatEditorView: View {
                 Text(pet.name)
                     .font(.caption.bold())
                     .lineLimit(1)
-                Text(pet.species.displayName)
+                Text(isAway ? "Out exploring" : pet.species.displayName)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
@@ -222,15 +231,16 @@ struct HabitatEditorView: View {
             }
         }
         .buttonStyle(.plain)
-        .disabled((selectionIsFull && !isSelected) || cannotRemoveLast)
+        .disabled(isAway || (selectionIsFull && !isSelected) || cannotRemoveLast)
         .opacity((selectionIsFull && !isSelected) ? 0.48 : 1)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityHint(cannotRemoveLast ? "At least one resident is required" : "")
+        .accessibilityHint(isAway ? Text("A space is kept for your exploring pet.") :
+                           cannotRemoveLast ? Text("At least one resident is required") : Text(""))
     }
 
     @ViewBuilder
     private var statusPanel: some View {
-        if !selectedPets.isEmpty {
+        if !presentPets.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 sectionHeader(
                     title: "Status",
@@ -239,12 +249,12 @@ struct HabitatEditorView: View {
                 )
 
                 VStack(spacing: 0) {
-                    ForEach(Array(selectedPets.enumerated()), id: \.element.id) { index, pet in
+                    ForEach(Array(presentPets.enumerated()), id: \.element.id) { index, pet in
                         HabitatResidentStatusRow(
                             pet: pet,
                             vitals: vitals(for: pet)
                         )
-                        if index < selectedPets.count - 1 {
+                        if index < presentPets.count - 1 {
                             Divider().padding(.leading, 58)
                         }
                     }
@@ -284,11 +294,16 @@ struct HabitatEditorView: View {
             .map { $0 }
     }
 
+    private var presentPets: [PetProfile] {
+        selectedPets.filter { !unavailablePetIDs.contains($0.id) }
+    }
+
     private func vitals(for pet: PetProfile) -> PetVitals {
         vitalsByPetID[pet.id] ?? PetVitals()
     }
 
     private func toggleSelection(of id: UUID) {
+        guard !unavailablePetIDs.contains(id) else { return }
         var normalizedIDs = selectedPets.map(\.id)
         if let index = normalizedIDs.firstIndex(of: id) {
             guard normalizedIDs.count > 1 else { return }
@@ -374,7 +389,12 @@ struct HabitatEditorCanvas: View {
                 motion.configure(pets: pets, size: proxy.size, petScale: petScale, vitals: vitalsByPetID)
                 motion.start(reduceMotion: reduceMotion, active: scenePhase == .active)
             }
-            .onChange(of: pets) { _, value in motion.configure(pets: value, size: proxy.size, petScale: petScale, vitals: vitalsByPetID) }
+            .onChange(of: pets) { previous, value in
+                motion.configure(pets: value, size: proxy.size, petScale: petScale, vitals: vitalsByPetID)
+                if previous.isEmpty && !value.isEmpty {
+                    motion.start(reduceMotion: reduceMotion, active: isVisible && scenePhase == .active)
+                }
+            }
             .onChange(of: vitalsByPetID) { _, value in motion.configure(pets: pets, size: proxy.size, petScale: petScale, vitals: value) }
             .onChange(of: proxy.size) { _, value in motion.configure(pets: pets, size: value, petScale: petScale, vitals: vitalsByPetID) }
         }
@@ -437,6 +457,7 @@ final class HabitatMotionSimulation: ObservableObject {
     private var clock = 0.0
     private var displayLink: CADisplayLink?
     private var lastTimestamp: CFTimeInterval?
+    var isRunning: Bool { displayLink != nil }
 
     @MainActor
     private final class Target: NSObject {
@@ -476,12 +497,13 @@ final class HabitatMotionSimulation: ObservableObject {
             if reduced { actor.pose = .idle }
             return actor
         }
+        if actors.isEmpty { stop() }
     }
 
     func start(reduceMotion: Bool, active: Bool) {
         reduced = reduceMotion
         stop()
-        guard active else { return }
+        guard active, !actors.isEmpty else { return }
         if reduceMotion {
             actors = actors.map { actor in
                 var actor = actor
@@ -526,7 +548,7 @@ final class HabitatMotionSimulation: ObservableObject {
     }
 
     func advance(by rawDelta: TimeInterval) {
-        guard !reduced, rawDelta.isFinite, rawDelta > 0, size.width > 1 else { return }
+        guard !actors.isEmpty, !reduced, rawDelta.isFinite, rawDelta > 0, size.width > 1 else { return }
         let dt = min(rawDelta, 1.0 / 15)
         clock += dt
         let previous = actors

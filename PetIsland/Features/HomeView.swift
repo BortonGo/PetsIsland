@@ -62,7 +62,9 @@ private struct IslandView: View {
                         Label("Play together", systemImage: "tennisball")
                     }
                     .buttonStyle(PetPrimaryButtonStyle())
+                    .disabled(controller.habitatResidents.isEmpty)
                     placementCard
+                    PetDiscoveriesCard(controller: controller)
                     activityAvailabilityNotice
                 }
                 .padding(.horizontal, 24)
@@ -78,6 +80,7 @@ private struct IslandView: View {
                 selectedPetIDs: $draftResidentIDs,
                 selectedTheme: $draftTheme,
                 vitalsByPetID: controller.habitatVitalsByPetID,
+                unavailablePetIDs: Set(controller.pets.filter { controller.isPetOnDiscoveryWalk($0.id) }.map(\.id)),
                 maximumPets: PetHabitatState.maximumResidents - (controller.habitat.configuration.leadDynamicIslandPetID == nil ? 0 : 1)
             ) {
                 if controller.saveHabitat(theme: draftTheme, residentPetIDs: draftResidentIDs) {
@@ -92,7 +95,7 @@ private struct IslandView: View {
         }
         .fullScreenCover(isPresented: $controller.showsPlayYard) {
             PlayYardView(
-                pets: controller.habitatResidents.isEmpty ? [controller.profile] : controller.habitatResidents,
+                pets: controller.habitatResidents,
                 hapticsEnabled: controller.settings.hapticsEnabled
             )
         }
@@ -142,12 +145,20 @@ private struct IslandView: View {
     private var residentSummary: some View {
         HStack(alignment: .center, spacing: 16) {
             VStack(alignment: .leading, spacing: 5) {
-                Text(controller.habitatResidents.isEmpty ? String(localized: "A quiet moment") :
-                     controller.habitatResidents.map(\.name).joined(separator: ", "))
-                    .font(.title3.weight(.semibold))
-                    .lineLimit(2)
-                Text(controller.habitatResidents.isEmpty ? "Your pet is keeping you company." : "Tap a pet to say hello.")
-                    .font(.caption).foregroundStyle(PetDesign.secondary)
+                if controller.habitatResidents.isEmpty, let walk = awayWalk {
+                    Text("\(walk.pet.name) is out exploring")
+                        .font(.title3.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Back at \(walk.endsAt.formatted(date: .omitted, time: .shortened))")
+                        .font(.caption).foregroundStyle(PetDesign.secondary)
+                } else {
+                    Text(controller.habitatResidents.isEmpty ? String(localized: "A quiet moment") :
+                         controller.habitatResidents.map(\.name).joined(separator: ", "))
+                        .font(.title3.weight(.semibold))
+                        .lineLimit(2)
+                    Text(controller.habitatResidents.isEmpty ? "Your pet is keeping you company." : "Tap a pet to say hello.")
+                        .font(.caption).foregroundStyle(PetDesign.secondary)
+                }
             }
             Spacer(minLength: 4)
             Image(systemName: "heart").foregroundStyle(PetDesign.secondary)
@@ -164,12 +175,17 @@ private struct IslandView: View {
                 }
             } label: {
                 HStack(spacing: 13) {
-                    Image(systemName: controller.placement == .dynamicIsland ? "house" : "iphone")
+                    Image(systemName: leadPetIsAway ? "pawprint" : controller.placement == .dynamicIsland ? "house" : "iphone")
                         .font(.title3)
                         .frame(width: 40, height: 40)
                         .background(PetDesign.soft, in: RoundedRectangle(cornerRadius: 13))
                     VStack(alignment: .leading, spacing: 5) {
-                        if controller.placement == .dynamicIsland {
+                        if leadPetIsAway {
+                            Text("\(controller.profile.name) is out exploring")
+                                .font(.subheadline.weight(.medium))
+                            Text("Dynamic Island will be available after the walk.")
+                                .font(.caption).foregroundStyle(PetDesign.secondary)
+                        } else if controller.placement == .dynamicIsland {
                             Text("Bring \(controller.profile.name) home")
                                 .font(.subheadline.weight(.medium))
                             Text("Back to the enclosure")
@@ -183,14 +199,24 @@ private struct IslandView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     if controller.isBusy { ProgressView().controlSize(.small) }
-                    else { Image(systemName: "arrow.up.right").font(.subheadline) }
+                    else if !leadPetIsAway { Image(systemName: "arrow.up.right").font(.subheadline) }
                 }
                 .padding(16)
                 .petSurface(radius: 20)
             }
             .buttonStyle(.plain)
-            .disabled(controller.isBusy)
+            .disabled(controller.isBusy || leadPetIsAway)
         }
+    }
+
+    private var leadPetIsAway: Bool {
+        controller.isPetOnDiscoveryWalk(controller.profile.id)
+    }
+
+    private var awayWalk: PetDiscoveryWalk? {
+        guard let walk = controller.discoveries.activeWalk,
+              controller.isPetOnDiscoveryWalk(walk.pet.id) else { return nil }
+        return walk
     }
 
     @ViewBuilder

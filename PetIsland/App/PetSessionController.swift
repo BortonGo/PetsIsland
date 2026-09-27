@@ -49,6 +49,7 @@ final class PetSessionController: ObservableObject {
     @Published private(set) var lifeState = PetLifeState.initial()
     @Published private(set) var habitat = SharedPetHabitat.initial()
     @Published private(set) var arcadeProgress = ArcadeProgress()
+    @Published private(set) var discoveries = PetDiscoveriesState()
 
     private let store: any PetStore
     private let arcadeStore: any ArcadeStore
@@ -57,6 +58,7 @@ final class PetSessionController: ObservableObject {
     private var state = PersistedAppState()
     private var arcadeState = ArcadeState()
     private var expiryTask: Task<Void, Never>?
+    private var discoveryReturnTask: Task<Void, Never>?
     private var activityObservationTask: Task<Void, Never>?
     private var authorizationTask: Task<Void, Never>?
     private var didBootstrap = false
@@ -117,6 +119,19 @@ final class PetSessionController: ObservableObject {
         }
         _ = await flushCareEvents()
         reloadSharedLifeState()
+        if habitat.discoveryWalk != state.discoveries.activeWalk {
+            synchronizeSharedDiscoveryWalk()
+        }
+        scheduleDiscoveryReturn()
+        // Early discovery builds allowed a walk and Live Activity to overlap.
+        // Keep the walk and its find, and resolve only the conflicting activity.
+        // Bootstrap already owns the save lock, so do not call endSession here.
+        if (placement == .dynamicIsland && isPetOnDiscoveryWalk(profile.id))
+            || state.activeSession.map({ isPetOnDiscoveryWalk($0.petID) }) == true {
+            await clearLiveActivityState()
+            updateSharedPlacement(.enclosure)
+            synchronizeSharedHabitat()
+        }
         if placement == .dynamicIsland {
             await reconcileActivities(at: .now)
         } else {
@@ -175,7 +190,7 @@ final class PetSessionController: ObservableObject {
         await beginSave()
         defer { finishSave() }
         guard state.pets.count > 1, state.pets.contains(where: { $0.id == id }),
-              session?.petID != id else { return false }
+              session?.petID != id, !isPetOnDiscoveryWalk(id) else { return false }
         var candidate = state
         candidate.pets.removeAll { $0.id == id }
         candidate.activePetIDs.removeAll { $0 == id }
@@ -237,6 +252,42 @@ final class PetSessionController: ObservableObject {
         return await commitState(candidate, syncPets: false)
     }
 
+    /// A walk temporarily reserves its companion. Rendering and care state stay
+    /// intact, and the companion returns at the saved deadline without a claim.
+    @discardableResult
+    func startDiscoveryWalk(petID: UUID, route: PetWalkRoute, at date: Date = .now) async -> Bool {
+        guard didBootstrap, !isBusy,
+              !isPetWithYou(petID),
+              let pet = state.pets.first(where: { $0.id == petID }) else { return false }
+        await beginSave()
+        defer { finishSave() }
+        var candidate = state
+        guard candidate.discoveries.startWalk(pet: pet, route: route, at: date) else { return false }
+        return await commitState(candidate, syncPets: false)
+    }
+
+    @discardableResult
+    func collectDiscoveryWalk(at date: Date = .now) async -> PetDiscoveryMemory? {
+        guard didBootstrap, !isBusy else { return nil }
+        await beginSave()
+        defer { finishSave() }
+        var candidate = state
+        guard let memory = candidate.discoveries.collectWalk(at: date),
+              await commitState(candidate, syncPets: false) else { return nil }
+        Haptics.success(enabled: settings.hapticsEnabled)
+        return memory
+    }
+
+    @discardableResult
+    func cancelDiscoveryWalk() async -> Bool {
+        guard didBootstrap, !isBusy else { return false }
+        await beginSave()
+        defer { finishSave() }
+        var candidate = state
+        guard candidate.discoveries.cancelWalk() else { return false }
+        return await commitState(candidate, syncPets: false)
+    }
+
     private func beginSave() async {
         if isSavingChanges {
             await withCheckedContinuation { saveWaiters.append($0) }
@@ -257,6 +308,7 @@ final class PetSessionController: ObservableObject {
             return false
         }
         let activityColorChanged = settings.liveActivityBackgroundColor != candidate.settings.liveActivityBackgroundColor
+        let discoveriesChanged = state.discoveries != candidate.discoveries
         state = candidate
         settings = candidate.settings
         completedOnboarding = candidate.completedOnboarding
@@ -264,6 +316,8 @@ final class PetSessionController: ObservableObject {
         if syncPets {
             synchronizeSharedLifeState()
             synchronizeSharedHabitat()
+        } else if discoveriesChanged {
+            synchronizeSharedDiscoveryWalk()
         }
         if activityColorChanged, let activity {
             var content = activity.content.state
@@ -274,8 +328,31 @@ final class PetSessionController: ObservableObject {
     }
 
     var habitatResidents: [PetProfile] {
+        habitatResidents(at: .now)
+    }
+
+    func habitatResidents(at date: Date) -> [PetProfile] {
         let residentsByID = Dictionary(uniqueKeysWithValues: habitat.residents.map { ($0.id, $0.profile) })
-        return habitat.configuration.residentPetIDs.compactMap { residentsByID[$0] }
+        return habitat.configuration.residentPetIDs
+            .filter { !isPetOnDiscoveryWalk($0, at: date) }
+            .compactMap { residentsByID[$0] }
+    }
+
+    func isPetOnDiscoveryWalk(_ petID: UUID, at date: Date = .now) -> Bool {
+        guard let walk = discoveries.activeWalk, walk.pet.id == petID else { return false }
+        return date.timeIntervalSinceReferenceDate.isFinite && date < walk.endsAt
+    }
+
+    var availableDiscoveryPets: [PetProfile] {
+        pets.filter { !isPetWithYou($0.id) }
+    }
+
+    private func isPetWithYou(_ petID: UUID) -> Bool {
+        if let session = state.activeSession, session.petID == petID, !session.isExpired(at: .now) {
+            return true
+        }
+        return (placement == .dynamicIsland && profile.id == petID)
+            || habitat.configuration.leadDynamicIslandPetID == petID
     }
 
     var habitatVitalsByPetID: [UUID: PetVitals] {
@@ -385,7 +462,20 @@ final class PetSessionController: ObservableObject {
         do {
             habitat = try PetHabitatStore.update { shared in
                 shared.configuration.setTheme(theme)
-                shared.configuration.setResidents(residentPetIDs)
+                var selectedIDs = residentPetIDs
+                // A walking resident keeps its berth and order while the user
+                // edits the other residents; an away pet cannot be newly added.
+                if let walk = discoveries.activeWalk, isPetOnDiscoveryWalk(walk.pet.id) {
+                    let previousIDs = shared.configuration.residentPetIDs
+                    selectedIDs.removeAll { $0 == walk.pet.id }
+                    if let index = previousIDs.firstIndex(of: walk.pet.id) {
+                        let capacity = PetHabitatState.maximumResidents
+                            - (shared.configuration.leadDynamicIslandPetID == nil ? 0 : 1)
+                        selectedIDs = Array(selectedIDs.prefix(max(0, capacity - 1)))
+                        selectedIDs.insert(walk.pet.id, at: min(index, selectedIDs.count))
+                    }
+                }
+                shared.configuration.setResidents(selectedIDs)
                 let selected = Set(shared.configuration.residentPetIDs)
                 shared.residents = state.pets.compactMap { pet in
                     guard selected.contains(pet.id) else { return nil }
@@ -410,7 +500,7 @@ final class PetSessionController: ObservableObject {
     }
 
     func startSession(duration: TimeInterval) async {
-        guard operation == .idle, !isSavingChanges else { return }
+        guard operation == .idle, !isSavingChanges, !isPetOnDiscoveryWalk(profile.id) else { return }
         await beginSave()
         defer { finishSave() }
         operation = .starting
@@ -453,6 +543,7 @@ final class PetSessionController: ObservableObject {
     /// A fresh activity is created whenever the pet is taken along.
     func placePet(in newPlacement: PetPlacement) async {
         guard !isBusy, newPlacement != placement else { return }
+        guard newPlacement != .dynamicIsland || !isPetOnDiscoveryWalk(profile.id) else { return }
 
         switch newPlacement {
         case .dynamicIsland:
@@ -487,7 +578,8 @@ final class PetSessionController: ObservableObject {
     /// Explicit user action for recovering a session whose system Live
     /// Activity was removed or could not be registered during installation.
     func reconnectLiveActivity() async {
-        guard !isBusy, let session, !session.isExpired(at: .now) else { return }
+        guard !isBusy, let session, !session.isExpired(at: .now),
+              !isPetOnDiscoveryWalk(session.petID) else { return }
         await beginSave()
         defer { finishSave() }
         operation = .starting
@@ -697,6 +789,22 @@ final class PetSessionController: ObservableObject {
         }
     }
 
+    private func scheduleDiscoveryReturn() {
+        discoveryReturnTask?.cancel()
+        guard let walk = discoveries.activeWalk, walk.endsAt > .now else { return }
+        discoveryReturnTask = Task { [weak self] in
+            do {
+                try await Task.sleep(until: .now + .seconds(max(walk.endsAt.timeIntervalSinceNow, 0)), clock: .continuous)
+            } catch { return }
+            guard !Task.isCancelled, let self,
+                  self.discoveries.activeWalk?.id == walk.id else { return }
+            // Availability is derived from the deadline. Refresh every surface,
+            // even if the user leaves the app open without collecting the find.
+            self.objectWillChange.send()
+            WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
+        }
+    }
+
     private func observeCurrentActivity() {
         activityObservationTask?.cancel()
         guard let activity else { return }
@@ -749,6 +857,8 @@ final class PetSessionController: ObservableObject {
         activeParty = state.activeParty
         profile = state.profile
         arcadeProgress = arcadeState.progress
+        discoveries = state.discoveries
+        scheduleDiscoveryReturn()
     }
 
     private func activityIdentity(for pet: PetProfile) -> PetActivityIdentity {
@@ -872,11 +982,12 @@ final class PetSessionController: ObservableObject {
     private func synchronizeSharedHabitat() {
         do {
             habitat = try PetHabitatStore.update { shared in
+                shared.discoveryWalk = state.discoveries.activeWalk
                 let knownIDs = Set(state.pets.map(\.id))
                 shared.configuration.reconcile(availablePetIDs: knownIDs)
 
                 if placement == .dynamicIsland {
-                    shared.configuration.setDynamicIslandLead(profile.id)
+                    setSharedDynamicIslandLead(in: &shared)
                 } else if shared.configuration.leadDynamicIslandPetID != nil {
                     if !shared.configuration.returnDynamicIslandLeadToHabitat() {
                         shared.configuration.setDynamicIslandLead(nil)
@@ -908,11 +1019,24 @@ final class PetSessionController: ObservableObject {
         }
     }
 
+    private func synchronizeSharedDiscoveryWalk() {
+        do {
+            habitat = try PetHabitatStore.update { shared in
+                shared.discoveryWalk = state.discoveries.activeWalk
+            }
+            WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
+        } catch {
+            // The collection save is authoritative; retry this shared projection
+            // when the app becomes active again without losing walk progress.
+            alertMessage = String(localized: "The enclosure state could not be synchronized.")
+        }
+    }
+
     private func moveLeadInSharedHabitat(toDynamicIsland: Bool) {
         do {
             habitat = try PetHabitatStore.update { shared in
                 if toDynamicIsland {
-                    shared.configuration.setDynamicIslandLead(profile.id)
+                    setSharedDynamicIslandLead(in: &shared)
                 } else {
                     if !shared.configuration.returnDynamicIslandLeadToHabitat() {
                         shared.configuration.setDynamicIslandLead(nil)
@@ -939,6 +1063,19 @@ final class PetSessionController: ObservableObject {
         } catch {
             alertMessage = String(localized: "The pet could not be moved.")
         }
+    }
+
+    private func setSharedDynamicIslandLead(in shared: inout SharedPetHabitat) {
+        let previousIDs = shared.configuration.residentPetIDs
+        shared.configuration.setDynamicIslandLead(profile.id)
+        guard let walk = discoveries.activeWalk, isPetOnDiscoveryWalk(walk.pet.id),
+              let originalIndex = previousIDs.firstIndex(of: walk.pet.id),
+              !shared.configuration.residentPetIDs.contains(walk.pet.id) else { return }
+        // Taking another pet from home can fill the final berth. Reserve the
+        // walking resident's place instead of silently dropping it at capacity.
+        var reservedIDs = Array(shared.configuration.residentPetIDs.prefix(PetHabitatState.maximumResidents - 2))
+        reservedIDs.insert(walk.pet.id, at: min(originalIndex, reservedIDs.count))
+        shared.configuration.setResidents(reservedIDs)
     }
 
     private func reloadSharedLifeState() {
