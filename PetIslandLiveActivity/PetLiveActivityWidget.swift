@@ -62,17 +62,11 @@ struct PetLiveActivityWidget: Widget {
                     .foregroundStyle(.secondary)
                 }
             } compactLeading: {
-                CompactTimerPet(
-                    context: context,
-                    viewport: CGSize(width: 36, height: 30)
-                )
+                CompactTimerPet(context: context)
             } compactTrailing: {
                 EmptyView()
             } minimal: {
-                CompactTimerPet(
-                    context: context,
-                    viewport: CGSize(width: 28, height: 25)
-                )
+                CompactTimerPet(context: context)
             }
             .widgetURL(deepLink(for: context.attributes.sessionID))
         }
@@ -123,7 +117,9 @@ struct PetLiveActivityWidget: Widget {
 /// or sleep. The pet stays anchored exactly like the reference implementation.
 private struct CompactTimerPet: View {
     let context: ActivityViewContext<PetActivityAttributes>
-    let viewport: CGSize
+    // Keep the same sprite scale when Now Playing or another activity makes
+    // the system switch from compact to minimal presentation.
+    private let viewport = CGSize(width: 36, height: 30)
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
 
     var body: some View {
@@ -268,7 +264,8 @@ private struct LockScreenTimerPetTrack: View {
                     viewport: spriteSize
                 )
                 .position(x: centerX, y: PetLockScreenSpriteAlignment.centerY(
-                    trackHeight: proxy.size.height, viewport: spriteSize, breed: context.attributes.pet.breed
+                    trackHeight: proxy.size.height, viewport: spriteSize,
+                    breed: context.attributes.pet.breed ?? PetBreed.defaultVariant(for: context.attributes.pet.species)
                 ))
             }
         }

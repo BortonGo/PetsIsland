@@ -547,13 +547,17 @@ final class PetDomainTests: XCTestCase {
     }
 
     @MainActor
-    func testBothCorgiBreedsMeetLockScreenLineInTimerAndSleepingArtwork() throws {
+    func testCatsAndCorgisMeetLockScreenLineInTimerAndSleepingArtwork() throws {
         try registerTimerFonts()
         let viewport = CGSize(width: 84, height: 72)
         let trackHeight: CGFloat = 86
         let lineTop = trackHeight - 7 - 4
-        let breeds: [(PetBreed, String)] = [(.corgi, "DogCorgi"), (.cardigan, "DogCardigan")]
-        for (breed, token) in breeds {
+        let breeds: [(PetSpecies, PetBreed, String)] = [
+            (.dog, .corgi, "DogCorgi"), (.dog, .cardigan, "DogCardigan"),
+            (.cat, .classicCat, "CatClassic"), (.cat, .britishShorthair, "CatBritish"),
+            (.cat, .maineCoon, "CatMaineCoon"), (.cat, .siamese, "CatSiamese")
+        ]
+        for (species, breed, token) in breeds {
             let center = PetLockScreenSpriteAlignment.centerY(trackHeight: trackHeight, viewport: viewport, breed: breed)
             for direction in [PetDirection.left, .right] {
                 for digit in 0...9 {
@@ -561,15 +565,15 @@ final class PetDomainTests: XCTestCase {
                         fontName: "PetIslandLockTimer" + token + "RunWalkSleep", viewport: viewport, direction: direction))
                     XCTAssertEqual(center - viewport.height / 2 + bounds.maxY, lineTop, accuracy: 1, token)
                 }
-                for step in PetAnimationLibrary.clip(for: .dog, breed: breed, pose: .sleep).frames.indices {
-                    let bounds = try renderedBounds(PetArtwork(species: .dog, breed: breed, pose: .sleep,
+                for step in PetAnimationLibrary.clip(for: species, breed: breed, pose: .sleep).frames.indices {
+                    let bounds = try renderedBounds(PetArtwork(species: species, breed: breed, pose: .sleep,
                         direction: direction, step: step, animatesMotion: false)
                         .frame(width: viewport.width, height: viewport.height))
                     XCTAssertEqual(center - viewport.height / 2 + bounds.maxY, lineTop, accuracy: 1, token)
                 }
             }
         }
-        for breed in PetBreed.allCases where breed != .corgi && breed != .cardigan {
+        for breed in PetBreed.allCases where !breeds.contains(where: { $0.1 == breed }) {
             XCTAssertEqual(PetLockScreenSpriteAlignment.centerY(trackHeight: trackHeight, viewport: viewport, breed: breed),
                            trackHeight / 2, "Preserve other pets' positions")
         }
@@ -603,12 +607,15 @@ final class PetDomainTests: XCTestCase {
     }
 
     func testRepairedWalkFramesKeepTheirGroundAndUpperBodyRegistration() throws {
-        for breed in ["cat_maine_coon", "cat_siamese", "fox"] {
+        for breed in ["cat", "cat_british", "cat_maine_coon", "cat_siamese", "fox"] {
             let first = try XCTUnwrap(PetSpriteGeometry.load(assetName: "island_\(breed)_walk_0"))
             let second = try XCTUnwrap(PetSpriteGeometry.load(assetName: "island_\(breed)_walk_1"))
             XCTAssertEqual(first.sourceSize, PetSpriteGeometry.canvas)
             XCTAssertEqual(second.sourceSize, PetSpriteGeometry.canvas)
-            XCTAssertEqual(first.visibleBounds.minY, second.visibleBounds.minY)
+            // A cat's ears may move by one authored pixel while its grounded
+            // paws and muzzle stay registered; the fox artwork is unchanged.
+            XCTAssertEqual(first.visibleBounds.minY, second.visibleBounds.minY,
+                           accuracy: breed == "fox" ? 0 : 1)
             XCTAssertEqual(first.visibleBounds.maxX, second.visibleBounds.maxX)
             XCTAssertEqual(first.visibleBounds.maxY, PetSpriteGeometry.baseline)
             XCTAssertEqual(second.visibleBounds.maxY, PetSpriteGeometry.baseline)
@@ -911,10 +918,12 @@ final class PetDomainTests: XCTestCase {
         XCTAssertEqual(jump.frames, ["island_dog_shepherd_run_0"])
     }
 
-    func testMaineCoonJumpUsesTheCompleteAirborneFrame() {
-        let jump = PetAnimationLibrary.clip(for: .cat, breed: .maineCoon, pose: .jump)
-
-        XCTAssertEqual(jump.frames, ["island_cat_maine_coon_run_0"])
+    func testCatsUseTheirRestoredJumpArtwork() {
+        for (breed, token) in [(PetBreed.classicCat, "cat"), (.britishShorthair, "cat_british"),
+                               (.maineCoon, "cat_maine_coon"), (.siamese, "cat_siamese")] {
+            let jump = PetAnimationLibrary.clip(for: .cat, breed: breed, pose: .jump)
+            XCTAssertEqual(jump.frames, ["island_\(token)_jump"])
+        }
     }
 
     func testSkyPawsUsesOneDedicatedPlaneForEveryNonParrotVariant() {

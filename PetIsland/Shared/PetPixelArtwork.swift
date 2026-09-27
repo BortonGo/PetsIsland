@@ -405,7 +405,10 @@ enum PetLockScreenSpriteAlignment {
     static let lineBottomInset: CGFloat = 7
 
     static func centerY(trackHeight: CGFloat, viewport: CGSize, breed: PetBreed?) -> CGFloat {
-        guard breed == .corgi || breed == .cardigan else { return trackHeight / 2 }
+        switch breed {
+        case .corgi, .cardigan, .classicCat, .britishShorthair, .maineCoon, .siamese: break
+        default: return trackHeight / 2
+        }
         let fit = min(viewport.width / PetSpriteGeometry.canvas.width,
                       viewport.height / PetSpriteGeometry.canvas.height)
         let groundBelowCenter = (PetSpriteGeometry.baseline - PetSpriteGeometry.canvas.height / 2) * fit
@@ -747,9 +750,7 @@ enum PetAnimationLibrary {
                 ? [prefix + "walk_1", prefix + "jump", prefix + "walk_0", prefix + "jump"]
                 : [prefix + "run_0", prefix + "run_1"]
         case .jump:
-            species == .cat && variant == .maineCoon
-                ? [prefix + "run_0"]
-                : [prefix + "jump"]
+            [prefix + "jump"]
         case .fly:
             species == .parrot
                 ? [prefix + "walk_1", prefix + "jump", prefix + "walk_0", prefix + "jump"]
