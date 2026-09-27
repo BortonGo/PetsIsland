@@ -5,6 +5,69 @@ final class PetDiscoveryControllerTests: XCTestCase {
     private let start = Date(timeIntervalSince1970: 2_000_000)
 
     @MainActor
+    func testEnclosureBoxSavePersistsAndLegacyCallerPreservesSelection() async {
+        let initial = makeState()
+        let store = InMemoryPetStore(initial)
+        let arcadeStore = InMemoryArcadeStore(ArcadeState(progress: ArcadeProgress(ownedHabitatItems: [.cozyBox])))
+        let controller = PetSessionController(store: store, arcadeStore: arcadeStore)
+        await controller.bootstrap()
+        let residentIDs = initial.pets.map(\.id)
+
+        XCTAssertTrue(controller.saveHabitat(theme: .warmRoom, residentPetIDs: residentIDs, hasCozyBox: true))
+        XCTAssertTrue(controller.habitat.configuration.hasCozyBox)
+        XCTAssertTrue(PetHabitatStore.load().configuration.hasCozyBox)
+        XCTAssertEqual(PetHabitatStore.load().configuration.residentPetIDs, residentIDs)
+
+        XCTAssertTrue(controller.saveHabitat(theme: .sunnyMeadow, residentPetIDs: residentIDs))
+        XCTAssertTrue(controller.habitat.configuration.hasCozyBox)
+        XCTAssertEqual(PetHabitatStore.load().configuration.theme, .sunnyMeadow)
+        XCTAssertTrue(PetHabitatStore.load().configuration.hasCozyBox)
+
+        let reopened = PetSessionController(store: store, arcadeStore: arcadeStore)
+        await reopened.bootstrap()
+        XCTAssertTrue(reopened.habitat.configuration.hasCozyBox)
+        XCTAssertEqual(reopened.habitat.configuration.residentPetIDs, residentIDs)
+        XCTAssertTrue(reopened.saveHabitat(theme: .sunnyMeadow, residentPetIDs: residentIDs, hasCozyBox: false))
+        XCTAssertFalse(reopened.habitat.configuration.hasCozyBox)
+        XCTAssertFalse(PetHabitatStore.load().configuration.hasCozyBox)
+    }
+
+    @MainActor
+    func testSavingBoxDuringWalkKeepsReservedBerthAndWalkProgress() async throws {
+        let initial = makeState()
+        let store = InMemoryPetStore(initial)
+        let controller = PetSessionController(store: store, arcadeStore: InMemoryArcadeStore(
+            ArcadeState(progress: ArcadeProgress(ownedHabitatItems: [.cozyBox]))))
+        await controller.bootstrap()
+        let residentIDs = initial.pets.map(\.id)
+        let walkingPetID = initial.pets[1].id
+        XCTAssertTrue(controller.saveHabitat(theme: .meadow, residentPetIDs: residentIDs, hasCozyBox: false))
+        let started = await controller.startDiscoveryWalk(petID: walkingPetID, route: .garden, at: .now)
+        XCTAssertTrue(started)
+        let walk = try XCTUnwrap(controller.discoveries.activeWalk)
+        let privateSaveBefore = await store.load()
+
+        XCTAssertTrue(controller.saveHabitat(theme: .warmRoom, residentPetIDs: [residentIDs[0]], hasCozyBox: true))
+        let shared = PetHabitatStore.load()
+        XCTAssertTrue(shared.configuration.hasCozyBox)
+        XCTAssertEqual(shared.configuration.residentPetIDs, residentIDs)
+        XCTAssertEqual(shared.residents.map(\.id), residentIDs)
+        XCTAssertEqual(shared.discoveryWalk, walk)
+        XCTAssertEqual(controller.discoveries.activeWalk, walk)
+        XCTAssertFalse(controller.habitatResidents.contains { $0.id == walkingPetID })
+        XCTAssertTrue(controller.habitatResidents(at: walk.endsAt).contains { $0.id == walkingPetID })
+        let privateSaveAfter = await store.load()
+        XCTAssertEqual(privateSaveAfter, privateSaveBefore)
+
+        let cancelled = await controller.cancelDiscoveryWalk()
+        XCTAssertTrue(cancelled)
+        XCTAssertTrue(controller.habitat.configuration.hasCozyBox)
+        XCTAssertTrue(PetHabitatStore.load().configuration.hasCozyBox)
+        XCTAssertEqual(controller.habitatResidents.map(\.id), residentIDs)
+        XCTAssertTrue(controller.saveHabitat(theme: .warmRoom, residentPetIDs: residentIDs, hasCozyBox: false))
+    }
+
+    @MainActor
     func testDiscoveryMutationsBeforeBootstrapDoNotReplaceSavedWalk() async {
         var initial = makeState()
         initial.discoveries.startWalk(pet: initial.profile, route: .garden, at: start)

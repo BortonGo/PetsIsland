@@ -44,6 +44,7 @@ struct PetHabitatState: Codable, Equatable, Sendable {
     var theme: HabitatTheme
     private(set) var residentPetIDs: [UUID]
     private(set) var leadDynamicIslandPetID: UUID?
+    private(set) var hasCozyBox: Bool
     var simulationEpoch: Date
     var behaviorSeed: UInt64
     private(set) var revision: Int
@@ -54,12 +55,14 @@ struct PetHabitatState: Codable, Equatable, Sendable {
         leadDynamicIslandPetID: UUID? = nil,
         simulationEpoch: Date = .now,
         behaviorSeed: UInt64 = 0x4841_4249_5441_5421,
-        revision: Int = 0
+        revision: Int = 0,
+        hasCozyBox: Bool = false
     ) {
         self.schemaVersion = Self.currentSchemaVersion
         self.theme = theme
         self.residentPetIDs = residentPetIDs
         self.leadDynamicIslandPetID = leadDynamicIslandPetID
+        self.hasCozyBox = hasCozyBox
         self.simulationEpoch = simulationEpoch
         self.behaviorSeed = behaviorSeed
         self.revision = max(revision, 0)
@@ -70,6 +73,14 @@ struct PetHabitatState: Codable, Equatable, Sendable {
     mutating func setTheme(_ newTheme: HabitatTheme) -> Bool {
         guard theme != newTheme else { return false }
         theme = newTheme
+        revision += 1
+        return true
+    }
+
+    @discardableResult
+    mutating func setCozyBox(_ enabled: Bool) -> Bool {
+        guard hasCozyBox != enabled else { return false }
+        hasCozyBox = enabled
         revision += 1
         return true
     }
@@ -160,6 +171,7 @@ struct PetHabitatState: Codable, Equatable, Sendable {
         case theme
         case residentPetIDs
         case leadDynamicIslandPetID
+        case hasCozyBox
         case simulationEpoch
         case behaviorSeed
         case revision
@@ -171,6 +183,7 @@ struct PetHabitatState: Codable, Equatable, Sendable {
         theme = try container.decodeIfPresent(HabitatTheme.self, forKey: .theme) ?? .meadow
         residentPetIDs = try container.decodeIfPresent([UUID].self, forKey: .residentPetIDs) ?? []
         leadDynamicIslandPetID = try container.decodeIfPresent(UUID.self, forKey: .leadDynamicIslandPetID)
+        hasCozyBox = try container.decodeIfPresent(Bool.self, forKey: .hasCozyBox) ?? false
         simulationEpoch = try container.decodeIfPresent(Date.self, forKey: .simulationEpoch) ?? .now
         behaviorSeed = try container.decodeIfPresent(UInt64.self, forKey: .behaviorSeed)
             ?? 0x4841_4249_5441_5421
@@ -184,6 +197,7 @@ struct PetHabitatState: Codable, Equatable, Sendable {
         try container.encode(theme, forKey: .theme)
         try container.encode(residentPetIDs, forKey: .residentPetIDs)
         try container.encodeIfPresent(leadDynamicIslandPetID, forKey: .leadDynamicIslandPetID)
+        try container.encode(hasCozyBox, forKey: .hasCozyBox)
         try container.encode(simulationEpoch, forKey: .simulationEpoch)
         try container.encode(behaviorSeed, forKey: .behaviorSeed)
         try container.encode(revision, forKey: .revision)

@@ -53,6 +53,10 @@
 		C10000000000000000000003 /* PetDiscoveriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000002 /* PetDiscoveriesView.swift */; };
 		C10000000000000000000004 /* PetDiscoveriesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000003 /* PetDiscoveriesTests.swift */; };
 		C10000000000000000000005 /* PetDiscoveryControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000004 /* PetDiscoveryControllerTests.swift */; };
+		B10000000000000000000001 /* HabitatCozyBoxArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000001 /* HabitatCozyBoxArtwork.swift */; };
+		B10000000000000000000002 /* PetCozyBoxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000002 /* PetCozyBoxTests.swift */; };
+		B10000000000000000000003 /* HabitatFurnitureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* HabitatFurnitureView.swift */; };
+		B10000000000000000000004 /* PetFurnitureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000004 /* PetFurnitureTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -131,6 +135,10 @@
 		C20000000000000000000002 /* PetDiscoveriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDiscoveriesView.swift; sourceTree = "<group>"; };
 		C20000000000000000000003 /* PetDiscoveriesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDiscoveriesTests.swift; sourceTree = "<group>"; };
 		C20000000000000000000004 /* PetDiscoveryControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDiscoveryControllerTests.swift; sourceTree = "<group>"; };
+		B20000000000000000000001 /* HabitatCozyBoxArtwork.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitatCozyBoxArtwork.swift; sourceTree = "<group>"; };
+		B20000000000000000000002 /* PetCozyBoxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetCozyBoxTests.swift; sourceTree = "<group>"; };
+		B20000000000000000000003 /* HabitatFurnitureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HabitatFurnitureView.swift; sourceTree = "<group>"; };
+		B20000000000000000000004 /* PetFurnitureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetFurnitureTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -264,6 +272,8 @@
 				D20000000000000000000009 /* PetCollectionView.swift */,
 				D2000000000000000000000A /* PlayYardView.swift */,
 				H20000000000000000000002 /* HabitatEditorView.swift */,
+				B20000000000000000000001 /* HabitatCozyBoxArtwork.swift */,
+				B20000000000000000000003 /* HabitatFurnitureView.swift */,
 				G20000000000000000000002 /* MiniGamesView.swift */,
 				G20000000000000000000003 /* SkyPawsGameView.swift */,
 				G20000000000000000000004 /* PetsDashGameView.swift */,
@@ -279,6 +289,8 @@
 				C20000000000000000000003 /* PetDiscoveriesTests.swift */,
 				C20000000000000000000004 /* PetDiscoveryControllerTests.swift */,
 				H20000000000000000000003 /* PetHabitatStateTests.swift */,
+				B20000000000000000000002 /* PetCozyBoxTests.swift */,
+				B20000000000000000000004 /* PetFurnitureTests.swift */,
 			);
 			path = PetIslandTests;
 			sourceTree = "<group>";
@@ -447,6 +459,8 @@
 				W10000000000000000000001 /* PetLifeState.swift in Sources */,
 				H10000000000000000000001 /* PetHabitatState.swift in Sources */,
 				H10000000000000000000003 /* HabitatEditorView.swift in Sources */,
+				B10000000000000000000001 /* HabitatCozyBoxArtwork.swift in Sources */,
+				B10000000000000000000003 /* HabitatFurnitureView.swift in Sources */,
 				G10000000000000000000001 /* MiniGameDomain.swift in Sources */,
 				G10000000000000000000002 /* MiniGamesView.swift in Sources */,
 				G10000000000000000000003 /* SkyPawsGameView.swift in Sources */,
@@ -479,6 +493,8 @@
 				C10000000000000000000004 /* PetDiscoveriesTests.swift in Sources */,
 				C10000000000000000000005 /* PetDiscoveryControllerTests.swift in Sources */,
 				H10000000000000000000004 /* PetHabitatStateTests.swift in Sources */,
+				B10000000000000000000002 /* PetCozyBoxTests.swift in Sources */,
+				B10000000000000000000004 /* PetFurnitureTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

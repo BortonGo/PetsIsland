@@ -1,20 +1,23 @@
 import SwiftUI
 import UIKit
 
-/// A controller-independent editor for the pets shown in the enclosure.
-///
+/// Drafts the theme and residents; furniture placement is saved immediately.
 struct HabitatEditorView: View {
+    @ObservedObject var controller: PetSessionController
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let pets: [PetProfile]
     @Binding var selectedPetIDs: [UUID]
     @Binding var selectedTheme: HabitatTheme
+    private var hasCozyBox: Bool { controller.habitat.configuration.hasCozyBox }
     var vitalsByPetID: [UUID: PetVitals]
     var unavailablePetIDs: Set<UUID>
     var maximumPets: Int
     var onSave: () -> Bool
     @State private var saveFailed = false
+    @State private var showsFurniture = false
 
     init(
+        controller: PetSessionController,
         pets: [PetProfile],
         selectedPetIDs: Binding<[UUID]>,
         selectedTheme: Binding<HabitatTheme>,
@@ -23,6 +26,7 @@ struct HabitatEditorView: View {
         maximumPets: Int = 3,
         onSave: @escaping () -> Bool = { true }
     ) {
+        self.controller = controller
         self.pets = pets
         _selectedPetIDs = selectedPetIDs
         _selectedTheme = selectedTheme
@@ -38,6 +42,7 @@ struct HabitatEditorView: View {
                 VStack(spacing: 22) {
                     habitatPreview
                     themePicker
+                    furniturePicker
                     petPicker
                     statusPanel
                 }
@@ -50,6 +55,9 @@ struct HabitatEditorView: View {
             } message: { Text("Your draft is safe. Please try saving again.") }
             .navigationTitle("Enclosure")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showsFurniture) {
+                HabitatFurnitureView(controller: controller)
+            }
             .safeAreaInset(edge: .bottom) {
                 saveBar
             }
@@ -60,7 +68,9 @@ struct HabitatEditorView: View {
         HabitatEditorCanvas(
             theme: selectedTheme,
             pets: presentPets,
-            vitalsByPetID: vitalsByPetID
+            vitalsByPetID: vitalsByPetID,
+            hasCozyBox: hasCozyBox,
+            isAnimationEnabled: !showsFurniture
         )
         .frame(height: 236)
         .overlay(alignment: .topLeading) {
@@ -90,6 +100,30 @@ struct HabitatEditorView: View {
             themeGroup(title: "Calm landscapes", vivid: false)
             themeGroup(title: "Colorful landscapes", vivid: true)
         }
+    }
+
+    private var furniturePicker: some View {
+        Button { showsFurniture = true } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "shippingbox")
+                    .font(.title3)
+                    .foregroundStyle(PetDesign.secondary)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Furniture").font(.subheadline.weight(.semibold))
+                    Text(hasCozyBox ? "Cozy box" : "Choose an item")
+                        .font(.caption)
+                        .foregroundStyle(PetDesign.secondary)
+                }
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(PetDesign.secondary)
+            }
+            .padding(14)
+            .background(PetDesign.surface, in: RoundedRectangle(cornerRadius: 18))
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("furniture.open")
     }
 
     private func themeGroup(title: LocalizedStringKey, vivid: Bool) -> some View {
@@ -340,6 +374,8 @@ struct HabitatEditorCanvas: View {
     let pets: [PetProfile]
     let vitalsByPetID: [UUID: PetVitals]
     var petScale: CGFloat = 1
+    var hasCozyBox = false
+    var isAnimationEnabled = true
     @PetReduceMotion private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var motion = HabitatMotionSimulation()
@@ -350,8 +386,36 @@ struct HabitatEditorCanvas: View {
             ZStack(alignment: .bottom) {
                 HabitatThemeBackdrop(theme: palette)
                 if pets.isEmpty {
-                    ContentUnavailableView("Empty enclosure", systemImage: "pawprint")
-                        .foregroundStyle(palette.foreground)
+                    if hasCozyBox {
+                        Label("Empty enclosure", systemImage: "pawprint")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(palette.foreground)
+                            .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.44)
+                    } else {
+                        ContentUnavailableView("Empty enclosure", systemImage: "pawprint")
+                            .foregroundStyle(palette.foreground)
+                    }
+                }
+                if hasCozyBox {
+                    cozyBox(layer: .back)
+                        .zIndex(boxDepth - 0.2)
+                    Button {
+                        if let occupant = motion.boxOccupantID {
+                            motion.pet(occupant)
+                        } else {
+                            motion.requestCatToBox()
+                        }
+                    } label: {
+                        cozyBoxArtwork(layer: .front)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .position(boxArtworkPosition)
+                    .zIndex(boxDepth + 0.2)
+                    .disabled(!pets.contains(where: { $0.species == .cat }))
+                    .accessibilityLabel("Cozy box")
+                    .accessibilityValue(boxStatus)
+                    .accessibilityHint(motion.boxOccupantID == nil ? Text("Invite a cat") : Text("Stroke pet"))
                 }
                 ForEach(motion.actors) { actor in
                     let width = min(proxy.size.width * 0.24, 78) * petScale
@@ -364,6 +428,7 @@ struct HabitatEditorCanvas: View {
                                    pose: actor.pose, direction: .right, step: reduceMotion ? 0 : actor.step,
                                    animatesMotion: false, usesNaturalGait: true)
                             .scaleEffect(x: actor.facing, y: 1)
+                            .offset(y: actor.visualOffsetY)
                         if actor.affection > 0 {
                             Image(systemName: "heart.fill")
                                 .font(.system(size: 13, weight: .medium))
@@ -376,7 +441,8 @@ struct HabitatEditorCanvas: View {
                     .contentShape(Rectangle())
                     .onTapGesture { motion.pet(actor.id) }
                     .position(actor.position)
-                    .zIndex(Double(actor.position.y))
+                    .zIndex(actor.id == motion.boxOccupantID && motion.boxPhase.containsCat
+                            ? boxDepth : Double(actor.position.y))
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(actor.profile.name)
                     .accessibilityValue(status(for: actor.pose))
@@ -386,21 +452,61 @@ struct HabitatEditorCanvas: View {
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
             .onAppear {
                 isVisible = true
-                motion.configure(pets: pets, size: proxy.size, petScale: petScale, vitals: vitalsByPetID)
-                motion.start(reduceMotion: reduceMotion, active: scenePhase == .active)
+                configure(in: proxy.size)
+                motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && scenePhase == .active)
             }
             .onChange(of: pets) { previous, value in
-                motion.configure(pets: value, size: proxy.size, petScale: petScale, vitals: vitalsByPetID)
+                configure(in: proxy.size)
                 if previous.isEmpty && !value.isEmpty {
-                    motion.start(reduceMotion: reduceMotion, active: isVisible && scenePhase == .active)
+                    motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && scenePhase == .active)
                 }
             }
-            .onChange(of: vitalsByPetID) { _, value in motion.configure(pets: pets, size: proxy.size, petScale: petScale, vitals: value) }
-            .onChange(of: proxy.size) { _, value in motion.configure(pets: pets, size: value, petScale: petScale, vitals: vitalsByPetID) }
+            .onChange(of: vitalsByPetID) { _, _ in configure(in: proxy.size) }
+            .onChange(of: proxy.size) { _, value in configure(in: value) }
+            .onChange(of: hasCozyBox) { _, _ in configure(in: proxy.size) }
+            .onChange(of: petScale) { _, _ in configure(in: proxy.size) }
         }
         .onDisappear { isVisible = false; motion.stop() }
-        .onChange(of: reduceMotion) { _, value in motion.start(reduceMotion: value, active: isVisible && scenePhase == .active) }
-        .onChange(of: scenePhase) { _, phase in motion.start(reduceMotion: reduceMotion, active: isVisible && phase == .active) }
+        .onChange(of: reduceMotion) { _, value in motion.start(reduceMotion: value, active: isAnimationEnabled && isVisible && scenePhase == .active) }
+        .onChange(of: scenePhase) { _, phase in motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && phase == .active) }
+        .onChange(of: isAnimationEnabled) { _, value in motion.start(reduceMotion: reduceMotion, active: value && isVisible && scenePhase == .active) }
+    }
+
+    private func configure(in size: CGSize) {
+        motion.configure(pets: pets, size: size, petScale: petScale,
+                         vitals: vitalsByPetID, hasCozyBox: hasCozyBox)
+    }
+
+    private var boxDepth: Double {
+        Double(motion.boxRenderDepth)
+    }
+
+    private var boxArtworkPosition: CGPoint {
+        CGPoint(x: motion.boxPosition.x,
+                y: motion.boxPosition.y - (HabitatCozyBoxArtwork.groundAnchor.y - 0.5) * motion.boxSize.height)
+    }
+
+    private func cozyBoxArtwork(layer: HabitatCozyBoxArtwork.Layer) -> some View {
+        HabitatCozyBoxArtwork(layer: layer)
+            .frame(width: motion.boxSize.width, height: motion.boxSize.height)
+    }
+
+    private func cozyBox(layer: HabitatCozyBoxArtwork.Layer) -> some View {
+        cozyBoxArtwork(layer: layer).position(boxArtworkPosition)
+    }
+
+    private var boxStatus: String {
+        if !pets.contains(where: { $0.species == .cat }) {
+            return String(localized: "No cats are home right now")
+        }
+        switch motion.boxPhase {
+        case .resting:
+            return motion.boxRestPose == .sleep
+                ? String(localized: "Resting in the box")
+                : String(localized: "Peeking out of the box")
+        case .inspecting: return String(localized: "Inspecting the box")
+        default: return ""
+        }
     }
 
     private func status(for pose: PetPose) -> String {
@@ -423,7 +529,15 @@ struct HabitatEditorCanvas: View {
 /// the cast never recalculates the positions of animals already in the scene.
 @MainActor
 final class HabitatMotionSimulation: ObservableObject {
-    struct Actor: Identifiable {
+    enum CozyBoxPhase: String, Equatable {
+        case empty, approaching, inspecting, entering, resting, exiting
+
+        var containsCat: Bool {
+            self == .entering || self == .resting || self == .exiting
+        }
+    }
+
+    struct Actor: Identifiable, Equatable {
         let id: UUID
         var profile: PetProfile
         var position: CGPoint
@@ -442,6 +556,8 @@ final class HabitatMotionSimulation: ObservableObject {
         var pace = 28.0
         var seed: UInt64
         var blockedFor = 0.0
+        /// A small entry/exit arc; the floor shadow keeps the ordinary ground anchor.
+        var visualOffsetY: CGFloat = 0
 
         mutating func random() -> Double {
             seed = seed &* 6364136223846793005 &+ 1442695040888963407
@@ -450,7 +566,11 @@ final class HabitatMotionSimulation: ObservableObject {
     }
 
     @Published private(set) var actors: [Actor] = []
+    @Published private(set) var boxOccupantID: UUID?
+    @Published private(set) var boxPhase: CozyBoxPhase = .empty
+    private(set) var boxRestPose: PetPose = .sleep
     private(set) var size = CGSize.zero
+    private(set) var hasCozyBox = false
     private var petWidth: CGFloat = 78
     private var vitals: [UUID: PetVitals] = [:]
     private var reduced = false
@@ -458,6 +578,27 @@ final class HabitatMotionSimulation: ObservableObject {
     private var displayLink: CADisplayLink?
     private var lastTimestamp: CFTimeInterval?
     var isRunning: Bool { displayLink != nil }
+    var isBoxOccupied: Bool { boxOccupantID != nil }
+    var boxRenderDepth: CGFloat { boxCenter.y }
+    var boxSize: CGSize {
+        let width = petWidth * 0.9
+        return CGSize(width: width, height: width / 1.4)
+    }
+    /// The illustrated box floor (94% down its image), rather than its frame center.
+    var boxPosition: CGPoint {
+        guard size.width > 1, size.height > 1 else { return .zero }
+        let center = bounded(CGPoint(x: size.width * 0.69,
+                                     y: (groundRange.lowerBound + groundRange.upperBound) / 2))
+        return CGPoint(x: center.x, y: center.y + petWidth * 0.31)
+    }
+
+    private var boxApproachSide: CGFloat = -1
+    private var boxPhaseElapsed = 0.0
+    private var boxPhaseDuration = 1.0
+    private var boxMotionOrigin = CGPoint.zero
+    private var boxMotionOriginOffset: CGFloat = 0
+    private var nextBoxVisit = Double.infinity
+    private var boxRandomSeed: UInt64 = 0x434F_5A59_424F_5821
 
     @MainActor
     private final class Target: NSObject {
@@ -466,12 +607,17 @@ final class HabitatMotionSimulation: ObservableObject {
         @objc func tick(_ link: CADisplayLink) { simulation?.tick(link) }
     }
 
-    func configure(pets: [PetProfile], size newSize: CGSize, petScale: CGFloat = 1, vitals: [UUID: PetVitals] = [:]) {
-        guard newSize.width > 1, newSize.height > 1 else { return }
+    func configure(pets: [PetProfile], size newSize: CGSize, petScale: CGFloat = 1,
+                   vitals: [UUID: PetVitals] = [:], hasCozyBox: Bool = false) {
+        guard newSize.width.isFinite, newSize.height.isFinite,
+              newSize.width > 1, newSize.height > 1, petScale.isFinite, petScale > 0 else { return }
         self.vitals = vitals
         let previousSize = size
+        let previousPetWidth = petWidth
+        let wasBoxEnabled = self.hasCozyBox
         size = newSize
         petWidth = min(size.width * 0.24, 78) * petScale
+        self.hasCozyBox = hasCozyBox
         let existing = Dictionary(uniqueKeysWithValues: actors.map { ($0.id, $0) })
         actors = pets.enumerated().map { index, profile in
             if var actor = existing[profile.id] {
@@ -497,6 +643,13 @@ final class HabitatMotionSimulation: ObservableObject {
             if reduced { actor.pose = .idle }
             return actor
         }
+        if !hasCozyBox || !actors.contains(where: { $0.id == boxOccupantID && $0.profile.species == .cat }) {
+            cancelBoxVisit()
+        } else if previousSize != size || previousPetWidth != petWidth {
+            retargetBoxAfterResize()
+        }
+        if hasCozyBox && !wasBoxEnabled { scheduleNextBoxVisit() }
+        if !hasCozyBox { nextBoxVisit = .infinity }
         if actors.isEmpty { stop() }
     }
 
@@ -505,10 +658,12 @@ final class HabitatMotionSimulation: ObservableObject {
         stop()
         guard active, !actors.isEmpty else { return }
         if reduceMotion {
+            if boxPhase != .resting { cancelBoxVisit() }
             actors = actors.map { actor in
                 var actor = actor
                 actor.velocity = .zero
-                actor.pose = .idle
+                actor.pose = actor.id == boxOccupantID ? boxRestPose : .idle
+                actor.visualOffsetY = actor.id == boxOccupantID ? boxRestOffset : 0
                 actor.facing = actor.facing < 0 ? -1 : 1
                 actor.turning = 0
                 actor.affection = 0
@@ -538,6 +693,18 @@ final class HabitatMotionSimulation: ObservableObject {
 
     func pet(_ id: UUID) {
         guard let index = actors.firstIndex(where: { $0.id == id }) else { return }
+        if boxOccupantID == id {
+            if boxPhase.containsCat && !reduced {
+                actors[index].affection = 1.5
+                beginBoxExit(from: actors[index])
+                return
+            }
+            if reduced && boxPhase.containsCat {
+                actors[index].position = boxApproachPoint
+                actors[index].visualOffsetY = 0
+            }
+            cancelBoxVisit()
+        }
         actors[index].velocity = .zero
         actors[index].travelling = false
         actors[index].turning = 0
@@ -547,15 +714,80 @@ final class HabitatMotionSimulation: ObservableObject {
         actors[index].affection = reduced ? 0 : 1.5
     }
 
+    /// A box reserves one present cat. Other species keep their normal simulation.
+    @discardableResult
+    func requestCatToBox(_ petID: UUID? = nil) -> Bool {
+        guard hasCozyBox, boxOccupantID == nil, size.width > 1 else { return false }
+        let candidates = actors.indices.filter {
+            actors[$0].profile.species == .cat && (petID == nil || actors[$0].id == petID)
+        }
+        guard let index = candidates.min(by: {
+            hypot(actors[$0].position.x - boxCenter.x, actors[$0].position.y - boxCenter.y)
+                < hypot(actors[$1].position.x - boxCenter.x, actors[$1].position.y - boxCenter.y)
+        }) else { return false }
+        // This main-actor reservation happens synchronously, before any cat
+        // advances. A second manual or ambient request cannot steal the box.
+        boxOccupantID = actors[index].id
+        boxRestPose = boxRandom() < 0.5 ? .idle : .sleep
+        boxApproachSide = actors[index].position.x <= boxCenter.x ? -1 : 1
+        boxPhaseElapsed = 0
+        actors[index].visualOffsetY = 0
+        actors[index].blockedFor = 0
+        if reduced {
+            actors[index].position = boxCenter
+            actors[index].target = boxCenter
+            actors[index].velocity = .zero
+            actors[index].travelling = false
+            actors[index].turning = 0
+            actors[index].pose = boxRestPose
+            actors[index].visualOffsetY = boxRestOffset
+            actors[index].step = 0
+            boxPhase = .resting
+            boxPhaseDuration = 8
+        } else {
+            boxPhase = .approaching
+            actors[index].target = boxApproachPoint
+            actors[index].travelling = true
+            actors[index].pace = 30
+            actors[index].pose = .walk
+            faceBoxTarget(&actors[index], target: boxApproachPoint)
+        }
+        return true
+    }
+
     func advance(by rawDelta: TimeInterval) {
         guard !actors.isEmpty, !reduced, rawDelta.isFinite, rawDelta > 0, size.width > 1 else { return }
         let dt = min(rawDelta, 1.0 / 15)
         clock += dt
+        if hasCozyBox, boxOccupantID == nil, clock >= nextBoxVisit {
+            let nearby = actors.filter {
+                $0.profile.species == .cat && hypot($0.position.x - boxCenter.x, $0.position.y - boxCenter.y) <= petWidth * 1.35
+            }.min {
+                hypot($0.position.x - boxCenter.x, $0.position.y - boxCenter.y)
+                    < hypot($1.position.x - boxCenter.x, $1.position.y - boxCenter.y)
+            }
+            if let nearby { _ = requestCatToBox(nearby.id) }
+            else { nextBoxVisit = clock + 2 }
+        }
         let previous = actors
         var next = actors
         for index in next.indices {
             var actor = next[index]
             actor.affection = max(actor.affection - dt, 0)
+            if actor.id != boxOccupantID, actor.visualOffsetY != 0 {
+                // Removing a raised box lets its cat settle without teleporting
+                // or shifting the floor lane used by every other resident.
+                let settling = petWidth * dt * 1.2
+                actor.visualOffsetY = actor.visualOffsetY < 0
+                    ? min(actor.visualOffsetY + settling, 0)
+                    : max(actor.visualOffsetY - settling, 0)
+            }
+            if hasCozyBox, actor.id == boxOccupantID {
+                advanceBoxVisit(for: &actor, neighbours: previous, by: dt)
+                updateAnimationFrame(for: &actor)
+                next[index] = actor
+                continue
+            }
             if actor.turning > 0 {
                 actor.turning = max(0, actor.turning - dt)
                 let progress = 1 - actor.turning / 0.22
@@ -631,6 +863,213 @@ final class HabitatMotionSimulation: ObservableObject {
             next[index] = actor
         }
         actors = next
+    }
+
+    private var boxCenter: CGPoint {
+        CGPoint(x: boxPosition.x, y: boxPosition.y - petWidth * 0.31)
+    }
+
+    private var boxRestOffset: CGFloat { -boxSize.height * (boxRestPose == .sleep ? 0.27 : 0.04) }
+
+    private var boxApproachPoint: CGPoint {
+        bounded(CGPoint(x: boxCenter.x + boxApproachSide * petWidth * 0.76, y: boxCenter.y))
+    }
+
+    private func boxRandom() -> Double {
+        boxRandomSeed = boxRandomSeed &* 6364136223846793005 &+ 1442695040888963407
+        return Double(boxRandomSeed >> 11) / Double(UInt64.max >> 11)
+    }
+
+    private func scheduleNextBoxVisit() {
+        nextBoxVisit = clock + 15 + boxRandom() * 30
+    }
+
+    private func faceBoxTarget(_ actor: inout Actor, target: CGPoint) {
+        guard abs(target.x - actor.position.x) > 0.5 else { return }
+        let facing: CGFloat = target.x >= actor.position.x ? 1 : -1
+        if actor.turning > 0, actor.desiredFacing == facing { return }
+        guard actor.facing != facing else {
+            actor.turning = 0
+            actor.desiredFacing = facing
+            return
+        }
+        actor.turnFrom = actor.facing
+        actor.desiredFacing = facing
+        actor.turning = 0.22
+        actor.velocity = .zero
+        actor.pose = .idle
+    }
+
+    private func advanceBoxVisit(for actor: inout Actor, neighbours: [Actor], by dt: TimeInterval) {
+        let target = boxPhase == .entering ? boxCenter : boxApproachPoint
+        if boxPhase == .approaching || boxPhase == .entering || boxPhase == .exiting {
+            faceBoxTarget(&actor, target: target)
+            if actor.turning > 0 {
+                actor.turning = max(0, actor.turning - dt)
+                let progress = 1 - actor.turning / 0.22
+                actor.facing = progress < 0.5 ? actor.turnFrom : actor.desiredFacing
+                if actor.turning == 0 { actor.facing = actor.desiredFacing }
+                return
+            }
+        }
+
+        switch boxPhase {
+        case .empty:
+            break
+        case .approaching:
+            actor.target = boxApproachPoint
+            let dx = actor.target.x - actor.position.x
+            let dy = actor.target.y - actor.position.y
+            let distance = hypot(dx, dy)
+            let speed = min(30, sqrt(max(distance - 1, 0) * 130))
+            var desired = CGVector(dx: dx / max(distance, 1) * speed,
+                                   dy: dy / max(distance, 1) * speed)
+            if let neighbour = neighbours.first(where: {
+                $0.id != actor.id && abs($0.position.y - actor.position.y) < 14
+                    && ($0.position.x - actor.position.x) * actor.facing > 0
+                    && abs($0.position.x - actor.position.x) < petWidth * 0.8
+            }) {
+                // Use a passing lane, without replacing the reserved destination.
+                let lane = actor.id.uuidString < neighbour.id.uuidString
+                    ? groundRange.lowerBound : groundRange.upperBound
+                desired.dx *= 0.25
+                desired.dy = min(max((lane - actor.position.y) * 4, -30), 30)
+            }
+            let blend = 1 - exp(-dt * 7)
+            actor.velocity.dx += (desired.dx - actor.velocity.dx) * blend
+            actor.velocity.dy += (desired.dy - actor.velocity.dy) * blend
+            let old = actor.position
+            actor.position = bounded(CGPoint(x: old.x + actor.velocity.dx * dt,
+                                             y: old.y + actor.velocity.dy * dt))
+            let travelled = hypot(actor.position.x - old.x, actor.position.y - old.y)
+            actor.gaitPhase += travelled / max(petWidth * 0.38, 1)
+            actor.pose = .walk
+            if distance < 2 && travelled / dt < 7 {
+                actor.velocity = .zero
+                actor.travelling = false
+                actor.pose = .idle
+                boxPhase = .inspecting
+                boxPhaseElapsed = 0
+                boxPhaseDuration = 1.25
+            }
+        case .inspecting:
+            actor.pose = .idle
+            actor.velocity = .zero
+            boxPhaseElapsed += dt
+            if boxPhaseElapsed >= boxPhaseDuration {
+                boxPhase = .entering
+                boxPhaseElapsed = 0
+                boxPhaseDuration = 1.15
+                boxMotionOrigin = actor.position
+                boxMotionOriginOffset = actor.visualOffsetY
+                actor.travelling = true
+            }
+        case .entering, .exiting:
+            boxPhaseElapsed += dt
+            let progress = min(boxPhaseElapsed / boxPhaseDuration, 1)
+            let eased = progress * progress * (3 - 2 * progress)
+            let old = actor.position
+            actor.position = bounded(CGPoint(
+                x: boxMotionOrigin.x + (target.x - boxMotionOrigin.x) * eased,
+                y: boxMotionOrigin.y + (target.y - boxMotionOrigin.y) * eased
+            ))
+            let targetOffset: CGFloat = boxPhase == .entering ? boxRestOffset : 0
+            actor.visualOffsetY = boxMotionOriginOffset + (targetOffset - boxMotionOriginOffset) * eased
+                - sin(.pi * eased) * petWidth * 0.11
+            actor.velocity = CGVector(dx: (actor.position.x - old.x) / dt,
+                                      dy: (actor.position.y - old.y) / dt)
+            actor.target = target
+            actor.pose = .walk
+            actor.gaitPhase += hypot(actor.position.x - old.x, actor.position.y - old.y)
+                / max(petWidth * 0.38, 1)
+            if progress >= 1 {
+                actor.visualOffsetY = targetOffset
+                actor.velocity = .zero
+                actor.travelling = false
+                if boxPhase == .entering {
+                    boxPhase = .resting
+                    boxPhaseElapsed = 0
+                    boxPhaseDuration = (boxRestPose == .sleep ? 10 : 6) + boxRandom() * 5
+                    actor.pose = boxRestPose
+                } else {
+                    endBoxVisit(for: &actor)
+                }
+            }
+        case .resting:
+            actor.pose = boxRestPose
+            actor.velocity = .zero
+            actor.visualOffsetY = boxRestOffset
+            boxPhaseElapsed += dt
+            if boxPhaseElapsed >= boxPhaseDuration { beginBoxExit(from: actor) }
+        }
+    }
+
+    private func beginBoxExit(from actor: Actor) {
+        boxPhase = .exiting
+        boxPhaseElapsed = 0
+        boxPhaseDuration = 1.15
+        boxMotionOrigin = actor.position
+        boxMotionOriginOffset = actor.visualOffsetY
+    }
+
+    private func endBoxVisit(for actor: inout Actor) {
+        // A removed item keeps its cat at the same drawn position, then the
+        // regular tick settles only this offset. Reduce Motion uses a static exit.
+        if reduced { actor.visualOffsetY = 0 }
+        actor.target = actor.position
+        actor.velocity = .zero
+        actor.travelling = false
+        actor.turning = 0
+        actor.pose = .idle
+        actor.waiting = 1.5
+        boxOccupantID = nil
+        boxPhase = .empty
+        boxPhaseElapsed = 0
+        if hasCozyBox { scheduleNextBoxVisit() }
+    }
+
+    private func cancelBoxVisit() {
+        guard let occupantID = boxOccupantID else { return }
+        if let index = actors.firstIndex(where: { $0.id == occupantID }) {
+            var actor = actors[index]
+            endBoxVisit(for: &actor)
+            actors[index] = actor
+        } else {
+            boxOccupantID = nil
+            boxPhase = .empty
+            boxPhaseElapsed = 0
+            if hasCozyBox { scheduleNextBoxVisit() }
+        }
+    }
+
+    private func retargetBoxAfterResize() {
+        guard let index = actors.firstIndex(where: { $0.id == boxOccupantID }) else { return }
+        switch boxPhase {
+        case .entering, .exiting:
+            boxMotionOrigin = actors[index].position
+            boxMotionOriginOffset = actors[index].visualOffsetY
+            boxPhaseDuration = max(boxPhaseDuration - boxPhaseElapsed, 0.25)
+            boxPhaseElapsed = 0
+        case .resting:
+            actors[index].position = boxCenter
+            actors[index].target = boxCenter
+            actors[index].visualOffsetY = boxRestOffset
+        case .approaching, .inspecting:
+            actors[index].target = boxApproachPoint
+            boxPhase = .approaching
+        case .empty:
+            break
+        }
+    }
+
+    private func updateAnimationFrame(for actor: inout Actor) {
+        let clip = PetAnimationLibrary.naturalClip(for: actor.profile.species,
+                                                   breed: actor.profile.resolvedBreed, pose: actor.pose)
+        if actor.pose == .walk || actor.pose == .run {
+            actor.step = Int(actor.gaitPhase.truncatingRemainder(dividingBy: 1) * Double(clip.frames.count))
+        } else {
+            actor.step = clip.frameIndex(at: clock)
+        }
     }
 
     private func chooseDestination(for actor: inout Actor) {
@@ -1033,6 +1472,7 @@ private struct HabitatEditorPreviewContainer: View {
 
     var body: some View {
         HabitatEditorView(
+            controller: PetSessionController(store: InMemoryPetStore(), arcadeStore: InMemoryArcadeStore()),
             pets: pets,
             selectedPetIDs: $selectedPetIDs,
             selectedTheme: $theme

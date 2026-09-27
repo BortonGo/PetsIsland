@@ -1,46 +1,59 @@
 import SwiftUI
 
+/// A dedicated sheet keeps walks and their album one tap away from the island.
+struct PetDiscoveriesView: View {
+    @ObservedObject var controller: PetSessionController
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                PetDiscoveriesContent(controller: controller)
+                    .padding(20)
+                    .frame(maxWidth: 600)
+                    .frame(maxWidth: .infinity)
+            }
+            .petPage()
+            .navigationTitle("Walks")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                        .disabled(controller.isBusy)
+                }
+            }
+        }
+        .presentationDragIndicator(.visible)
+    }
+}
+
 /// Walks use their saved return time without changing any pet sprite or animation.
-struct PetDiscoveriesCard: View {
+private struct PetDiscoveriesContent: View {
     @ObservedObject var controller: PetSessionController
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.scenePhase) private var scenePhase
-    @State private var showsWalkPicker = false
     @State private var showsAlbum = false
     @State private var showsCancelConfirmation = false
     @State private var collectedMemory: PetDiscoveryMemory?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("Little adventures")
-                    .font(PetDesign.title(.title3))
-                    .accessibilityAddTraits(.isHeader)
-                Spacer(minLength: 8)
-                Image(systemName: "sparkles")
-                    .foregroundStyle(PetDesign.secondary)
-                    .accessibilityHidden(true)
-            }
             if let walk = controller.discoveries.activeWalk {
-                if scenePhase == .active, !walk.isReady(at: .now) {
-                    // The UI displays whole minutes. The controller schedules
-                    // the exact return once; no per-second polling is needed.
-                    TimelineView(.periodic(from: walk.startedAt, by: 60)) { context in
-                        walkContent(walk, at: context.date)
+                Group {
+                    if scenePhase == .active, !walk.isReady(at: .now) {
+                        // The UI displays whole minutes. The controller schedules
+                        // the exact return once; no per-second polling is needed.
+                        TimelineView(.periodic(from: walk.startedAt, by: 60)) { context in
+                            walkContent(walk, at: context.date)
+                        }
+                    } else {
+                        walkContent(walk, at: .now)
                     }
-                } else {
-                    walkContent(walk, at: .now)
                 }
+                .padding(20)
+                .petSurface()
             } else {
-                Text("A little walk. A little treasure.")
-                    .font(.subheadline)
-                    .foregroundStyle(PetDesign.secondary)
-                Button { showsWalkPicker = true } label: {
-                    Label("Go exploring", systemImage: "pawprint.fill")
-                }
-                .buttonStyle(PetPrimaryButtonStyle())
-                .disabled(controller.isBusy || controller.pets.isEmpty)
-                .accessibilityIdentifier("discoveries.start")
+                PetDiscoveryWalkPicker(controller: controller)
             }
             Button { showsAlbum = true } label: {
                 HStack(spacing: 12) {
@@ -55,18 +68,14 @@ struct PetDiscoveriesCard: View {
                     Spacer(minLength: 4)
                     Image(systemName: "chevron.right").font(.caption.weight(.semibold))
                 }
-                .padding(.vertical, 5)
+                .padding(20)
+                .petSurface()
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .accessibilityIdentifier("discoveries.album")
         }
-        .padding(20)
         .foregroundStyle(PetDesign.ink)
-        .petSurface()
-        .sheet(isPresented: $showsWalkPicker) {
-            PetDiscoveryWalkPicker(controller: controller)
-        }
         .sheet(isPresented: $showsAlbum) {
             PetDiscoveriesAlbum(controller: controller)
         }
@@ -157,7 +166,6 @@ struct PetDiscoveriesCard: View {
 
 private struct PetDiscoveryWalkPicker: View {
     @ObservedObject var controller: PetSessionController
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var selectedPetID: UUID?
     @State private var selectedRoute: PetWalkRoute = .garden
@@ -168,92 +176,75 @@ private struct PetDiscoveryWalkPicker: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Who's going?").font(PetDesign.title(.title3))
-                        if controller.availableDiscoveryPets.isEmpty {
-                            Label("Bring a pet home from Dynamic Island before starting a walk.", systemImage: "house")
-                                .font(.subheadline)
-                                .foregroundStyle(PetDesign.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .padding(16)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .petSurface(radius: 20)
-                        } else {
-                            HStack(spacing: 16) {
-                                if let pet = selectedPet {
-                                    DiscoveryPetPortrait(pet: pet)
-                                        .frame(width: 76, height: 66)
-                                        .accessibilityHidden(true)
-                                }
-                                Picker("Walk companion", selection: $selectedPetID) {
-                                    if selectedPetID == nil {
-                                        Text("Choose a pet").tag(Optional<UUID>.none)
-                                    }
-                                    ForEach(controller.availableDiscoveryPets) { pet in
-                                        Text(pet.name).tag(Optional(pet.id))
-                                    }
-                                }
-                                .pickerStyle(.menu)
-                                .tint(PetDesign.ink)
-                                .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                                .disabled(isStarting)
+        VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Who's going?").font(PetDesign.title(.title3))
+                if controller.availableDiscoveryPets.isEmpty {
+                    Label("Bring a pet home from Dynamic Island before starting a walk.", systemImage: "house")
+                        .font(.subheadline)
+                        .foregroundStyle(PetDesign.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .petSurface(radius: 20)
+                } else {
+                    HStack(spacing: 16) {
+                        if let pet = selectedPet {
+                            DiscoveryPetPortrait(pet: pet)
+                                .frame(width: 76, height: 66)
+                                .accessibilityHidden(true)
+                        }
+                        Picker("Walk companion", selection: $selectedPetID) {
+                            if selectedPetID == nil {
+                                Text("Choose a pet").tag(Optional<UUID>.none)
                             }
-                            .padding(12)
-                            .petSurface(radius: 20)
+                            ForEach(controller.availableDiscoveryPets) { pet in
+                                Text(pet.name).tag(Optional(pet.id))
+                            }
                         }
+                        .pickerStyle(.menu)
+                        .tint(PetDesign.ink)
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .disabled(isStarting)
                     }
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Pick a path").font(PetDesign.title(.title3))
-                        ForEach(PetWalkRoute.allCases, id: \.self) { route in
-                            routeButton(route)
-                        }
-                    }
-                    Label {
-                        Text("Your pet leaves the enclosure for the walk and returns automatically. You can close the app; the find will wait for you.")
-                            .fixedSize(horizontal: false, vertical: true)
-                    } icon: {
-                        Image(systemName: "moon.stars")
-                    }
-                    .font(.footnote)
-                    .foregroundStyle(PetDesign.secondary)
-                    .padding(.horizontal, 2)
+                    .padding(12)
+                    .petSurface(radius: 20)
                 }
-                .padding(24)
             }
-            .safeAreaInset(edge: .bottom) {
-                Button {
-                    guard let petID = selectedPetID, !isStarting else { return }
-                    isStarting = true
-                    Task {
-                        let started = await controller.startDiscoveryWalk(petID: petID, route: selectedRoute)
-                        isStarting = false
-                        if started { dismiss() }
-                    }
-                } label: {
-                    if isStarting {
-                        Label("Getting ready…", systemImage: "hourglass")
-                    } else if controller.availableDiscoveryPets.isEmpty {
-                        Label("Bring a pet home first", systemImage: "house")
-                    } else {
-                        Label("Start walk", systemImage: "pawprint.fill")
-                    }
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Pick a path").font(PetDesign.title(.title3))
+                ForEach(PetWalkRoute.allCases, id: \.self) { route in
+                    routeButton(route)
                 }
-                .buttonStyle(PetPrimaryButtonStyle())
-                .disabled(selectedPet == nil || isStarting || controller.isBusy || controller.discoveries.activeWalk != nil)
-                .accessibilityIdentifier("discoveries.confirmStart")
-                .padding(.horizontal, 24)
-                .padding(.vertical, 12)
-                .background(PetDesign.background)
             }
-            .navigationTitle("A little adventure")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+            Label {
+                Text("Your pet leaves the enclosure for the walk and returns automatically. You can close the app; the find will wait for you.")
+                    .fixedSize(horizontal: false, vertical: true)
+            } icon: {
+                Image(systemName: "moon.stars")
             }
-            .petPage()
+            .font(.footnote)
+            .foregroundStyle(PetDesign.secondary)
+            .padding(.horizontal, 2)
+            Button {
+                guard let petID = selectedPetID, !isStarting else { return }
+                isStarting = true
+                Task {
+                    _ = await controller.startDiscoveryWalk(petID: petID, route: selectedRoute)
+                    isStarting = false
+                }
+            } label: {
+                if isStarting {
+                    Label("Getting ready…", systemImage: "hourglass")
+                } else if controller.availableDiscoveryPets.isEmpty {
+                    Label("Bring a pet home first", systemImage: "house")
+                } else {
+                    Label("Start walk", systemImage: "pawprint.fill")
+                }
+            }
+            .buttonStyle(PetPrimaryButtonStyle())
+            .disabled(selectedPet == nil || isStarting || controller.isBusy || controller.discoveries.activeWalk != nil)
+            .accessibilityIdentifier("discoveries.confirmStart")
         }
         .interactiveDismissDisabled(isStarting)
         .onChange(of: controller.availableDiscoveryPets.map(\.id), initial: true) { _, availableIDs in
@@ -267,36 +258,46 @@ private struct PetDiscoveryWalkPicker: View {
     private func routeButton(_ route: PetWalkRoute) -> some View {
         let selected = selectedRoute == route
         return Button { selectedRoute = route } label: {
-            HStack(alignment: .top, spacing: 14) {
+            HStack(alignment: .center, spacing: 10) {
                 if !dynamicTypeSize.isAccessibilitySize {
                     Image(systemName: route.discoverySymbol)
-                        .font(.title2)
+                        .font(.body)
                         .foregroundStyle(route.discoveryTint)
-                        .frame(width: 46, height: 46)
-                        .background(route.discoveryTint.opacity(0.12), in: RoundedRectangle(cornerRadius: 14))
+                        .frame(width: 34, height: 34)
+                        .background(route.discoveryTint.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
                 }
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(route.discoveryTitle).font(.headline)
+                VStack(alignment: .leading, spacing: 4) {
+                    (dynamicTypeSize.isAccessibilitySize
+                     ? AnyLayout(VStackLayout(alignment: .leading, spacing: 4))
+                     : AnyLayout(HStackLayout(alignment: .firstTextBaseline, spacing: 8))) {
+                        Text(route.discoveryTitle)
+                            .font(.subheadline.weight(.semibold))
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Text("\(route.discoveryMinutes) min")
+                            .font(.caption.weight(.medium).monospacedDigit())
+                            .foregroundStyle(PetDesign.secondary)
+                            .fixedSize()
+                    }
                     Text(route.discoverySubtitle)
-                        .font(.subheadline)
+                        .font(.caption)
                         .foregroundStyle(PetDesign.secondary)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text("\(route.discoveryMinutes) min")
-                        .font(.caption.weight(.semibold).monospacedDigit())
-                        .padding(.top, 3)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
                     .foregroundStyle(selected ? PetDesign.accent : PetDesign.secondary)
-                    .font(.title3)
+                    .font(.body)
             }
-            .padding(18)
-            .petSurface(radius: 20)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .frame(minHeight: 64)
+            .petSurface(radius: 16)
             .overlay {
-                RoundedRectangle(cornerRadius: 20)
+                RoundedRectangle(cornerRadius: 16)
                     .strokeBorder(selected ? PetDesign.accent : .clear, lineWidth: 1.5)
             }
-            .contentShape(RoundedRectangle(cornerRadius: 20))
+            .contentShape(RoundedRectangle(cornerRadius: 16))
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? [.isSelected] : [])

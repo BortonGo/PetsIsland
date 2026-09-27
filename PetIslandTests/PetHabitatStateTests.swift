@@ -101,7 +101,112 @@ final class PetHabitatStateTests: XCTestCase {
         XCTAssertEqual(decoded.theme, .cozyRoom)
         XCTAssertEqual(decoded.residentPetIDs, [residentID])
         XCTAssertNil(decoded.leadDynamicIslandPetID)
+        XCTAssertFalse(decoded.hasCozyBox)
         XCTAssertEqual(decoded.revision, 0)
+    }
+
+    func testCozyBoxStartsDisabledAndOnlyChangesRevisionWhenToggled() {
+        let epoch = Date(timeIntervalSince1970: 12_345)
+        let residentIDs = [UUID(), UUID()]
+        var state = PetHabitatState(theme: .sunnyMeadow, residentPetIDs: residentIDs,
+                                    simulationEpoch: epoch, behaviorSeed: 42, revision: 7)
+        XCTAssertFalse(state.hasCozyBox)
+        XCTAssertFalse(state.setCozyBox(false))
+        XCTAssertEqual(state.revision, 7)
+        XCTAssertTrue(state.setCozyBox(true))
+        XCTAssertEqual(state.revision, 8)
+        XCTAssertTrue(state.hasCozyBox)
+        XCTAssertFalse(state.setCozyBox(true))
+        XCTAssertEqual(state.revision, 8)
+        XCTAssertTrue(state.setCozyBox(false))
+        XCTAssertEqual(state.revision, 9)
+        XCTAssertFalse(state.hasCozyBox)
+        XCTAssertEqual(state.residentPetIDs, residentIDs)
+        XCTAssertEqual(state.theme, .sunnyMeadow)
+        XCTAssertEqual(state.simulationEpoch, epoch)
+        XCTAssertEqual(state.behaviorSeed, 42)
+        XCTAssertNil(state.leadDynamicIslandPetID)
+    }
+
+    func testCozyBoxSharedRoundTripPreservesDiscoveriesAndResidents() throws {
+        let epoch = Date(timeIntervalSince1970: 12_345)
+        let pets = makePets(count: 3, createdAt: epoch)
+        let walk = try XCTUnwrap(PetDiscoveryWalk(pet: pets[0], route: .garden, startedAt: epoch,
+                                                 endsAt: epoch.addingTimeInterval(1_200), discovery: .clover))
+        var shared = SharedPetHabitat(
+            configuration: PetHabitatState(theme: .warmRoom, residentPetIDs: pets.map(\.id),
+                                           simulationEpoch: epoch, hasCozyBox: true),
+            residents: pets.map { SharedHabitatResident(profile: $0, vitals: PetVitals(), vitalsUpdatedAt: epoch) },
+            discoveryWalk: walk
+        )
+        shared.appliedCareEventIDs = [UUID()]
+        for enabled in [true, false] {
+            shared.configuration.setCozyBox(enabled)
+            let json = try JSONEncoder().encode(shared)
+            XCTAssertEqual(try JSONDecoder().decode(SharedPetHabitat.self, from: json), shared)
+            let plist = try PropertyListEncoder().encode(shared)
+            var restored = try PropertyListDecoder().decode(SharedPetHabitat.self, from: plist)
+            restored.reconcile()
+            XCTAssertEqual(restored, shared)
+            XCTAssertEqual(restored.configuration.hasCozyBox, enabled)
+            XCTAssertEqual(restored.discoveryWalk, walk)
+            XCTAssertEqual(restored.visibleResidents(at: epoch).map(\.id), Array(pets.dropFirst()).map(\.id))
+        }
+    }
+
+    func testExistingFullHabitatMigratesWithoutAddingBoxOrLosingFields() throws {
+        let epoch = Date(timeIntervalSince1970: 12_345)
+        let ids = [UUID(), UUID(), UUID()]
+        let original = PetHabitatState(theme: .starryNight, residentPetIDs: ids,
+                                       leadDynamicIslandPetID: ids[1], simulationEpoch: epoch,
+                                       behaviorSeed: 543, revision: 23)
+        let data = try JSONEncoder().encode(original)
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        json.removeValue(forKey: "hasCozyBox")
+        let legacyData = try JSONSerialization.data(withJSONObject: json)
+        XCTAssertEqual(try JSONDecoder().decode(PetHabitatState.self, from: legacyData), original)
+    }
+
+    func testCozyBoxSurvivesDynamicIslandMovesAndResidentReconciliation() {
+        let ids = [UUID(), UUID(), UUID()]
+        var state = PetHabitatState(residentPetIDs: ids, hasCozyBox: true)
+        XCTAssertTrue(state.setDynamicIslandLead(ids[1]))
+        XCTAssertTrue(state.hasCozyBox)
+        XCTAssertEqual(state.residentPetIDs, [ids[0], ids[2]])
+        state.reconcile(availablePetIDs: Set(ids))
+        XCTAssertTrue(state.hasCozyBox)
+        XCTAssertTrue(state.returnDynamicIslandLeadToHabitat())
+        XCTAssertTrue(state.hasCozyBox)
+        XCTAssertEqual(state.residentPetIDs, [ids[0], ids[2], ids[1]])
+        state.reconcile(availablePetIDs: Set([ids[0], ids[1]]))
+        XCTAssertTrue(state.hasCozyBox)
+        XCTAssertEqual(state.residentPetIDs, [ids[0], ids[1]])
+    }
+
+    func testCozyBoxSelectionPreservesAllWidgetPetMovement() {
+        let epoch = Date(timeIntervalSince1970: 12_345)
+        let pets = makePets(count: 6, createdAt: epoch)
+        let original = PetHabitatState(residentPetIDs: pets.map(\.id), simulationEpoch: epoch, behaviorSeed: 42)
+        var withBox = original
+        XCTAssertTrue(withBox.setCozyBox(true))
+        for second in stride(from: 0.0, through: 96, by: 0.5) {
+            let date = epoch.addingTimeInterval(second)
+            let before = PetHabitatEngine.projections(for: original, pets: pets, at: date)
+            let after = PetHabitatEngine.projections(for: withBox, pets: pets, at: date)
+            XCTAssertEqual(before.count, after.count)
+            for (old, new) in zip(before, after) {
+                XCTAssertEqual(new.petID, old.petID)
+                XCTAssertEqual(new.position, old.position)
+                XCTAssertEqual(new.verticalPosition, old.verticalPosition)
+                XCTAssertEqual(new.lane, old.lane)
+                XCTAssertEqual(new.direction, old.direction)
+                XCTAssertEqual(new.pose, old.pose)
+                XCTAssertEqual(new.status, old.status)
+                XCTAssertEqual(new.depth, old.depth)
+                // All scenery edits already advance this shared refresh index.
+                XCTAssertEqual(new.spriteStep, old.spriteStep + 1)
+            }
+        }
     }
 
     func testUnknownFutureThemeFallsBackWithoutLosingState() throws {

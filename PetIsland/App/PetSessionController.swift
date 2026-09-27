@@ -103,6 +103,12 @@ final class PetSessionController: ObservableObject {
                 operation = .loadFailed
                 return
             }
+            var migratedArcade = arcadeState
+            migratedArcade.progress.importLegacyFurniture(hasCozyBox: PetHabitatStore.load().configuration.hasCozyBox)
+            if migratedArcade != arcadeState, !(await commitArcade(migratedArcade)) {
+                operation = .loadFailed
+                return
+            }
             arcadeState.reconcile(with: state.pets)
             _ = await flushCareEvents()
             arcadeState.mergeVitals(from: PetHabitatStore.load())
@@ -399,6 +405,16 @@ final class PetSessionController: ObservableObject {
         return true
     }
 
+    func purchaseHabitatItem(_ item: HabitatItemKind) async -> Bool {
+        guard didBootstrap, !isBusy else { return false }
+        await beginSave()
+        defer { finishSave() }
+        var candidate = arcadeState
+        guard candidate.progress.purchaseHabitatItem(item), await commitArcade(candidate) else { return false }
+        Haptics.success(enabled: settings.hapticsEnabled)
+        return true
+    }
+
     func useArcadeItem(_ item: ArcadeItemKind, for petID: UUID) async -> Bool {
         await beginSave()
         defer { finishSave() }
@@ -454,14 +470,43 @@ final class PetSessionController: ObservableObject {
         }
     }
 
+    /// Furniture taps commit independently of the editor's theme/resident draft.
+    /// Publish the new placement only after the locked on-disk update succeeds.
+    @discardableResult
+    func setHabitatItem(_ item: HabitatItemKind, placed: Bool) -> Bool {
+        guard didBootstrap, !isBusy else { return false }
+        guard !placed || arcadeProgress.ownedHabitatItems.contains(item) else {
+            alertMessage = String(localized: "Buy this item in the shop before placing it.")
+            return false
+        }
+        do {
+            habitat = try PetHabitatStore.update { shared in
+                switch item {
+                case .cozyBox: shared.configuration.setCozyBox(placed)
+                }
+            }
+            WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
+            Haptics.success(enabled: settings.hapticsEnabled)
+            return true
+        } catch {
+            alertMessage = String(localized: "The enclosure could not be saved.")
+            return false
+        }
+    }
+
     /// Saves the enclosure composition and theme as one atomic App Group
     /// snapshot, so the Home Screen widget observes a consistent update.
     @discardableResult
-    func saveHabitat(theme: HabitatTheme, residentPetIDs: [UUID]) -> Bool {
+    func saveHabitat(theme: HabitatTheme, residentPetIDs: [UUID], hasCozyBox: Bool? = nil) -> Bool {
         guard !isBusy else { return false }
+        guard hasCozyBox != true || arcadeProgress.ownedHabitatItems.contains(.cozyBox) else {
+            alertMessage = String(localized: "Buy this item in the shop before placing it.")
+            return false
+        }
         do {
             habitat = try PetHabitatStore.update { shared in
                 shared.configuration.setTheme(theme)
+                if let hasCozyBox { shared.configuration.setCozyBox(hasCozyBox) }
                 var selectedIDs = residentPetIDs
                 // A walking resident keeps its berth and order while the user
                 // edits the other residents; an away pet cannot be newly added.

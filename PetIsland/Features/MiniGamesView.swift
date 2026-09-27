@@ -156,7 +156,10 @@ struct MiniGamesView: View {
                 economyCard
             }
         case .shop:
-            shop(for: pet)
+            VStack(spacing: 24) {
+                HabitatFurnitureShopSection(controller: controller)
+                shop(for: pet)
+            }
         }
     }
 

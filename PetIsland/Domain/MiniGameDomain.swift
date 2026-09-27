@@ -17,6 +17,13 @@ enum ArcadeItemKind: String, Codable, CaseIterable, Identifiable, Hashable, Send
     var id: String { rawValue }
 }
 
+enum HabitatItemKind: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
+    case cozyBox
+
+    var id: String { rawValue }
+    var price: Int { 80 }
+}
+
 struct ArcadeInventory: Codable, Equatable, Sendable {
     private(set) var quantities: [ArcadeItemKind: Int] = [:]
 
@@ -53,6 +60,8 @@ struct ArcadeProgress: Codable, Equatable, Sendable {
     private(set) var highScores: [MiniGameKind: Int]
     private(set) var inventory: ArcadeInventory
     private(set) var lastPlayedAt: Date?
+    private(set) var ownedHabitatItems: Set<HabitatItemKind>
+    private(set) var hasImportedLegacyFurniture: Bool
 
     init(
         coins: Int = 0,
@@ -60,7 +69,9 @@ struct ArcadeProgress: Codable, Equatable, Sendable {
         gamesPlayed: Int = 0,
         highScores: [MiniGameKind: Int] = [:],
         inventory: ArcadeInventory = ArcadeInventory(),
-        lastPlayedAt: Date? = nil
+        lastPlayedAt: Date? = nil,
+        ownedHabitatItems: Set<HabitatItemKind> = [],
+        hasImportedLegacyFurniture: Bool = true
     ) {
         self.coins = max(coins, 0)
         self.totalScore = max(totalScore, 0)
@@ -68,6 +79,8 @@ struct ArcadeProgress: Codable, Equatable, Sendable {
         self.highScores = highScores.mapValues { max($0, 0) }
         self.inventory = inventory
         self.lastPlayedAt = lastPlayedAt
+        self.ownedHabitatItems = ownedHabitatItems
+        self.hasImportedLegacyFurniture = hasImportedLegacyFurniture
     }
 
     func highScore(for game: MiniGameKind) -> Int {
@@ -133,8 +146,24 @@ struct ArcadeProgress: Codable, Equatable, Sendable {
         inventory.remove(item)
     }
 
+    /// Permanent items and their coin debit share the same durable arcade save.
+    @discardableResult
+    mutating func purchaseHabitatItem(_ item: HabitatItemKind) -> Bool {
+        guard !ownedHabitatItems.contains(item), coins >= item.price else { return false }
+        coins -= item.price
+        ownedHabitatItems.insert(item)
+        return true
+    }
+
+    mutating func importLegacyFurniture(hasCozyBox: Bool) {
+        guard !hasImportedLegacyFurniture else { return }
+        if hasCozyBox { ownedHabitatItems.insert(.cozyBox) }
+        hasImportedLegacyFurniture = true
+    }
+
     private enum CodingKeys: String, CodingKey {
         case coins, totalScore, gamesPlayed, highScores, inventory, lastPlayedAt
+        case ownedHabitatItems, hasImportedLegacyFurniture
     }
 
     init(from decoder: Decoder) throws {
@@ -145,7 +174,10 @@ struct ArcadeProgress: Codable, Equatable, Sendable {
             gamesPlayed: try values.decodeIfPresent(Int.self, forKey: .gamesPlayed) ?? 0,
             highScores: try values.decodeIfPresent([MiniGameKind: Int].self, forKey: .highScores) ?? [:],
             inventory: try values.decodeIfPresent(ArcadeInventory.self, forKey: .inventory) ?? ArcadeInventory(),
-            lastPlayedAt: try values.decodeIfPresent(Date.self, forKey: .lastPlayedAt)
+            lastPlayedAt: try values.decodeIfPresent(Date.self, forKey: .lastPlayedAt),
+            ownedHabitatItems: Set((try values.decodeIfPresent([String].self, forKey: .ownedHabitatItems) ?? [])
+                .compactMap(HabitatItemKind.init(rawValue:))),
+            hasImportedLegacyFurniture: try values.decodeIfPresent(Bool.self, forKey: .hasImportedLegacyFurniture) ?? false
         )
     }
 }

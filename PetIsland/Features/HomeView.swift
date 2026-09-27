@@ -38,6 +38,7 @@ private struct IslandView: View {
     @Environment(\.openURL) private var openURL
     @State private var showsHabitatEditor = false
     @State private var showsIslandSetup = false
+    @State private var showsDiscoveries = false
     @State private var draftResidentIDs: [UUID] = []
     @State private var draftTheme: HabitatTheme = .meadow
 
@@ -47,6 +48,7 @@ private struct IslandView: View {
                 VStack(spacing: 22) {
                     HStack {
                         PetScreenHeading(title: "Island")
+                        discoveriesButton
                         Button { showsIslandSetup = true } label: {
                             Image(systemName: "slider.horizontal.3")
                                 .font(.subheadline)
@@ -64,7 +66,6 @@ private struct IslandView: View {
                     .buttonStyle(PetPrimaryButtonStyle())
                     .disabled(controller.habitatResidents.isEmpty)
                     placementCard
-                    PetDiscoveriesCard(controller: controller)
                     activityAvailabilityNotice
                 }
                 .padding(.horizontal, 24)
@@ -76,6 +77,7 @@ private struct IslandView: View {
         }
         .sheet(isPresented: $showsHabitatEditor) {
             HabitatEditorView(
+                controller: controller,
                 pets: controller.pets.filter { $0.id != controller.habitat.configuration.leadDynamicIslandPetID },
                 selectedPetIDs: $draftResidentIDs,
                 selectedTheme: $draftTheme,
@@ -93,6 +95,9 @@ private struct IslandView: View {
         .sheet(isPresented: $showsIslandSetup) {
             IslandSetupView(controller: controller)
         }
+        .sheet(isPresented: $showsDiscoveries) {
+            PetDiscoveriesView(controller: controller)
+        }
         .fullScreenCover(isPresented: $controller.showsPlayYard) {
             PlayYardView(
                 pets: controller.habitatResidents,
@@ -106,7 +111,9 @@ private struct IslandView: View {
             theme: controller.habitat.configuration.theme,
             pets: controller.habitatResidents,
             vitalsByPetID: controller.habitatVitalsByPetID,
-            petScale: 1.2
+            petScale: 1.2,
+            hasCozyBox: controller.habitat.configuration.hasCozyBox,
+            isAnimationEnabled: !showsHabitatEditor && !showsIslandSetup && !showsDiscoveries && !controller.showsPlayYard
         )
         .frame(height: 240)
         .overlay(alignment: .topLeading) {
@@ -140,6 +147,30 @@ private struct IslandView: View {
             .accessibilityLabel("Edit enclosure")
             .padding(12)
         }
+    }
+
+    private var discoveriesButton: some View {
+        let hasFind = controller.discoveries.activeWalk?.isReady(at: .now) == true
+        return Button { showsDiscoveries = true } label: {
+            Image(systemName: "safari")
+                .font(.title3)
+                .frame(width: 44, height: 44)
+                .background(PetDesign.soft, in: Circle())
+                .overlay(alignment: .topTrailing) {
+                    if hasFind {
+                        Circle()
+                            .fill(PetDesign.accent)
+                            .frame(width: 8, height: 8)
+                            .overlay(Circle().strokeBorder(PetDesign.background, lineWidth: 2))
+                            .offset(x: -2, y: 2)
+                            .accessibilityHidden(true)
+                    }
+                }
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Walks")
+        .accessibilityValue(hasFind ? Text("A find is ready") : Text(""))
+        .accessibilityIdentifier("discoveries.open")
     }
 
     private var residentSummary: some View {
