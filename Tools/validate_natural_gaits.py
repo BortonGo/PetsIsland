@@ -13,6 +13,9 @@ tokens = ["dog_shepherd", "dog_corgi", "dog_doberman", "dog_bull_terrier",
 checked = 0
 for token in tokens:
     for pose in ("walk", "run"):
+        # Pembroke uses four approved frames from the shared catalog.
+        if token == "dog_corgi" and pose == "walk":
+            continue
         hashes = set()
         for index in range(8):
             name = f"fluid_{token}_{pose}_{index}"
@@ -24,12 +27,42 @@ for token in tokens:
             hashes.add(sha256(image.tobytes()).digest())
             checked += 1
         assert len(hashes) == 8, f"Duplicated poses in {token} {pose}"
-print(f"Validated {checked} foreground frames in 24 distinct animation cycles.")
+print(f"Validated {checked} foreground frames in 23 distinct animation cycles.")
+
+shared = root / "SharedResources/PetSprites.xcassets"
+corgi_steps = []
+for index in range(4):
+    name = f"island_dog_corgi_walk_{index}"
+    image = Image.open(shared / f"{name}.imageset" / f"{name}.png")
+    assert image.mode == "RGBA" and image.size == (220, 176), name
+    alpha = image.getchannel("A")
+    bounds = alpha.getbbox()
+    assert bounds and bounds[1] in (42, 43) and bounds[2:] == (178, 160), (name, bounds)
+    assert set(image.getchannel("A").tobytes()) == {0, 255}, name
+    # All four paws, including the lifted one, remain separated below the belly.
+    for y in (150, 151, 152):
+        spans = 0
+        was_visible = False
+        for x in range(image.width):
+            visible = alpha.getpixel((x, y)) > 0
+            spans += visible and not was_visible
+            was_visible = visible
+        assert spans == 4, (name, y, "Missing or merged paws", spans)
+    corgi_steps.append(image)
+assert len({sha256(image.tobytes()).digest() for image in corgi_steps}) == 4, "Repeated corgi phase"
+for region in [(35, 134, 112, 164), (112, 134, 180, 164)]:
+    assert len({image.crop(region).tobytes() for image in corgi_steps}) == 4, "Static corgi legs"
+# Frame 0 is also a long-held DI pose: its near hind paw must reach the
+# contact plane rather than remain visibly tucked above the other feet.
+near_hind_region = (56, 140, 76, 166)
+near_hind_bounds = corgi_steps[0].getchannel("A").crop(near_hind_region).getbbox()
+assert near_hind_bounds and 159 <= near_hind_region[1] + near_hind_bounds[3] <= 160, \
+    ("Corgi walk 0 near hind paw floats above the ground", near_hind_bounds)
+print("Validated 4 shared corgi walking phases: four distinct paws, stable head, common ground and crisp alpha.")
 
 # Fixed-cell slicing previously left a neighbouring jumping paw in the British
 # and Siamese play poses. Allow tiny detached whiskers, but never a second piece
 # of character art. These poses are shared by the app and Live Activity.
-shared = root / "SharedResources/PetSprites.xcassets"
 for token in ("cat", "cat_british", "cat_maine_coon", "cat_siamese"):
     for pose in ("jump", "play"):
         name = f"island_{token}_{pose}"

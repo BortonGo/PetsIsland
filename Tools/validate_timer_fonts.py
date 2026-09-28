@@ -37,6 +37,10 @@ def pose_for_digit(mode, digit):
 
 def asset_for_digit(breed, mode, digit):
     pose = pose_for_digit(mode, digit)
+    if breed == 'DogCorgi' and pose == 'walk':
+        # At the timer's cadence, alternate the back/forward contact poses.
+        # All four phases remain available to foreground animation.
+        return f'island_dog_corgi_walk_{(0, 2)[digit % 2]}'
     if breed in COMPANIONS:
         index = 0 if pose == 'sleep' else (0, 4)[digit % 2]
         return f'companion_{PREFIXES[breed]}_{pose}_{index:02}'

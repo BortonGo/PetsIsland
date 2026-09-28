@@ -219,18 +219,20 @@ final class PetDomainTests: XCTestCase {
             for breed in PetBreed.available(for: species) {
                 for pose in [PetPose.walk, .run] {
                     let clip = PetAnimationLibrary.naturalClip(for: species, breed: breed, pose: pose)
-                    let naturalFrameCount = breed == .cardigan ? 2 : 8
+                    let sharedCorgiWalk = breed == .corgi && pose == .walk
+                    let naturalFrameCount = sharedCorgiWalk ? 4 : (breed == .cardigan ? 2 : 8)
                     XCTAssertEqual(clip.frames.count, naturalFrameCount)
                     XCTAssertEqual(Set(clip.frames).count, naturalFrameCount)
                     for name in clip.frames {
                         XCTAssertNotNil(UIImage(named: name), name)
                         let geometry = PetSpriteGeometry.load(assetName: name)
-                        let origin = breed.companionArtworkToken == nil ? CGPoint(x: -12, y: 0) : .zero
+                        let origin = breed.companionArtworkToken == nil && !sharedCorgiWalk
+                            ? CGPoint(x: -12, y: 0) : .zero
                         XCTAssertEqual(geometry?.rect(in: PetSpriteGeometry.canvas).origin, origin, name)
                         XCTAssertEqual(geometry?.scale, 1, name)
                     }
                     XCTAssertEqual(PetAnimationLibrary.clip(for: species, breed: breed, pose: pose).frames.count,
-                                   breed.companionArtworkToken == nil || breed == .cardigan ? 2 : 8)
+                                   sharedCorgiWalk ? 4 : (breed.companionArtworkToken == nil || breed == .cardigan ? 2 : 8))
                 }
             }
         }
@@ -673,7 +675,7 @@ final class PetDomainTests: XCTestCase {
     }
 
     func testRepairedWalkFramesKeepTheirGroundAndUpperBodyRegistration() throws {
-        for breed in ["cat", "cat_british", "cat_maine_coon", "cat_siamese", "fox"] {
+        for breed in ["cat", "cat_british", "cat_maine_coon", "cat_siamese", "fox", "dog_corgi"] {
             let first = try XCTUnwrap(PetSpriteGeometry.load(assetName: "island_\(breed)_walk_0"))
             let second = try XCTUnwrap(PetSpriteGeometry.load(assetName: "island_\(breed)_walk_1"))
             XCTAssertEqual(first.sourceSize, PetSpriteGeometry.canvas)
@@ -681,7 +683,7 @@ final class PetDomainTests: XCTestCase {
             // A cat's ears may move by one authored pixel while its grounded
             // paws and muzzle stay registered; the fox artwork is unchanged.
             XCTAssertEqual(first.visibleBounds.minY, second.visibleBounds.minY,
-                           accuracy: breed == "fox" ? 0 : 1)
+                           accuracy: breed.hasPrefix("cat") ? 1 : 0)
             XCTAssertEqual(first.visibleBounds.maxX, second.visibleBounds.maxX)
             XCTAssertEqual(first.visibleBounds.maxY, PetSpriteGeometry.baseline)
             XCTAssertEqual(second.visibleBounds.maxY, PetSpriteGeometry.baseline)
@@ -973,7 +975,7 @@ final class PetDomainTests: XCTestCase {
         let walk = PetAnimationLibrary.clip(for: .dog, breed: .corgi, pose: .walk)
         let run = PetAnimationLibrary.clip(for: .dog, breed: .corgi, pose: .run)
 
-        XCTAssertEqual(walk.frames, ["island_dog_corgi_walk_0", "island_dog_corgi_walk_1"])
+        XCTAssertEqual(walk.frames, (0..<4).map { "island_dog_corgi_walk_\($0)" })
         XCTAssertEqual(run.frames, ["island_dog_corgi_run_0", "island_dog_corgi_run_1"])
         XCTAssertLessThan(run.frameDuration, walk.frameDuration)
     }
@@ -1288,6 +1290,88 @@ final class PetDomainTests: XCTestCase {
         XCTAssertLessThan(geometry[4].visibleBounds.maxY, geometry[0].visibleBounds.maxY - 8)
     }
 
+    @MainActor
+    func testCorgiFourBeatWalkStaysRegisteredWithoutReplacingRun() throws {
+        let walk = PetAnimationLibrary.clip(for: .dog, breed: .corgi, pose: .walk)
+        XCTAssertEqual(walk, PetAnimationLibrary.naturalClip(for: .dog, breed: .corgi, pose: .walk))
+        XCTAssertEqual(walk.frames.count, 4)
+        XCTAssertEqual(walk.cycleDuration, 0.72, accuracy: 0.0001)
+        XCTAssertEqual(walk.frameName(forStep: 4), walk.frameName(forStep: 0))
+        for step in 0..<8 {
+            XCTAssertEqual(walk.frameIndex(at: Double(step) * 0.18 + 0.001), step % 4)
+            XCTAssertEqual(walk.travelFrameIndex(distance: Double(step) * 4.5 + 0.001,
+                                                canvasWidth: 100, pose: .walk), step % 4)
+        }
+
+        for step in 0..<4 {
+            let geometry = try XCTUnwrap(PetSpriteGeometry.load(assetName: walk.frames[step]))
+            XCTAssertEqual(geometry.sourceSize, PetSpriteGeometry.canvas)
+            XCTAssertEqual(geometry.visibleBounds.maxY, PetSpriteGeometry.baseline)
+            XCTAssertEqual(geometry.visibleBounds.maxX, 178)
+            XCTAssertEqual(geometry.visibleBounds.minY, 42, accuracy: 1)
+            XCTAssertEqual(geometry.rect(in: PetSpriteGeometry.canvas).origin, .zero)
+            for direction in [PetDirection.left, .right] {
+                let standard = PetArtwork(species: .dog, breed: .corgi, pose: .walk,
+                    direction: direction, step: step, animatesMotion: false)
+                    .frame(width: 110, height: 88)
+                let foreground = PetArtwork(species: .dog, breed: .corgi, pose: .walk,
+                    direction: direction, step: step, animatesMotion: false, usesNaturalGait: true)
+                    .frame(width: 110, height: 88)
+                XCTAssertEqual(try renderedBounds(standard), try renderedBounds(foreground))
+            }
+        }
+        let run = PetAnimationLibrary.clip(for: .dog, breed: .corgi, pose: .run)
+        XCTAssertEqual(run.frames, ["island_dog_corgi_run_0", "island_dog_corgi_run_1"])
+        XCTAssertEqual(run.frameDuration, 0.09)
+        let naturalRun = PetAnimationLibrary.naturalClip(for: .dog, breed: .corgi, pose: .run)
+        XCTAssertEqual(naturalRun.frames, (0..<8).map { "fluid_dog_corgi_run_\($0)" })
+        XCTAssertEqual(naturalRun.frameDuration, 0.08)
+    }
+
+    func testCorgiShortWalkStridePreservesAllOtherGaits() {
+        for species in PetSpecies.allCases {
+            for breed in PetBreed.available(for: species) {
+                for pose in [PetPose.walk, .run] {
+                    let ratio = PetAnimationLibrary.enclosureStrideRatio(for: species, breed: breed, pose: pose)
+                    if species == .dog, breed == .corgi, pose == .walk {
+                        XCTAssertEqual(ratio, 0.18)
+                    } else {
+                        XCTAssertEqual(ratio, pose == .run ? 0.55 : 0.38, "\(breed) \(pose)")
+                    }
+                }
+            }
+        }
+    }
+
+    @MainActor
+    func testCorgiHabitatWalkUsesEveryApprovedPhaseAndStopsWithReducedMotion() throws {
+        let pet = PetProfile(id: UUID(uuidString: "E2222222-2222-2222-2222-222222222222")!,
+            name: "Corgi", species: .dog, coat: .sunrise, createdAt: .distantPast, breed: .corgi)
+        let simulation = HabitatMotionSimulation()
+        simulation.configure(pets: [pet], size: CGSize(width: 360, height: 180))
+        var steps = Set<Int>()
+        var transitions = 0
+        for _ in 0..<2400 {
+            let old = try XCTUnwrap(simulation.actors.first)
+            simulation.advance(by: 1.0 / 30)
+            let actor = try XCTUnwrap(simulation.actors.first)
+            guard actor.pose == .walk else { continue }
+            XCTAssertTrue((0..<4).contains(actor.step))
+            steps.insert(actor.step)
+            if old.pose == .walk, old.step != actor.step {
+                XCTAssertEqual(actor.step, (old.step + 1) % 4, "Walking must not skip the forward reach")
+                transitions += 1
+            }
+        }
+        XCTAssertEqual(steps, Set(0..<4))
+        XCTAssertGreaterThan(transitions, 12)
+        simulation.start(reduceMotion: true, active: true)
+        let positions = simulation.actors.map(\.position)
+        simulation.advance(by: 1)
+        XCTAssertEqual(simulation.actors.map(\.position), positions)
+        XCTAssertFalse(simulation.isRunning)
+    }
+
     func testCardiganPushOffTouchesGroundBeforeItsExtendedFlightFrame() throws {
         for pose in [PetPose.walk, .run] {
             let clip = PetAnimationLibrary.clip(for: .dog, breed: .cardigan, pose: pose)
@@ -1321,6 +1405,16 @@ final class PetDomainTests: XCTestCase {
 
     @MainActor
     func testCardiganTimerModesMatchGroundedAndAirbornePNGFrames() throws {
+        try assertTimerModesMatchPNGFrames(breed: .cardigan, fontToken: "DogCardigan")
+    }
+
+    @MainActor
+    func testCorgiTimerModesMatchPNGFramesIncludingMixedWalkingDigits() throws {
+        try assertTimerModesMatchPNGFrames(breed: .corgi, fontToken: "DogCorgi")
+    }
+
+    @MainActor
+    private func assertTimerModesMatchPNGFrames(breed: PetBreed, fontToken: String) throws {
         try registerTimerFonts()
         let modes: [(String, [PetPose])] = [
             ("Run", Array(repeating: .run, count: 10)),
@@ -1336,14 +1430,18 @@ final class PetDomainTests: XCTestCase {
                 for digit in 0...9 {
                     for direction in [PetDirection.left, .right] {
                         let glyph = PetTimerGlyphViewport(text: Text("1:00:\(digit)"),
-                            fontName: family + "DogCardigan" + mode, viewport: viewport, direction: direction)
-                        let artwork = PetArtwork(species: .dog, breed: .cardigan, pose: poses[digit],
-                            direction: direction, step: poses[digit] == .sleep ? 0 : digit % 2,
+                            fontName: family + fontToken + mode, viewport: viewport, direction: direction)
+                        // Timer glyphs keep a two-beat cadence using the opposite
+                        // contact poses from the corgi's four-frame foreground walk.
+                        let step = poses[digit] == .sleep ? 0
+                            : (breed == .corgi && poses[digit] == .walk ? (digit % 2) * 2 : digit % 2)
+                        let artwork = PetArtwork(species: .dog, breed: breed, pose: poses[digit],
+                            direction: direction, step: step,
                             animatesMotion: false, surface: viewport.width == 84 ? .standard : .dynamicIsland)
                             .frame(width: viewport.width, height: viewport.height)
                         let fontBounds = try renderedBounds(glyph)
                         let pngBounds = try renderedBounds(artwork)
-                        let sample = "\(mode), digit \(digit), \(viewport), \(direction)"
+                        let sample = "\(breed), \(mode), digit \(digit), \(viewport), \(direction)"
                         XCTAssertEqual(fontBounds.minX, pngBounds.minX, accuracy: 1.5, sample)
                         XCTAssertEqual(fontBounds.maxX, pngBounds.maxX, accuracy: 1.5, sample)
                         XCTAssertEqual(fontBounds.minY, pngBounds.minY, accuracy: 1.5, sample)

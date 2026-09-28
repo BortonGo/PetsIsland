@@ -1050,7 +1050,9 @@ final class PlayYardSimulation: NSObject, ObservableObject {
             let travelled = hypot(actor.position.x - previousPosition.x, actor.position.y - previousPosition.y)
             actor.distanceTravelled += travelled
             if actor.pose == .walk || actor.pose == .run {
-                actor.gaitPhase = (actor.gaitPhase + travelled / max(actor.size * (actor.pose == .run ? 0.55 : 0.38), 1))
+                let stride = actor.size * PetAnimationLibrary.enclosureStrideRatio(
+                    for: actor.profile.species, breed: actor.profile.resolvedBreed, pose: actor.pose)
+                actor.gaitPhase = (actor.gaitPhase + travelled / max(stride, 1))
                     .truncatingRemainder(dividingBy: 1)
                 actor.step = reduceMotion ? 0 : Int(actor.gaitPhase * Double(clip.frames.count))
             } else {

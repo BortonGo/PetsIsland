@@ -563,6 +563,10 @@ private struct SpriteColorTreatment {
 enum PetAnimationLibrary {
     static func naturalClip(for species: PetSpecies, breed: PetBreed?, pose: PetPose) -> PetAnimationClip {
         if let clip = companionClip(for: species, breed: breed, pose: pose) { return clip }
+        if species == .dog, breed == .corgi, pose == .walk {
+            // Use the approved four-beat walk in every foreground renderer.
+            return clip(for: species, breed: breed, pose: pose)
+        }
         if pose == .walk || pose == .run {
             let token: String? = switch breed ?? PetBreed.defaultVariant(for: species) {
             case .shepherd: "dog_shepherd"
@@ -609,7 +613,15 @@ enum PetAnimationLibrary {
             frames = (0..<count).map { "sprite_\(species.rawValue)_\(state)_\($0)" }
         }
 
-        return PetAnimationClip(frames: frames, frameDuration: frameDuration(for: pose))
+        let duration = species == .dog && breed == .corgi && pose == .walk
+            ? 0.18 : frameDuration(for: pose)
+        return PetAnimationClip(frames: frames, frameDuration: duration)
+    }
+
+    /// Match the short authored steps to travel without altering other gaits.
+    static func enclosureStrideRatio(for species: PetSpecies, breed: PetBreed?, pose: PetPose) -> Double {
+        if species == .dog, breed == .corgi, pose == .walk { return 0.18 }
+        return pose == .run ? 0.55 : 0.38
     }
 
     private static func companionClip(for species: PetSpecies, breed: PetBreed?, pose: PetPose) -> PetAnimationClip? {
@@ -693,6 +705,9 @@ enum PetAnimationLibrary {
             }
             return nil
         case .corgi:
+            if pose == .walk {
+                return (0..<4).map { "island_dog_corgi_walk_\($0)" }
+            }
             token = "corgi"
         case .doberman:
             token = "doberman"

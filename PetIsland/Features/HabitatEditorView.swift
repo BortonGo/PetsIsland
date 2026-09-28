@@ -844,7 +844,8 @@ final class HabitatMotionSimulation: ObservableObject {
                 let actualSpeed = travelled / dt
                 actor.pose = actor.profile.species == .parrot ? .fly : (actualSpeed > 40 ? .run : .walk)
                 // Continuous cycles survive a walk/run switch; only stride length changes.
-                let stride = petWidth * (actor.pose == .run ? 0.55 : 0.38)
+                let stride = petWidth * PetAnimationLibrary.enclosureStrideRatio(
+                    for: actor.profile.species, breed: actor.profile.resolvedBreed, pose: actor.pose)
                 actor.gaitPhase += travelled / max(stride, 1)
                 if distance < 2 && actualSpeed < 7 {
                     actor.travelling = false
