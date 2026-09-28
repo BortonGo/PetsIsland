@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 242 tests, a Release build, and static analysis on September 27,
+> build passed 249 tests, a Release build, and static analysis on September 28,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -75,10 +75,19 @@ Walks continue while the app is closed. A ready find waits until you collect
 it, with no missed-day penalty. The **Finds album** saves each discovery with
 its pet, date, and a short story that can be shared as text. Progress stays on
 the device and survives app restarts. Walks do not change pet artwork,
-animation, care, or coins.
+existing animation assets, care, or coins.
+
+The active walk now shows its own landscape inside the walks sheet: a garden with
+flowers and bushes, a shore with pebbles and reeds, or a grove with roots, mushrooms
+and a fallen branch. The companion follows paths, pauses to investigate landmarks,
+and heads home before the saved return time. Movement uses the existing natural
+gait sprites, paced by distance, and restores from the saved walk when reopened.
 
 Walks use a saved deadline, with no background polling. Their visible countdown
-updates once a minute, and empty enclosures stop the display-link animation loop.
+updates once a minute. The scene animates only while visible and uncovered, pauses
+outside the scroll viewport or behind the album, and respects Reduce Motion. Once
+the pet has returned, the landscape stays still and shows that it is home. Empty
+enclosures stop the display-link animation loop.
 Animations pause when the app becomes inactive. Actual battery and thermal
 behaviour still needs measurement on a physical iPhone.
 

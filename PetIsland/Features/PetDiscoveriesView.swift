@@ -7,11 +7,14 @@ struct PetDiscoveriesView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                PetDiscoveriesContent(controller: controller)
-                    .padding(20)
-                    .frame(maxWidth: 600)
-                    .frame(maxWidth: .infinity)
+            GeometryReader { viewport in
+                ScrollView {
+                    PetDiscoveriesContent(controller: controller, viewportHeight: viewport.size.height)
+                        .padding(20)
+                        .frame(maxWidth: 600)
+                        .frame(maxWidth: .infinity)
+                }
+                .coordinateSpace(name: "discoveryScroll")
             }
             .petPage()
             .navigationTitle("Walks")
@@ -27,10 +30,10 @@ struct PetDiscoveriesView: View {
     }
 }
 
-/// Walks use their saved return time without changing any pet sprite or animation.
+/// Walk timing and rewards remain independent from the visible landscape.
 private struct PetDiscoveriesContent: View {
     @ObservedObject var controller: PetSessionController
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let viewportHeight: CGFloat
     @Environment(\.scenePhase) private var scenePhase
     @State private var showsAlbum = false
     @State private var showsCancelConfirmation = false
@@ -39,18 +42,25 @@ private struct PetDiscoveriesContent: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             if let walk = controller.discoveries.activeWalk {
-                Group {
-                    if scenePhase == .active, !walk.isReady(at: .now) {
-                        // The UI displays whole minutes. The controller schedules
-                        // the exact return once; no per-second polling is needed.
-                        TimelineView(.periodic(from: walk.startedAt, by: 60)) { context in
-                            walkContent(walk, at: context.date)
+                VStack(spacing: 0) {
+                    PetDiscoverySceneView(walk: walk,
+                                          isAnimationEnabled: !showsAlbum && collectedMemory == nil && !showsCancelConfirmation,
+                                          isComplete: walk.isReady(at: .now),
+                                          viewportHeight: viewportHeight)
+                        .id(walk.id)
+                        .padding(8)
+                    Group {
+                        if scenePhase == .active, !walk.isReady(at: .now) {
+                            // Only the countdown uses this slow timeline; the scene has its own visibility gate.
+                            TimelineView(.periodic(from: walk.startedAt, by: 60)) { context in
+                                walkContent(walk, at: context.date)
+                            }
+                        } else {
+                            walkContent(walk, at: .now)
                         }
-                    } else {
-                        walkContent(walk, at: .now)
                     }
+                    .padding(18)
                 }
-                .padding(20)
                 .petSurface()
             } else {
                 PetDiscoveryWalkPicker(controller: controller)
@@ -94,22 +104,11 @@ private struct PetDiscoveriesContent: View {
     private func walkContent(_ walk: PetDiscoveryWalk, at now: Date) -> some View {
         let ready = walk.isReady(at: now)
         return VStack(alignment: .leading, spacing: 15) {
-            (dynamicTypeSize.isAccessibilitySize
-             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
-             : AnyLayout(HStackLayout(alignment: .center, spacing: 12))) {
-                DiscoveryPetPortrait(pet: walk.pet)
-                    .frame(width: 78, height: 68)
-                    .background(PetDesign.soft, in: RoundedRectangle(cornerRadius: 18))
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(ready ? String(localized: "A find for you!") : String(localized: "Out exploring"))
-                        .font(.headline)
-                    Text(walk.pet.name)
-                        .font(.subheadline.weight(.medium))
-                    Label(walk.route.discoveryTitle, systemImage: walk.route.discoverySymbol)
-                        .font(.caption)
-                        .foregroundStyle(PetDesign.secondary)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(walk.pet.name).font(.headline)
+                if ready {
+                    Text("A find for you!").font(.subheadline.weight(.medium))
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
             if ready {
                 Text("\(walk.pet.name) is home. Your find will wait here until you're ready.")
@@ -260,11 +259,9 @@ private struct PetDiscoveryWalkPicker: View {
         return Button { selectedRoute = route } label: {
             HStack(alignment: .center, spacing: 10) {
                 if !dynamicTypeSize.isAccessibilitySize {
-                    Image(systemName: route.discoverySymbol)
-                        .font(.body)
-                        .foregroundStyle(route.discoveryTint)
-                        .frame(width: 34, height: 34)
-                        .background(route.discoveryTint.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
+                    DiscoveryLandscape(route: route)
+                        .frame(width: 54, height: 42)
+                        .clipShape(RoundedRectangle(cornerRadius: 9))
                 }
                 VStack(alignment: .leading, spacing: 4) {
                     (dynamicTypeSize.isAccessibilitySize
@@ -601,7 +598,7 @@ private struct DiscoveryIllustration: View {
     }
 }
 
-private extension PetWalkRoute {
+extension PetWalkRoute {
     var discoveryTitle: String {
         switch self {
         case .garden: String(localized: "Quiet garden")

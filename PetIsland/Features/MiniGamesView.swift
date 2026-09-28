@@ -415,13 +415,20 @@ struct MiniGamesView: View {
                     .frame(width: 34, height: 34)
                     .background(item.color.opacity(0.12), in: Circle())
                 Spacer()
-                if owned > 0 {
-                    Text("×\(owned)")
-                        .font(.caption.bold().monospacedDigit())
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(.thinMaterial, in: Capsule())
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("In stock")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text(owned, format: .number)
+                        .font(.subheadline.bold().monospacedDigit())
                 }
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("\(item.title), in stock: \(owned)")
+                .accessibilityIdentifier("shop.stock.\(item.rawValue)")
             }
             Text(item.title)
                 .font(.headline)

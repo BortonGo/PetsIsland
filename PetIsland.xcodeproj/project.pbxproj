@@ -60,6 +60,9 @@
 		F10000000000000000000021 /* BubblePawsEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000021 /* BubblePawsEngine.swift */; };
 		F10000000000000000000022 /* BubblePawsGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000022 /* BubblePawsGameView.swift */; };
 		F10000000000000000000023 /* BubblePawsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000023 /* BubblePawsTests.swift */; };
+		F10000000000000000000024 /* PetDiscoveryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000024 /* PetDiscoveryScene.swift */; };
+		F10000000000000000000025 /* PetDiscoverySceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000025 /* PetDiscoverySceneView.swift */; };
+		F10000000000000000000026 /* PetDiscoverySceneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F20000000000000000000026 /* PetDiscoverySceneTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -145,6 +148,9 @@
 		F20000000000000000000021 /* BubblePawsEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BubblePawsEngine.swift; sourceTree = "<group>"; };
 		F20000000000000000000022 /* BubblePawsGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BubblePawsGameView.swift; sourceTree = "<group>"; };
 		F20000000000000000000023 /* BubblePawsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BubblePawsTests.swift; sourceTree = "<group>"; };
+		F20000000000000000000024 /* PetDiscoveryScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDiscoveryScene.swift; sourceTree = "<group>"; };
+		F20000000000000000000025 /* PetDiscoverySceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDiscoverySceneView.swift; sourceTree = "<group>"; };
+		F20000000000000000000026 /* PetDiscoverySceneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDiscoverySceneTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -256,6 +262,7 @@
 			children = (
 				D20000000000000000000001 /* PetDomain.swift */,
 				C20000000000000000000001 /* PetDiscoveries.swift */,
+				F20000000000000000000024 /* PetDiscoveryScene.swift */,
 				G20000000000000000000001 /* MiniGameDomain.swift */,
 				F20000000000000000000021 /* BubblePawsEngine.swift */,
 			);
@@ -274,6 +281,7 @@
 				E20000000000000000000001 /* PetDesign.swift */,
 				D20000000000000000000004 /* HomeView.swift */,
 				C20000000000000000000002 /* PetDiscoveriesView.swift */,
+				F20000000000000000000025 /* PetDiscoverySceneView.swift */,
 				D20000000000000000000005 /* OnboardingView.swift */,
 				D20000000000000000000006 /* Sheets.swift */,
 				D20000000000000000000009 /* PetCollectionView.swift */,
@@ -295,6 +303,7 @@
 			children = (
 				T20000000000000000000001 /* PetDomainTests.swift */,
 				C20000000000000000000003 /* PetDiscoveriesTests.swift */,
+				F20000000000000000000026 /* PetDiscoverySceneTests.swift */,
 				C20000000000000000000004 /* PetDiscoveryControllerTests.swift */,
 				H20000000000000000000003 /* PetHabitatStateTests.swift */,
 				B20000000000000000000002 /* PetCozyBoxTests.swift */,
@@ -456,7 +465,9 @@
 				A10000000000000000000005 /* PetPixelArtwork.swift in Sources */,
 				D10000000000000000000001 /* PetDomain.swift in Sources */,
 				C10000000000000000000001 /* PetDiscoveries.swift in Sources */,
+				F10000000000000000000024 /* PetDiscoveryScene.swift in Sources */,
 				C10000000000000000000003 /* PetDiscoveriesView.swift in Sources */,
+				F10000000000000000000025 /* PetDiscoverySceneView.swift in Sources */,
 				D10000000000000000000002 /* PetStore.swift in Sources */,
 				D10000000000000000000003 /* PetActivityAttributes.swift in Sources */,
 				E10000000000000000000001 /* PetDesign.swift in Sources */,
@@ -502,6 +513,7 @@
 			files = (
 				T10000000000000000000001 /* PetDomainTests.swift in Sources */,
 				C10000000000000000000004 /* PetDiscoveriesTests.swift in Sources */,
+				F10000000000000000000026 /* PetDiscoverySceneTests.swift in Sources */,
 				C10000000000000000000005 /* PetDiscoveryControllerTests.swift in Sources */,
 				H10000000000000000000004 /* PetHabitatStateTests.swift in Sources */,
 				B10000000000000000000002 /* PetCozyBoxTests.swift in Sources */,
