@@ -219,8 +219,9 @@ final class PetDomainTests: XCTestCase {
             for breed in PetBreed.available(for: species) {
                 for pose in [PetPose.walk, .run] {
                     let clip = PetAnimationLibrary.naturalClip(for: species, breed: breed, pose: pose)
-                    XCTAssertEqual(clip.frames.count, 8)
-                    XCTAssertEqual(Set(clip.frames).count, 8)
+                    let naturalFrameCount = breed == .cardigan ? 2 : 8
+                    XCTAssertEqual(clip.frames.count, naturalFrameCount)
+                    XCTAssertEqual(Set(clip.frames).count, naturalFrameCount)
                     for name in clip.frames {
                         XCTAssertNotNil(UIImage(named: name), name)
                         let geometry = PetSpriteGeometry.load(assetName: name)
@@ -229,7 +230,7 @@ final class PetDomainTests: XCTestCase {
                         XCTAssertEqual(geometry?.scale, 1, name)
                     }
                     XCTAssertEqual(PetAnimationLibrary.clip(for: species, breed: breed, pose: pose).frames.count,
-                                   breed.companionArtworkToken == nil ? 2 : 8)
+                                   breed.companionArtworkToken == nil || breed == .cardigan ? 2 : 8)
                 }
             }
         }
@@ -623,7 +624,12 @@ final class PetDomainTests: XCTestCase {
                 for digit in 0...9 {
                     let bounds = try renderedBounds(PetTimerGlyphViewport(text: Text("\(digit)"),
                         fontName: "PetIslandLockTimer" + token + "RunWalkSleep", viewport: viewport, direction: direction))
-                    XCTAssertEqual(center - viewport.height / 2 + bounds.maxY, lineTop, accuracy: 1, token)
+                    // Only the Cardigan's extended run frame is airborne; the
+                    // compressed push-off, walking and sleeping frames touch the line.
+                    let flightLift: CGFloat = breed == .cardigan && digit < 4 && digit % 2 == 1
+                        ? 10 * viewport.width / PetSpriteGeometry.canvas.width : 0
+                    XCTAssertEqual(center - viewport.height / 2 + bounds.maxY,
+                                   lineTop - flightLift, accuracy: 1, token)
                 }
                 for step in PetAnimationLibrary.clip(for: species, breed: breed, pose: .sleep).frames.indices {
                     let bounds = try renderedBounds(PetArtwork(species: species, breed: breed, pose: .sleep,
@@ -1280,6 +1286,72 @@ final class PetDomainTests: XCTestCase {
             XCTAssertLessThanOrEqual(abs(tops[index] - tops[(index + 1) % tops.count]), 3)
         }
         XCTAssertLessThan(geometry[4].visibleBounds.maxY, geometry[0].visibleBounds.maxY - 8)
+    }
+
+    func testCardiganPushOffTouchesGroundBeforeItsExtendedFlightFrame() throws {
+        for pose in [PetPose.walk, .run] {
+            let clip = PetAnimationLibrary.clip(for: .dog, breed: .cardigan, pose: pose)
+            XCTAssertEqual(clip, PetAnimationLibrary.naturalClip(for: .dog, breed: .cardigan, pose: pose))
+            XCTAssertEqual(clip.frames.count, 2)
+            let first = try XCTUnwrap(PetSpriteGeometry.load(assetName: clip.frameName(forStep: 0)))
+            let second = try XCTUnwrap(PetSpriteGeometry.load(assetName: clip.frameName(forStep: 1)))
+            for geometry in [first, second] {
+                XCTAssertEqual(geometry.sourceSize, PetSpriteGeometry.canvas)
+                XCTAssertEqual(geometry.scale, 1)
+                XCTAssertEqual(geometry.horizontalAnchor, 110)
+                XCTAssertEqual(geometry.rect(in: PetSpriteGeometry.canvas).origin, .zero)
+            }
+            XCTAssertEqual(first.visibleBounds.maxY, PetSpriteGeometry.baseline)
+            if pose == .run {
+                XCTAssertEqual(second.visibleBounds.maxY, PetSpriteGeometry.baseline - 10)
+                XCTAssertEqual(first.visibleBounds.minY - second.visibleBounds.minY, 14)
+            } else {
+                XCTAssertEqual(second.visibleBounds.maxY, PetSpriteGeometry.baseline)
+                XCTAssertEqual(first.visibleBounds, second.visibleBounds)
+            }
+            // Moving and then stopping must keep the chosen contact/flight
+            // frame stable; the next half-stride changes to the other drawing.
+            let stride = 100.0 * (pose == .run ? 0.26 : 0.18)
+            XCTAssertEqual(clip.travelFrameIndex(distance: 0, canvasWidth: 100, pose: pose), 0)
+            XCTAssertEqual(clip.travelFrameIndex(distance: stride * 0.51, canvasWidth: 100, pose: pose), 1)
+            XCTAssertEqual(clip.travelFrameIndex(distance: stride * 1.01, canvasWidth: 100, pose: pose), 0)
+            XCTAssertEqual(clip.frameName(forStep: 2), clip.frameName(forStep: 0))
+        }
+    }
+
+    @MainActor
+    func testCardiganTimerModesMatchGroundedAndAirbornePNGFrames() throws {
+        try registerTimerFonts()
+        let modes: [(String, [PetPose])] = [
+            ("Run", Array(repeating: .run, count: 10)),
+            ("Walk", Array(repeating: .walk, count: 10)),
+            ("Sleep", Array(repeating: .sleep, count: 10)),
+            ("RunSleep", [.run, .run, .run, .run, .run, .run, .run, .sleep, .sleep, .sleep]),
+            ("WalkSleep", [.walk, .walk, .walk, .walk, .walk, .walk, .walk, .sleep, .sleep, .sleep]),
+            ("RunWalkSleep", [.run, .run, .run, .run, .walk, .walk, .walk, .sleep, .sleep, .sleep])
+        ]
+        for viewport in [CGSize(width: 36, height: 30), CGSize(width: 28, height: 25), CGSize(width: 84, height: 72)] {
+            let family = viewport.width == 84 ? "PetIslandLockTimer" : "PetIslandTimer"
+            for (mode, poses) in modes {
+                for digit in 0...9 {
+                    for direction in [PetDirection.left, .right] {
+                        let glyph = PetTimerGlyphViewport(text: Text("1:00:\(digit)"),
+                            fontName: family + "DogCardigan" + mode, viewport: viewport, direction: direction)
+                        let artwork = PetArtwork(species: .dog, breed: .cardigan, pose: poses[digit],
+                            direction: direction, step: poses[digit] == .sleep ? 0 : digit % 2,
+                            animatesMotion: false, surface: viewport.width == 84 ? .standard : .dynamicIsland)
+                            .frame(width: viewport.width, height: viewport.height)
+                        let fontBounds = try renderedBounds(glyph)
+                        let pngBounds = try renderedBounds(artwork)
+                        let sample = "\(mode), digit \(digit), \(viewport), \(direction)"
+                        XCTAssertEqual(fontBounds.minX, pngBounds.minX, accuracy: 1.5, sample)
+                        XCTAssertEqual(fontBounds.maxX, pngBounds.maxX, accuracy: 1.5, sample)
+                        XCTAssertEqual(fontBounds.minY, pngBounds.minY, accuracy: 1.5, sample)
+                        XCTAssertEqual(fontBounds.maxY, pngBounds.maxY, accuracy: 1.5, sample)
+                    }
+                }
+            }
+        }
     }
 
     @MainActor
