@@ -16,8 +16,19 @@ struct PetActivityAttributes: ActivityAttributes {
         var snapshot: PetSnapshot
         var lastInteraction: String?
         var backgroundColor: PetColorSelection? = nil
+        // Optional so activities started by older app versions still decode.
+        var backgroundTransparency: Double? = nil
 
-        var appearance: PetActivityAppearance { PetActivityAppearance(background: backgroundColor) }
+        var appearance: PetActivityAppearance {
+            PetActivityAppearance(background: backgroundColor, transparency: backgroundTransparency ?? 0)
+        }
+
+        func updatingAppearance(color: PetColorSelection?, transparency: Double) -> Self {
+            var updated = self
+            updated.backgroundColor = color
+            updated.backgroundTransparency = PetActivityAppearance.normalizedTransparency(transparency)
+            return updated
+        }
 
         func updating(snapshot: PetSnapshot, lastInteraction: String?) -> Self {
             var updated = self

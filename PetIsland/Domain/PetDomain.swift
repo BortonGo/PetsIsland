@@ -150,10 +150,24 @@ struct PetColorSelection: Codable, Equatable, Hashable, Sendable {
 struct PetActivityAppearance {
     static let defaultBackground = PetColorSelection(red: 0.07, green: 0.08, blue: 0.14)
     let background: PetColorSelection
+    let transparency: Double
 
-    init(background: PetColorSelection?) {
+    init(background: PetColorSelection?, transparency: Double = 0) {
         self.background = background ?? Self.defaultBackground
+        self.transparency = Self.normalizedTransparency(transparency)
     }
+
+    static func normalizedTransparency(_ value: Double) -> Double {
+        value.isFinite ? min(max(value, 0), 1) : 0
+    }
+
+    func respectingReducedTransparency(_ reduceTransparency: Bool) -> Self {
+        Self(background: background, transparency: reduceTransparency ? 0 : transparency)
+    }
+
+    var usesSystemMaterial: Bool { transparency > 0 }
+    // With little color coverage, let the system choose text for its material.
+    var usesAdaptiveForeground: Bool { transparency > 0.5 }
 
     var relativeLuminance: Double {
         func linear(_ channel: Double) -> Double {
@@ -291,10 +305,11 @@ struct AppSettings: Codable, Equatable, Sendable {
     var dynamicIslandMotionMode: DynamicIslandMotionMode = .runSleep
     var appearance: AppAppearance = .system
     var liveActivityBackgroundColor: PetColorSelection? = nil
+    var liveActivityBackgroundTransparency: Double = 0
 
     private enum CodingKeys: String, CodingKey {
         case defaultSessionMinutes, hapticsEnabled, minimizeMotion, dynamicIslandMotionMode, appearance
-        case liveActivityBackgroundColor
+        case liveActivityBackgroundColor, liveActivityBackgroundTransparency
     }
 
     init(
@@ -303,7 +318,8 @@ struct AppSettings: Codable, Equatable, Sendable {
         minimizeMotion: Bool = false,
         dynamicIslandMotionMode: DynamicIslandMotionMode = .runSleep,
         appearance: AppAppearance = .system,
-        liveActivityBackgroundColor: PetColorSelection? = nil
+        liveActivityBackgroundColor: PetColorSelection? = nil,
+        liveActivityBackgroundTransparency: Double = 0
     ) {
         self.defaultSessionMinutes = min(max(defaultSessionMinutes, 10), 480)
         self.hapticsEnabled = hapticsEnabled
@@ -311,6 +327,7 @@ struct AppSettings: Codable, Equatable, Sendable {
         self.dynamicIslandMotionMode = dynamicIslandMotionMode
         self.appearance = appearance
         self.liveActivityBackgroundColor = liveActivityBackgroundColor
+        self.liveActivityBackgroundTransparency = PetActivityAppearance.normalizedTransparency(liveActivityBackgroundTransparency)
     }
 
     init(from decoder: Decoder) throws {
@@ -324,6 +341,9 @@ struct AppSettings: Codable, Equatable, Sendable {
         ) ?? .runSleep
         appearance = try values.decodeIfPresent(AppAppearance.self, forKey: .appearance) ?? .system
         liveActivityBackgroundColor = try values.decodeIfPresent(PetColorSelection.self, forKey: .liveActivityBackgroundColor)
+        liveActivityBackgroundTransparency = PetActivityAppearance.normalizedTransparency(
+            try values.decodeIfPresent(Double.self, forKey: .liveActivityBackgroundTransparency) ?? 0
+        )
     }
 }
 

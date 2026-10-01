@@ -8,8 +8,6 @@ struct PetLiveActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: PetActivityAttributes.self) { context in
             LockScreenPetView(context: context)
-                .activityBackgroundTint(context.state.appearance.backgroundColor)
-                .activitySystemActionForegroundColor(context.state.appearance.foregroundColor)
                 .widgetURL(deepLink(for: context.attributes.sessionID))
         } dynamicIsland: { context in
             DynamicIsland {
@@ -174,6 +172,12 @@ private struct CompactTimerPet: View {
 private struct LockScreenPetView: View {
     let context: ActivityViewContext<PetActivityAttributes>
     @Environment(\.isLuminanceReduced) private var isLuminanceReduced
+    @Environment(\.showsWidgetContainerBackground) private var showsContainerBackground
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
+    private var appearance: PetActivityAppearance {
+        context.state.appearance.respectingReducedTransparency(reduceTransparency)
+    }
 
     private var resolvedSnapshot: PetSnapshot {
         guard isLuminanceReduced || context.isStale else { return context.state.snapshot }
@@ -192,9 +196,9 @@ private struct LockScreenPetView: View {
                 Label(context.attributes.pet.name, systemImage: "pawprint.fill")
                     .font(.headline)
                     .lineLimit(1)
-                    .foregroundStyle(context.state.backgroundColor == nil
-                        ? accent(for: context.attributes.pet)
-                        : context.state.appearance.foregroundColor)
+                    .foregroundStyle(context.state.backgroundColor == nil && !appearance.usesSystemMaterial
+                        ? AnyShapeStyle(accent(for: context.attributes.pet))
+                        : appearance.contentForegroundStyle)
                 Spacer()
                 Label(
                     isLuminanceReduced || context.isStale
@@ -203,15 +207,25 @@ private struct LockScreenPetView: View {
                     systemImage: symbol(for: resolvedSnapshot.pose)
                 )
                 .font(.caption.bold())
-                .foregroundStyle(context.state.appearance.foregroundColor)
+                .foregroundStyle(appearance.contentForegroundStyle)
             }
             LockScreenTimerPetTrack(
                 context: context,
-                spriteSize: CGSize(width: 84, height: 72)
+                spriteSize: CGSize(width: 84, height: 72),
+                appearance: appearance
             )
             .frame(height: 86)
         }
         .padding(14)
+        .background {
+            // At zero transparency this preserves the exact chosen color.
+            // Otherwise the same layer reveals the system material beneath it.
+            if showsContainerBackground {
+                appearance.backgroundFill
+            }
+        }
+        .activityBackgroundTint(appearance.systemBackgroundTint)
+        .activitySystemActionForegroundColor(appearance.systemActionForeground)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: context.attributes.pet.name) + Text(", pet session"))
     }
@@ -246,6 +260,7 @@ private struct LockScreenPetView: View {
 private struct LockScreenTimerPetTrack: View {
     let context: ActivityViewContext<PetActivityAttributes>
     let spriteSize: CGSize
+    let appearance: PetActivityAppearance
 
     var body: some View {
         GeometryReader { proxy in
@@ -255,7 +270,7 @@ private struct LockScreenTimerPetTrack: View {
 
             ZStack(alignment: .bottom) {
                 Capsule()
-                    .fill(context.state.appearance.foregroundColor.opacity(context.isStale ? 0.07 : 0.12))
+                    .fill(appearance.contentForegroundStyle.opacity(context.isStale ? 0.07 : 0.12))
                     .frame(height: PetLockScreenSpriteAlignment.lineHeight)
                     .offset(y: -PetLockScreenSpriteAlignment.lineBottomInset)
 
@@ -264,8 +279,7 @@ private struct LockScreenTimerPetTrack: View {
                     viewport: spriteSize
                 )
                 .position(x: centerX, y: PetLockScreenSpriteAlignment.centerY(
-                    trackHeight: proxy.size.height, viewport: spriteSize,
-                    breed: context.attributes.pet.breed ?? PetBreed.defaultVariant(for: context.attributes.pet.species)
+                    trackHeight: proxy.size.height, viewport: spriteSize
                 ))
             }
         }
@@ -438,8 +452,8 @@ private struct ActivityPetTrack: View {
             ZStack(alignment: .bottom) {
                 Capsule()
                     .fill(.white.opacity(isSleeping ? 0.07 : 0.12))
-                    .frame(height: 4)
-                    .offset(y: -7)
+                    .frame(height: PetLockScreenSpriteAlignment.lineHeight)
+                    .offset(y: -PetLockScreenSpriteAlignment.lineBottomInset)
 
                 ActivityAnimatedPet(
                     identity: identity,
@@ -450,7 +464,9 @@ private struct ActivityPetTrack: View {
                 )
                 .frame(width: groupWidth, height: spriteSize.height, alignment: .bottom)
                 .accessibilityHidden(true)
-                .position(x: centerX, y: proxy.size.height / 2)
+                .position(x: centerX, y: PetLockScreenSpriteAlignment.centerY(
+                    trackHeight: proxy.size.height, viewport: spriteSize
+                ))
             }
         }
         .accessibilityElement(children: .ignore)

@@ -610,28 +610,41 @@ final class PetDomainTests: XCTestCase {
     }
 
     @MainActor
-    func testCatsAndCorgisMeetLockScreenLineInTimerAndSleepingArtwork() throws {
+    func testAllPetsMeetLockScreenLineInEveryTimerModeAndSleepingArtwork() throws {
         try registerTimerFonts()
         let viewport = CGSize(width: 84, height: 72)
         let trackHeight: CGFloat = 86
         let lineTop = trackHeight - 7 - 4
         let breeds: [(PetSpecies, PetBreed, String)] = [
-            (.dog, .corgi, "DogCorgi"), (.dog, .cardigan, "DogCardigan"),
+            (.dog, .shepherd, "DogShepherd"), (.dog, .corgi, "DogCorgi"),
+            (.dog, .cardigan, "DogCardigan"), (.dog, .doberman, "DogDoberman"),
+            (.dog, .bullTerrier, "DogBullTerrier"),
             (.cat, .classicCat, "CatClassic"), (.cat, .britishShorthair, "CatBritish"),
-            (.cat, .maineCoon, "CatMaineCoon"), (.cat, .siamese, "CatSiamese")
+            (.cat, .maineCoon, "CatMaineCoon"), (.cat, .siamese, "CatSiamese"),
+            (.fox, .redFox, "FoxRed"), (.fox, .arcticFox, "FoxArctic"),
+            (.parrot, .classicParrot, "ParrotClassic"), (.parrot, .cockatiel, "ParrotCockatiel"),
+            (.parrot, .budgie, "ParrotBudgie"), (.parrot, .macaw, "ParrotMacaw"),
+            (.penguin, .classicPenguin, "PenguinClassic"), (.penguin, .rockhopper, "PenguinRockhopper"),
+            (.lion, .adultLion, "LionAdult"), (.lion, .lioness, "Lioness"), (.lion, .lionCub, "LionCub")
         ]
+        XCTAssertEqual(Set(breeds.map { $0.1 }), Set(PetBreed.allCases))
         for (species, breed, token) in breeds {
-            let center = PetLockScreenSpriteAlignment.centerY(trackHeight: trackHeight, viewport: viewport, breed: breed)
+            let center = PetLockScreenSpriteAlignment.centerY(trackHeight: trackHeight, viewport: viewport)
             for direction in [PetDirection.left, .right] {
-                for digit in 0...9 {
-                    let bounds = try renderedBounds(PetTimerGlyphViewport(text: Text("\(digit)"),
-                        fontName: "PetIslandLockTimer" + token + "RunWalkSleep", viewport: viewport, direction: direction))
-                    // Only the Cardigan's extended run frame is airborne; the
-                    // compressed push-off, walking and sleeping frames touch the line.
-                    let flightLift: CGFloat = breed == .cardigan && digit < 4 && digit % 2 == 1
-                        ? 10 * viewport.width / PetSpriteGeometry.canvas.width : 0
-                    XCTAssertEqual(center - viewport.height / 2 + bounds.maxY,
-                                   lineTop - flightLift, accuracy: 1, token)
+                for mode in ["Run", "Walk", "Sleep", "RunSleep", "WalkSleep", "RunWalkSleep"] {
+                    for digit in 0...9 {
+                        let bounds = try renderedBounds(PetTimerGlyphViewport(text: Text("1:00:\(digit)"),
+                            fontName: "PetIslandLockTimer" + token + mode, viewport: viewport, direction: direction))
+                        let isRun = mode == "Run" || (mode == "RunSleep" && digit < 7)
+                            || (mode == "RunWalkSleep" && digit < 4)
+                        // Preserve the authored flight frames; grounding each
+                        // individual image would make these animals drop mid-stride.
+                        let clearance: CGFloat = isRun && digit % 2 == 1
+                            ? (breed == .cardigan ? 10 : breed == .adultLion ? 12 : 0) : 0
+                        XCTAssertEqual(center - viewport.height / 2 + bounds.maxY,
+                                       lineTop - clearance * 84 / 220, accuracy: 1,
+                                       "\(token) \(mode) \(digit) \(direction)")
+                    }
                 }
                 for step in PetAnimationLibrary.clip(for: species, breed: breed, pose: .sleep).frames.indices {
                     let bounds = try renderedBounds(PetArtwork(species: species, breed: breed, pose: .sleep,
@@ -641,12 +654,59 @@ final class PetDomainTests: XCTestCase {
                 }
             }
         }
-        for breed in PetBreed.allCases where !breeds.contains(where: { $0.1 == breed }) {
-            XCTAssertEqual(PetLockScreenSpriteAlignment.centerY(trackHeight: trackHeight, viewport: viewport, breed: breed),
-                           trackHeight / 2, "Preserve other pets' positions")
+    }
+
+    @MainActor
+    func testAllPetsMeetExpandedIslandLineWithoutChangingSpriteSize() throws {
+        // Include a height-constrained viewport to catch assumptions that width
+        // alone determines the fit, as well as the actual expanded DI size.
+        for viewport in [CGSize(width: 50, height: 44), CGSize(width: 100, height: 50)] {
+            let center = PetLockScreenSpriteAlignment.centerY(trackHeight: 72, viewport: viewport)
+            for species in PetSpecies.allCases {
+                for breed in PetBreed.available(for: species) {
+                    for pose in [PetPose.walk, .sleep] {
+                        let clip = PetAnimationLibrary.clip(for: species, breed: breed, pose: pose)
+                        for step in clip.frames.indices {
+                            for direction in [PetDirection.left, .right] {
+                                let bounds = try renderedBounds(PetArtwork(species: species, breed: breed, pose: pose,
+                                    direction: direction, step: step, animatesMotion: false, surface: .dynamicIsland)
+                                    .frame(width: viewport.width, height: viewport.height))
+                                XCTAssertEqual(center - viewport.height / 2 + bounds.maxY, 61, accuracy: 1,
+                                               "\(breed) \(pose) \(step) \(viewport) \(direction)")
+                            }
+                        }
+                    }
+                }
+            }
         }
-        XCTAssertEqual(PetLockScreenSpriteAlignment.centerY(trackHeight: trackHeight, viewport: viewport, breed: nil),
-                       trackHeight / 2)
+    }
+
+    func testAllForegroundPetsKeepGroundedWalkAndAuthoredFlightClearance() throws {
+        for species in PetSpecies.allCases {
+            for breed in PetBreed.available(for: species) {
+                for pose in [PetPose.walk, .run, .idle, .sleep, .play, .eat] {
+                    let clip = PetAnimationLibrary.naturalClip(for: species, breed: breed, pose: pose)
+                    for name in clip.frames {
+                        let geometry = try XCTUnwrap(PetSpriteGeometry.load(assetName: name), name)
+                        for viewport in [CGSize(width: 78, height: 62.4), CGSize(width: 104, height: 83.2)] {
+                            let fit = viewport.width / 220
+                            let rect = geometry.rect(in: viewport)
+                            let foot = rect.minY + geometry.visibleBounds.maxY * geometry.scale * fit
+                            let authoredClearance = geometry.preservesAuthoredBaseline
+                                ? 160 - geometry.visibleBounds.maxY : 0
+                            if pose != .run {
+                                // Some original companion canvases include one
+                                // extra contact pixel. Allow it plus float rounding.
+                                XCTAssertEqual(foot, 160 * fit, accuracy: fit + 0.0001, name)
+                            } else {
+                                XCTAssertEqual(foot, (160 - authoredClearance) * fit, accuracy: 0.001, name)
+                                XCTAssertLessThanOrEqual(foot, 161 * fit, name)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     func testEverySelectablePetPoseHasVisibleBundledArtwork() throws {
@@ -2343,11 +2403,13 @@ final class PetDomainTests: XCTestCase {
         XCTAssertFalse(settings.hapticsEnabled)
         XCTAssertTrue(settings.minimizeMotion)
         XCTAssertNil(settings.liveActivityBackgroundColor)
+        XCTAssertEqual(settings.liveActivityBackgroundTransparency, 0)
     }
 
     func testLiveActivityColorSurvivesSettingsRoundTrip() throws {
         let color = PetColorSelection(red: 0.94, green: 0.87, blue: 0.76)
-        let settings = AppSettings(appearance: .light, liveActivityBackgroundColor: color)
+        let settings = AppSettings(appearance: .light, liveActivityBackgroundColor: color,
+                                   liveActivityBackgroundTransparency: 0.65)
         let decoded = try JSONDecoder().decode(AppSettings.self, from: JSONEncoder().encode(settings))
         XCTAssertEqual(decoded, settings)
     }
@@ -2359,17 +2421,21 @@ final class PetDomainTests: XCTestCase {
         XCTAssertNil(json["backgroundColor"])
         let decoded = try JSONDecoder().decode(PetActivityAttributes.ContentState.self, from: encoded)
         XCTAssertNil(decoded.backgroundColor)
+        XCTAssertNil(decoded.backgroundTransparency)
+        XCTAssertEqual(decoded.appearance.transparency, 0)
         XCTAssertEqual(decoded.appearance.background, PetActivityAppearance.defaultBackground)
     }
 
     func testLiveActivityReactionsPreserveCustomBackground() throws {
         let color = PetColorSelection(red: 0.74, green: 0.68, blue: 0.88)
         let initial = PetSnapshot.initial(at: .now)
-        let content = PetActivityAttributes.ContentState(snapshot: initial, lastInteraction: nil, backgroundColor: color)
+        let content = PetActivityAttributes.ContentState(snapshot: initial, lastInteraction: nil,
+                                                        backgroundColor: color, backgroundTransparency: 0.7)
         let snapshots = PetLiveMotionSequence.snapshots(from: initial, action: .run, species: .lion)
         for snapshot in snapshots {
             let updated = content.updating(snapshot: snapshot, lastInteraction: "run")
             XCTAssertEqual(updated.backgroundColor, color)
+            XCTAssertEqual(updated.backgroundTransparency, 0.7)
             XCTAssertEqual(updated.snapshot, snapshot)
             XCTAssertEqual(updated.lastInteraction, "run")
             XCTAssertEqual(try JSONDecoder().decode(PetActivityAttributes.ContentState.self,
@@ -2391,6 +2457,70 @@ final class PetDomainTests: XCTestCase {
         }
         XCTAssertFalse(PetActivityAppearance(background: nil).usesDarkText)
         XCTAssertTrue(PetActivityAppearance(background: .init(red: 1, green: 1, blue: 1)).usesDarkText)
+    }
+
+    func testActivityTransparencyUpdatePreservesPetSnapshotAndInteraction() throws {
+        let snapshot = PetSnapshot(pose: .walk, position: 0.6, direction: .left, revision: 37, generatedAt: .now)
+        let content = PetActivityAttributes.ContentState(snapshot: snapshot, lastInteraction: "play")
+        for color in [PetColorSelection(red: 0.55, green: 0.55, blue: 0.55),
+                      PetColorSelection(red: 0.95, green: 0.45, blue: 0.65)] {
+            for transparency in [0.0, 0.35, 1.0] {
+                let updated = content.updatingAppearance(color: color, transparency: transparency)
+                let decoded = try JSONDecoder().decode(PetActivityAttributes.ContentState.self,
+                                                       from: JSONEncoder().encode(updated))
+                XCTAssertEqual(decoded.snapshot, snapshot)
+                XCTAssertEqual(decoded.lastInteraction, "play")
+                XCTAssertEqual(decoded.appearance.background, color)
+                XCTAssertEqual(decoded.appearance.transparency, transparency)
+            }
+        }
+    }
+
+    func testActivityTransparencyBoundsAndAccessibilityKeepSavedChoice() throws {
+        for (value, expected) in [(-4.0, 0.0), (0.35, 0.35), (8.0, 1.0)] {
+            let data = Data("{\"liveActivityBackgroundTransparency\":\(value)}".utf8)
+            let settings = try JSONDecoder().decode(AppSettings.self, from: data)
+            XCTAssertEqual(settings.liveActivityBackgroundTransparency, expected)
+        }
+        for invalid in [Double.nan, .infinity, -.infinity] {
+            let settings = AppSettings(liveActivityBackgroundTransparency: invalid)
+            XCTAssertEqual(settings.liveActivityBackgroundTransparency, 0)
+            XCTAssertNoThrow(try JSONEncoder().encode(settings))
+        }
+        let color = PetColorSelection(red: 0.95, green: 0.45, blue: 0.65)
+        let saved = PetActivityAppearance(background: color, transparency: 0.8)
+        let reduced = saved.respectingReducedTransparency(true)
+        XCTAssertEqual(reduced.transparency, 0)
+        XCTAssertEqual(reduced.background, color)
+        XCTAssertNotNil(reduced.systemBackgroundTint)
+        XCTAssertNil(saved.systemBackgroundTint)
+        XCTAssertEqual(saved.respectingReducedTransparency(false).transparency, 0.8)
+        XCTAssertEqual(saved.transparency, 0.8)
+    }
+
+    @MainActor
+    func testActivityTransparencyOnlySavePersistsWithoutChangingColorOrSessionSettings() async throws {
+        let store = InMemoryPetStore()
+        let controller = PetSessionController(store: store, arcadeStore: InMemoryArcadeStore())
+        await controller.bootstrap()
+        await controller.updateDynamicIslandSettings(mode: .runWalkSleep, durationMinutes: 120)
+        let color = PetColorSelection(red: 0.55, green: 0.55, blue: 0.55)
+        let initial = await controller.updateLiveActivityBackgroundColor(color)
+        XCTAssertTrue(initial)
+        let before = await store.load()
+        let saved = await controller.updateLiveActivityBackgroundColor(color, transparency: 0.6)
+        XCTAssertTrue(saved)
+        let after = await store.load()
+        var expected = before
+        expected.settings.liveActivityBackgroundTransparency = 0.6
+        XCTAssertEqual(after, expected)
+        let reloaded = PetSessionController(store: store, arcadeStore: InMemoryArcadeStore())
+        await reloaded.bootstrap()
+        XCTAssertEqual(reloaded.settings.liveActivityBackgroundTransparency, 0.6)
+        XCTAssertEqual(reloaded.settings.liveActivityBackgroundColor, color)
+        let colorOnly = await reloaded.updateLiveActivityBackgroundColor(nil)
+        XCTAssertTrue(colorOnly)
+        XCTAssertEqual(reloaded.settings.liveActivityBackgroundTransparency, 0.6)
     }
 
     @MainActor
@@ -2422,14 +2552,16 @@ final class PetDomainTests: XCTestCase {
         let controller = PetSessionController(store: store, arcadeStore: InMemoryArcadeStore())
         await controller.bootstrap()
         let previous = PetColorSelection(red: 0.15, green: 0.27, blue: 0.44)
-        let saved = await controller.updateLiveActivityBackgroundColor(previous)
+        let saved = await controller.updateLiveActivityBackgroundColor(previous, transparency: 0.65)
         XCTAssertTrue(saved)
         await store.setFailure(true)
-        let reset = await controller.updateLiveActivityBackgroundColor(nil)
+        let reset = await controller.updateLiveActivityBackgroundColor(nil, transparency: 0)
         XCTAssertFalse(reset)
         XCTAssertEqual(controller.settings.liveActivityBackgroundColor, previous)
+        XCTAssertEqual(controller.settings.liveActivityBackgroundTransparency, 0.65)
         let persisted = await store.load()
         XCTAssertEqual(persisted.settings.liveActivityBackgroundColor, previous)
+        XCTAssertEqual(persisted.settings.liveActivityBackgroundTransparency, 0.65)
         XCTAssertNotNil(controller.alertMessage)
     }
 

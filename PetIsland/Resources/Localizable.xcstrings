@@ -1,6 +1,108 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "More transparency reveals the glass beneath the color. Its appearance depends on your wallpaper. At 0%, the chosen color stays solid." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More transparency reveals the glass beneath the color. Its appearance depends on your wallpaper. At 0%, the chosen color stays solid."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чем выше прозрачность, тем заметнее стекло под цветом. Его вид зависит от обоев. При 0% выбранный цвет остаётся сплошным."
+          }
+        }
+      }
+    },
+    "Reduce Transparency is enabled in iPhone settings. The card uses a solid background; your glass preference is saved." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reduce Transparency is enabled in iPhone settings. The card uses a solid background; your glass preference is saved."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В настройках iPhone включено «Уменьшение прозрачности». Фон будет сплошным, а ваш выбор прозрачности сохранится."
+          }
+        }
+      }
+    },
+    "Glass" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glass"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стекло"
+          }
+        }
+      }
+    },
+    "Solid background" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solid background"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сплошной фон"
+          }
+        }
+      }
+    },
+    "Liquid Glass" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liquid Glass"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liquid Glass"
+          }
+        }
+      }
+    },
+    "Transparency" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transparency"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прозрачность"
+          }
+        }
+      }
+    },
     "" : {
 
     },

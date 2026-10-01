@@ -395,16 +395,22 @@ private struct IslandSetupView: View {
 private struct LiveActivityColorEditor: View {
     @ObservedObject var controller: PetSessionController
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @State private var draft: PetColorSelection?
+    @State private var draftTransparency: Double
     @State private var isSaving = false
     @State private var saveFailed = false
 
     init(controller: PetSessionController) {
         self.controller = controller
         _draft = State(initialValue: controller.settings.liveActivityBackgroundColor)
+        _draftTransparency = State(initialValue: controller.settings.liveActivityBackgroundTransparency)
     }
 
-    private var appearance: PetActivityAppearance { PetActivityAppearance(background: draft) }
+    private var appearance: PetActivityAppearance {
+        PetActivityAppearance(background: draft, transparency: draftTransparency)
+            .respectingReducedTransparency(reduceTransparency)
+    }
 
     private let presets: [(name: LocalizedStringKey, color: PetColorSelection)] = [
         ("Graphite", .init(red: 0.15, green: 0.17, blue: 0.21)),
@@ -437,12 +443,30 @@ private struct LiveActivityColorEditor: View {
                     .frame(width: 84, height: 72)
                     .frame(maxWidth: .infinity)
                     Capsule()
-                        .fill(appearance.foregroundColor.opacity(0.12))
+                        .fill(appearance.contentForegroundStyle.opacity(0.12))
                         .frame(height: 4)
                 }
-                .foregroundStyle(appearance.foregroundColor)
+                .foregroundStyle(appearance.contentForegroundStyle)
                 .padding(14)
-                .background(appearance.backgroundColor, in: RoundedRectangle(cornerRadius: 22))
+                .background {
+                    let shape = RoundedRectangle(cornerRadius: 22)
+                    ZStack {
+                        if appearance.usesSystemMaterial {
+                            if #available(iOS 26.0, *) {
+                                Color.clear.glassEffect(.regular, in: shape)
+                            } else {
+                                shape.fill(.regularMaterial)
+                            }
+                        }
+                        shape.fill(appearance.backgroundFill)
+                    }
+                }
+                .padding(12)
+                .background {
+                    LinearGradient(colors: [.indigo, .pink.opacity(0.65), .blue],
+                                   startPoint: .topLeading, endPoint: .bottomTrailing)
+                        .clipShape(RoundedRectangle(cornerRadius: 28))
+                }
                 .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
                 .listRowBackground(Color.clear)
             }
@@ -480,6 +504,35 @@ private struct LiveActivityColorEditor: View {
                 Text("Text adjusts automatically. Save to update the current Live Activity and future sessions.")
             }
 
+            Section {
+                HStack {
+                    Text("Transparency")
+                    Spacer()
+                    Text(draftTransparency, format: .percent.precision(.fractionLength(0)))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                }
+                Slider(value: $draftTransparency, in: 0...1, step: 0.05) {
+                    Text("Transparency")
+                }
+                .disabled(reduceTransparency)
+                HStack {
+                    Text("Solid background")
+                    Spacer()
+                    Text("Glass")
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            } header: {
+                Text("Liquid Glass")
+            } footer: {
+                if reduceTransparency {
+                    Text("Reduce Transparency is enabled in iPhone settings. The card uses a solid background; your glass preference is saved.")
+                } else {
+                    Text("More transparency reveals the glass beneath the color. Its appearance depends on your wallpaper. At 0%, the chosen color stays solid.")
+                }
+            }
+
             if saveFailed {
                 Text("Your changes could not be saved. Please try again.")
                     .foregroundStyle(.red)
@@ -497,7 +550,7 @@ private struct LiveActivityColorEditor: View {
                 Button("Save") {
                     isSaving = true
                     Task {
-                        let saved = await controller.updateLiveActivityBackgroundColor(draft)
+                        let saved = await controller.updateLiveActivityBackgroundColor(draft, transparency: draftTransparency)
                         isSaving = false
                         saveFailed = !saved
                         if saved { dismiss() }

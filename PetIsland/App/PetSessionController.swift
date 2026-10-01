@@ -250,11 +250,14 @@ final class PetSessionController: ObservableObject {
     }
 
     @discardableResult
-    func updateLiveActivityBackgroundColor(_ color: PetColorSelection?) async -> Bool {
+    func updateLiveActivityBackgroundColor(_ color: PetColorSelection?, transparency: Double? = nil) async -> Bool {
         await beginSave()
         defer { finishSave() }
         var candidate = state
         candidate.settings.liveActivityBackgroundColor = color
+        if let transparency {
+            candidate.settings.liveActivityBackgroundTransparency = PetActivityAppearance.normalizedTransparency(transparency)
+        }
         return await commitState(candidate, syncPets: false)
     }
 
@@ -313,7 +316,8 @@ final class PetSessionController: ObservableObject {
             alertMessage = String(localized: "Your changes could not be saved. Please try again.")
             return false
         }
-        let activityColorChanged = settings.liveActivityBackgroundColor != candidate.settings.liveActivityBackgroundColor
+        let activityAppearanceChanged = settings.liveActivityBackgroundColor != candidate.settings.liveActivityBackgroundColor
+            || settings.liveActivityBackgroundTransparency != candidate.settings.liveActivityBackgroundTransparency
         let discoveriesChanged = state.discoveries != candidate.discoveries
         state = candidate
         settings = candidate.settings
@@ -325,9 +329,11 @@ final class PetSessionController: ObservableObject {
         } else if discoveriesChanged {
             synchronizeSharedDiscoveryWalk()
         }
-        if activityColorChanged, let activity {
-            var content = activity.content.state
-            content.backgroundColor = settings.liveActivityBackgroundColor
+        if activityAppearanceChanged, let activity {
+            let content = activity.content.state.updatingAppearance(
+                color: settings.liveActivityBackgroundColor,
+                transparency: settings.liveActivityBackgroundTransparency
+            )
             await activity.update(ActivityContent(state: content, staleDate: activity.attributes.endsAt))
         }
         return true
@@ -952,7 +958,8 @@ final class PetSessionController: ObservableObject {
             state: PetActivityAttributes.ContentState(
                 snapshot: session.snapshot,
                 lastInteraction: nil,
-                backgroundColor: settings.liveActivityBackgroundColor
+                backgroundColor: settings.liveActivityBackgroundColor,
+                backgroundTransparency: settings.liveActivityBackgroundTransparency
             ),
             staleDate: session.endsAt
         )

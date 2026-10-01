@@ -7,6 +7,16 @@ extension PetActivityAppearance {
     }
 
     var foregroundColor: Color { usesDarkText ? .black : .white }
+
+    var backgroundFill: Color { backgroundColor.opacity(1 - transparency) }
+
+    // Keep the system's glass underneath the color layer. Applying the same
+    // translucent color as both tint and fill would double its opacity.
+    var systemBackgroundTint: Color? { usesSystemMaterial ? nil : backgroundColor }
+    var systemActionForeground: Color? { usesAdaptiveForeground ? nil : foregroundColor }
+    var contentForegroundStyle: AnyShapeStyle {
+        usesAdaptiveForeground ? AnyShapeStyle(.primary) : AnyShapeStyle(foregroundColor)
+    }
 }
 
 private struct PetMinimizeMotionKey: EnvironmentKey {
@@ -404,16 +414,13 @@ enum PetLockScreenSpriteAlignment {
     static let lineHeight: CGFloat = 4
     static let lineBottomInset: CGFloat = 7
 
-    static func centerY(trackHeight: CGFloat, viewport: CGSize, breed: PetBreed?) -> CGFloat {
-        switch breed {
-        case .corgi, .cardigan, .classicCat, .britishShorthair, .maineCoon, .siamese: break
-        default: return trackHeight / 2
-        }
+    static func centerY(trackHeight: CGFloat, viewport: CGSize) -> CGFloat {
         let fit = min(viewport.width / PetSpriteGeometry.canvas.width,
                       viewport.height / PetSpriteGeometry.canvas.height)
         let groundBelowCenter = (PetSpriteGeometry.baseline - PetSpriteGeometry.canvas.height / 2) * fit
-        // Align the authored ground, including transparent margins, with the
-        // top of the track. Use one position for both timer and sleeping PNG.
+        // Every breed uses the same authored ground, including transparent
+        // margins. Keep this position across timer/PNG and pose transitions;
+        // airborne frames retain their own clearance above the canvas baseline.
         return trackHeight - lineBottomInset - lineHeight - groundBelowCenter
     }
 }
