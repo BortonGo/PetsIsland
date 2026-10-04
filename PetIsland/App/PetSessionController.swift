@@ -481,15 +481,44 @@ final class PetSessionController: ObservableObject {
     @discardableResult
     func setHabitatItem(_ item: HabitatItemKind, placed: Bool) -> Bool {
         guard didBootstrap, !isBusy else { return false }
-        guard !placed || arcadeProgress.ownedHabitatItems.contains(item) else {
+        if placed {
+            if let placement = habitat.configuration.furniture.first(where: { $0.item == item }) {
+                return placeHabitatItem(item, in: placement.slot)
+            }
+            let slots = item == .cozyBox ? [HabitatFurnitureSlot.right, .left] : item.slots
+            guard let slot = slots.first(where: { habitat.configuration.furnitureConflicts(for: item, in: $0).isEmpty }) else {
+                alertMessage = String(localized: "Choose a place and replace an item to make room.")
+                return false
+            }
+            return placeHabitatItem(item, in: slot)
+        }
+        do {
+            habitat = try PetHabitatStore.update { $0.configuration.removeItem(item) }
+            WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
+            return true
+        } catch {
+            alertMessage = String(localized: "The enclosure could not be saved.")
+            return false
+        }
+    }
+
+    @discardableResult
+    func placeHabitatItem(_ item: HabitatItemKind, in slot: HabitatFurnitureSlot, replacing: Bool = false) -> Bool {
+        guard didBootstrap, !isBusy else { return false }
+        guard arcadeProgress.ownedHabitatItems.contains(item) else {
             alertMessage = String(localized: "Buy this item in the shop before placing it.")
             return false
         }
+        guard item.slots.contains(slot) else { return false }
+        var didPlace = false
         do {
             habitat = try PetHabitatStore.update { shared in
-                switch item {
-                case .cozyBox: shared.configuration.setCozyBox(placed)
-                }
+                didPlace = shared.configuration.placeItem(item, in: slot, replacing: replacing)
+                    || shared.configuration.furniture.contains(.init(item: item, slot: slot))
+            }
+            guard didPlace else {
+                alertMessage = String(localized: "Choose a place and replace an item to make room.")
+                return false
             }
             WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
             Haptics.success(enabled: settings.hapticsEnabled)
@@ -509,10 +538,19 @@ final class PetSessionController: ObservableObject {
             alertMessage = String(localized: "Buy this item in the shop before placing it.")
             return false
         }
+        var placementRejected = false
         do {
             habitat = try PetHabitatStore.update { shared in
+                if let hasCozyBox {
+                    var configuration = shared.configuration
+                    configuration.setCozyBox(hasCozyBox)
+                    guard configuration.hasCozyBox == hasCozyBox else {
+                        placementRejected = true
+                        return
+                    }
+                    shared.configuration = configuration
+                }
                 shared.configuration.setTheme(theme)
-                if let hasCozyBox { shared.configuration.setCozyBox(hasCozyBox) }
                 var selectedIDs = residentPetIDs
                 // A walking resident keeps its berth and order while the user
                 // edits the other residents; an away pet cannot be newly added.
@@ -540,6 +578,10 @@ final class PetSessionController: ObservableObject {
                         vitalsUpdatedAt: arcadeState.vitalsUpdatedAtByPetID[pet.id] ?? .distantPast
                     )
                 }
+            }
+            guard !placementRejected else {
+                alertMessage = String(localized: "Choose a place and replace an item to make room.")
+                return false
             }
             WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
             Haptics.success(enabled: settings.hapticsEnabled)

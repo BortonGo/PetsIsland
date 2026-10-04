@@ -70,6 +70,7 @@ struct HabitatEditorView: View {
             pets: presentPets,
             vitalsByPetID: vitalsByPetID,
             hasCozyBox: hasCozyBox,
+            furniture: controller.habitat.configuration.furniture,
             isAnimationEnabled: !showsFurniture
         )
         .frame(height: 236)
@@ -110,9 +111,12 @@ struct HabitatEditorView: View {
                     .foregroundStyle(PetDesign.secondary)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Furniture").font(.subheadline.weight(.semibold))
-                    Text(hasCozyBox ? "Cozy box" : "Choose an item")
+                    Text(controller.habitat.configuration.furniture.isEmpty
+                         ? String(localized: "Choose an item")
+                         : controller.habitat.configuration.furniture.map { $0.item.title }.joined(separator: ", "))
                         .font(.caption)
                         .foregroundStyle(PetDesign.secondary)
+                        .lineLimit(2)
                 }
                 Spacer(minLength: 8)
                 Image(systemName: "chevron.right")
@@ -375,6 +379,7 @@ struct HabitatEditorCanvas: View {
     let vitalsByPetID: [UUID: PetVitals]
     var petScale: CGFloat = 1
     var hasCozyBox = false
+    var furniture: [HabitatFurniturePlacement]? = nil
     var isAnimationEnabled = true
     @PetReduceMotion private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
@@ -386,7 +391,7 @@ struct HabitatEditorCanvas: View {
             ZStack(alignment: .bottom) {
                 HabitatThemeBackdrop(theme: palette)
                 if pets.isEmpty {
-                    if hasCozyBox {
+                    if !motion.furniture.isEmpty {
                         Label("Empty enclosure", systemImage: "pawprint")
                             .font(.subheadline.weight(.medium))
                             .foregroundStyle(palette.foreground)
@@ -396,7 +401,7 @@ struct HabitatEditorCanvas: View {
                             .foregroundStyle(palette.foreground)
                     }
                 }
-                if hasCozyBox {
+                if motion.hasCozyBox {
                     cozyBox(layer: .back)
                         .zIndex(boxDepth - 0.2)
                     Button {
@@ -416,6 +421,12 @@ struct HabitatEditorCanvas: View {
                     .accessibilityLabel("Cozy box")
                     .accessibilityValue(boxStatus)
                     .accessibilityHint(motion.boxOccupantID == nil ? Text("Invite a cat") : Text("Stroke pet"))
+                }
+                ForEach(motion.furniture.filter { $0.item != .cozyBox }) { placement in
+                    furnitureArtwork(placement, layer: .back)
+                        .zIndex(motion.furnitureDepth(placement) - 0.2)
+                    furnitureArtwork(placement, layer: .front)
+                        .zIndex(motion.furnitureDepth(placement) + 0.2)
                 }
                 ForEach(motion.actors) { actor in
                     let width = min(proxy.size.width * 0.24, 78) * petScale
@@ -442,7 +453,7 @@ struct HabitatEditorCanvas: View {
                     .onTapGesture { motion.pet(actor.id) }
                     .position(actor.position)
                     .zIndex(actor.id == motion.boxOccupantID && motion.boxPhase.containsCat
-                            ? boxDepth : Double(actor.position.y))
+                            ? boxDepth : motion.renderDepth(for: actor))
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(actor.profile.name)
                     .accessibilityValue(status(for: actor.pose))
@@ -464,6 +475,7 @@ struct HabitatEditorCanvas: View {
             .onChange(of: vitalsByPetID) { _, _ in configure(in: proxy.size) }
             .onChange(of: proxy.size) { _, value in configure(in: value) }
             .onChange(of: hasCozyBox) { _, _ in configure(in: proxy.size) }
+            .onChange(of: furniture) { _, _ in configure(in: proxy.size) }
             .onChange(of: petScale) { _, _ in configure(in: proxy.size) }
         }
         .onDisappear { isVisible = false; motion.stop() }
@@ -474,7 +486,31 @@ struct HabitatEditorCanvas: View {
 
     private func configure(in size: CGSize) {
         motion.configure(pets: pets, size: size, petScale: petScale,
-                         vitals: vitalsByPetID, hasCozyBox: hasCozyBox)
+                         vitals: vitalsByPetID, hasCozyBox: hasCozyBox, furniture: furniture)
+    }
+
+    private func furnitureArtwork(_ placement: HabitatFurniturePlacement, layer: HabitatItemArtwork.Layer) -> some View {
+        let frame = motion.furnitureFrame(placement)
+        let visit = motion.furnitureVisits[placement.slot]
+        let active = visit?.phase == .using
+        return Button {
+            if let visit { motion.pet(visit.petID) }
+            else { _ = motion.requestFurniture(placement.slot) }
+        } label: {
+            HabitatItemArtwork(item: placement.item, layer: layer,
+                               activity: visit?.elapsed ?? 0, active: active)
+                .frame(width: frame.width, height: frame.height)
+                .frame(width: max(44, frame.width), height: max(44, frame.height))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .position(x: frame.midX, y: frame.midY)
+        .allowsHitTesting(layer == .front)
+        .accessibilityHidden(layer == .back)
+        .accessibilityLabel(placement.item.title)
+        .accessibilityValue(visit != nil ? Text("In use") : Text("Available"))
+        .accessibilityHint(visit == nil ? Text("Invite a pet") : Text("Stroke pet"))
+        .disabled(!pets.contains { placement.item.supports($0.species) })
     }
 
     private var boxDepth: Double {
@@ -568,6 +604,19 @@ final class HabitatMotionSimulation: ObservableObject {
     @Published private(set) var actors: [Actor] = []
     @Published private(set) var boxOccupantID: UUID?
     @Published private(set) var boxPhase: CozyBoxPhase = .empty
+    enum FurniturePhase: String { case approaching, settling, using, leaving }
+    struct FurnitureVisit: Equatable {
+        let placement: HabitatFurniturePlacement
+        let petID: UUID
+        var phase: FurniturePhase = .approaching
+        var elapsed = 0.0
+        var origin: CGPoint = .zero
+        var originOffset: CGFloat = 0
+        var exitPoint: CGPoint = .zero
+    }
+    @Published private(set) var furnitureVisits: [HabitatFurnitureSlot: FurnitureVisit] = [:]
+    private(set) var furniture: [HabitatFurniturePlacement] = []
+    private var nextFurnitureVisit: [HabitatFurnitureSlot: Double] = [:]
     private(set) var boxRestPose: PetPose = .sleep
     private(set) var size = CGSize.zero
     private(set) var hasCozyBox = false
@@ -581,15 +630,15 @@ final class HabitatMotionSimulation: ObservableObject {
     var isBoxOccupied: Bool { boxOccupantID != nil }
     var boxRenderDepth: CGFloat { boxCenter.y }
     var boxSize: CGSize {
-        let width = petWidth * 0.9
-        return CGSize(width: width, height: width / 1.4)
+        furnitureFrame(boxPlacement).size
     }
     /// The illustrated box floor (94% down its image), rather than its frame center.
     var boxPosition: CGPoint {
         guard size.width > 1, size.height > 1 else { return .zero }
-        let center = bounded(CGPoint(x: size.width * 0.69,
-                                     y: (groundRange.lowerBound + groundRange.upperBound) / 2))
-        return CGPoint(x: center.x, y: center.y + petWidth * 0.31)
+        return HabitatFurnitureLayout.ground(for: boxPlacement.slot, in: size)
+    }
+    private var boxPlacement: HabitatFurniturePlacement {
+        furniture.first { $0.item == .cozyBox } ?? .init(item: .cozyBox, slot: .right)
     }
 
     private var boxApproachSide: CGFloat = -1
@@ -608,16 +657,19 @@ final class HabitatMotionSimulation: ObservableObject {
     }
 
     func configure(pets: [PetProfile], size newSize: CGSize, petScale: CGFloat = 1,
-                   vitals: [UUID: PetVitals] = [:], hasCozyBox: Bool = false) {
+                   vitals: [UUID: PetVitals] = [:], hasCozyBox: Bool = false,
+                   furniture: [HabitatFurniturePlacement]? = nil) {
         guard newSize.width.isFinite, newSize.height.isFinite,
               newSize.width > 1, newSize.height > 1, petScale.isFinite, petScale > 0 else { return }
         self.vitals = vitals
         let previousSize = size
         let previousPetWidth = petWidth
         let wasBoxEnabled = self.hasCozyBox
+        let oldBoxSlot = boxPlacement.slot
         size = newSize
         petWidth = min(size.width * 0.24, 78) * petScale
-        self.hasCozyBox = hasCozyBox
+        self.furniture = PetHabitatState.normalizedFurniture(furniture ?? (hasCozyBox ? [.init(item: .cozyBox, slot: .right)] : []))
+        self.hasCozyBox = self.furniture.contains { $0.item == .cozyBox }
         let existing = Dictionary(uniqueKeysWithValues: actors.map { ($0.id, $0) })
         actors = pets.enumerated().map { index, profile in
             if var actor = existing[profile.id] {
@@ -643,13 +695,14 @@ final class HabitatMotionSimulation: ObservableObject {
             if reduced { actor.pose = .idle }
             return actor
         }
-        if !hasCozyBox || !actors.contains(where: { $0.id == boxOccupantID && $0.profile.species == .cat }) {
+        if !self.hasCozyBox || oldBoxSlot != boxPlacement.slot || !actors.contains(where: { $0.id == boxOccupantID && $0.profile.species == .cat }) {
             cancelBoxVisit()
         } else if previousSize != size || previousPetWidth != petWidth {
             retargetBoxAfterResize()
         }
-        if hasCozyBox && !wasBoxEnabled { scheduleNextBoxVisit() }
-        if !hasCozyBox { nextBoxVisit = .infinity }
+        if self.hasCozyBox && !wasBoxEnabled { scheduleNextBoxVisit() }
+        if !self.hasCozyBox { nextBoxVisit = .infinity }
+        reconcileFurnitureVisits(resized: previousSize != size || previousPetWidth != petWidth)
         if actors.isEmpty { stop() }
     }
 
@@ -659,6 +712,7 @@ final class HabitatMotionSimulation: ObservableObject {
         guard active, !actors.isEmpty else { return }
         if reduceMotion {
             if boxPhase != .resting { cancelBoxVisit() }
+            for slot in Array(furnitureVisits.keys) { cancelFurnitureVisit(slot) }
             actors = actors.map { actor in
                 var actor = actor
                 actor.velocity = .zero
@@ -693,6 +747,10 @@ final class HabitatMotionSimulation: ObservableObject {
 
     func pet(_ id: UUID) {
         guard let index = actors.firstIndex(where: { $0.id == id }) else { return }
+        if let visit = furnitureVisits.values.first(where: { $0.petID == id }) {
+            if reduced || visit.phase == .approaching { cancelFurnitureVisit(visit.placement.slot) }
+            else { beginFurnitureExit(visit.placement.slot, actor: actors[index]); return }
+        }
         if boxOccupantID == id {
             if boxPhase.containsCat && !reduced {
                 actors[index].affection = 1.5
@@ -718,8 +776,9 @@ final class HabitatMotionSimulation: ObservableObject {
     @discardableResult
     func requestCatToBox(_ petID: UUID? = nil) -> Bool {
         guard hasCozyBox, boxOccupantID == nil, size.width > 1 else { return false }
-        let candidates = actors.indices.filter {
-            actors[$0].profile.species == .cat && (petID == nil || actors[$0].id == petID)
+        let candidates = actors.indices.filter { index in
+            actors[index].profile.species == .cat && !furnitureVisits.values.contains(where: { $0.petID == actors[index].id })
+                && (petID == nil || actors[index].id == petID)
         }
         guard let index = candidates.min(by: {
             hypot(actors[$0].position.x - boxCenter.x, actors[$0].position.y - boxCenter.y)
@@ -759,6 +818,7 @@ final class HabitatMotionSimulation: ObservableObject {
         guard !actors.isEmpty, !reduced, rawDelta.isFinite, rawDelta > 0, size.width > 1 else { return }
         let dt = min(rawDelta, 1.0 / 15)
         clock += dt
+        requestAmbientFurnitureVisits()
         if hasCozyBox, boxOccupantID == nil, clock >= nextBoxVisit {
             let nearby = actors.filter {
                 $0.profile.species == .cat && hypot($0.position.x - boxCenter.x, $0.position.y - boxCenter.y) <= petWidth * 1.35
@@ -766,7 +826,7 @@ final class HabitatMotionSimulation: ObservableObject {
                 hypot($0.position.x - boxCenter.x, $0.position.y - boxCenter.y)
                     < hypot($1.position.x - boxCenter.x, $1.position.y - boxCenter.y)
             }
-            if let nearby { _ = requestCatToBox(nearby.id) }
+            if let nearby, requestCatToBox(nearby.id) { }
             else { nextBoxVisit = clock + 2 }
         }
         let previous = actors
@@ -774,6 +834,12 @@ final class HabitatMotionSimulation: ObservableObject {
         for index in next.indices {
             var actor = next[index]
             actor.affection = max(actor.affection - dt, 0)
+            if let visit = furnitureVisits.values.first(where: { $0.petID == actor.id }) {
+                advanceFurnitureVisit(visit.placement.slot, actor: &actor, by: dt)
+                updateAnimationFrame(for: &actor)
+                next[index] = actor
+                continue
+            }
             if actor.id != boxOccupantID, actor.visualOffsetY != 0 {
                 // Removing a raised box lets its cat settle without teleporting
                 // or shifting the floor lane used by every other resident.
@@ -811,6 +877,7 @@ final class HabitatMotionSimulation: ObservableObject {
                     }
                 }
             } else {
+                avoidFurniture(for: &actor)
                 let dx = actor.target.x - actor.position.x
                 let dy = actor.target.y - actor.position.y
                 let distance = hypot(dx, dy)
@@ -1086,6 +1153,7 @@ final class HabitatMotionSimulation: ObservableObject {
                 x: xRange.lowerBound + actor.random() * (xRange.upperBound - xRange.lowerBound),
                 y: groundRange.lowerBound + actor.random() * (groundRange.upperBound - groundRange.lowerBound)
             ))
+            if furnitureBlocks(candidate) { continue }
             let clearance = neighbours.map { other in
                 let occupied = other.travelling ? other.target : other.position
                 return hypot((candidate.x - occupied.x) / (petWidth * 0.8),
@@ -1108,6 +1176,244 @@ final class HabitatMotionSimulation: ObservableObject {
         let inset = min(petWidth * 0.46, size.width / 2)
         return CGPoint(x: min(max(point.x, inset), size.width - inset),
                        y: min(max(point.y, groundRange.lowerBound), groundRange.upperBound))
+    }
+}
+
+
+extension HabitatMotionSimulation {
+    func furnitureFrame(_ placement: HabitatFurniturePlacement) -> CGRect {
+        HabitatFurnitureLayout.frame(for: placement, in: size, petWidth: petWidth)
+    }
+
+    func furnitureDepth(_ placement: HabitatFurniturePlacement) -> Double {
+        Double(HabitatFurnitureLayout.ground(for: placement.slot, in: size).y - petWidth * 72 / 220)
+    }
+
+    func renderDepth(for actor: Actor) -> Double {
+        if let visit = furnitureVisits.values.first(where: { $0.petID == actor.id && $0.phase != .approaching }) {
+            return furnitureDepth(visit.placement)
+        }
+        return Double(actor.position.y)
+    }
+
+    private func furnitureCenter(_ placement: HabitatFurniturePlacement) -> CGPoint {
+        let floorSlot: HabitatFurnitureSlot = placement.slot == .perch ? .right : placement.slot
+        let ground = HabitatFurnitureLayout.ground(for: floorSlot, in: size)
+        let side: CGFloat = placement.slot == .left ? 1 : -1
+        return bounded(CGPoint(x: ground.x + (placement.item == .playBall ? side * petWidth * 0.42 : 0),
+                               y: ground.y - petWidth * 72 / 220))
+    }
+
+    private func furnitureApproach(_ placement: HabitatFurniturePlacement) -> CGPoint {
+        let center = furnitureCenter(placement)
+        return bounded(CGPoint(x: center.x, y: center.y + petWidth * 0.48))
+    }
+
+    private func furnitureRestOffset(_ placement: HabitatFurniturePlacement) -> CGFloat {
+        let height = furnitureFrame(placement).height
+        switch placement.item {
+        case .birdPerch:
+            return HabitatFurnitureLayout.ground(for: .perch, in: size).y
+                - HabitatFurnitureLayout.ground(for: .right, in: size).y - height * 0.08
+        case .softBed: return -height * 0.48
+        case .warmStone: return -height * 0.64
+        case .leafNest, .splashBath: return -height * 0.20
+        case .cozyBox, .playBall: return 0
+        }
+    }
+
+    @discardableResult
+    func requestFurniture(_ slot: HabitatFurnitureSlot, petID: UUID? = nil) -> Bool {
+        guard let placement = furniture.first(where: { $0.slot == slot }), size.width > 1 else { return false }
+        if placement.item == .cozyBox { return requestCatToBox(petID) }
+        guard furnitureVisits[slot] == nil else { return false }
+        let target = furnitureApproach(placement)
+        let candidates = actors.indices.filter { index in
+            let actor = actors[index]
+            return placement.item.supports(actor.profile.species) && actor.id != boxOccupantID
+                && (petID == nil || actor.id == petID)
+                && !furnitureVisits.values.contains(where: { $0.petID == actor.id })
+        }
+        guard let index = candidates.min(by: {
+            hypot(actors[$0].position.x - target.x, actors[$0].position.y - target.y)
+                < hypot(actors[$1].position.x - target.x, actors[$1].position.y - target.y)
+        }) else { return false }
+        // Reserve synchronously on the main actor, before the first movement.
+        var visit = FurnitureVisit(placement: placement, petID: actors[index].id, exitPoint: target)
+        actors[index].target = target
+        actors[index].velocity = .zero
+        actors[index].turning = 0
+        actors[index].travelling = true
+        actors[index].pose = actors[index].profile.species == .parrot ? .fly : .walk
+        if reduced {
+            visit.phase = .using
+            actors[index].position = furnitureCenter(placement)
+            actors[index].visualOffsetY = furnitureRestOffset(placement)
+            actors[index].travelling = false
+            actors[index].pose = furniturePose(visit, actor: actors[index])
+            actors[index].step = 0
+        }
+        furnitureVisits[slot] = visit
+        return true
+    }
+
+    private func furniturePose(_ visit: FurnitureVisit, actor: Actor) -> PetPose {
+        switch visit.placement.item {
+        case .softBed: .sleep
+        case .leafNest: visit.elapsed < 2 ? .play : .sleep
+        case .warmStone: actor.profile.resolvedBreed == .lionCub && visit.elapsed < 2 ? .play : .sleep
+        case .splashBath, .playBall: .play
+        case .birdPerch, .cozyBox: .idle
+        }
+    }
+
+    private func requestAmbientFurnitureVisits() {
+        for placement in furniture where placement.item != .cozyBox && furnitureVisits[placement.slot] == nil {
+            guard clock >= nextFurnitureVisit[placement.slot, default: .infinity] else { continue }
+            nextFurnitureVisit[placement.slot] = clock + 3
+            let target = furnitureApproach(placement)
+            if let nearby = actors.first(where: { actor in
+                placement.item.supports(actor.profile.species) && actor.id != boxOccupantID
+                    && !furnitureVisits.values.contains(where: { $0.petID == actor.id })
+                    && hypot(actor.position.x - target.x, actor.position.y - target.y) < petWidth * 1.5
+            }) { _ = requestFurniture(placement.slot, petID: nearby.id) }
+        }
+    }
+
+    private func reconcileFurnitureVisits(resized: Bool) {
+        for slot in Array(furnitureVisits.keys) {
+            guard var visit = furnitureVisits[slot] else { continue }
+            guard furniture.contains(visit.placement), let index = actors.firstIndex(where: { $0.id == visit.petID }),
+                  visit.placement.item.supports(actors[index].profile.species) else {
+                cancelFurnitureVisit(slot)
+                continue
+            }
+            if resized {
+                visit.exitPoint = furnitureApproach(visit.placement)
+                if visit.phase == .using {
+                    actors[index].position = furnitureCenter(visit.placement)
+                    actors[index].visualOffsetY = furnitureRestOffset(visit.placement)
+                } else if visit.phase != .approaching {
+                    visit.origin = actors[index].position
+                    visit.originOffset = actors[index].visualOffsetY
+                    visit.elapsed = 0
+                }
+                furnitureVisits[slot] = visit
+            }
+        }
+        nextFurnitureVisit = nextFurnitureVisit.filter { slot, _ in furniture.contains { $0.slot == slot } }
+        for placement in furniture where nextFurnitureVisit[placement.slot] == nil {
+            nextFurnitureVisit[placement.slot] = clock + 9 + Double(HabitatFurnitureSlot.allCases.firstIndex(of: placement.slot) ?? 0) * 7
+        }
+    }
+
+    private func beginFurnitureExit(_ slot: HabitatFurnitureSlot, actor: Actor) {
+        guard var visit = furnitureVisits[slot], visit.phase != .leaving else { return }
+        visit.phase = .leaving
+        visit.elapsed = 0
+        visit.origin = actor.position
+        visit.originOffset = actor.visualOffsetY
+        furnitureVisits[slot] = visit
+    }
+
+    private func finishFurnitureVisit(_ slot: HabitatFurnitureSlot, actor: inout Actor) {
+        if reduced { actor.visualOffsetY = 0 }
+        actor.velocity = .zero
+        actor.target = actor.position
+        actor.travelling = false
+        actor.turning = 0
+        actor.pose = .idle
+        actor.waiting = 2
+        furnitureVisits[slot] = nil
+        nextFurnitureVisit[slot] = clock + 25
+    }
+
+    private func cancelFurnitureVisit(_ slot: HabitatFurnitureSlot) {
+        guard let visit = furnitureVisits[slot] else { return }
+        if let index = actors.firstIndex(where: { $0.id == visit.petID }) {
+            var actor = actors[index]
+            finishFurnitureVisit(slot, actor: &actor)
+            actors[index] = actor
+        } else { furnitureVisits[slot] = nil }
+    }
+
+    private func advanceFurnitureVisit(_ slot: HabitatFurnitureSlot, actor: inout Actor, by dt: Double) {
+        guard var visit = furnitureVisits[slot] else { return }
+        visit.elapsed += dt
+        switch visit.phase {
+        case .approaching:
+            // A recently removed raised item may still be settling. Do not
+            // carry that vertical offset all the way to the next object.
+            let settling = petWidth * dt * 1.2
+            actor.visualOffsetY = actor.visualOffsetY < 0
+                ? min(actor.visualOffsetY + settling, 0) : max(actor.visualOffsetY - settling, 0)
+            let target = furnitureApproach(visit.placement)
+            let dx = target.x - actor.position.x, dy = target.y - actor.position.y
+            let distance = hypot(dx, dy)
+            let step = min(distance, 34 * dt)
+            actor.target = target
+            actor.facing = abs(dx) > 1 ? (dx < 0 ? -1 : 1) : actor.facing
+            actor.position = bounded(CGPoint(x: actor.position.x + dx / max(distance, 0.001) * step,
+                                             y: actor.position.y + dy / max(distance, 0.001) * step))
+            actor.gaitPhase += step / max(petWidth * 0.38, 1)
+            actor.pose = actor.profile.species == .parrot ? .fly : .walk
+            if distance < 1 {
+                visit.phase = .settling; visit.elapsed = 0
+                visit.origin = actor.position; visit.originOffset = actor.visualOffsetY
+                actor.facing = visit.placement.slot == .left ? -1 : 1
+            } else if visit.elapsed > 25 {
+                finishFurnitureVisit(slot, actor: &actor)
+                return
+            }
+        case .settling, .leaving:
+            let leaving = visit.phase == .leaving
+            let target = leaving ? visit.exitPoint : furnitureCenter(visit.placement)
+            let p = min(visit.elapsed / 1.4, 1)
+            let t = p * p * (3 - 2 * p)
+            let old = actor.position
+            actor.position = bounded(CGPoint(x: visit.origin.x + (target.x - visit.origin.x) * t,
+                                             y: visit.origin.y + (target.y - visit.origin.y) * t))
+            let offset = leaving ? 0 : furnitureRestOffset(visit.placement)
+            actor.visualOffsetY = visit.originOffset + (offset - visit.originOffset) * t
+            actor.pose = actor.profile.species == .parrot ? .fly : .walk
+            actor.gaitPhase += hypot(actor.position.x - old.x, actor.position.y - old.y) / max(petWidth * 0.38, 1)
+            if p >= 1 {
+                actor.travelling = false; actor.velocity = .zero
+                if leaving { finishFurnitureVisit(slot, actor: &actor); return }
+                visit.phase = .using; visit.elapsed = 0
+                actor.pose = furniturePose(visit, actor: actor)
+            }
+        case .using:
+            actor.pose = furniturePose(visit, actor: actor)
+            actor.velocity = .zero; actor.travelling = false
+            actor.position = furnitureCenter(visit.placement)
+            actor.visualOffsetY = furnitureRestOffset(visit.placement)
+            if visit.placement.item == .birdPerch { actor.position.x += sin(visit.elapsed * 1.4) * furnitureFrame(visit.placement).width * 0.02 }
+            if visit.elapsed >= 12 {
+                visit.phase = .leaving; visit.elapsed = 0
+                visit.origin = actor.position; visit.originOffset = actor.visualOffsetY
+            }
+        }
+        furnitureVisits[slot] = visit
+    }
+
+    private func furnitureBlocks(_ point: CGPoint) -> Bool {
+        furniture.contains { placement in
+            guard placement.slot != .perch else { return false }
+            let ground = HabitatFurnitureLayout.ground(for: placement.slot, in: size)
+            let center = CGPoint(x: ground.x, y: ground.y - petWidth * 72 / 220)
+            let frame = furnitureFrame(placement)
+            return abs(point.x - center.x) < frame.width / 2 + petWidth * 0.2
+                && abs(point.y - center.y) < max(frame.height * 0.38, petWidth * 0.16)
+        }
+    }
+
+    private func avoidFurniture(for actor: inout Actor) {
+        guard actor.profile.species != .parrot, !furniture.isEmpty else { return }
+        let ahead = CGPoint(x: actor.position.x + actor.facing * petWidth * 0.35, y: actor.position.y)
+        if furnitureBlocks(ahead) || furnitureBlocks(actor.target) {
+            actor.target.y = groundRange.upperBound
+        }
     }
 }
 

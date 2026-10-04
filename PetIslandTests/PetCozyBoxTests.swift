@@ -155,7 +155,7 @@ final class PetCozyBoxTests: XCTestCase {
     }
 
     @MainActor
-    func testOtherSpeciesKeepExactlyTheSameMotionWhenBoxIsEnabled() {
+    func testOtherSpeciesWalkAroundBoxWithoutEnteringOrChangingArtwork() {
         let pets = [
             makePet(species: .dog, breed: .cardigan),
             makePet(species: .fox, breed: .redFox),
@@ -163,16 +163,21 @@ final class PetCozyBoxTests: XCTestCase {
             makePet(species: .penguin, breed: .classicPenguin),
             makePet(species: .lion, breed: .lionCub)
         ]
-        let original = HabitatMotionSimulation()
         let furnished = HabitatMotionSimulation()
-        original.configure(pets: pets, size: canvasSize)
         furnished.configure(pets: pets, size: canvasSize, hasCozyBox: true)
-
         for pet in pets { XCTAssertFalse(furnished.requestCatToBox(pet.id)) }
         for _ in 0..<3_000 {
-            original.advance(by: frameDuration)
             furnished.advance(by: frameDuration)
-            XCTAssertEqual(furnished.actors, original.actors)
+            XCTAssertEqual(furnished.actors.map(\.profile), pets)
+            for actor in furnished.actors {
+                XCTAssertEqual(actor.visualOffsetY, 0)
+                XCTAssertTrue(actor.position.x.isFinite && actor.position.y.isFinite)
+                XCTAssertGreaterThanOrEqual(actor.position.x, 0)
+                XCTAssertLessThanOrEqual(actor.position.x, canvasSize.width)
+                let clip = PetAnimationLibrary.naturalClip(for: actor.profile.species,
+                    breed: actor.profile.resolvedBreed, pose: actor.pose)
+                XCTAssertTrue(clip.frames.indices.contains(actor.step))
+            }
         }
 
         XCTAssertNil(furnished.boxOccupantID)

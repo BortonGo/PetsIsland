@@ -6,14 +6,35 @@ struct HabitatFurnitureView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showsShop = false
     @State private var placementError: String?
+    @State private var placingItem: HabitatItemKind?
+    @State private var sheetHeight: PresentationDetent = .large
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("Tap an owned item to place or remove it.")
+                    Text("Two ground places and one upper perch. Keep the middle free for walking.")
                         .font(.subheadline)
                         .foregroundStyle(PetDesign.secondary)
+                    HStack(spacing: 8) {
+                        ForEach(HabitatFurnitureSlot.allCases) { slot in
+                            VStack(spacing: 6) {
+                                let item = controller.habitat.configuration.furniture.first { $0.slot == slot }?.item
+                                if let item {
+                                    HabitatFurnitureArtwork(item: item).frame(height: 42)
+                                } else {
+                                    Image(systemName: slot == .perch ? "bird" : "plus")
+                                        .foregroundStyle(PetDesign.secondary).frame(height: 42)
+                                }
+                                Text(slot.title).font(.caption2)
+                                Text(item?.title ?? String(localized: "Free place"))
+                                    .font(.caption2.weight(.medium)).lineLimit(2)
+                            }
+                            .frame(maxWidth: .infinity).padding(8).petSurface(radius: 14)
+                        }
+                    }
+                    Text("One bulky item at a time: a box or a leaf nest. Everything else stays in your collection.")
+                        .font(.caption).foregroundStyle(PetDesign.secondary)
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 260 : 140))], spacing: 12) {
                         ForEach(HabitatItemKind.allCases) { item in
                             itemTile(item)
@@ -48,8 +69,11 @@ struct HabitatFurnitureView: View {
                 HabitatFurnitureShopView(controller: controller)
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.medium, .large], selection: $sheetHeight)
         .presentationDragIndicator(.visible)
+        .sheet(item: $placingItem) { item in
+            HabitatItemPlacementView(controller: controller, item: item)
+        }
         .alert("Could not save", isPresented: Binding(
             get: { placementError != nil },
             set: { if !$0 { placementError = nil } }
@@ -62,10 +86,12 @@ struct HabitatFurnitureView: View {
 
     private func itemTile(_ item: HabitatItemKind) -> some View {
         let owned = controller.arcadeProgress.ownedHabitatItems.contains(item)
-        let placed = owned && controller.habitat.configuration.hasCozyBox
+        let placed = owned && controller.habitat.configuration.furniture.contains { $0.item == item }
         return Button {
             if owned {
-                if !controller.setHabitatItem(item, placed: !placed) {
+                if !placed {
+                    placingItem = item
+                } else if !controller.setHabitatItem(item, placed: false) {
                     placementError = controller.alertMessage
                         ?? String(localized: "The enclosure could not be saved.")
                     controller.alertMessage = nil
@@ -110,6 +136,11 @@ struct HabitatFurnitureView: View {
             .contentShape(RoundedRectangle(cornerRadius: 20))
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            if placed {
+                Button("Move item", systemImage: "arrow.left.arrow.right") { placingItem = item }
+            }
+        }
         .disabled(controller.isBusy)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(item.title))
@@ -158,7 +189,7 @@ struct HabitatFurnitureShopSection: View {
                     .frame(width: 80, height: 58)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.title).font(.headline)
-                    Text("A little hiding place for cats. Tap the box to invite one.")
+                    Text(item.detail)
                         .font(.caption)
                         .foregroundStyle(PetDesign.secondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -220,7 +251,7 @@ private struct HabitatFurnitureShopView: View {
     }
 }
 
-private struct HabitatFurnitureArtwork: View {
+struct HabitatFurnitureArtwork: View {
     let item: HabitatItemKind
 
     var body: some View {
@@ -230,14 +261,75 @@ private struct HabitatFurnitureArtwork: View {
                 HabitatCozyBoxArtwork(layer: .back)
                 HabitatCozyBoxArtwork(layer: .front)
             }
+        default:
+            HabitatItemArtwork(item: item, layer: .complete)
         }
     }
 }
 
-private extension HabitatItemKind {
-    var title: String {
-        switch self {
-        case .cozyBox: String(localized: "Cozy box")
+private struct HabitatItemPlacementView: View {
+    @ObservedObject var controller: PetSessionController
+    let item: HabitatItemKind
+    @Environment(\.dismiss) private var dismiss
+    @State private var replacement: HabitatFurnitureSlot?
+    @State private var error: String?
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 18) {
+                    HabitatFurnitureArtwork(item: item).frame(width: 120, height: 90)
+                    Text(item.detail).font(.subheadline).foregroundStyle(PetDesign.secondary)
+                    Text("Choose a place").font(.headline)
+                    ForEach(item.slots) { slot in
+                        let conflicts = controller.habitat.configuration.furnitureConflicts(for: item, in: slot)
+                        Button {
+                            if conflicts.isEmpty { place(in: slot, replacing: false) }
+                            else { replacement = slot }
+                        } label: {
+                            HStack {
+                                Image(systemName: slot == .perch ? "bird" : "square.dashed")
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(slot.title).font(.headline)
+                                    Text(conflicts.isEmpty ? String(localized: "Free place")
+                                         : conflicts.map { $0.item.title }.joined(separator: ", "))
+                                        .font(.caption).foregroundStyle(PetDesign.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: conflicts.isEmpty ? "plus.circle" : "arrow.triangle.2.circlepath")
+                            }
+                            .padding(16).petSurface(radius: 18)
+                        }
+                        .buttonStyle(.plain).disabled(controller.isBusy)
+                        .accessibilityIdentifier("furniture.place.\(slot.rawValue)")
+                    }
+                    Text("Replaced items return to your collection. You never need to buy them again.")
+                        .font(.caption).foregroundStyle(PetDesign.secondary)
+                }.padding(20)
+            }
+            .petPage().navigationTitle(item.title).navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
+        }
+        .presentationDetents([.medium, .large]).presentationDragIndicator(.visible)
+        .confirmationDialog("Replace placed items?", isPresented: Binding(
+            get: { replacement != nil }, set: { if !$0 { replacement = nil } }
+        ), titleVisibility: .visible) {
+            if let slot = replacement {
+                Button("Replace") { place(in: slot, replacing: true) }
+            }
+        } message: {
+            Text("Replaced items return to your collection. You never need to buy them again.")
+        }
+        .alert("Could not save", isPresented: Binding(get: { error != nil }, set: { if !$0 { error = nil } })) {
+            Button("OK", role: .cancel) { }
+        } message: { Text(error ?? "") }
+    }
+
+    private func place(in slot: HabitatFurnitureSlot, replacing: Bool) {
+        if controller.placeHabitatItem(item, in: slot, replacing: replacing) { dismiss() }
+        else {
+            error = controller.alertMessage ?? String(localized: "The enclosure could not be saved.")
+            controller.alertMessage = nil
         }
     }
 }

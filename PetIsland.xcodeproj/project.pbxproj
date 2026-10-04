@@ -54,6 +54,7 @@
 		C10000000000000000000004 /* PetDiscoveriesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000003 /* PetDiscoveriesTests.swift */; };
 		C10000000000000000000005 /* PetDiscoveryControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000004 /* PetDiscoveryControllerTests.swift */; };
 		B10000000000000000000001 /* HabitatCozyBoxArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000001 /* HabitatCozyBoxArtwork.swift */; };
+		B10000000000000000000005 /* HabitatCozyBoxArtwork.swift in Widget Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000001 /* HabitatCozyBoxArtwork.swift */; };
 		B10000000000000000000002 /* PetCozyBoxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000002 /* PetCozyBoxTests.swift */; };
 		B10000000000000000000003 /* HabitatFurnitureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* HabitatFurnitureView.swift */; };
 		B10000000000000000000004 /* PetFurnitureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000004 /* PetFurnitureTests.swift */; };
@@ -504,6 +505,7 @@
 				W10000000000000000000002 /* PetLifeState.swift in Sources */,
 				H10000000000000000000002 /* PetHabitatState.swift in Sources */,
 				W10000000000000000000003 /* PetEnclosureWidget.swift in Sources */,
+				B10000000000000000000005 /* HabitatCozyBoxArtwork.swift in Widget Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

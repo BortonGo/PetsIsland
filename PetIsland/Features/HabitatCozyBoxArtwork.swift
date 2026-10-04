@@ -180,3 +180,126 @@ struct HabitatCozyBoxArtwork: View {
         }
     }
 }
+
+/// Small pixel shapes use the same palette, hard edges and layered drawing as
+/// the original box. Animal artwork is always rendered separately and unchanged.
+struct HabitatItemArtwork: View {
+    enum Layer { case back, front, complete }
+    let item: HabitatItemKind
+    let layer: Layer
+    var activity: Double = 0
+    var active = false
+
+    var body: some View {
+        Canvas { context, size in
+            var c = context
+            c.scaleBy(x: size.width / 100, y: size.height / 100)
+            let back = layer != .front
+            let front = layer != .back
+            let ink = color(0x594A46)
+            switch item {
+            case .cozyBox: break
+            case .softBed:
+                if back {
+                    pixels([(8, 35), (17, 35), (17, 20), (83, 20), (83, 35), (92, 35), (92, 79), (84, 79), (84, 94), (16, 94), (16, 79), (8, 79)], ink, c)
+                    rect(13, 38, 74, 38, color(0xBA8A87), c)
+                    rect(20, 27, 60, 14, color(0xDDB0A5), c)
+                    rect(19, 46, 62, 25, color(0xF0D3B6), c)
+                    rect(25, 49, 49, 6, color(0xFFE6CA), c)
+                    rect(20, 78, 60, 9, color(0xA87877), c)
+                    rect(43, 80, 14, 8, color(0xF0D3B6), c)
+                }
+            case .leafNest:
+                if back {
+                    pixels([(7, 47), (17, 47), (17, 30), (29, 30), (29, 19), (70, 19), (70, 30), (84, 30), (84, 46), (94, 46), (94, 80), (82, 80), (82, 94), (20, 94), (20, 83), (7, 83)], ink, c)
+                    rect(18, 38, 66, 43, color(0x896146), c)
+                    rect(28, 32, 44, 31, color(0x59443A), c)
+                }
+                if front {
+                    for i in 0..<7 {
+                        let x = Double(8 + i * 12)
+                        let y = Double(67 + (i % 2) * 10)
+                        leaf(x, y, i % 2 == 0 ? color(0xCD9861) : color(0x9F7650), c)
+                    }
+                    if active {
+                        for i in 0..<3 {
+                            let t = (activity * 0.5 + Double(i) / 3).truncatingRemainder(dividingBy: 1)
+                            leaf(14 + Double(i) * 30, 52 - sin(t * .pi) * 25, color(0xD2AA71), c)
+                        }
+                    }
+                }
+            case .birdPerch:
+                if back {
+                    rect(14, 1, 72, 6, ink, c)
+                    rect(19, 7, 5, 78, color(0xA58A68), c)
+                    rect(76, 7, 5, 78, color(0xA58A68), c)
+                    rect(20, 9, 2, 72, color(0xDEBD87), c)
+                    rect(77, 9, 2, 72, color(0xDEBD87), c)
+                }
+                if front {
+                    let sway = active ? sin(activity * 1.4) * 2 : 0
+                    rect(12 + sway, 86, 76, 8, ink, c)
+                    rect(17 + sway, 87, 66, 4, color(0xCBA170), c)
+                    rect(45 + sway, 94, 10, 4, color(0x8D6847), c)
+                }
+            case .splashBath:
+                if back {
+                    pixels([(9, 35), (20, 35), (20, 19), (79, 19), (79, 35), (91, 35), (91, 76), (82, 76), (82, 94), (18, 94), (18, 76), (9, 76)], ink, c)
+                    rect(14, 39, 72, 31, color(0x84BBC6), c)
+                    rect(23, 26, 53, 13, color(0xB8D9D8), c)
+                    rect(24, 40, 53, 19, color(0x6FA4B7), c)
+                }
+                if front {
+                    rect(16, 68, 69, 13, color(0x9BC9CD), c)
+                    rect(23, 81, 54, 7, color(0x71A2B0), c)
+                    rect(23, 63, 51, 6, color(0xD0E4DB), c)
+                    if active {
+                        for i in 0..<3 {
+                            let t = (activity * 0.6 + Double(i) / 3).truncatingRemainder(dividingBy: 1)
+                            rect(18 + Double(i) * 28, 54 - sin(t * .pi) * 25, 4, 8, color(0xCCE6E9), c)
+                        }
+                        rect(34 + sin(activity * 2) * 8, 65, 19, 3, color(0xF0F3E2), c)
+                    }
+                }
+            case .warmStone:
+                if back {
+                    pixels([(4, 66), (13, 66), (13, 40), (28, 40), (28, 22), (70, 22), (70, 37), (85, 37), (85, 60), (96, 60), (96, 83), (86, 83), (86, 94), (13, 94), (13, 84), (4, 84)], ink, c)
+                    rect(18, 48, 64, 32, color(0xBBA48B), c)
+                    rect(30, 29, 37, 21, color(0xDDC8A8), c)
+                    rect(28, 50, 47, 8, color(0xD1BA9D), c)
+                    rect(15, 81, 70, 6, color(0x947E70), c)
+                    rect(68, 62, 12, 6, color(0xA38D79), c)
+                }
+            case .playBall:
+                if back {
+                    let dx = active ? sin(activity * 2) * 9 : 0
+                    pixels([(27 + dx, 5), (70 + dx, 5), (70 + dx, 14), (85 + dx, 14), (85 + dx, 28), (94 + dx, 28), (94 + dx, 69), (85 + dx, 69), (85 + dx, 84), (71 + dx, 84), (71 + dx, 94), (28 + dx, 94), (28 + dx, 84), (14 + dx, 84), (14 + dx, 70), (5 + dx, 70), (5 + dx, 28), (14 + dx, 28), (14 + dx, 14), (27 + dx, 14)], ink, c)
+                    rect(23 + dx, 20, 53, 60, color(0xB38B83), c)
+                    rect(15 + dx, 32, 70, 33, color(0xC8A396), c)
+                    rect(39 + dx, 13, 19, 74, color(0xE9D3AD), c)
+                    rect(23 + dx, 33, 13, 7, color(0xF2DAC4), c)
+                }
+            }
+        }
+        .aspectRatio(item.artworkAspectRatio, contentMode: .fit)
+        .allowsHitTesting(false).accessibilityHidden(true)
+    }
+
+    private func color(_ rgb: UInt32) -> Color {
+        Color(red: Double((rgb >> 16) & 255) / 255, green: Double((rgb >> 8) & 255) / 255, blue: Double(rgb & 255) / 255)
+    }
+    private func rect(_ x: Double, _ y: Double, _ w: Double, _ h: Double, _ color: Color, _ c: GraphicsContext) {
+        c.fill(Path(CGRect(x: x, y: y, width: w, height: h)), with: .color(color), style: FillStyle(antialiased: false))
+    }
+    private func pixels(_ points: [(Double, Double)], _ color: Color, _ c: GraphicsContext) {
+        var p = Path()
+        guard let first = points.first else { return }
+        p.move(to: CGPoint(x: first.0, y: first.1))
+        for point in points.dropFirst() { p.addLine(to: CGPoint(x: point.0, y: point.1)) }
+        p.closeSubpath()
+        c.fill(p, with: .color(color), style: FillStyle(antialiased: false))
+    }
+    private func leaf(_ x: Double, _ y: Double, _ color: Color, _ c: GraphicsContext) {
+        pixels([(x, y + 6), (x + 4, y + 6), (x + 4, y), (x + 11, y), (x + 11, y + 4), (x + 15, y + 4), (x + 15, y + 12), (x + 9, y + 12), (x + 9, y + 16), (x + 2, y + 16), (x + 2, y + 11), (x, y + 11)], color, c)
+    }
+}

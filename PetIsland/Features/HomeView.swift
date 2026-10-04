@@ -113,6 +113,7 @@ private struct IslandView: View {
             vitalsByPetID: controller.habitatVitalsByPetID,
             petScale: 1.2,
             hasCozyBox: controller.habitat.configuration.hasCozyBox,
+            furniture: controller.habitat.configuration.furniture,
             isAnimationEnabled: !showsHabitatEditor && !showsIslandSetup && !showsDiscoveries && !controller.showsPlayYard
         )
         .frame(height: 240)

@@ -18,13 +18,6 @@ enum ArcadeItemKind: String, Codable, CaseIterable, Identifiable, Hashable, Send
     var id: String { rawValue }
 }
 
-enum HabitatItemKind: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
-    case cozyBox
-
-    var id: String { rawValue }
-    var price: Int { 80 }
-}
-
 struct ArcadeInventory: Codable, Equatable, Sendable {
     private(set) var quantities: [ArcadeItemKind: Int] = [:]
 

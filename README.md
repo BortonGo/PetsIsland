@@ -41,17 +41,29 @@ The collection contains **20 visual variants across six species**:
 - Pet your companions and open the full-screen playroom to throw a ball and
   play fetch. Grounded movement and gait frames follow the distance travelled.
 - Track fullness, happiness, and energy, with rest and care between games.
-- Open **Enclosure → Furniture** to place or remove owned items by tapping their
-  picture. Placement saves immediately and shows a checkmark while the sheet
-  stays open; no separate enclosure save is needed. Locked items show a padlock
-  and link to the shop.
-- The **cozy box** costs **80 earned coins** in **Arcade → Shop**. It is a permanent,
-  one-time purchase. An already installed box from an earlier build stays owned
-  without a charge. Removing the box does not remove ownership.
-- Any nearby cat can approach the box, peek out or nap inside, then leave.
-  Tap the box to invite a cat or wake its occupant. One cat reserves the box
-  throughout approach, entry, rest and exit. All four cat variants keep their
-  existing artwork and movement frames.
+- Open **Enclosure → Furniture**, tap an owned item and choose its place. Placement
+  saves immediately and shows a checkmark; no separate enclosure save is needed.
+  Tap a placed item to remove it, or use its **Move item** context menu.
+- The layout has **two ground places and one upper perch**, leaving the middle
+  open for walking. Only one bulky item (a box or leaf nest) can be placed at once.
+  Replacing an item returns it to the collection without another charge.
+- Buy furniture once with earned coins in **Arcade → Shop**:
+
+  | Item | Coins | Interaction |
+  | --- | ---: | --- |
+  | Cozy box | 80 | Cats peek out or nap inside |
+  | Soft bed | 65 | Dogs settle down to sleep |
+  | Leaf nest | 90 | Foxes rustle leaves, then rest |
+  | Little swing | 100 | Parrots land and sway gently |
+  | Splash pool | 110 | Penguins play with ripples and splashes |
+  | Warm stone | 95 | Lions rest; cubs can play before sleeping |
+  | Play ball | 45 | Cats, dogs, foxes and lions play beside the ball |
+
+- Nearby pets can visit suitable furniture by themselves. Tap an item to invite
+  a pet, or tap its occupant to let it leave. A pet reserves its item throughout
+  approach, entry, use and exit, so two pets cannot occupy it simultaneously.
+- Existing boxes remain owned without a charge. All animal artwork and sprite
+  frames are preserved. The Home Screen widget reflects the placed furniture.
 
 <p align="center">
   <img src="Docs/Media/colorful-meadow-light.png" width="240" alt="Sunny meadow enclosure">
@@ -94,9 +106,9 @@ behaviour still needs measurement on a physical iPhone.
 The compass gains a small dot when a find is ready. In Russian, open
 **Остров → компас «Прогулки» → Альбом находок**.
 
-The cozy box runs on the enclosure's existing animation loop, with no extra
-timer or background task. Reduced motion keeps it static and still lets you
-invite a cat. The home enclosure pauses while walks, its editor, island setup,
+Furniture interactions run on the enclosure's existing animation loop, with no
+extra timers or background tasks. Reduced motion keeps them static and still
+lets you invite a pet. The home enclosure pauses while walks, its editor, island setup,
 or the playroom cover it.
 
 ## Arcade

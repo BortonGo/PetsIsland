@@ -120,6 +120,9 @@ private struct PetEnclosureView: View {
             ZStack {
                 enclosureBackground(size: proxy.size)
                 enclosureProps(size: proxy.size)
+                ForEach(entry.habitat.configuration.furniture) { placement in
+                    furniture(placement, size: proxy.size)
+                }
 
                 if petIsHere {
                     if let ball = presentation.ball {
@@ -171,6 +174,7 @@ private struct PetEnclosureView: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
+                .zIndex(100)
             }
             .clipped()
         }
@@ -214,9 +218,6 @@ private struct PetEnclosureView: View {
 
     private func enclosureProps(size: CGSize) -> some View {
         ZStack {
-            dogHouse
-                .position(x: 49, y: size.height - 55)
-
             HStack(alignment: .bottom, spacing: 11) {
                 ForEach(0..<18, id: \.self) { index in
                     RoundedRectangle(cornerRadius: 2)
@@ -243,22 +244,21 @@ private struct PetEnclosureView: View {
         }
     }
 
-    private var dogHouse: some View {
-        ZStack(alignment: .bottom) {
-            RoundedRectangle(cornerRadius: 5)
-                .fill(Color(red: 0.76, green: 0.35, blue: 0.21))
-                .frame(width: 58, height: 43)
-            RoundedRectangle(cornerRadius: 10)
-                .fill(Color(red: 0.22, green: 0.14, blue: 0.12))
-                .frame(width: 24, height: 29)
-            Image(systemName: "triangle.fill")
-                .resizable()
-                .foregroundStyle(Color(red: 0.42, green: 0.18, blue: 0.16))
-                .frame(width: 68, height: 32)
-                .rotationEffect(.degrees(0))
-                .offset(y: -34)
+    private func furniture(_ placement: HabitatFurniturePlacement, size: CGSize) -> some View {
+        let rect = HabitatFurnitureLayout.frame(for: placement, in: size, petWidth: petSize)
+        return Group {
+            if placement.item == .cozyBox {
+                ZStack {
+                    HabitatCozyBoxArtwork(layer: .back)
+                    HabitatCozyBoxArtwork(layer: .front)
+                }
+            } else {
+                HabitatItemArtwork(item: placement.item, layer: .complete)
+            }
         }
-        .frame(width: 72, height: 70)
+        .frame(width: rect.width, height: rect.height)
+        .position(x: rect.midX, y: rect.midY)
+        .accessibilityHidden(true)
     }
 
     private var header: some View {

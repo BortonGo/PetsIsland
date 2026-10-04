@@ -1,5 +1,110 @@
 import Foundation
 
+enum HabitatItemKind: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
+    case cozyBox, softBed, leafNest, birdPerch, splashBath, warmStone, playBall
+    var id: String { rawValue }
+    var price: Int {
+        switch self {
+        case .cozyBox: 80
+        case .softBed: 65
+        case .leafNest: 90
+        case .birdPerch: 100
+        case .splashBath: 110
+        case .warmStone: 95
+        case .playBall: 45
+        }
+    }
+    var isBulky: Bool { self == .cozyBox || self == .leafNest }
+    var artworkAspectRatio: CGFloat {
+        switch self {
+        case .cozyBox: 1.4
+        case .softBed: 3
+        case .leafNest: 2.1
+        case .birdPerch: 0.76
+        case .splashBath: 2.2
+        case .warmStone: 2.7
+        case .playBall: 1
+        }
+    }
+    var slots: [HabitatFurnitureSlot] { self == .birdPerch ? [.perch] : [.left, .right] }
+    func supports(_ species: PetSpecies) -> Bool {
+        switch self {
+        case .cozyBox: species == .cat
+        case .softBed: species == .dog
+        case .leafNest: species == .fox
+        case .birdPerch: species == .parrot
+        case .splashBath: species == .penguin
+        case .warmStone: species == .lion
+        case .playBall: [.cat, .dog, .fox, .lion].contains(species)
+        }
+    }
+    var title: String {
+        switch self {
+        case .cozyBox: String(localized: "Cozy box")
+        case .softBed: String(localized: "Soft bed")
+        case .leafNest: String(localized: "Leaf nest")
+        case .birdPerch: String(localized: "Little swing")
+        case .splashBath: String(localized: "Splash pool")
+        case .warmStone: String(localized: "Warm stone")
+        case .playBall: String(localized: "Play ball")
+        }
+    }
+    var detail: String {
+        switch self {
+        case .cozyBox: String(localized: "A little hiding place for cats. Tap the box to invite one.")
+        case .softBed: String(localized: "A soft place for a dog to curl up and rest.")
+        case .leafNest: String(localized: "Foxes rustle the leaves, then settle into their nest.")
+        case .birdPerch: String(localized: "Parrots land here and enjoy a gentle swing.")
+        case .splashBath: String(localized: "A little pool for penguins, with ripples and splashes.")
+        case .warmStone: String(localized: "A sunny resting spot for lions and their cubs.")
+        case .playBall: String(localized: "Cats, dogs, foxes and lions can nudge this little ball.")
+        }
+    }
+}
+
+enum HabitatFurnitureSlot: String, Codable, CaseIterable, Identifiable, Sendable {
+    case left, right, perch
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .left: String(localized: "Left corner")
+        case .right: String(localized: "Right corner")
+        case .perch: String(localized: "Upper perch")
+        }
+    }
+}
+
+struct HabitatFurniturePlacement: Codable, Equatable, Hashable, Identifiable, Sendable {
+    let item: HabitatItemKind
+    let slot: HabitatFurnitureSlot
+    var id: HabitatFurnitureSlot { slot }
+}
+
+/// Shared by the animated enclosure, its static widget and placement previews.
+enum HabitatFurnitureLayout {
+    static func ground(for slot: HabitatFurnitureSlot, in size: CGSize) -> CGPoint {
+        CGPoint(x: size.width * (slot == .left ? 0.18 : 0.82),
+                y: size.height * (slot == .perch ? 0.40 : 0.73))
+    }
+
+    static func frame(for placement: HabitatFurniturePlacement, in size: CGSize, petWidth: CGFloat) -> CGRect {
+        let ratio: CGFloat
+        switch placement.item {
+        case .cozyBox: ratio = 0.76
+        case .softBed: ratio = 0.96
+        case .leafNest: ratio = 0.86
+        case .birdPerch: ratio = 0.72
+        case .splashBath: ratio = 0.94
+        case .warmStone: ratio = 0.96
+        case .playBall: ratio = 0.32
+        }
+        let width = min(petWidth * ratio, size.width * 0.25)
+        let height = width / placement.item.artworkAspectRatio
+        let ground = ground(for: placement.slot, in: size)
+        return CGRect(x: ground.x - width / 2, y: ground.y - height * 0.94, width: width, height: height)
+    }
+}
+
 /// Visual environment selected for the multi-pet Home Screen habitat.
 /// Unknown values decode as `.meadow`, allowing older app versions to open a
 /// state written by a newer version without discarding its residents.
@@ -44,7 +149,8 @@ struct PetHabitatState: Codable, Equatable, Sendable {
     var theme: HabitatTheme
     private(set) var residentPetIDs: [UUID]
     private(set) var leadDynamicIslandPetID: UUID?
-    private(set) var hasCozyBox: Bool
+    private(set) var furniture: [HabitatFurniturePlacement]
+    var hasCozyBox: Bool { furniture.contains { $0.item == .cozyBox } }
     var simulationEpoch: Date
     var behaviorSeed: UInt64
     private(set) var revision: Int
@@ -56,13 +162,14 @@ struct PetHabitatState: Codable, Equatable, Sendable {
         simulationEpoch: Date = .now,
         behaviorSeed: UInt64 = 0x4841_4249_5441_5421,
         revision: Int = 0,
-        hasCozyBox: Bool = false
+        hasCozyBox: Bool = false,
+        furniture: [HabitatFurniturePlacement]? = nil
     ) {
         self.schemaVersion = Self.currentSchemaVersion
         self.theme = theme
         self.residentPetIDs = residentPetIDs
         self.leadDynamicIslandPetID = leadDynamicIslandPetID
-        self.hasCozyBox = hasCozyBox
+        self.furniture = Self.normalizedFurniture(furniture ?? (hasCozyBox ? [.init(item: .cozyBox, slot: .right)] : []))
         self.simulationEpoch = simulationEpoch
         self.behaviorSeed = behaviorSeed
         self.revision = max(revision, 0)
@@ -80,9 +187,46 @@ struct PetHabitatState: Codable, Equatable, Sendable {
     @discardableResult
     mutating func setCozyBox(_ enabled: Bool) -> Bool {
         guard hasCozyBox != enabled else { return false }
-        hasCozyBox = enabled
+        if !enabled { return removeItem(.cozyBox) }
+        guard let slot = [HabitatFurnitureSlot.right, .left].first(where: {
+            furnitureConflicts(for: .cozyBox, in: $0).isEmpty
+        }) else { return false }
+        return placeItem(.cozyBox, in: slot)
+    }
+
+    func furnitureConflicts(for item: HabitatItemKind, in slot: HabitatFurnitureSlot) -> [HabitatFurniturePlacement] {
+        furniture.filter { $0.item != item && ($0.slot == slot || (item.isBulky && $0.item.isBulky)) }
+    }
+
+    @discardableResult
+    mutating func placeItem(_ item: HabitatItemKind, in slot: HabitatFurnitureSlot, replacing: Bool = false) -> Bool {
+        guard item.slots.contains(slot), replacing || furnitureConflicts(for: item, in: slot).isEmpty else { return false }
+        let conflicts = Set(furnitureConflicts(for: item, in: slot).map(\.item))
+        let next = Self.normalizedFurniture(furniture.filter { $0.item != item && !conflicts.contains($0.item) }
+            + [.init(item: item, slot: slot)])
+        guard furniture != next else { return false }
+        furniture = next
         revision += 1
         return true
+    }
+
+    @discardableResult
+    mutating func removeItem(_ item: HabitatItemKind) -> Bool {
+        guard furniture.contains(where: { $0.item == item }) else { return false }
+        furniture.removeAll { $0.item == item }
+        revision += 1
+        return true
+    }
+
+    static func normalizedFurniture(_ placements: [HabitatFurniturePlacement]) -> [HabitatFurniturePlacement] {
+        var result: [HabitatFurniturePlacement] = []
+        for placement in placements {
+            guard placement.item.slots.contains(placement.slot),
+                  !result.contains(where: { $0.slot == placement.slot || $0.item == placement.item
+                      || ($0.item.isBulky && placement.item.isBulky) }) else { continue }
+            result.append(placement)
+        }
+        return result.sorted { $0.slot.rawValue < $1.slot.rawValue }
     }
 
     @discardableResult
@@ -172,6 +316,7 @@ struct PetHabitatState: Codable, Equatable, Sendable {
         case residentPetIDs
         case leadDynamicIslandPetID
         case hasCozyBox
+        case furniture
         case simulationEpoch
         case behaviorSeed
         case revision
@@ -183,7 +328,15 @@ struct PetHabitatState: Codable, Equatable, Sendable {
         theme = try container.decodeIfPresent(HabitatTheme.self, forKey: .theme) ?? .meadow
         residentPetIDs = try container.decodeIfPresent([UUID].self, forKey: .residentPetIDs) ?? []
         leadDynamicIslandPetID = try container.decodeIfPresent(UUID.self, forKey: .leadDynamicIslandPetID)
-        hasCozyBox = try container.decodeIfPresent(Bool.self, forKey: .hasCozyBox) ?? false
+        if let saved = try container.decodeIfPresent([String: String].self, forKey: .furniture) {
+            furniture = Self.normalizedFurniture(HabitatFurnitureSlot.allCases.compactMap { slot in
+                guard let raw = saved[slot.rawValue], let item = HabitatItemKind(rawValue: raw) else { return nil }
+                return HabitatFurniturePlacement(item: item, slot: slot)
+            })
+        } else {
+            furniture = (try container.decodeIfPresent(Bool.self, forKey: .hasCozyBox) ?? false)
+                ? [.init(item: .cozyBox, slot: .right)] : []
+        }
         simulationEpoch = try container.decodeIfPresent(Date.self, forKey: .simulationEpoch) ?? .now
         behaviorSeed = try container.decodeIfPresent(UInt64.self, forKey: .behaviorSeed)
             ?? 0x4841_4249_5441_5421
@@ -198,6 +351,7 @@ struct PetHabitatState: Codable, Equatable, Sendable {
         try container.encode(residentPetIDs, forKey: .residentPetIDs)
         try container.encodeIfPresent(leadDynamicIslandPetID, forKey: .leadDynamicIslandPetID)
         try container.encode(hasCozyBox, forKey: .hasCozyBox)
+        try container.encode(Dictionary(uniqueKeysWithValues: furniture.map { ($0.slot.rawValue, $0.item.rawValue) }), forKey: .furniture)
         try container.encode(simulationEpoch, forKey: .simulationEpoch)
         try container.encode(behaviorSeed, forKey: .behaviorSeed)
         try container.encode(revision, forKey: .revision)
