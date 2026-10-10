@@ -39,6 +39,18 @@ struct PetReduceMotion: DynamicProperty {
     var wrappedValue: Bool { systemValue || appValue }
 }
 
+extension View {
+    /// Non-lazy scroll content stays mounted offscreen. Observe only visibility,
+    /// not every scroll offset, so hidden scenes can stop their frame clocks.
+    func onPetViewportVisibilityChange(_ action: @escaping (Bool) -> Void) -> some View {
+        onGeometryChange(for: Bool.self) { geometry in
+            guard let viewport = geometry.bounds(of: .scrollView) else { return true }
+            let intersection = CGRect(origin: .zero, size: geometry.size).intersection(viewport)
+            return !intersection.isNull && intersection.width > 0 && intersection.height > 0
+        } action: { action($0) }
+    }
+}
+
 extension PetSpecies {
     var displayName: LocalizedStringKey {
         switch self {
@@ -249,6 +261,7 @@ struct PetArtwork: View {
     var animatesMotion = true
     var usesNaturalGait = false
     var surface: PetArtworkSurface = .standard
+    var accessory: PetAccessory? = nil
 
     @PetReduceMotion private var reduceMotion
 
@@ -274,8 +287,12 @@ struct PetArtwork: View {
             pose: pose,
             step: step,
             usesNaturalGait: usesNaturalGait,
-            surface: surface
+            surface: surface,
+            accessory: accessory
         )
+        // Position, shadows and flight offsets can move every display frame;
+        // resolve the image only when its appearance or animation frame changes.
+        .equatable()
         .scaleEffect(x: direction == .right ? 1 : -1, y: 1)
         // Sprite frames and facing are discrete. Interpolating their layout
         // produces sliding paws and a sideways squash at every turn.
@@ -294,7 +311,7 @@ struct PetArtwork: View {
 /// Frame-based sprites shared by the app, widget and Live Activity. Approved
 /// Pet Island sheets use original six-pose artwork; legacy frames remain as a
 /// temporary fallback for species that have not received a new sheet yet.
-private struct ImportedPetSprite: View {
+private struct ImportedPetSprite: View, Equatable {
     let species: PetSpecies
     let coat: PetCoat
     let customColor: PetColorSelection?
@@ -303,14 +320,21 @@ private struct ImportedPetSprite: View {
     let step: Int
     var usesNaturalGait = false
     var surface: PetArtworkSurface = .standard
+    var accessory: PetAccessory? = nil
 
     var body: some View {
         let clip = usesNaturalGait
             ? PetAnimationLibrary.naturalClip(for: species, breed: breed, pose: pose)
             : PetAnimationLibrary.clip(for: species, breed: breed, pose: pose)
         let assetName = clip.frameName(forStep: step)
-        let image = GroundedPetImage(assetName: assetName, usesNaturalGait: usesNaturalGait, surface: surface)
+        let dressed = accessory.flatMap { PetDressedAssets.frame(for: $0, assetName: assetName) }
+        let image = GroundedPetImage(assetName: assetName, usesNaturalGait: usesNaturalGait, surface: surface, dressedImage: dressed?.image)
         image.petCoat(species: species, coat: coat, customColor: customColor)
+            .overlay {
+                if coat != .sunrise || customColor != nil, let accessory, dressed != nil {
+                    PetAccessoryOverlay(accessory: accessory, assetName: assetName, surface: surface)
+                }
+            }
     }
 }
 
@@ -474,6 +498,7 @@ private struct GroundedPetImage: View {
     let assetName: String
     var usesNaturalGait = false
     var surface: PetArtworkSurface = .standard
+    var dressedImage: UIImage? = nil
 
     var body: some View {
         GeometryReader { proxy in
@@ -484,7 +509,8 @@ private struct GroundedPetImage: View {
             Canvas { context, _ in
                 let rect = PetSpriteGeometry.load(assetName: assetName, surface: surface)?.rect(in: proxy.size)
                     ?? CGRect(origin: .zero, size: proxy.size)
-                context.draw(Image(assetName).interpolation(.none), in: rect.offsetBy(dx: gutter, dy: 0))
+                let image = dressedImage.map { Image(uiImage: $0) } ?? Image(assetName)
+                context.draw(image.interpolation(.none), in: rect.offsetBy(dx: gutter, dy: 0))
             }
             .frame(width: proxy.size.width + gutter * 2, height: proxy.size.height)
             .position(x: proxy.size.width / 2, y: proxy.size.height / 2)

@@ -1,0 +1,8822 @@
+{
+  "fluid_cat_run_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      40,
+      192,
+      160
+    ],
+    "inkBounds": [
+      155,
+      41,
+      183,
+      68
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_run_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      20,
+      42,
+      192,
+      160
+    ],
+    "inkBounds": [
+      152,
+      42,
+      181,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_run_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      10,
+      31,
+      195,
+      151
+    ],
+    "inkBounds": [
+      141,
+      31,
+      189,
+      65
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_run_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      26,
+      28,
+      194,
+      154
+    ],
+    "inkBounds": [
+      154,
+      32,
+      181,
+      57
+    ],
+    "canonicalBottom": 154,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_run_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      26,
+      28,
+      192,
+      160
+    ],
+    "inkBounds": [
+      153,
+      30,
+      182,
+      58
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_run_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      26,
+      42,
+      194,
+      160
+    ],
+    "inkBounds": [
+      154,
+      46,
+      184,
+      74
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_run_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      34,
+      21,
+      193,
+      153
+    ],
+    "inkBounds": [
+      138,
+      21,
+      189,
+      59
+    ],
+    "canonicalBottom": 153,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_run_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      43,
+      25,
+      195,
+      157
+    ],
+    "inkBounds": [
+      154,
+      28,
+      184,
+      56
+    ],
+    "canonicalBottom": 157,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_walk_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      39,
+      20,
+      194,
+      160
+    ],
+    "inkBounds": [
+      155,
+      22,
+      183,
+      51
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_walk_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      39,
+      19,
+      193,
+      160
+    ],
+    "inkBounds": [
+      152,
+      20,
+      182,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_walk_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      19,
+      193,
+      160
+    ],
+    "inkBounds": [
+      131,
+      19,
+      188,
+      57
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_walk_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      20,
+      195,
+      160
+    ],
+    "inkBounds": [
+      135,
+      20,
+      189,
+      58
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_walk_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      39,
+      23,
+      194,
+      160
+    ],
+    "inkBounds": [
+      155,
+      25,
+      184,
+      53
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_walk_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      26,
+      193,
+      160
+    ],
+    "inkBounds": [
+      131,
+      26,
+      186,
+      60
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_walk_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      23,
+      194,
+      160
+    ],
+    "inkBounds": [
+      153,
+      28,
+      183,
+      55
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_walk_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      37,
+      24,
+      195,
+      160
+    ],
+    "inkBounds": [
+      152,
+      26,
+      182,
+      54
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "island_cat_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      45,
+      23,
+      174,
+      160
+    ],
+    "inkBounds": [
+      134,
+      27,
+      165,
+      55
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "island_cat_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      28,
+      29,
+      191,
+      160
+    ],
+    "inkBounds": [
+      139,
+      36,
+      175,
+      67
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "island_cat_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      49,
+      181,
+      160
+    ],
+    "inkBounds": [
+      116,
+      68,
+      168,
+      105
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "island_cat_run_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      3,
+      40,
+      190,
+      160
+    ],
+    "inkBounds": [
+      142,
+      40,
+      173,
+      68
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "island_cat_run_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      17,
+      38,
+      190,
+      160
+    ],
+    "inkBounds": [
+      145,
+      41,
+      175,
+      68
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "island_cat_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      43,
+      79,
+      177,
+      160
+    ],
+    "inkBounds": [
+      114,
+      79,
+      170,
+      122
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "island_cat_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      23,
+      20,
+      184,
+      160
+    ],
+    "inkBounds": [
+      143,
+      23,
+      173,
+      51
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "island_cat_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      26,
+      21,
+      183,
+      160
+    ],
+    "inkBounds": [
+      124,
+      21,
+      173,
+      60
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.993856706742547
+  },
+  "fluid_cat_british_run_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      47,
+      31,
+      200,
+      160
+    ],
+    "inkBounds": [
+      148,
+      31,
+      188,
+      60
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_run_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      30,
+      33,
+      198,
+      160
+    ],
+    "inkBounds": [
+      148,
+      33,
+      187,
+      60
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_run_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      16,
+      41,
+      201,
+      151
+    ],
+    "inkBounds": [
+      145,
+      41,
+      183,
+      69
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_run_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      24,
+      25,
+      201,
+      154
+    ],
+    "inkBounds": [
+      147,
+      25,
+      186,
+      53
+    ],
+    "canonicalBottom": 154,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_run_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      24,
+      33,
+      201,
+      160
+    ],
+    "inkBounds": [
+      149,
+      33,
+      186,
+      61
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_run_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      37,
+      31,
+      201,
+      160
+    ],
+    "inkBounds": [
+      149,
+      31,
+      189,
+      60
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_run_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      30,
+      201,
+      153
+    ],
+    "inkBounds": [
+      145,
+      30,
+      186,
+      59
+    ],
+    "canonicalBottom": 153,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_run_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      34,
+      201,
+      157
+    ],
+    "inkBounds": [
+      146,
+      34,
+      184,
+      62
+    ],
+    "canonicalBottom": 157,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_walk_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      23,
+      202,
+      160
+    ],
+    "inkBounds": [
+      143,
+      23,
+      181,
+      50
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_walk_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      24,
+      203,
+      160
+    ],
+    "inkBounds": [
+      146,
+      24,
+      187,
+      52
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_walk_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      39,
+      23,
+      203,
+      160
+    ],
+    "inkBounds": [
+      147,
+      23,
+      185,
+      52
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_walk_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      21,
+      203,
+      160
+    ],
+    "inkBounds": [
+      145,
+      21,
+      184,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_walk_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      41,
+      24,
+      202,
+      160
+    ],
+    "inkBounds": [
+      141,
+      24,
+      179,
+      52
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_walk_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      22,
+      203,
+      160
+    ],
+    "inkBounds": [
+      142,
+      22,
+      183,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_walk_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      25,
+      202,
+      160
+    ],
+    "inkBounds": [
+      145,
+      25,
+      186,
+      54
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_british_walk_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      39,
+      25,
+      203,
+      160
+    ],
+    "inkBounds": [
+      147,
+      25,
+      187,
+      54
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "island_cat_british_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      22,
+      184,
+      160
+    ],
+    "inkBounds": [
+      127,
+      22,
+      167,
+      50
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "island_cat_british_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      18,
+      36,
+      202,
+      160
+    ],
+    "inkBounds": [
+      137,
+      36,
+      175,
+      64
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "island_cat_british_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      32,
+      27,
+      186,
+      160
+    ],
+    "inkBounds": [
+      126,
+      72,
+      166,
+      97
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "island_cat_british_run_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      4,
+      49,
+      189,
+      160
+    ],
+    "inkBounds": [
+      137,
+      49,
+      176,
+      77
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "island_cat_british_run_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      32,
+      31,
+      190,
+      160
+    ],
+    "inkBounds": [
+      136,
+      31,
+      176,
+      60
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "island_cat_british_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      77,
+      178,
+      160
+    ],
+    "inkBounds": [
+      127,
+      81,
+      166,
+      109
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "island_cat_british_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      24,
+      22,
+      192,
+      160
+    ],
+    "inkBounds": [
+      134,
+      22,
+      173,
+      50
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "island_cat_british_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      28,
+      25,
+      191,
+      160
+    ],
+    "inkBounds": [
+      132,
+      25,
+      170,
+      52
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9907911902386617
+  },
+  "fluid_cat_maine_coon_run_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      49,
+      190,
+      160
+    ],
+    "inkBounds": [
+      146,
+      58,
+      175,
+      90
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_run_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      45,
+      189,
+      160
+    ],
+    "inkBounds": [
+      143,
+      57,
+      178,
+      89
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_run_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      26,
+      31,
+      186,
+      151
+    ],
+    "inkBounds": [
+      131,
+      51,
+      157,
+      77
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_run_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      34,
+      34,
+      192,
+      154
+    ],
+    "inkBounds": [
+      150,
+      51,
+      175,
+      79
+    ],
+    "canonicalBottom": 154,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_run_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      32,
+      191,
+      160
+    ],
+    "inkBounds": [
+      137,
+      52,
+      165,
+      80
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_run_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      34,
+      188,
+      160
+    ],
+    "inkBounds": [
+      142,
+      51,
+      170,
+      80
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_run_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      18,
+      191,
+      153
+    ],
+    "inkBounds": [
+      129,
+      43,
+      178,
+      74
+    ],
+    "canonicalBottom": 153,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_run_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      33,
+      191,
+      157
+    ],
+    "inkBounds": [
+      149,
+      50,
+      173,
+      77
+    ],
+    "canonicalBottom": 157,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_walk_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      32,
+      36,
+      188,
+      160
+    ],
+    "inkBounds": [
+      141,
+      42,
+      169,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_walk_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      36,
+      190,
+      160
+    ],
+    "inkBounds": [
+      148,
+      42,
+      172,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_walk_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      34,
+      39,
+      191,
+      160
+    ],
+    "inkBounds": [
+      144,
+      41,
+      172,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_walk_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      30,
+      38,
+      192,
+      160
+    ],
+    "inkBounds": [
+      143,
+      42,
+      172,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_walk_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      35,
+      36,
+      188,
+      160
+    ],
+    "inkBounds": [
+      142,
+      41,
+      170,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_walk_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      29,
+      36,
+      192,
+      160
+    ],
+    "inkBounds": [
+      148,
+      40,
+      172,
+      68
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_walk_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      30,
+      36,
+      193,
+      160
+    ],
+    "inkBounds": [
+      146,
+      41,
+      175,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_maine_coon_walk_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      30,
+      36,
+      193,
+      160
+    ],
+    "inkBounds": [
+      143,
+      40,
+      178,
+      71
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "island_cat_maine_coon_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      33,
+      177,
+      160
+    ],
+    "inkBounds": [
+      134,
+      34,
+      158,
+      60
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "island_cat_maine_coon_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      31,
+      61,
+      189,
+      160
+    ],
+    "inkBounds": [
+      123,
+      61,
+      152,
+      87
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "island_cat_maine_coon_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      21,
+      173,
+      160
+    ],
+    "inkBounds": [
+      103,
+      84,
+      157,
+      116
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "island_cat_maine_coon_run_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      8,
+      31,
+      181,
+      160
+    ],
+    "inkBounds": [
+      127,
+      53,
+      153,
+      78
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "island_cat_maine_coon_run_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      32,
+      43,
+      181,
+      160
+    ],
+    "inkBounds": [
+      137,
+      55,
+      162,
+      81
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "island_cat_maine_coon_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      88,
+      174,
+      160
+    ],
+    "inkBounds": [
+      111,
+      90,
+      157,
+      121
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "island_cat_maine_coon_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      17,
+      35,
+      180,
+      160
+    ],
+    "inkBounds": [
+      136,
+      44,
+      160,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "island_cat_maine_coon_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      20,
+      36,
+      180,
+      160
+    ],
+    "inkBounds": [
+      136,
+      46,
+      160,
+      70
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8297824180177121
+  },
+  "fluid_cat_siamese_run_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      55,
+      198,
+      160
+    ],
+    "inkBounds": [
+      156,
+      55,
+      193,
+      83
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_run_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      34,
+      52,
+      198,
+      160
+    ],
+    "inkBounds": [
+      156,
+      52,
+      192,
+      79
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_run_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      16,
+      53,
+      199,
+      151
+    ],
+    "inkBounds": [
+      149,
+      53,
+      189,
+      80
+    ],
+    "canonicalBottom": 151,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_run_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      54,
+      42,
+      198,
+      154
+    ],
+    "inkBounds": [
+      153,
+      42,
+      193,
+      71
+    ],
+    "canonicalBottom": 154,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_run_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      37,
+      42,
+      198,
+      160
+    ],
+    "inkBounds": [
+      157,
+      42,
+      193,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_run_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      45,
+      199,
+      160
+    ],
+    "inkBounds": [
+      157,
+      45,
+      194,
+      73
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_run_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      57,
+      43,
+      199,
+      153
+    ],
+    "inkBounds": [
+      151,
+      43,
+      195,
+      75
+    ],
+    "canonicalBottom": 153,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_run_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      33,
+      39,
+      199,
+      157
+    ],
+    "inkBounds": [
+      156,
+      39,
+      193,
+      67
+    ],
+    "canonicalBottom": 157,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_walk_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      33,
+      30,
+      199,
+      160
+    ],
+    "inkBounds": [
+      149,
+      30,
+      194,
+      63
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_walk_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      30,
+      199,
+      160
+    ],
+    "inkBounds": [
+      150,
+      30,
+      193,
+      62
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_walk_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      29,
+      200,
+      160
+    ],
+    "inkBounds": [
+      147,
+      29,
+      195,
+      63
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_walk_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      34,
+      29,
+      200,
+      160
+    ],
+    "inkBounds": [
+      149,
+      29,
+      195,
+      63
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_walk_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      30,
+      199,
+      160
+    ],
+    "inkBounds": [
+      148,
+      30,
+      194,
+      62
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_walk_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      31,
+      199,
+      160
+    ],
+    "inkBounds": [
+      149,
+      31,
+      193,
+      62
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_walk_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      37,
+      32,
+      200,
+      160
+    ],
+    "inkBounds": [
+      148,
+      32,
+      195,
+      63
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_cat_siamese_walk_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      34,
+      31,
+      199,
+      160
+    ],
+    "inkBounds": [
+      148,
+      31,
+      194,
+      63
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_cat_siamese_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      21,
+      179,
+      160
+    ],
+    "inkBounds": [
+      128,
+      21,
+      172,
+      54
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_cat_siamese_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      18,
+      48,
+      200,
+      160
+    ],
+    "inkBounds": [
+      137,
+      48,
+      177,
+      76
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_cat_siamese_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      35,
+      175,
+      160
+    ],
+    "inkBounds": [
+      117,
+      75,
+      163,
+      105
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_cat_siamese_run_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      3,
+      60,
+      187,
+      160
+    ],
+    "inkBounds": [
+      136,
+      60,
+      177,
+      89
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_cat_siamese_run_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      35,
+      54,
+      187,
+      160
+    ],
+    "inkBounds": [
+      142,
+      54,
+      181,
+      83
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_cat_siamese_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      85,
+      175,
+      160
+    ],
+    "inkBounds": [
+      114,
+      86,
+      164,
+      123
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_cat_siamese_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      20,
+      32,
+      188,
+      160
+    ],
+    "inkBounds": [
+      135,
+      32,
+      183,
+      63
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_cat_siamese_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      26,
+      31,
+      187,
+      160
+    ],
+    "inkBounds": [
+      135,
+      31,
+      181,
+      62
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_dog_bull_terrier_run_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      39,
+      53,
+      192,
+      160
+    ],
+    "inkBounds": [
+      147,
+      53,
+      181,
+      82
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_run_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      26,
+      54,
+      191,
+      160
+    ],
+    "inkBounds": [
+      150,
+      54,
+      182,
+      84
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_run_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      24,
+      48,
+      191,
+      151
+    ],
+    "inkBounds": [
+      147,
+      48,
+      179,
+      76
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_run_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      43,
+      190,
+      154
+    ],
+    "inkBounds": [
+      144,
+      43,
+      181,
+      74
+    ],
+    "canonicalBottom": 154,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_run_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      33,
+      45,
+      190,
+      160
+    ],
+    "inkBounds": [
+      145,
+      45,
+      179,
+      76
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_run_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      44,
+      187,
+      160
+    ],
+    "inkBounds": [
+      142,
+      44,
+      174,
+      75
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_run_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      36,
+      193,
+      153
+    ],
+    "inkBounds": [
+      149,
+      36,
+      182,
+      64
+    ],
+    "canonicalBottom": 153,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_run_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      44,
+      193,
+      157
+    ],
+    "inkBounds": [
+      148,
+      44,
+      182,
+      74
+    ],
+    "canonicalBottom": 157,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_walk_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      47,
+      196,
+      160
+    ],
+    "inkBounds": [
+      156,
+      49,
+      188,
+      78
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_walk_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      51,
+      46,
+      193,
+      160
+    ],
+    "inkBounds": [
+      150,
+      46,
+      184,
+      79
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_walk_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      47,
+      193,
+      160
+    ],
+    "inkBounds": [
+      149,
+      47,
+      181,
+      77
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_walk_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      57,
+      49,
+      189,
+      160
+    ],
+    "inkBounds": [
+      143,
+      49,
+      176,
+      79
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_walk_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      52,
+      191,
+      160
+    ],
+    "inkBounds": [
+      149,
+      52,
+      182,
+      82
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_walk_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      48,
+      192,
+      160
+    ],
+    "inkBounds": [
+      151,
+      49,
+      184,
+      81
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_walk_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      48,
+      193,
+      160
+    ],
+    "inkBounds": [
+      151,
+      48,
+      185,
+      77
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "fluid_dog_bull_terrier_walk_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      50,
+      193,
+      160
+    ],
+    "inkBounds": [
+      148,
+      50,
+      182,
+      80
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "island_dog_bull_terrier_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      60,
+      181,
+      171
+    ],
+    "inkBounds": [
+      134,
+      60,
+      165,
+      89
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "island_dog_bull_terrier_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      31,
+      57,
+      188,
+      171
+    ],
+    "inkBounds": [
+      132,
+      57,
+      166,
+      87
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "island_dog_bull_terrier_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      39,
+      64,
+      181,
+      171
+    ],
+    "inkBounds": [
+      136,
+      87,
+      170,
+      116
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "island_dog_bull_terrier_run_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      11,
+      45,
+      209,
+      160
+    ],
+    "inkBounds": [
+      150,
+      45,
+      186,
+      74
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "island_dog_bull_terrier_run_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      29,
+      40,
+      190,
+      160
+    ],
+    "inkBounds": [
+      135,
+      40,
+      171,
+      74
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "island_dog_bull_terrier_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      101,
+      172,
+      171
+    ],
+    "inkBounds": [
+      137,
+      102,
+      172,
+      129
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "island_dog_bull_terrier_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      57,
+      180,
+      171
+    ],
+    "inkBounds": [
+      135,
+      57,
+      168,
+      85
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "island_dog_bull_terrier_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      57,
+      179,
+      171
+    ],
+    "inkBounds": [
+      134,
+      57,
+      166,
+      89
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9429824561403508
+  },
+  "companion_dog_cardigan_idle_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      23,
+      43,
+      193,
+      161
+    ],
+    "inkBounds": [
+      144,
+      43,
+      178,
+      73
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9661006128702758
+  },
+  "companion_dog_cardigan_idle_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      20,
+      48,
+      193,
+      161
+    ],
+    "inkBounds": [
+      142,
+      48,
+      192,
+      83
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9661006128702758
+  },
+  "companion_dog_cardigan_jump_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      20,
+      20,
+      192,
+      148
+    ],
+    "inkBounds": [
+      148,
+      20,
+      190,
+      53
+    ],
+    "canonicalBottom": 148,
+    "scale": 0.9661006128702758
+  },
+  "companion_dog_cardigan_jump_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      32,
+      38,
+      193,
+      149
+    ],
+    "inkBounds": [
+      148,
+      38,
+      192,
+      71
+    ],
+    "canonicalBottom": 149,
+    "scale": 0.9661006128702758
+  },
+  "companion_dog_cardigan_play_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      40,
+      200,
+      161
+    ],
+    "inkBounds": [
+      142,
+      77,
+      175,
+      104
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9661006128702758
+  },
+  "companion_dog_cardigan_play_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      41,
+      39,
+      200,
+      161
+    ],
+    "inkBounds": [
+      139,
+      65,
+      185,
+      102
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9661006128702758
+  },
+  "companion_dog_cardigan_run_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      24,
+      57,
+      192,
+      160
+    ],
+    "inkBounds": [
+      148,
+      60,
+      176,
+      85
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9661006128702758
+  },
+  "companion_dog_cardigan_run_04": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      14,
+      41,
+      200,
+      150
+    ],
+    "inkBounds": [
+      147,
+      41,
+      191,
+      76
+    ],
+    "canonicalBottom": 150,
+    "scale": 0.9661006128702758
+  },
+  "companion_dog_cardigan_sleep_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      21,
+      78,
+      193,
+      161
+    ],
+    "inkBounds": [
+      144,
+      84,
+      173,
+      110
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9661006128702758
+  },
+  "companion_dog_cardigan_sleep_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      21,
+      78,
+      193,
+      161
+    ],
+    "inkBounds": [
+      146,
+      86,
+      177,
+      111
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9661006128702758
+  },
+  "companion_dog_cardigan_walk_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      13,
+      38,
+      193,
+      160
+    ],
+    "inkBounds": [
+      146,
+      38,
+      192,
+      73
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9661006128702758
+  },
+  "companion_dog_cardigan_walk_04": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      12,
+      37,
+      194,
+      160
+    ],
+    "inkBounds": [
+      147,
+      37,
+      193,
+      72
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9661006128702758
+  },
+  "fluid_dog_corgi_run_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      56,
+      44,
+      189,
+      160
+    ],
+    "inkBounds": [
+      138,
+      45,
+      172,
+      76
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "fluid_dog_corgi_run_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      42,
+      188,
+      160
+    ],
+    "inkBounds": [
+      140,
+      43,
+      168,
+      72
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "fluid_dog_corgi_run_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      24,
+      47,
+      188,
+      151
+    ],
+    "inkBounds": [
+      137,
+      47,
+      170,
+      75
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.9627586206896552
+  },
+  "fluid_dog_corgi_run_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      54,
+      44,
+      189,
+      154
+    ],
+    "inkBounds": [
+      139,
+      46,
+      173,
+      75
+    ],
+    "canonicalBottom": 154,
+    "scale": 0.9627586206896552
+  },
+  "fluid_dog_corgi_run_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      40,
+      191,
+      160
+    ],
+    "inkBounds": [
+      141,
+      41,
+      172,
+      70
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "fluid_dog_corgi_run_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      53,
+      40,
+      191,
+      160
+    ],
+    "inkBounds": [
+      140,
+      42,
+      174,
+      71
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "fluid_dog_corgi_run_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      37,
+      190,
+      153
+    ],
+    "inkBounds": [
+      141,
+      40,
+      175,
+      67
+    ],
+    "canonicalBottom": 153,
+    "scale": 0.9627586206896552
+  },
+  "fluid_dog_corgi_run_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      44,
+      190,
+      157
+    ],
+    "inkBounds": [
+      140,
+      44,
+      174,
+      73
+    ],
+    "canonicalBottom": 157,
+    "scale": 0.9627586206896552
+  },
+  "island_dog_corgi_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      43,
+      176,
+      171
+    ],
+    "inkBounds": [
+      126,
+      46,
+      157,
+      75
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "island_dog_corgi_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      59,
+      182,
+      171
+    ],
+    "inkBounds": [
+      123,
+      60,
+      157,
+      89
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "island_dog_corgi_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      67,
+      176,
+      171
+    ],
+    "inkBounds": [
+      127,
+      74,
+      158,
+      104
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "island_dog_corgi_run_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      24,
+      44,
+      196,
+      160
+    ],
+    "inkBounds": [
+      132,
+      44,
+      166,
+      75
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "island_dog_corgi_run_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      33,
+      181,
+      160
+    ],
+    "inkBounds": [
+      124,
+      33,
+      158,
+      65
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "island_dog_corgi_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      82,
+      178,
+      171
+    ],
+    "inkBounds": [
+      126,
+      85,
+      154,
+      116
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "island_dog_corgi_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      32,
+      39,
+      179,
+      160
+    ],
+    "inkBounds": [
+      128,
+      39,
+      159,
+      71
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "island_dog_corgi_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      28,
+      37,
+      178,
+      160
+    ],
+    "inkBounds": [
+      129,
+      37,
+      160,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "island_dog_corgi_walk_2": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      38,
+      178,
+      160
+    ],
+    "inkBounds": [
+      128,
+      38,
+      159,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "island_dog_corgi_walk_3": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      37,
+      178,
+      160
+    ],
+    "inkBounds": [
+      129,
+      37,
+      160,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9627586206896552
+  },
+  "fluid_dog_doberman_run_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      33,
+      37,
+      190,
+      160
+    ],
+    "inkBounds": [
+      151,
+      37,
+      182,
+      62
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_run_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      18,
+      36,
+      189,
+      160
+    ],
+    "inkBounds": [
+      141,
+      36,
+      173,
+      61
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_run_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      14,
+      38,
+      191,
+      151
+    ],
+    "inkBounds": [
+      145,
+      38,
+      174,
+      63
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_run_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      35,
+      25,
+      189,
+      154
+    ],
+    "inkBounds": [
+      145,
+      25,
+      178,
+      50
+    ],
+    "canonicalBottom": 154,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_run_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      23,
+      189,
+      160
+    ],
+    "inkBounds": [
+      148,
+      23,
+      178,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_run_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      53,
+      26,
+      191,
+      160
+    ],
+    "inkBounds": [
+      145,
+      26,
+      177,
+      51
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_run_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      22,
+      14,
+      191,
+      153
+    ],
+    "inkBounds": [
+      145,
+      14,
+      177,
+      39
+    ],
+    "canonicalBottom": 153,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_run_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      24,
+      28,
+      192,
+      157
+    ],
+    "inkBounds": [
+      147,
+      28,
+      178,
+      53
+    ],
+    "canonicalBottom": 157,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_walk_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      26,
+      190,
+      160
+    ],
+    "inkBounds": [
+      140,
+      26,
+      171,
+      51
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_walk_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      55,
+      26,
+      191,
+      160
+    ],
+    "inkBounds": [
+      148,
+      26,
+      180,
+      51
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_walk_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      54,
+      24,
+      192,
+      160
+    ],
+    "inkBounds": [
+      145,
+      24,
+      176,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_walk_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      22,
+      191,
+      160
+    ],
+    "inkBounds": [
+      145,
+      22,
+      176,
+      47
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_walk_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      23,
+      190,
+      160
+    ],
+    "inkBounds": [
+      144,
+      23,
+      175,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_walk_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      56,
+      24,
+      191,
+      160
+    ],
+    "inkBounds": [
+      144,
+      24,
+      177,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_walk_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      24,
+      191,
+      160
+    ],
+    "inkBounds": [
+      142,
+      24,
+      173,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_doberman_walk_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      24,
+      192,
+      160
+    ],
+    "inkBounds": [
+      146,
+      24,
+      177,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "island_dog_doberman_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      27,
+      171,
+      171
+    ],
+    "inkBounds": [
+      122,
+      27,
+      154,
+      52
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "island_dog_doberman_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      28,
+      49,
+      192,
+      171
+    ],
+    "inkBounds": [
+      137,
+      49,
+      170,
+      73
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "island_dog_doberman_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      54,
+      178,
+      171
+    ],
+    "inkBounds": [
+      129,
+      76,
+      161,
+      101
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "island_dog_doberman_run_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      9,
+      36,
+      211,
+      160
+    ],
+    "inkBounds": [
+      151,
+      36,
+      183,
+      61
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "island_dog_doberman_run_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      35,
+      25,
+      184,
+      160
+    ],
+    "inkBounds": [
+      136,
+      25,
+      166,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "island_dog_doberman_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      41,
+      102,
+      178,
+      171
+    ],
+    "inkBounds": [
+      142,
+      102,
+      172,
+      127
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "island_dog_doberman_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      36,
+      179,
+      171
+    ],
+    "inkBounds": [
+      139,
+      36,
+      170,
+      60
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "island_dog_doberman_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      35,
+      180,
+      171
+    ],
+    "inkBounds": [
+      134,
+      35,
+      164,
+      60
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9785703352211848
+  },
+  "fluid_dog_shepherd_run_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      28,
+      24,
+      200,
+      160
+    ],
+    "inkBounds": [
+      148,
+      26,
+      176,
+      55
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_run_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      14,
+      31,
+      201,
+      160
+    ],
+    "inkBounds": [
+      151,
+      33,
+      180,
+      61
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_run_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      8,
+      33,
+      198,
+      151
+    ],
+    "inkBounds": [
+      148,
+      33,
+      176,
+      62
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_run_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      26,
+      22,
+      206,
+      154
+    ],
+    "inkBounds": [
+      155,
+      24,
+      184,
+      53
+    ],
+    "canonicalBottom": 154,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_run_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      19,
+      29,
+      201,
+      160
+    ],
+    "inkBounds": [
+      150,
+      30,
+      178,
+      60
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_run_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      25,
+      28,
+      200,
+      160
+    ],
+    "inkBounds": [
+      150,
+      31,
+      178,
+      60
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_run_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      33,
+      20,
+      202,
+      153
+    ],
+    "inkBounds": [
+      149,
+      24,
+      177,
+      54
+    ],
+    "canonicalBottom": 153,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_run_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      28,
+      29,
+      200,
+      157
+    ],
+    "inkBounds": [
+      147,
+      32,
+      175,
+      61
+    ],
+    "canonicalBottom": 157,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_walk_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      41,
+      14,
+      203,
+      160
+    ],
+    "inkBounds": [
+      151,
+      17,
+      179,
+      47
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_walk_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      15,
+      201,
+      160
+    ],
+    "inkBounds": [
+      150,
+      18,
+      178,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_walk_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      41,
+      15,
+      202,
+      160
+    ],
+    "inkBounds": [
+      147,
+      19,
+      176,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_walk_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      15,
+      202,
+      160
+    ],
+    "inkBounds": [
+      149,
+      18,
+      178,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_walk_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      14,
+      203,
+      160
+    ],
+    "inkBounds": [
+      148,
+      19,
+      177,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_walk_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      13,
+      203,
+      160
+    ],
+    "inkBounds": [
+      150,
+      18,
+      178,
+      47
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_walk_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      13,
+      201,
+      160
+    ],
+    "inkBounds": [
+      144,
+      18,
+      173,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "fluid_dog_shepherd_walk_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      15,
+      202,
+      160
+    ],
+    "inkBounds": [
+      149,
+      19,
+      177,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "island_dog_shepherd_run_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      10,
+      21,
+      211,
+      160
+    ],
+    "inkBounds": [
+      150,
+      25,
+      179,
+      53
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "island_dog_shepherd_run_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      28,
+      24,
+      191,
+      160
+    ],
+    "inkBounds": [
+      138,
+      28,
+      167,
+      56
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "island_dog_shepherd_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      28,
+      19,
+      191,
+      160
+    ],
+    "inkBounds": [
+      137,
+      24,
+      166,
+      51
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "island_dog_shepherd_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      29,
+      20,
+      191,
+      160
+    ],
+    "inkBounds": [
+      137,
+      23,
+      164,
+      51
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_idle_0": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      71,
+      84,
+      336,
+      351
+    ],
+    "inkBounds": [
+      239,
+      87,
+      292,
+      143
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_idle_1": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      45,
+      84,
+      336,
+      351
+    ],
+    "inkBounds": [
+      239,
+      93,
+      290,
+      146
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_idle_3": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      37,
+      87,
+      331,
+      351
+    ],
+    "inkBounds": [
+      233,
+      95,
+      283,
+      146
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_lie_0": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      29,
+      193,
+      294,
+      355
+    ],
+    "inkBounds": [
+      211,
+      204,
+      267,
+      274
+    ],
+    "canonicalBottom": 159,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_run_2": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      30,
+      108,
+      349,
+      351
+    ],
+    "inkBounds": [
+      246,
+      115,
+      298,
+      170
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_swipe_0": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      60,
+      143,
+      333,
+      351
+    ],
+    "inkBounds": [
+      237,
+      157,
+      290,
+      215
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_idle_2": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      71,
+      84,
+      336,
+      351
+    ],
+    "inkBounds": [
+      239,
+      87,
+      292,
+      143
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_lie_1": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      29,
+      193,
+      294,
+      355
+    ],
+    "inkBounds": [
+      211,
+      204,
+      267,
+      274
+    ],
+    "canonicalBottom": 159,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_lie_2": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      29,
+      193,
+      294,
+      355
+    ],
+    "inkBounds": [
+      211,
+      204,
+      267,
+      274
+    ],
+    "canonicalBottom": 159,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_run_0": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      45,
+      84,
+      336,
+      351
+    ],
+    "inkBounds": [
+      239,
+      93,
+      290,
+      146
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_run_1": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      37,
+      87,
+      331,
+      351
+    ],
+    "inkBounds": [
+      233,
+      95,
+      283,
+      146
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_run_3": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      45,
+      84,
+      336,
+      351
+    ],
+    "inkBounds": [
+      239,
+      93,
+      290,
+      146
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_run_4": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      37,
+      87,
+      331,
+      351
+    ],
+    "inkBounds": [
+      233,
+      95,
+      283,
+      146
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_run_5": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      30,
+      108,
+      349,
+      351
+    ],
+    "inkBounds": [
+      246,
+      115,
+      298,
+      170
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_swipe_1": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      71,
+      84,
+      336,
+      351
+    ],
+    "inkBounds": [
+      239,
+      87,
+      292,
+      143
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_swipe_2": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      60,
+      143,
+      333,
+      351
+    ],
+    "inkBounds": [
+      237,
+      157,
+      290,
+      215
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_walk_0": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      45,
+      84,
+      336,
+      351
+    ],
+    "inkBounds": [
+      239,
+      93,
+      290,
+      146
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_walk_1": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      37,
+      87,
+      331,
+      351
+    ],
+    "inkBounds": [
+      233,
+      95,
+      283,
+      146
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_walk_2": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      71,
+      84,
+      336,
+      351
+    ],
+    "inkBounds": [
+      239,
+      87,
+      292,
+      143
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_with_ball_0": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      60,
+      143,
+      333,
+      351
+    ],
+    "inkBounds": [
+      237,
+      157,
+      290,
+      215
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_with_ball_1": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      45,
+      84,
+      336,
+      351
+    ],
+    "inkBounds": [
+      239,
+      93,
+      290,
+      146
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_with_ball_2": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      60,
+      143,
+      333,
+      351
+    ],
+    "inkBounds": [
+      237,
+      157,
+      290,
+      215
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "sprite_dog_with_ball_3": {
+    "size": [
+      362,
+      362
+    ],
+    "visibleBounds": [
+      71,
+      84,
+      336,
+      351
+    ],
+    "inkBounds": [
+      239,
+      87,
+      292,
+      143
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9664616999737543
+  },
+  "fluid_fox_run_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      30,
+      34,
+      198,
+      160
+    ],
+    "inkBounds": [
+      148,
+      34,
+      180,
+      61
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_run_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      13,
+      37,
+      198,
+      160
+    ],
+    "inkBounds": [
+      147,
+      37,
+      178,
+      64
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_run_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      4,
+      45,
+      198,
+      151
+    ],
+    "inkBounds": [
+      147,
+      45,
+      178,
+      72
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_run_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      20,
+      29,
+      199,
+      154
+    ],
+    "inkBounds": [
+      146,
+      29,
+      178,
+      56
+    ],
+    "canonicalBottom": 154,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_run_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      22,
+      37,
+      198,
+      160
+    ],
+    "inkBounds": [
+      148,
+      37,
+      179,
+      64
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_run_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      32,
+      32,
+      197,
+      160
+    ],
+    "inkBounds": [
+      145,
+      32,
+      178,
+      59
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_run_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      30,
+      25,
+      199,
+      153
+    ],
+    "inkBounds": [
+      147,
+      25,
+      180,
+      52
+    ],
+    "canonicalBottom": 153,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_run_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      29,
+      36,
+      199,
+      157
+    ],
+    "inkBounds": [
+      146,
+      36,
+      178,
+      62
+    ],
+    "canonicalBottom": 157,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_walk_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      21,
+      198,
+      160
+    ],
+    "inkBounds": [
+      144,
+      21,
+      177,
+      50
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_walk_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      20,
+      197,
+      160
+    ],
+    "inkBounds": [
+      143,
+      20,
+      177,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_walk_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      28,
+      19,
+      199,
+      160
+    ],
+    "inkBounds": [
+      145,
+      19,
+      179,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_walk_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      28,
+      17,
+      199,
+      160
+    ],
+    "inkBounds": [
+      144,
+      17,
+      177,
+      46
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_walk_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      21,
+      200,
+      160
+    ],
+    "inkBounds": [
+      147,
+      21,
+      180,
+      50
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_walk_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      32,
+      20,
+      198,
+      160
+    ],
+    "inkBounds": [
+      145,
+      20,
+      178,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_walk_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      30,
+      14,
+      200,
+      160
+    ],
+    "inkBounds": [
+      146,
+      14,
+      180,
+      43
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_walk_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      21,
+      199,
+      160
+    ],
+    "inkBounds": [
+      144,
+      21,
+      178,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "island_fox_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      22,
+      183,
+      160
+    ],
+    "inkBounds": [
+      129,
+      22,
+      162,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "island_fox_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      15,
+      30,
+      205,
+      160
+    ],
+    "inkBounds": [
+      147,
+      30,
+      178,
+      58
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "island_fox_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      29,
+      179,
+      160
+    ],
+    "inkBounds": [
+      126,
+      67,
+      157,
+      93
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "island_fox_run_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      10,
+      39,
+      209,
+      160
+    ],
+    "inkBounds": [
+      142,
+      39,
+      174,
+      66
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "island_fox_run_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      28,
+      43,
+      193,
+      160
+    ],
+    "inkBounds": [
+      146,
+      43,
+      176,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "island_fox_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      73,
+      177,
+      160
+    ],
+    "inkBounds": [
+      135,
+      79,
+      166,
+      111
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "island_fox_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      22,
+      20,
+      187,
+      160
+    ],
+    "inkBounds": [
+      131,
+      20,
+      164,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "island_fox_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      25,
+      18,
+      187,
+      160
+    ],
+    "inkBounds": [
+      130,
+      18,
+      164,
+      47
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9943152454780362
+  },
+  "fluid_fox_arctic_run_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      51,
+      194,
+      160
+    ],
+    "inkBounds": [
+      156,
+      51,
+      193,
+      77
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_run_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      47,
+      194,
+      160
+    ],
+    "inkBounds": [
+      157,
+      49,
+      194,
+      72
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_run_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      33,
+      43,
+      194,
+      151
+    ],
+    "inkBounds": [
+      156,
+      50,
+      194,
+      74
+    ],
+    "canonicalBottom": 151,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_run_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      38,
+      193,
+      154
+    ],
+    "inkBounds": [
+      155,
+      44,
+      193,
+      70
+    ],
+    "canonicalBottom": 154,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_run_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      46,
+      195,
+      160
+    ],
+    "inkBounds": [
+      157,
+      47,
+      195,
+      73
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_run_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      45,
+      195,
+      160
+    ],
+    "inkBounds": [
+      158,
+      47,
+      194,
+      73
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_run_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      33,
+      194,
+      153
+    ],
+    "inkBounds": [
+      156,
+      41,
+      193,
+      69
+    ],
+    "canonicalBottom": 153,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_run_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      40,
+      194,
+      157
+    ],
+    "inkBounds": [
+      156,
+      45,
+      194,
+      70
+    ],
+    "canonicalBottom": 157,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_walk_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      53,
+      45,
+      194,
+      160
+    ],
+    "inkBounds": [
+      157,
+      46,
+      194,
+      71
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_walk_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      43,
+      45,
+      194,
+      160
+    ],
+    "inkBounds": [
+      156,
+      46,
+      193,
+      71
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_walk_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      47,
+      46,
+      195,
+      160
+    ],
+    "inkBounds": [
+      157,
+      47,
+      195,
+      73
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_walk_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      47,
+      194,
+      160
+    ],
+    "inkBounds": [
+      155,
+      48,
+      193,
+      72
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_walk_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      44,
+      195,
+      160
+    ],
+    "inkBounds": [
+      157,
+      44,
+      193,
+      70
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_walk_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      45,
+      43,
+      194,
+      160
+    ],
+    "inkBounds": [
+      156,
+      44,
+      193,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_walk_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      43,
+      196,
+      160
+    ],
+    "inkBounds": [
+      157,
+      44,
+      195,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "fluid_fox_arctic_walk_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      46,
+      194,
+      160
+    ],
+    "inkBounds": [
+      155,
+      46,
+      193,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_fox_arctic_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      35,
+      177,
+      160
+    ],
+    "inkBounds": [
+      132,
+      35,
+      168,
+      67
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_fox_arctic_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      22,
+      54,
+      198,
+      160
+    ],
+    "inkBounds": [
+      139,
+      54,
+      177,
+      84
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_fox_arctic_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      20,
+      174,
+      160
+    ],
+    "inkBounds": [
+      125,
+      77,
+      163,
+      105
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_fox_arctic_run_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      10,
+      40,
+      211,
+      160
+    ],
+    "inkBounds": [
+      144,
+      42,
+      184,
+      66
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_fox_arctic_run_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      23,
+      49,
+      196,
+      160
+    ],
+    "inkBounds": [
+      146,
+      50,
+      184,
+      77
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_fox_arctic_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      92,
+      171,
+      160
+    ],
+    "inkBounds": [
+      127,
+      94,
+      169,
+      118
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_fox_arctic_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      42,
+      183,
+      160
+    ],
+    "inkBounds": [
+      142,
+      50,
+      181,
+      79
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "island_fox_arctic_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      41,
+      41,
+      178,
+      160
+    ],
+    "inkBounds": [
+      137,
+      41,
+      176,
+      70
+    ],
+    "canonicalBottom": 160,
+    "scale": 1.0
+  },
+  "companion_lion_adult_idle_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      25,
+      194,
+      161
+    ],
+    "inkBounds": [
+      134,
+      25,
+      190,
+      51
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_idle_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      26,
+      195,
+      161
+    ],
+    "inkBounds": [
+      135,
+      26,
+      188,
+      50
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_jump_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      10,
+      9,
+      195,
+      149
+    ],
+    "inkBounds": [
+      133,
+      9,
+      170,
+      37
+    ],
+    "canonicalBottom": 149,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_jump_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      29,
+      34,
+      195,
+      149
+    ],
+    "inkBounds": [
+      134,
+      34,
+      187,
+      53
+    ],
+    "canonicalBottom": 149,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_play_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      40,
+      213,
+      161
+    ],
+    "inkBounds": [
+      157,
+      74,
+      188,
+      99
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_play_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      43,
+      40,
+      212,
+      161
+    ],
+    "inkBounds": [
+      135,
+      74,
+      188,
+      97
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_run_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      47,
+      26,
+      198,
+      160
+    ],
+    "inkBounds": [
+      161,
+      26,
+      192,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_run_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      25,
+      198,
+      160
+    ],
+    "inkBounds": [
+      139,
+      25,
+      192,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_run_02": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      21,
+      196,
+      158
+    ],
+    "inkBounds": [
+      136,
+      21,
+      190,
+      48
+    ],
+    "canonicalBottom": 158,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_run_03": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      22,
+      199,
+      156
+    ],
+    "inkBounds": [
+      139,
+      22,
+      195,
+      47
+    ],
+    "canonicalBottom": 156,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_run_04": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      23,
+      206,
+      148
+    ],
+    "inkBounds": [
+      159,
+      23,
+      193,
+      48
+    ],
+    "canonicalBottom": 148,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_run_05": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      23,
+      197,
+      154
+    ],
+    "inkBounds": [
+      135,
+      23,
+      187,
+      50
+    ],
+    "canonicalBottom": 154,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_run_06": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      29,
+      196,
+      161
+    ],
+    "inkBounds": [
+      159,
+      29,
+      190,
+      52
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_run_07": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      45,
+      29,
+      197,
+      160
+    ],
+    "inkBounds": [
+      159,
+      29,
+      190,
+      51
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_sleep_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      84,
+      202,
+      161
+    ],
+    "inkBounds": [
+      138,
+      84,
+      193,
+      108
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_sleep_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      84,
+      202,
+      161
+    ],
+    "inkBounds": [
+      138,
+      84,
+      188,
+      109
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_walk_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      25,
+      200,
+      160
+    ],
+    "inkBounds": [
+      134,
+      25,
+      187,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_walk_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      26,
+      196,
+      160
+    ],
+    "inkBounds": [
+      157,
+      26,
+      191,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_walk_02": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      25,
+      196,
+      160
+    ],
+    "inkBounds": [
+      135,
+      25,
+      193,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_walk_03": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      28,
+      197,
+      160
+    ],
+    "inkBounds": [
+      134,
+      28,
+      191,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_walk_04": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      22,
+      196,
+      160
+    ],
+    "inkBounds": [
+      158,
+      22,
+      191,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_walk_05": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      23,
+      196,
+      160
+    ],
+    "inkBounds": [
+      134,
+      23,
+      191,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_walk_06": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      23,
+      196,
+      160
+    ],
+    "inkBounds": [
+      134,
+      23,
+      193,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_adult_walk_07": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      25,
+      197,
+      160
+    ],
+    "inkBounds": [
+      135,
+      25,
+      192,
+      47
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9869275461380724
+  },
+  "companion_lion_cub_idle_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      62,
+      46,
+      184,
+      161
+    ],
+    "inkBounds": [
+      124,
+      46,
+      184,
+      79
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_idle_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      63,
+      46,
+      183,
+      161
+    ],
+    "inkBounds": [
+      124,
+      49,
+      170,
+      79
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_jump_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      27,
+      184,
+      149
+    ],
+    "inkBounds": [
+      124,
+      27,
+      175,
+      58
+    ],
+    "canonicalBottom": 149,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_jump_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      62,
+      36,
+      185,
+      149
+    ],
+    "inkBounds": [
+      124,
+      41,
+      172,
+      65
+    ],
+    "canonicalBottom": 149,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_play_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      58,
+      61,
+      193,
+      161
+    ],
+    "inkBounds": [
+      123,
+      76,
+      173,
+      103
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_play_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      56,
+      194,
+      160
+    ],
+    "inkBounds": [
+      116,
+      72,
+      179,
+      101
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_run_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      60,
+      187,
+      161
+    ],
+    "inkBounds": [
+      124,
+      64,
+      175,
+      91
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_run_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      45,
+      61,
+      187,
+      161
+    ],
+    "inkBounds": [
+      124,
+      61,
+      176,
+      91
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_run_02": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      27,
+      57,
+      183,
+      152
+    ],
+    "inkBounds": [
+      124,
+      57,
+      172,
+      88
+    ],
+    "canonicalBottom": 152,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_run_03": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      49,
+      55,
+      185,
+      155
+    ],
+    "inkBounds": [
+      124,
+      55,
+      185,
+      85
+    ],
+    "canonicalBottom": 155,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_run_04": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      58,
+      185,
+      161
+    ],
+    "inkBounds": [
+      124,
+      61,
+      172,
+      89
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_run_05": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      59,
+      186,
+      161
+    ],
+    "inkBounds": [
+      141,
+      59,
+      172,
+      83
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_run_06": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      49,
+      184,
+      153
+    ],
+    "inkBounds": [
+      124,
+      54,
+      173,
+      84
+    ],
+    "canonicalBottom": 153,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_run_07": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      45,
+      56,
+      185,
+      158
+    ],
+    "inkBounds": [
+      124,
+      56,
+      185,
+      88
+    ],
+    "canonicalBottom": 158,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_sleep_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      84,
+      187,
+      161
+    ],
+    "inkBounds": [
+      124,
+      84,
+      170,
+      117
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_sleep_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      83,
+      185,
+      161
+    ],
+    "inkBounds": [
+      124,
+      83,
+      171,
+      117
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_walk_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      66,
+      42,
+      183,
+      161
+    ],
+    "inkBounds": [
+      124,
+      42,
+      183,
+      77
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_walk_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      62,
+      41,
+      183,
+      161
+    ],
+    "inkBounds": [
+      124,
+      47,
+      172,
+      78
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_walk_02": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      58,
+      38,
+      186,
+      161
+    ],
+    "inkBounds": [
+      124,
+      38,
+      186,
+      77
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_walk_03": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      59,
+      43,
+      185,
+      161
+    ],
+    "inkBounds": [
+      124,
+      43,
+      173,
+      77
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_walk_04": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      62,
+      46,
+      183,
+      161
+    ],
+    "inkBounds": [
+      124,
+      46,
+      166,
+      77
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_walk_05": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      60,
+      45,
+      184,
+      161
+    ],
+    "inkBounds": [
+      124,
+      45,
+      172,
+      78
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_walk_06": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      62,
+      46,
+      185,
+      161
+    ],
+    "inkBounds": [
+      124,
+      51,
+      170,
+      78
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lion_cub_walk_07": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      64,
+      46,
+      184,
+      161
+    ],
+    "inkBounds": [
+      124,
+      50,
+      169,
+      77
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.9466571834992887
+  },
+  "companion_lioness_idle_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      58,
+      50,
+      192,
+      161
+    ],
+    "inkBounds": [
+      146,
+      50,
+      191,
+      76
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_idle_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      59,
+      50,
+      197,
+      161
+    ],
+    "inkBounds": [
+      150,
+      50,
+      197,
+      76
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_jump_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      34,
+      33,
+      194,
+      151
+    ],
+    "inkBounds": [
+      145,
+      33,
+      180,
+      53
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_jump_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      51,
+      196,
+      151
+    ],
+    "inkBounds": [
+      150,
+      51,
+      196,
+      74
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_play_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      74,
+      52,
+      214,
+      161
+    ],
+    "inkBounds": [
+      147,
+      93,
+      192,
+      120
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_play_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      74,
+      52,
+      207,
+      161
+    ],
+    "inkBounds": [
+      147,
+      83,
+      192,
+      109
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_run_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      61,
+      194,
+      161
+    ],
+    "inkBounds": [
+      149,
+      61,
+      194,
+      84
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_run_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      60,
+      198,
+      161
+    ],
+    "inkBounds": [
+      153,
+      60,
+      198,
+      84
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_run_02": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      26,
+      56,
+      205,
+      153
+    ],
+    "inkBounds": [
+      152,
+      56,
+      195,
+      83
+    ],
+    "canonicalBottom": 153,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_run_03": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      53,
+      194,
+      155
+    ],
+    "inkBounds": [
+      149,
+      53,
+      194,
+      81
+    ],
+    "canonicalBottom": 155,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_run_04": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      56,
+      204,
+      161
+    ],
+    "inkBounds": [
+      150,
+      56,
+      195,
+      82
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_run_05": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      54,
+      195,
+      161
+    ],
+    "inkBounds": [
+      150,
+      54,
+      195,
+      82
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_run_06": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      64,
+      53,
+      193,
+      155
+    ],
+    "inkBounds": [
+      147,
+      53,
+      193,
+      83
+    ],
+    "canonicalBottom": 155,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_run_07": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      52,
+      200,
+      158
+    ],
+    "inkBounds": [
+      152,
+      52,
+      197,
+      80
+    ],
+    "canonicalBottom": 158,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_sleep_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      64,
+      100,
+      195,
+      161
+    ],
+    "inkBounds": [
+      147,
+      100,
+      192,
+      127
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_sleep_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      64,
+      99,
+      197,
+      161
+    ],
+    "inkBounds": [
+      147,
+      99,
+      195,
+      127
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_walk_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      21,
+      54,
+      182,
+      161
+    ],
+    "inkBounds": [
+      145,
+      54,
+      182,
+      75
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_walk_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      20,
+      55,
+      183,
+      161
+    ],
+    "inkBounds": [
+      145,
+      55,
+      183,
+      76
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_walk_02": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      22,
+      53,
+      178,
+      161
+    ],
+    "inkBounds": [
+      144,
+      53,
+      178,
+      75
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_walk_03": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      16,
+      53,
+      184,
+      161
+    ],
+    "inkBounds": [
+      145,
+      53,
+      184,
+      75
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_walk_04": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      24,
+      55,
+      180,
+      161
+    ],
+    "inkBounds": [
+      145,
+      55,
+      180,
+      78
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_walk_05": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      20,
+      57,
+      184,
+      161
+    ],
+    "inkBounds": [
+      145,
+      57,
+      184,
+      77
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_walk_06": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      18,
+      57,
+      184,
+      161
+    ],
+    "inkBounds": [
+      144,
+      57,
+      178,
+      77
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "companion_lioness_walk_07": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      20,
+      57,
+      184,
+      161
+    ],
+    "inkBounds": [
+      150,
+      57,
+      176,
+      75
+    ],
+    "canonicalBottom": 161,
+    "scale": 0.7730713680960207
+  },
+  "island_parrot_classic_fly_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      53,
+      15,
+      167,
+      160
+    ],
+    "inkBounds": [
+      118,
+      53,
+      160,
+      87
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_classic_fly_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      53,
+      41,
+      166,
+      160
+    ],
+    "inkBounds": [
+      119,
+      58,
+      160,
+      90
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_classic_fly_02": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      59,
+      166,
+      160
+    ],
+    "inkBounds": [
+      119,
+      59,
+      158,
+      93
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_classic_fly_03": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      54,
+      33,
+      165,
+      160
+    ],
+    "inkBounds": [
+      118,
+      33,
+      159,
+      72
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_classic_fly_04": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      54,
+      27,
+      165,
+      160
+    ],
+    "inkBounds": [
+      116,
+      27,
+      160,
+      64
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_classic_fly_05": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      62,
+      45,
+      157,
+      160
+    ],
+    "inkBounds": [
+      110,
+      45,
+      151,
+      85
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_classic_fly_06": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      51,
+      47,
+      169,
+      160
+    ],
+    "inkBounds": [
+      120,
+      57,
+      164,
+      89
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_classic_fly_07": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      15,
+      170,
+      160
+    ],
+    "inkBounds": [
+      120,
+      57,
+      166,
+      90
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      33,
+      170,
+      160
+    ],
+    "inkBounds": [
+      126,
+      43,
+      157,
+      65
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      46,
+      179,
+      160
+    ],
+    "inkBounds": [
+      134,
+      46,
+      170,
+      81
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      33,
+      63,
+      187,
+      160
+    ],
+    "inkBounds": [
+      141,
+      68,
+      173,
+      97
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      93,
+      168,
+      160
+    ],
+    "inkBounds": [
+      121,
+      93,
+      168,
+      122
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      29,
+      171,
+      160
+    ],
+    "inkBounds": [
+      126,
+      33,
+      160,
+      67
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      45,
+      29,
+      174,
+      160
+    ],
+    "inkBounds": [
+      127,
+      29,
+      164,
+      68
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9497688104245481
+  },
+  "island_parrot_budgie_fly_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      16,
+      178,
+      160
+    ],
+    "inkBounds": [
+      128,
+      37,
+      177,
+      71
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_fly_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      42,
+      36,
+      178,
+      160
+    ],
+    "inkBounds": [
+      129,
+      39,
+      173,
+      70
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_fly_02": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      55,
+      179,
+      160
+    ],
+    "inkBounds": [
+      131,
+      55,
+      179,
+      84
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_fly_03": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      31,
+      182,
+      160
+    ],
+    "inkBounds": [
+      132,
+      31,
+      181,
+      62
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_fly_04": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      35,
+      35,
+      184,
+      160
+    ],
+    "inkBounds": [
+      132,
+      39,
+      178,
+      68
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_fly_05": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      39,
+      32,
+      180,
+      160
+    ],
+    "inkBounds": [
+      129,
+      44,
+      176,
+      79
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_fly_06": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      51,
+      182,
+      160
+    ],
+    "inkBounds": [
+      131,
+      55,
+      180,
+      84
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_fly_07": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      22,
+      178,
+      160
+    ],
+    "inkBounds": [
+      128,
+      50,
+      178,
+      83
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      22,
+      173,
+      160
+    ],
+    "inkBounds": [
+      125,
+      24,
+      164,
+      59
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      22,
+      182,
+      160
+    ],
+    "inkBounds": [
+      134,
+      43,
+      174,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      28,
+      68,
+      190,
+      160
+    ],
+    "inkBounds": [
+      137,
+      68,
+      188,
+      94
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      56,
+      83,
+      164,
+      160
+    ],
+    "inkBounds": [
+      110,
+      83,
+      164,
+      115
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      43,
+      15,
+      176,
+      160
+    ],
+    "inkBounds": [
+      126,
+      21,
+      167,
+      52
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_budgie_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      20,
+      172,
+      160
+    ],
+    "inkBounds": [
+      122,
+      23,
+      165,
+      52
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.911361804995971
+  },
+  "island_parrot_cockatiel_fly_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      24,
+      168,
+      159
+    ],
+    "inkBounds": [
+      122,
+      55,
+      164,
+      91
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_fly_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      54,
+      38,
+      167,
+      160
+    ],
+    "inkBounds": [
+      123,
+      57,
+      164,
+      89
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_fly_02": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      51,
+      61,
+      169,
+      160
+    ],
+    "inkBounds": [
+      121,
+      61,
+      165,
+      94
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_fly_03": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      9,
+      167,
+      160
+    ],
+    "inkBounds": [
+      117,
+      9,
+      163,
+      43
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_fly_04": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      6,
+      170,
+      160
+    ],
+    "inkBounds": [
+      119,
+      7,
+      161,
+      45
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_fly_05": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      56,
+      49,
+      163,
+      160
+    ],
+    "inkBounds": [
+      113,
+      49,
+      159,
+      91
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_fly_06": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      49,
+      172,
+      160
+    ],
+    "inkBounds": [
+      124,
+      49,
+      169,
+      92
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_fly_07": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      20,
+      171,
+      160
+    ],
+    "inkBounds": [
+      123,
+      53,
+      167,
+      93
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      56,
+      27,
+      164,
+      160
+    ],
+    "inkBounds": [
+      120,
+      27,
+      158,
+      64
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      43,
+      30,
+      177,
+      160
+    ],
+    "inkBounds": [
+      132,
+      36,
+      173,
+      73
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      40,
+      65,
+      180,
+      160
+    ],
+    "inkBounds": [
+      134,
+      66,
+      180,
+      101
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      58,
+      87,
+      161,
+      160
+    ],
+    "inkBounds": [
+      115,
+      88,
+      161,
+      125
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      32,
+      168,
+      160
+    ],
+    "inkBounds": [
+      120,
+      32,
+      162,
+      68
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_cockatiel_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      56,
+      27,
+      164,
+      160
+    ],
+    "inkBounds": [
+      118,
+      28,
+      159,
+      61
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.8842437977099237
+  },
+  "island_parrot_macaw_fly_00": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      49,
+      23,
+      170,
+      158
+    ],
+    "inkBounds": [
+      133,
+      53,
+      157,
+      74
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_fly_01": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      60,
+      175,
+      158
+    ],
+    "inkBounds": [
+      137,
+      60,
+      165,
+      81
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_fly_02": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      46,
+      48,
+      174,
+      158
+    ],
+    "inkBounds": [
+      133,
+      48,
+      164,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_fly_03": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      45,
+      175,
+      158
+    ],
+    "inkBounds": [
+      134,
+      45,
+      163,
+      66
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_fly_04": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      47,
+      46,
+      172,
+      158
+    ],
+    "inkBounds": [
+      131,
+      46,
+      162,
+      69
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_fly_05": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      36,
+      171,
+      158
+    ],
+    "inkBounds": [
+      135,
+      59,
+      160,
+      82
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_fly_06": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      35,
+      170,
+      158
+    ],
+    "inkBounds": [
+      135,
+      62,
+      163,
+      83
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_fly_07": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      28,
+      167,
+      158
+    ],
+    "inkBounds": [
+      132,
+      60,
+      160,
+      80
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      19,
+      138,
+      160
+    ],
+    "inkBounds": [
+      96,
+      19,
+      128,
+      42
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      35,
+      20,
+      184,
+      160
+    ],
+    "inkBounds": [
+      126,
+      43,
+      154,
+      60
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      51,
+      48,
+      169,
+      160
+    ],
+    "inkBounds": [
+      136,
+      80,
+      169,
+      100
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      66,
+      73,
+      153,
+      160
+    ],
+    "inkBounds": [
+      113,
+      73,
+      144,
+      98
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      38,
+      35,
+      163,
+      159
+    ],
+    "inkBounds": [
+      122,
+      35,
+      153,
+      53
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "island_parrot_macaw_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      33,
+      149,
+      157
+    ],
+    "inkBounds": [
+      109,
+      34,
+      137,
+      51
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9303124664447546
+  },
+  "fluid_penguin_run_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      23,
+      184,
+      160
+    ],
+    "inkBounds": [
+      127,
+      23,
+      165,
+      57
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_run_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      23,
+      183,
+      160
+    ],
+    "inkBounds": [
+      117,
+      23,
+      161,
+      57
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_run_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      58,
+      9,
+      185,
+      151
+    ],
+    "inkBounds": [
+      124,
+      9,
+      165,
+      45
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_run_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      17,
+      183,
+      154
+    ],
+    "inkBounds": [
+      119,
+      17,
+      161,
+      50
+    ],
+    "canonicalBottom": 154,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_run_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      62,
+      17,
+      183,
+      160
+    ],
+    "inkBounds": [
+      125,
+      17,
+      167,
+      52
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_run_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      60,
+      17,
+      182,
+      160
+    ],
+    "inkBounds": [
+      116,
+      17,
+      163,
+      51
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_run_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      54,
+      13,
+      183,
+      153
+    ],
+    "inkBounds": [
+      120,
+      13,
+      162,
+      46
+    ],
+    "canonicalBottom": 153,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_run_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      55,
+      16,
+      183,
+      157
+    ],
+    "inkBounds": [
+      115,
+      16,
+      162,
+      50
+    ],
+    "canonicalBottom": 157,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_walk_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      62,
+      7,
+      182,
+      160
+    ],
+    "inkBounds": [
+      112,
+      7,
+      154,
+      42
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_walk_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      60,
+      11,
+      182,
+      160
+    ],
+    "inkBounds": [
+      110,
+      11,
+      154,
+      45
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_walk_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      63,
+      9,
+      184,
+      160
+    ],
+    "inkBounds": [
+      111,
+      9,
+      156,
+      43
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_walk_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      56,
+      11,
+      183,
+      160
+    ],
+    "inkBounds": [
+      114,
+      11,
+      153,
+      45
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_walk_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      62,
+      11,
+      182,
+      160
+    ],
+    "inkBounds": [
+      112,
+      11,
+      156,
+      44
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_walk_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      59,
+      10,
+      183,
+      160
+    ],
+    "inkBounds": [
+      114,
+      10,
+      156,
+      45
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_walk_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      60,
+      10,
+      184,
+      160
+    ],
+    "inkBounds": [
+      111,
+      10,
+      153,
+      44
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_walk_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      62,
+      11,
+      183,
+      160
+    ],
+    "inkBounds": [
+      114,
+      11,
+      155,
+      44
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "island_penguin_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      52,
+      10,
+      169,
+      160
+    ],
+    "inkBounds": [
+      98,
+      10,
+      142,
+      41
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "island_penguin_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      20,
+      48,
+      198,
+      160
+    ],
+    "inkBounds": [
+      148,
+      48,
+      185,
+      78
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "island_penguin_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      34,
+      16,
+      185,
+      160
+    ],
+    "inkBounds": [
+      110,
+      16,
+      145,
+      50
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "island_penguin_run_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      61,
+      184,
+      160
+    ],
+    "inkBounds": [
+      132,
+      61,
+      169,
+      94
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "island_penguin_run_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      18,
+      66,
+      201,
+      160
+    ],
+    "inkBounds": [
+      150,
+      66,
+      194,
+      97
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "island_penguin_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      36,
+      72,
+      182,
+      160
+    ],
+    "inkBounds": [
+      131,
+      72,
+      171,
+      100
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "island_penguin_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      48,
+      12,
+      173,
+      160
+    ],
+    "inkBounds": [
+      102,
+      12,
+      144,
+      46
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "island_penguin_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      50,
+      12,
+      168,
+      160
+    ],
+    "inkBounds": [
+      98,
+      12,
+      142,
+      45
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9821296589589272
+  },
+  "fluid_penguin_rockhopper_run_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      64,
+      19,
+      175,
+      160
+    ],
+    "inkBounds": [
+      114,
+      19,
+      154,
+      55
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_run_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      54,
+      24,
+      174,
+      160
+    ],
+    "inkBounds": [
+      114,
+      24,
+      153,
+      59
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_run_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      56,
+      14,
+      175,
+      151
+    ],
+    "inkBounds": [
+      114,
+      14,
+      152,
+      49
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_run_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      60,
+      11,
+      176,
+      154
+    ],
+    "inkBounds": [
+      114,
+      11,
+      148,
+      46
+    ],
+    "canonicalBottom": 154,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_run_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      56,
+      24,
+      177,
+      160
+    ],
+    "inkBounds": [
+      113,
+      24,
+      153,
+      59
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_run_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      58,
+      25,
+      177,
+      160
+    ],
+    "inkBounds": [
+      113,
+      25,
+      156,
+      61
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_run_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      57,
+      9,
+      176,
+      153
+    ],
+    "inkBounds": [
+      114,
+      9,
+      150,
+      44
+    ],
+    "canonicalBottom": 153,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_run_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      58,
+      19,
+      176,
+      157
+    ],
+    "inkBounds": [
+      114,
+      19,
+      151,
+      54
+    ],
+    "canonicalBottom": 157,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_walk_0": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      68,
+      11,
+      179,
+      160
+    ],
+    "inkBounds": [
+      108,
+      11,
+      153,
+      47
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_walk_1": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      60,
+      12,
+      178,
+      160
+    ],
+    "inkBounds": [
+      110,
+      12,
+      154,
+      47
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_walk_2": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      65,
+      14,
+      178,
+      160
+    ],
+    "inkBounds": [
+      108,
+      14,
+      152,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_walk_3": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      64,
+      12,
+      178,
+      160
+    ],
+    "inkBounds": [
+      107,
+      12,
+      153,
+      47
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_walk_4": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      62,
+      11,
+      179,
+      160
+    ],
+    "inkBounds": [
+      108,
+      11,
+      152,
+      46
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_walk_5": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      66,
+      16,
+      178,
+      160
+    ],
+    "inkBounds": [
+      108,
+      16,
+      152,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_walk_6": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      66,
+      17,
+      180,
+      160
+    ],
+    "inkBounds": [
+      110,
+      17,
+      153,
+      49
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "fluid_penguin_rockhopper_walk_7": {
+    "size": [
+      244,
+      176
+    ],
+    "visibleBounds": [
+      66,
+      13,
+      178,
+      160
+    ],
+    "inkBounds": [
+      107,
+      13,
+      152,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "island_penguin_rockhopper_idle": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      58,
+      9,
+      162,
+      160
+    ],
+    "inkBounds": [
+      91,
+      9,
+      135,
+      43
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "island_penguin_rockhopper_jump": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      22,
+      68,
+      197,
+      160
+    ],
+    "inkBounds": [
+      137,
+      68,
+      175,
+      101
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "island_penguin_rockhopper_play": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      45,
+      10,
+      174,
+      160
+    ],
+    "inkBounds": [
+      111,
+      10,
+      134,
+      45
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "island_penguin_rockhopper_run_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      34,
+      76,
+      187,
+      160
+    ],
+    "inkBounds": [
+      134,
+      76,
+      174,
+      109
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "island_penguin_rockhopper_run_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      18,
+      84,
+      203,
+      160
+    ],
+    "inkBounds": [
+      153,
+      84,
+      192,
+      116
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "island_penguin_rockhopper_sleep": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      44,
+      75,
+      175,
+      160
+    ],
+    "inkBounds": [
+      113,
+      79,
+      157,
+      116
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "island_penguin_rockhopper_walk_0": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      53,
+      13,
+      166,
+      160
+    ],
+    "inkBounds": [
+      94,
+      13,
+      139,
+      48
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  },
+  "island_penguin_rockhopper_walk_1": {
+    "size": [
+      220,
+      176
+    ],
+    "visibleBounds": [
+      45,
+      9,
+      174,
+      160
+    ],
+    "inkBounds": [
+      108,
+      9,
+      151,
+      45
+    ],
+    "canonicalBottom": 160,
+    "scale": 0.9841019494038231
+  }
+}

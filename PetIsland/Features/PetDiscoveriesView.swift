@@ -481,7 +481,7 @@ private struct DiscoveryPetPortrait: View {
     var body: some View {
         PetArtwork(species: pet.species, coat: pet.coat, customColor: pet.customColor,
                    breed: pet.resolvedBreed, pose: pet.species == .parrot ? .fly : .idle,
-                   animatesMotion: false)
+                   animatesMotion: false, accessory: pet.outfit?.headwear)
             .padding(5)
             .accessibilityHidden(true)
     }

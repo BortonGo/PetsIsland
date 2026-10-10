@@ -139,6 +139,92 @@ final class PetDomainTests: XCTestCase {
     }
 
     @MainActor
+    func testRestingEnclosureKeepsItsClockWithoutPublishingIdenticalPictures() {
+        let simulation = HabitatMotionSimulation()
+        let pet = PetProfile(id: UUID(uuidString: "01000000-0000-0000-0000-000000000001")!,
+                             name: "Pixel", species: .dog, coat: .sunrise, createdAt: .distantPast)
+        simulation.configure(pets: [pet], size: CGSize(width: 345, height: 240))
+        let before = simulation.actors[0]
+        var publications = 0
+        let observation = simulation.objectWillChange.sink { publications += 1 }
+        defer { observation.cancel() }
+        for _ in 0..<6 { simulation.advance(by: 1.0 / 60) }
+        XCTAssertEqual(simulation.actors[0].position, before.position)
+        XCTAssertEqual(simulation.actors[0].step, before.step)
+        XCTAssertEqual(publications, 0, "An invisible waiting timer must not invalidate the scene")
+        XCTAssertEqual(simulation.actors[0].waiting, before.waiting - 0.1, accuracy: 0.000001)
+
+        var movingFrames = 0
+        for _ in 0..<600 {
+            let position = simulation.actors[0].position
+            let oldPublications = publications
+            simulation.advance(by: 1.0 / 60)
+            if position != simulation.actors[0].position {
+                movingFrames += 1
+                XCTAssertGreaterThan(publications, oldPublications, "Every new position must reach the renderer")
+            }
+        }
+        XCTAssertGreaterThan(movingFrames, 120, "Suppressing idle redraws must not freeze the simulation")
+        let oldPublications = publications
+        simulation.pet(pet.id)
+        XCTAssertGreaterThan(publications, oldPublications, "Touch feedback must still appear immediately")
+    }
+
+    @MainActor
+    func testPlayYardRestoresSixtyFPSAfterChangingReduceMotion() {
+        let yard = PlayYardSimulation(pets: [.starter], hapticsEnabled: false)
+        yard.configure(roomSize: CGSize(width: 393, height: 740))
+        defer { yard.stop() }
+        yard.start(reduceMotion: false)
+        XCTAssertEqual(yard.preferredFramesPerSecond, 60)
+        yard.setReduceMotion(true)
+        XCTAssertEqual(yard.preferredFramesPerSecond, 15)
+        yard.setReduceMotion(false)
+        XCTAssertEqual(yard.preferredFramesPerSecond, 60)
+        yard.start(reduceMotion: false)
+        XCTAssertEqual(yard.preferredFramesPerSecond, 60, "Repeated activation must not halve the rate")
+        yard.stop()
+        yard.setReduceMotion(false)
+        XCTAssertNil(yard.preferredFramesPerSecond, "Changing a preference must not restart a hidden game")
+        yard.start(reduceMotion: false)
+        XCTAssertEqual(yard.preferredFramesPerSecond, 60)
+    }
+
+    @MainActor
+    func testScrollVisibilityStopsAndResumesOffscreenAnimation() async throws {
+        var visibility: [Bool] = []
+        let content = ScrollView {
+            VStack(spacing: 0) {
+                Color.blue.frame(height: 120)
+                    .onPetViewportVisibilityChange { visibility.append($0) }
+                Color.clear.frame(height: 900)
+            }
+        }
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.first)
+        let host = UIHostingController(rootView: content)
+        let window = UIWindow(windowScene: scene)
+        window.frame = CGRect(x: 0, y: 0, width: 320, height: 400)
+        window.rootViewController = host
+        window.makeKeyAndVisible()
+        defer { window.isHidden = true }
+        try await Task.sleep(for: .milliseconds(150))
+        host.view.layoutIfNeeded()
+        func scrollView(in view: UIView) -> UIScrollView? {
+            if let scroll = view as? UIScrollView { return scroll }
+            return view.subviews.lazy.compactMap { scrollView(in: $0) }.first
+        }
+        let scroll = try XCTUnwrap(scrollView(in: host.view))
+        XCTAssertEqual(visibility.last, true)
+        scroll.setContentOffset(CGPoint(x: 0, y: 500), animated: false)
+        try await Task.sleep(for: .milliseconds(150))
+        XCTAssertEqual(visibility.last, false)
+        scroll.setContentOffset(CGPoint(x: 0, y: -scroll.adjustedContentInset.top), animated: false)
+        try await Task.sleep(for: .milliseconds(150))
+        XCTAssertEqual(visibility.last, true)
+        XCTAssertEqual(visibility.suffix(3), [true, false, true])
+    }
+
+    @MainActor
     func testEmptyEnclosureStopsRenderingAndPublishesNoAnimationFrames() {
         let simulation = HabitatMotionSimulation()
         let size = CGSize(width: 345, height: 240)

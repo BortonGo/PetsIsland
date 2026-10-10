@@ -10,6 +10,7 @@ struct PlayYardView: View {
     @PetReduceMotion private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var simulation: PlayYardSimulation
+    @State private var isVisible = false
 
     init(pets: [PetProfile], hapticsEnabled: Bool = true) {
         let visiblePets = pets.isEmpty ? [PetProfile.starter] : Array(pets.prefix(PetHabitatState.maximumResidents))
@@ -64,8 +65,9 @@ struct PlayYardView: View {
                 .coordinateSpace(name: PlayYardCoordinateSpace.name)
                 .clipShape(Rectangle())
                 .onAppear {
+                    isVisible = true
                     simulation.configure(roomSize: proxy.size)
-                    simulation.start(reduceMotion: reduceMotion)
+                    if scenePhase == .active { simulation.start(reduceMotion: reduceMotion) }
                 }
                 .onChange(of: proxy.size) { _, newSize in
                     simulation.configure(roomSize: newSize)
@@ -96,10 +98,11 @@ struct PlayYardView: View {
             simulation.setReduceMotion(newValue)
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { simulation.start(reduceMotion: reduceMotion) }
+            if phase == .active && isVisible { simulation.start(reduceMotion: reduceMotion) }
             else { simulation.stop() }
         }
         .onDisappear {
+            isVisible = false
             simulation.stop()
         }
     }
@@ -323,7 +326,7 @@ private struct PlayYardPetFigure: View {
                 pose: actor.pose,
                 direction: actor.direction,
                 step: actor.step,
-                animatesMotion: false, usesNaturalGait: true
+                animatesMotion: false, usesNaturalGait: true, accessory: actor.profile.outfit?.headwear
             )
             .offset(y: bodyLift)
 
@@ -350,7 +353,7 @@ private struct PlayYardPetFigure: View {
     private var bodyLift: CGFloat {
         guard !reduceMotion else { return 0 }
         if actor.pose == .fly {
-            return (sin(actor.motionPhase) * 2.5).rounded()
+            return sin(actor.motionPhase) * 2.5
         }
         // The art already contains foot lift. Moving the entire grounded body
         // adds a second, unrelated bounce and breaks its contact with the floor.
@@ -563,6 +566,7 @@ final class PlayYardSimulation: NSObject, ObservableObject {
     @Published private(set) var frame: Frame
 
     private var displayLink: CADisplayLink?
+    var preferredFramesPerSecond: Int? { displayLink?.preferredFramesPerSecond }
     private var roomSize = CGSize.zero
     private var ballVelocity = CGVector.zero
     private var lastTimestamp: CFTimeInterval?
@@ -664,7 +668,7 @@ final class PlayYardSimulation: NSObject, ObservableObject {
 
     func setReduceMotion(_ enabled: Bool) {
         reduceMotion = enabled
-        displayLink?.preferredFramesPerSecond = enabled ? 15 : 30
+        displayLink?.preferredFramesPerSecond = enabled ? 15 : 60
     }
 
     func reset() {

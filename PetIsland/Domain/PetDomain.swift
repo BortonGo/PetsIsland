@@ -194,6 +194,7 @@ struct PetProfile: Codable, Equatable, Hashable, Identifiable, Sendable {
     var customColor: PetColorSelection? = nil
     /// Optional so profiles saved before breeds existed continue to decode.
     var breed: PetBreed? = nil
+    var outfit: PetOutfit? = nil
 
     var resolvedBreed: PetBreed? {
         let variants = PetBreed.available(for: species)

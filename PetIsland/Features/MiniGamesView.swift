@@ -170,6 +170,7 @@ struct MiniGamesView: View {
             }
         case .shop:
             VStack(spacing: 24) {
+                PetAccessoryShopSection(controller: controller, pet: pet)
                 HabitatFurnitureShopSection(controller: controller)
                 shop(for: pet)
             }
@@ -268,7 +269,7 @@ struct MiniGamesView: View {
                                     breed: pet.resolvedBreed,
                                     pose: pet.species == .parrot ? .fly : .jump,
                                     step: 0,
-                                    animatesMotion: false
+                                    animatesMotion: false, accessory: pet.outfit?.headwear
                                 )
                                 .frame(width: 68, height: 58)
                                 Text(pet.name)
@@ -675,7 +676,7 @@ private struct SkyHopGameView: View {
             pose: pet.species == .parrot ? .fly : .jump,
             direction: engine.facingLeft ? .left : .right,
             step: Int(engine.elapsedTime * 10),
-            animatesMotion: false
+            animatesMotion: false, accessory: pet.outfit?.headwear
         )
         .frame(width: SkyHopEngine.playerSize.width, height: SkyHopEngine.playerSize.height)
         .position(engine.playerPosition)
@@ -726,7 +727,7 @@ private struct SkyHopGameView: View {
                 breed: pet.resolvedBreed,
                 pose: pet.species == .parrot ? .fly : .jump,
                 step: 0,
-                animatesMotion: false
+                animatesMotion: false, accessory: pet.outfit?.headwear
             )
             .frame(width: 110, height: 92)
             Text("Ready, \(pet.name)?")

@@ -9,6 +9,7 @@ struct PetActivityIdentity: Codable, Hashable {
     var coat: PetCoat
     var customColor: PetColorSelection?
     var breed: PetBreed? = nil
+    var outfit: PetOutfit? = nil
 }
 
 struct PetActivityAttributes: ActivityAttributes {
@@ -18,6 +19,7 @@ struct PetActivityAttributes: ActivityAttributes {
         var backgroundColor: PetColorSelection? = nil
         // Optional so activities started by older app versions still decode.
         var backgroundTransparency: Double? = nil
+        var petOutfit: PetOutfit? = nil
 
         var appearance: PetActivityAppearance {
             PetActivityAppearance(background: backgroundColor, transparency: backgroundTransparency ?? 0)

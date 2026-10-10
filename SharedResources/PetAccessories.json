@@ -1,0 +1,6020 @@
+{
+  "version": 3,
+  "art": {
+    "knitHat": {
+      "palette": {
+        "o": "304553",
+        "b": "658EAA",
+        "l": "98BDCB",
+        "w": "D9E5E4"
+      },
+      "rows": [
+        "          oooo          ",
+        "         owwwwo         ",
+        "         owwwwo         ",
+        "          oooo          ",
+        "       oooooooooo       ",
+        "     oobbbbbbbbbboo     ",
+        "    obbblbblbblbbbbo    ",
+        "   obbblbblbblbbbbbbo   ",
+        "  obbblbblbblbblbbbbbo  ",
+        "  obbblbblbblbblbbbbbo  ",
+        "  obbblbblbblbblbbbbbo  ",
+        " oooooooooooooooooooooo ",
+        " obllllllllllllllllllbo ",
+        " obllllllllllllllllllbo ",
+        " obbbbbbbbbbbbbbbbbbbbo ",
+        " oooooooooooooooooooooo "
+      ]
+    },
+    "tinyCrown": {
+      "palette": {
+        "o": "765535",
+        "b": "DCA74D",
+        "l": "F9D875",
+        "r": "C57560"
+      },
+      "rows": [
+        " oo        oo        oo ",
+        " ol o     ollo     o lo ",
+        " olbo    ollllo    oblo ",
+        " olbbo  ollbbllo  obblo ",
+        " olbbboollbbbblloobblo  ",
+        " olbbllllllllllllbbblo  ",
+        " olbbbbbbbbbbbbbbbbbbo  ",
+        " olbbrbbbbrbbbbrbbbblo  ",
+        " olbbbbbbbbbbbbbbbbblo  ",
+        " ooooooooooooooooooooo  ",
+        "  olllllllllllllllllo   ",
+        "  obbbbbbbbbbbbbbbbbo   ",
+        "  ooooooooooooooooooo   "
+      ]
+    },
+    "ribbonBow": {
+      "palette": {
+        "o": "6E4249",
+        "b": "B66F81",
+        "l": "E3A5AB",
+        "w": "F3C5C0"
+      },
+      "rows": [
+        "   oooo          oooo   ",
+        "  ollllo        ollllo  ",
+        " olwllblo      olbllwlo ",
+        " olllbbbloooooolbbblllo ",
+        " olbbbbbbollollobbbbblo ",
+        "  obbbbbbollollobbbbbo  ",
+        "   obbbbbolbbllobbbbo   ",
+        "    ooooooobboooooo     ",
+        "        olloollo        ",
+        "       ollo  ollo       ",
+        "      ollo    ollo      ",
+        "      ooo      ooo      "
+      ]
+    }
+  },
+  "anchors": {
+    "island_parrot_classic_fly_03": [
+      141,
+      62.6,
+      24.0
+    ],
+    "island_parrot_classic_fly_02": [
+      142,
+      83.6,
+      24.0
+    ],
+    "companion_dog_cardigan_jump_00": [
+      160,
+      44.25,
+      35.0
+    ],
+    "companion_dog_cardigan_jump_01": [
+      160,
+      62.25,
+      35.0
+    ],
+    "island_fox_arctic_walk_1": [
+      147,
+      58.8,
+      32.0
+    ],
+    "companion_lion_adult_play_01": [
+      161,
+      85.65,
+      31.0
+    ],
+    "island_fox_arctic_walk_0": [
+      151,
+      67.8,
+      32.0
+    ],
+    "companion_lion_adult_play_00": [
+      159,
+      87.65,
+      31.0
+    ],
+    "companion_lion_cub_walk_05": [
+      154,
+      66.8,
+      32.0
+    ],
+    "companion_lion_cub_walk_04": [
+      154,
+      65.8,
+      32.0
+    ],
+    "companion_lion_adult_walk_03": [
+      163,
+      37.65,
+      31.0
+    ],
+    "companion_lion_adult_walk_02": [
+      163,
+      37.65,
+      31.0
+    ],
+    "island_parrot_budgie_fly_07": [
+      153,
+      72.9,
+      26.0
+    ],
+    "island_parrot_budgie_fly_06": [
+      156,
+      73.9,
+      26.0
+    ],
+    "island_dog_corgi_idle": [
+      141,
+      74.55,
+      37.0
+    ],
+    "companion_dog_cardigan_idle_01": [
+      160,
+      72.25,
+      35.0
+    ],
+    "companion_dog_cardigan_idle_00": [
+      160,
+      72.25,
+      35.0
+    ],
+    "sprite_dog_swipe_0": [
+      263,
+      193.96,
+      66.41
+    ],
+    "sprite_dog_swipe_1": [
+      271,
+      126.96,
+      66.41
+    ],
+    "island_dog_bull_terrier_idle": [
+      147,
+      79.65,
+      31.0
+    ],
+    "island_dog_shepherd_run_1": [
+      158,
+      43.4,
+      36.0
+    ],
+    "island_dog_shepherd_run_0": [
+      169,
+      40.4,
+      36.0
+    ],
+    "island_parrot_budgie_idle": [
+      150,
+      48.9,
+      26.0
+    ],
+    "island_fox_play": [
+      156,
+      90.8,
+      32.0
+    ],
+    "sprite_dog_lie_2": [
+      225,
+      249.96,
+      66.41
+    ],
+    "companion_dog_cardigan_sleep_00": [
+      160,
+      106.25,
+      35.0
+    ],
+    "companion_dog_cardigan_sleep_01": [
+      160,
+      107.25,
+      35.0
+    ],
+    "island_parrot_cockatiel_fly_03": [
+      134,
+      33.6,
+      24.0
+    ],
+    "island_parrot_cockatiel_fly_02": [
+      144,
+      84.6,
+      24.0
+    ],
+    "island_parrot_macaw_fly_04": [
+      143,
+      66.75,
+      25.0
+    ],
+    "island_parrot_macaw_fly_05": [
+      143,
+      76.75,
+      25.0
+    ],
+    "island_fox_sleep": [
+      142,
+      103.8,
+      32.0
+    ],
+    "companion_dog_cardigan_play_00": [
+      153,
+      101.25,
+      35.0
+    ],
+    "companion_dog_cardigan_play_01": [
+      157,
+      94.25,
+      35.0
+    ],
+    "companion_lion_cub_run_03": [
+      154,
+      73.8,
+      32.0
+    ],
+    "companion_lion_cub_run_02": [
+      154,
+      76.8,
+      32.0
+    ],
+    "island_cat_maine_coon_idle": [
+      144,
+      51.95,
+      33.0
+    ],
+    "companion_lion_adult_jump_01": [
+      163,
+      41.65,
+      31.0
+    ],
+    "island_parrot_macaw_jump": [
+      149,
+      50.75,
+      25.0
+    ],
+    "companion_lion_adult_jump_00": [
+      162,
+      25.65,
+      31.0
+    ],
+    "island_parrot_cockatiel_idle": [
+      143,
+      54.6,
+      24.0
+    ],
+    "island_fox_arctic_jump": [
+      156,
+      72.8,
+      32.0
+    ],
+    "island_parrot_cockatiel_sleep": [
+      138,
+      115.6,
+      24.0
+    ],
+    "island_dog_bull_terrier_sleep": [
+      137,
+      117.65,
+      31.0
+    ],
+    "island_penguin_rockhopper_play": [
+      143,
+      42.1,
+      34.0
+    ],
+    "sprite_dog_run_0": [
+      273,
+      126.96,
+      66.41
+    ],
+    "sprite_dog_run_1": [
+      264,
+      125.96,
+      66.41
+    ],
+    "island_parrot_macaw_walk_0": [
+      135,
+      43.75,
+      25.0
+    ],
+    "island_parrot_macaw_walk_1": [
+      117,
+      41.75,
+      25.0
+    ],
+    "companion_lioness_walk_05": [
+      170,
+      66.9,
+      26.0
+    ],
+    "companion_lioness_walk_04": [
+      170,
+      67.9,
+      26.0
+    ],
+    "island_parrot_jump": [
+      157,
+      71.6,
+      24.0
+    ],
+    "companion_lion_adult_idle_00": [
+      163,
+      39.65,
+      31.0
+    ],
+    "companion_dog_cardigan_run_04": [
+      159,
+      69.25,
+      35.0
+    ],
+    "companion_lion_adult_idle_01": [
+      163,
+      38.65,
+      31.0
+    ],
+    "island_dog_doberman_sleep": [
+      140,
+      114.25,
+      35.0
+    ],
+    "companion_lion_adult_run_00": [
+      163,
+      37.65,
+      31.0
+    ],
+    "island_penguin_idle": [
+      116,
+      28.25,
+      35.0
+    ],
+    "companion_lion_adult_run_01": [
+      163,
+      37.65,
+      31.0
+    ],
+    "island_cat_siamese_play": [
+      133,
+      93.8,
+      32.0
+    ],
+    "island_parrot_budgie_sleep": [
+      135,
+      104.9,
+      26.0
+    ],
+    "island_dog_doberman_idle": [
+      135,
+      47.25,
+      35.0
+    ],
+    "companion_lioness_run_01": [
+      170,
+      73.9,
+      26.0
+    ],
+    "companion_lioness_run_00": [
+      170,
+      73.9,
+      26.0
+    ],
+    "companion_lion_cub_run_04": [
+      154,
+      77.8,
+      32.0
+    ],
+    "island_dog_corgi_run_1": [
+      145,
+      65.55,
+      37.0
+    ],
+    "island_dog_corgi_run_0": [
+      153,
+      75.55,
+      37.0
+    ],
+    "companion_lion_cub_run_05": [
+      154,
+      75.8,
+      32.0
+    ],
+    "island_parrot_macaw_fly_03": [
+      148,
+      61.75,
+      25.0
+    ],
+    "island_cat_maine_coon_sleep": [
+      138,
+      108.95,
+      33.0
+    ],
+    "island_parrot_macaw_fly_02": [
+      148,
+      60.75,
+      25.0
+    ],
+    "companion_lion_cub_jump_00": [
+      154,
+      46.8,
+      32.0
+    ],
+    "companion_lion_cub_jump_01": [
+      154,
+      53.8,
+      32.0
+    ],
+    "island_cat_siamese_run_0": [
+      150,
+      77.8,
+      32.0
+    ],
+    "island_cat_siamese_run_1": [
+      155,
+      71.8,
+      32.0
+    ],
+    "island_penguin_rockhopper_walk_1": [
+      133,
+      37.1,
+      34.0
+    ],
+    "island_penguin_rockhopper_walk_0": [
+      124,
+      37.1,
+      34.0
+    ],
+    "island_dog_corgi_jump": [
+      144,
+      88.55,
+      37.0
+    ],
+    "island_cat_british_play": [
+      137,
+      85.85,
+      39.0
+    ],
+    "companion_dog_cardigan_walk_04": [
+      160,
+      67.25,
+      35.0
+    ],
+    "companion_lioness_walk_02": [
+      169,
+      64.9,
+      26.0
+    ],
+    "companion_lioness_walk_03": [
+      170,
+      64.9,
+      26.0
+    ],
+    "island_dog_corgi_walk_3": [
+      143,
+      69.55,
+      37.0
+    ],
+    "island_dog_corgi_walk_2": [
+      143,
+      68.55,
+      37.0
+    ],
+    "companion_lion_adult_run_07": [
+      163,
+      39.65,
+      31.0
+    ],
+    "companion_lion_cub_idle_01": [
+      154,
+      67.8,
+      32.0
+    ],
+    "companion_lion_adult_run_06": [
+      163,
+      40.65,
+      31.0
+    ],
+    "companion_lion_cub_idle_00": [
+      154,
+      67.8,
+      32.0
+    ],
+    "island_dog_bull_terrier_jump": [
+      146,
+      79.65,
+      31.0
+    ],
+    "sprite_dog_walk_0": [
+      273,
+      126.96,
+      66.41
+    ],
+    "sprite_dog_walk_1": [
+      264,
+      125.96,
+      66.41
+    ],
+    "companion_lioness_play_00": [
+      169,
+      109.9,
+      26.0
+    ],
+    "companion_lioness_play_01": [
+      169,
+      98.9,
+      26.0
+    ],
+    "companion_lioness_run_06": [
+      169,
+      72.9,
+      26.0
+    ],
+    "companion_lioness_run_07": [
+      169,
+      69.9,
+      26.0
+    ],
+    "island_parrot_budgie_jump": [
+      159,
+      58.9,
+      26.0
+    ],
+    "island_parrot_sleep": [
+      144,
+      112.6,
+      24.0
+    ],
+    "island_parrot_cockatiel_jump": [
+      155,
+      63.6,
+      24.0
+    ],
+    "island_cat_british_sleep": [
+      134,
+      96.85,
+      39.0
+    ],
+    "island_parrot_macaw_idle": [
+      109,
+      33.75,
+      25.0
+    ],
+    "island_cat_maine_coon_jump": [
+      141,
+      77.95,
+      33.0
+    ],
+    "island_cat_walk_0": [
+      150,
+      47.95,
+      33.0
+    ],
+    "island_cat_walk_1": [
+      150,
+      47.95,
+      33.0
+    ],
+    "island_fox_arctic_idle": [
+      147,
+      55.8,
+      32.0
+    ],
+    "island_penguin_rockhopper_sleep": [
+      145,
+      112.1,
+      34.0
+    ],
+    "island_parrot_classic_fly_04": [
+      139,
+      54.6,
+      24.0
+    ],
+    "island_parrot_classic_fly_05": [
+      133,
+      75.6,
+      24.0
+    ],
+    "island_penguin_sleep": [
+      139,
+      87.25,
+      35.0
+    ],
+    "companion_lion_cub_walk_02": [
+      154,
+      65.8,
+      32.0
+    ],
+    "companion_lion_cub_walk_03": [
+      154,
+      65.8,
+      32.0
+    ],
+    "island_cat_play": [
+      141,
+      92.95,
+      33.0
+    ],
+    "companion_lion_adult_sleep_00": [
+      167,
+      96.65,
+      31.0
+    ],
+    "companion_lion_adult_sleep_01": [
+      167,
+      97.65,
+      31.0
+    ],
+    "island_parrot_budgie_fly_00": [
+      153,
+      60.9,
+      26.0
+    ],
+    "island_parrot_budgie_fly_01": [
+      154,
+      59.9,
+      26.0
+    ],
+    "sprite_dog_with_ball_3": [
+      271,
+      126.96,
+      66.41
+    ],
+    "sprite_dog_with_ball_2": [
+      263,
+      193.96,
+      66.41
+    ],
+    "companion_lion_adult_walk_04": [
+      162,
+      36.65,
+      31.0
+    ],
+    "companion_lion_adult_walk_05": [
+      162,
+      37.65,
+      31.0
+    ],
+    "island_fox_arctic_run_1": [
+      164,
+      65.8,
+      32.0
+    ],
+    "companion_lion_cub_play_00": [
+      153,
+      91.8,
+      32.0
+    ],
+    "island_fox_arctic_run_0": [
+      165,
+      54.8,
+      32.0
+    ],
+    "companion_lion_cub_play_01": [
+      146,
+      89.8,
+      32.0
+    ],
+    "companion_lioness_idle_01": [
+      170,
+      65.9,
+      26.0
+    ],
+    "companion_lioness_idle_00": [
+      170,
+      65.9,
+      26.0
+    ],
+    "island_parrot_cockatiel_walk_0": [
+      143,
+      58.6,
+      24.0
+    ],
+    "island_parrot_cockatiel_walk_1": [
+      141,
+      51.6,
+      24.0
+    ],
+    "island_parrot_idle": [
+      149,
+      55.6,
+      24.0
+    ],
+    "island_dog_doberman_jump": [
+      148,
+      64.25,
+      35.0
+    ],
+    "island_cat_sleep": [
+      145,
+      109.95,
+      33.0
+    ],
+    "island_parrot_cockatiel_fly_04": [
+      136,
+      35.6,
+      24.0
+    ],
+    "island_parrot_cockatiel_fly_05": [
+      136,
+      81.6,
+      24.0
+    ],
+    "island_penguin_jump": [
+      153,
+      65.25,
+      35.0
+    ],
+    "companion_lioness_jump_00": [
+      170,
+      42.9,
+      26.0
+    ],
+    "sprite_dog_idle_2": [
+      271,
+      126.96,
+      66.41
+    ],
+    "companion_lioness_jump_01": [
+      170,
+      63.9,
+      26.0
+    ],
+    "sprite_dog_idle_3": [
+      264,
+      125.96,
+      66.41
+    ],
+    "companion_lioness_walk_06": [
+      169,
+      66.9,
+      26.0
+    ],
+    "companion_lioness_walk_07": [
+      170,
+      64.9,
+      26.0
+    ],
+    "island_cat_siamese_sleep": [
+      144,
+      111.8,
+      32.0
+    ],
+    "island_cat_siamese_jump": [
+      154,
+      64.8,
+      32.0
+    ],
+    "island_dog_corgi_sleep": [
+      140,
+      115.55,
+      37.0
+    ],
+    "companion_lion_adult_run_03": [
+      163,
+      35.65,
+      31.0
+    ],
+    "companion_lion_adult_run_02": [
+      163,
+      36.65,
+      31.0
+    ],
+    "island_cat_maine_coon_run_1": [
+      143,
+      77.95,
+      33.0
+    ],
+    "island_cat_maine_coon_run_0": [
+      133,
+      73.95,
+      33.0
+    ],
+    "island_parrot_play": [
+      164,
+      87.6,
+      24.0
+    ],
+    "companion_lioness_run_02": [
+      170,
+      72.9,
+      26.0
+    ],
+    "companion_lioness_run_03": [
+      170,
+      70.9,
+      26.0
+    ],
+    "island_parrot_macaw_fly_07": [
+      140,
+      74.75,
+      25.0
+    ],
+    "island_parrot_macaw_fly_06": [
+      142,
+      77.75,
+      25.0
+    ],
+    "companion_lion_cub_run_00": [
+      154,
+      79.8,
+      32.0
+    ],
+    "companion_lion_cub_run_01": [
+      154,
+      79.8,
+      32.0
+    ],
+    "island_penguin_walk_1": [
+      117,
+      32.25,
+      35.0
+    ],
+    "island_penguin_walk_0": [
+      118,
+      33.25,
+      35.0
+    ],
+    "island_penguin_rockhopper_jump": [
+      169,
+      96.1,
+      34.0
+    ],
+    "island_parrot_macaw_play": [
+      140,
+      90.75,
+      25.0
+    ],
+    "island_cat_siamese_walk_1": [
+      156,
+      50.8,
+      32.0
+    ],
+    "island_dog_shepherd_walk_0": [
+      153,
+      38.4,
+      36.0
+    ],
+    "island_cat_siamese_walk_0": [
+      156,
+      51.8,
+      32.0
+    ],
+    "island_dog_shepherd_walk_1": [
+      154,
+      38.4,
+      36.0
+    ],
+    "island_fox_arctic_play": [
+      150,
+      93.8,
+      32.0
+    ],
+    "island_cat_maine_coon_walk_1": [
+      144,
+      57.95,
+      33.0
+    ],
+    "sprite_dog_run_3": [
+      273,
+      126.96,
+      66.41
+    ],
+    "sprite_dog_run_2": [
+      283,
+      148.96,
+      66.41
+    ],
+    "island_cat_maine_coon_walk_0": [
+      144,
+      56.95,
+      33.0
+    ],
+    "island_cat_idle": [
+      142,
+      48.95,
+      33.0
+    ],
+    "companion_dog_cardigan_walk_00": [
+      160,
+      67.25,
+      35.0
+    ],
+    "island_parrot_walk_0": [
+      149,
+      57.6,
+      24.0
+    ],
+    "island_parrot_walk_1": [
+      150,
+      58.6,
+      24.0
+    ],
+    "island_fox_arctic_sleep": [
+      140,
+      106.8,
+      32.0
+    ],
+    "sprite_dog_swipe_2": [
+      263,
+      193.96,
+      66.41
+    ],
+    "island_fox_jump": [
+      164,
+      52.8,
+      32.0
+    ],
+    "island_fox_walk_0": [
+      153,
+      47.8,
+      32.0
+    ],
+    "island_fox_walk_1": [
+      153,
+      47.8,
+      32.0
+    ],
+    "island_cat_british_run_1": [
+      147,
+      48.85,
+      39.0
+    ],
+    "island_cat_british_run_0": [
+      147,
+      65.85,
+      39.0
+    ],
+    "island_dog_doberman_walk_1": [
+      143,
+      54.25,
+      35.0
+    ],
+    "island_dog_doberman_walk_0": [
+      142,
+      50.25,
+      35.0
+    ],
+    "sprite_dog_lie_1": [
+      225,
+      249.96,
+      66.41
+    ],
+    "sprite_dog_lie_0": [
+      225,
+      249.96,
+      66.41
+    ],
+    "companion_lioness_sleep_00": [
+      172,
+      116.9,
+      26.0
+    ],
+    "island_parrot_budgie_walk_0": [
+      151,
+      41.9,
+      26.0
+    ],
+    "companion_lioness_sleep_01": [
+      172,
+      116.9,
+      26.0
+    ],
+    "island_parrot_budgie_walk_1": [
+      147,
+      41.9,
+      26.0
+    ],
+    "island_penguin_rockhopper_run_0": [
+      152,
+      98.1,
+      34.0
+    ],
+    "island_penguin_rockhopper_run_1": [
+      169,
+      106.1,
+      34.0
+    ],
+    "island_penguin_run_1": [
+      153,
+      84.25,
+      35.0
+    ],
+    "island_penguin_run_0": [
+      140,
+      82.25,
+      35.0
+    ],
+    "island_parrot_cockatiel_fly_00": [
+      143,
+      81.6,
+      24.0
+    ],
+    "island_parrot_cockatiel_fly_01": [
+      143,
+      79.6,
+      24.0
+    ],
+    "island_parrot_classic_fly_00": [
+      140,
+      77.6,
+      24.0
+    ],
+    "island_parrot_classic_fly_01": [
+      142,
+      80.6,
+      24.0
+    ],
+    "island_cat_run_1": [
+      158,
+      62.95,
+      33.0
+    ],
+    "island_cat_run_0": [
+      159,
+      60.95,
+      33.0
+    ],
+    "island_cat_british_idle": [
+      142,
+      36.85,
+      39.0
+    ],
+    "companion_lion_cub_walk_06": [
+      154,
+      66.8,
+      32.0
+    ],
+    "companion_lion_cub_walk_07": [
+      154,
+      65.8,
+      32.0
+    ],
+    "companion_lion_adult_walk_00": [
+      163,
+      37.65,
+      31.0
+    ],
+    "companion_lion_adult_walk_01": [
+      162,
+      37.65,
+      31.0
+    ],
+    "island_parrot_budgie_fly_04": [
+      157,
+      57.9,
+      26.0
+    ],
+    "island_parrot_budgie_fly_05": [
+      154,
+      68.9,
+      26.0
+    ],
+    "island_penguin_play": [
+      143,
+      58.25,
+      35.0
+    ],
+    "island_cat_siamese_idle": [
+      148,
+      42.8,
+      32.0
+    ],
+    "island_dog_doberman_play": [
+      133,
+      88.25,
+      35.0
+    ],
+    "island_parrot_cockatiel_fly_07": [
+      143,
+      83.6,
+      24.0
+    ],
+    "island_parrot_cockatiel_fly_06": [
+      145,
+      82.6,
+      24.0
+    ],
+    "sprite_dog_idle_1": [
+      273,
+      126.96,
+      66.41
+    ],
+    "sprite_dog_idle_0": [
+      271,
+      126.96,
+      66.41
+    ],
+    "island_parrot_classic_fly_07": [
+      139,
+      80.6,
+      24.0
+    ],
+    "island_parrot_classic_fly_06": [
+      143,
+      79.6,
+      24.0
+    ],
+    "island_penguin_rockhopper_idle": [
+      123,
+      34.1,
+      34.0
+    ],
+    "companion_lion_cub_walk_01": [
+      154,
+      66.8,
+      32.0
+    ],
+    "companion_lion_cub_walk_00": [
+      154,
+      65.8,
+      32.0
+    ],
+    "island_parrot_budgie_fly_03": [
+      157,
+      51.9,
+      26.0
+    ],
+    "island_dog_bull_terrier_walk_1": [
+      148,
+      85.65,
+      31.0
+    ],
+    "island_parrot_budgie_fly_02": [
+      156,
+      73.9,
+      26.0
+    ],
+    "island_dog_bull_terrier_walk_0": [
+      147,
+      79.65,
+      31.0
+    ],
+    "sprite_dog_with_ball_0": [
+      263,
+      193.96,
+      66.41
+    ],
+    "sprite_dog_with_ball_1": [
+      273,
+      126.96,
+      66.41
+    ],
+    "island_cat_jump": [
+      151,
+      54.95,
+      33.0
+    ],
+    "companion_lion_adult_walk_07": [
+      163,
+      35.65,
+      31.0
+    ],
+    "companion_lion_adult_walk_06": [
+      163,
+      36.65,
+      31.0
+    ],
+    "island_parrot_cockatiel_play": [
+      157,
+      91.6,
+      24.0
+    ],
+    "island_cat_maine_coon_play": [
+      118,
+      103.95,
+      33.0
+    ],
+    "island_dog_bull_terrier_play": [
+      133,
+      104.65,
+      31.0
+    ],
+    "island_dog_bull_terrier_run_0": [
+      172,
+      69.65,
+      31.0
+    ],
+    "island_dog_bull_terrier_run_1": [
+      157,
+      67.65,
+      31.0
+    ],
+    "island_fox_idle": [
+      147,
+      46.8,
+      32.0
+    ],
+    "companion_lioness_walk_01": [
+      170,
+      65.9,
+      26.0
+    ],
+    "companion_lioness_walk_00": [
+      170,
+      64.9,
+      26.0
+    ],
+    "island_parrot_budgie_play": [
+      162,
+      83.9,
+      26.0
+    ],
+    "companion_dog_cardigan_run_00": [
+      159,
+      83.25,
+      35.0
+    ],
+    "island_dog_corgi_walk_0": [
+      143,
+      70.55,
+      37.0
+    ],
+    "island_dog_corgi_walk_1": [
+      143,
+      70.55,
+      37.0
+    ],
+    "island_fox_run_1": [
+      158,
+      65.8,
+      32.0
+    ],
+    "island_fox_run_0": [
+      162,
+      66.8,
+      32.0
+    ],
+    "companion_lion_adult_run_04": [
+      163,
+      36.65,
+      31.0
+    ],
+    "island_parrot_macaw_sleep": [
+      126,
+      93.75,
+      25.0
+    ],
+    "companion_lion_adult_run_05": [
+      163,
+      38.65,
+      31.0
+    ],
+    "companion_lioness_run_05": [
+      170,
+      71.9,
+      26.0
+    ],
+    "companion_lioness_run_04": [
+      170,
+      71.9,
+      26.0
+    ],
+    "sprite_dog_walk_2": [
+      271,
+      126.96,
+      66.41
+    ],
+    "island_cat_british_jump": [
+      150,
+      52.85,
+      39.0
+    ],
+    "island_cat_british_walk_0": [
+      148,
+      41.85,
+      39.0
+    ],
+    "island_cat_british_walk_1": [
+      148,
+      42.85,
+      39.0
+    ],
+    "companion_lion_cub_run_07": [
+      154,
+      76.8,
+      32.0
+    ],
+    "companion_lion_cub_run_06": [
+      154,
+      72.8,
+      32.0
+    ],
+    "island_parrot_macaw_fly_00": [
+      143,
+      68.75,
+      25.0
+    ],
+    "island_parrot_macaw_fly_01": [
+      146,
+      74.75,
+      25.0
+    ],
+    "island_dog_corgi_play": [
+      139,
+      103.55,
+      37.0
+    ],
+    "companion_lion_cub_sleep_00": [
+      154,
+      105.8,
+      32.0
+    ],
+    "companion_lion_cub_sleep_01": [
+      154,
+      105.8,
+      32.0
+    ],
+    "sprite_dog_run_4": [
+      264,
+      125.96,
+      66.41
+    ],
+    "sprite_dog_run_5": [
+      283,
+      148.96,
+      66.41
+    ],
+    "island_dog_doberman_run_1": [
+      146,
+      44.25,
+      35.0
+    ],
+    "island_dog_doberman_run_0": [
+      162,
+      55.25,
+      35.0
+    ],
+    "fluid_fox_arctic_run_6": [
+      162,
+      57.8,
+      32.0
+    ],
+    "fluid_fox_arctic_run_7": [
+      163,
+      58.8,
+      32.0
+    ],
+    "fluid_penguin_rockhopper_walk_3": [
+      135,
+      37.1,
+      34.0
+    ],
+    "fluid_penguin_rockhopper_walk_2": [
+      136,
+      37.1,
+      34.0
+    ],
+    "fluid_dog_doberman_walk_6": [
+      154,
+      38.25,
+      35.0
+    ],
+    "fluid_dog_doberman_walk_7": [
+      154,
+      38.25,
+      35.0
+    ],
+    "fluid_cat_walk_2": [
+      162,
+      44.95,
+      33.0
+    ],
+    "fluid_cat_walk_3": [
+      162,
+      45.95,
+      33.0
+    ],
+    "fluid_cat_british_walk_1": [
+      160,
+      41.85,
+      39.0
+    ],
+    "fluid_cat_british_walk_0": [
+      160,
+      41.85,
+      39.0
+    ],
+    "fluid_dog_doberman_run_0": [
+      154,
+      49.25,
+      35.0
+    ],
+    "fluid_dog_doberman_run_1": [
+      154,
+      53.25,
+      35.0
+    ],
+    "fluid_cat_siamese_run_3": [
+      168,
+      59.8,
+      32.0
+    ],
+    "fluid_cat_siamese_run_2": [
+      162,
+      68.8,
+      32.0
+    ],
+    "fluid_fox_run_0": [
+      165,
+      59.8,
+      32.0
+    ],
+    "fluid_fox_run_1": [
+      165,
+      61.8,
+      32.0
+    ],
+    "fluid_cat_siamese_walk_7": [
+      168,
+      51.8,
+      32.0
+    ],
+    "fluid_cat_siamese_walk_6": [
+      168,
+      51.8,
+      32.0
+    ],
+    "fluid_dog_bull_terrier_run_6": [
+      158,
+      57.65,
+      31.0
+    ],
+    "fluid_dog_bull_terrier_run_7": [
+      158,
+      70.65,
+      31.0
+    ],
+    "fluid_cat_maine_coon_walk_4": [
+      156,
+      57.95,
+      33.0
+    ],
+    "fluid_cat_maine_coon_walk_5": [
+      156,
+      58.95,
+      33.0
+    ],
+    "fluid_dog_corgi_run_7": [
+      155,
+      71.55,
+      37.0
+    ],
+    "fluid_dog_corgi_run_6": [
+      154,
+      64.55,
+      37.0
+    ],
+    "fluid_fox_walk_6": [
+      164,
+      41.8,
+      32.0
+    ],
+    "fluid_fox_walk_7": [
+      165,
+      47.8,
+      32.0
+    ],
+    "fluid_penguin_run_7": [
+      141,
+      42.25,
+      35.0
+    ],
+    "fluid_penguin_run_6": [
+      141,
+      38.25,
+      35.0
+    ],
+    "fluid_fox_arctic_walk_5": [
+      163,
+      57.8,
+      32.0
+    ],
+    "fluid_fox_arctic_walk_4": [
+      162,
+      58.8,
+      32.0
+    ],
+    "fluid_penguin_walk_4": [
+      130,
+      34.25,
+      35.0
+    ],
+    "fluid_penguin_walk_5": [
+      131,
+      33.25,
+      35.0
+    ],
+    "fluid_dog_bull_terrier_walk_3": [
+      159,
+      67.65,
+      31.0
+    ],
+    "fluid_dog_bull_terrier_walk_2": [
+      159,
+      69.65,
+      31.0
+    ],
+    "fluid_cat_run_7": [
+      162,
+      51.95,
+      33.0
+    ],
+    "fluid_dog_shepherd_walk_7": [
+      165,
+      40.4,
+      36.0
+    ],
+    "fluid_dog_shepherd_walk_6": [
+      166,
+      37.4,
+      36.0
+    ],
+    "fluid_cat_run_6": [
+      162,
+      46.95,
+      33.0
+    ],
+    "fluid_cat_maine_coon_run_4": [
+      150,
+      70.95,
+      33.0
+    ],
+    "fluid_cat_maine_coon_run_5": [
+      155,
+      69.95,
+      33.0
+    ],
+    "fluid_penguin_rockhopper_run_7": [
+      146,
+      43.1,
+      34.0
+    ],
+    "fluid_penguin_rockhopper_run_6": [
+      146,
+      38.1,
+      34.0
+    ],
+    "fluid_cat_british_run_6": [
+      159,
+      49.85,
+      39.0
+    ],
+    "fluid_cat_british_run_7": [
+      160,
+      52.85,
+      39.0
+    ],
+    "fluid_dog_shepherd_run_4": [
+      166,
+      50.4,
+      36.0
+    ],
+    "fluid_dog_shepherd_run_5": [
+      166,
+      50.4,
+      36.0
+    ],
+    "fluid_fox_arctic_walk_2": [
+      163,
+      61.8,
+      32.0
+    ],
+    "fluid_fox_arctic_walk_3": [
+      163,
+      60.8,
+      32.0
+    ],
+    "fluid_penguin_walk_3": [
+      130,
+      32.25,
+      35.0
+    ],
+    "fluid_penguin_walk_2": [
+      131,
+      32.25,
+      35.0
+    ],
+    "fluid_dog_bull_terrier_walk_4": [
+      159,
+      71.65,
+      31.0
+    ],
+    "fluid_dog_bull_terrier_walk_5": [
+      159,
+      72.65,
+      31.0
+    ],
+    "fluid_dog_shepherd_walk_0": [
+      166,
+      38.4,
+      36.0
+    ],
+    "fluid_cat_run_0": [
+      161,
+      62.95,
+      33.0
+    ],
+    "fluid_cat_run_1": [
+      162,
+      62.95,
+      33.0
+    ],
+    "fluid_dog_shepherd_walk_1": [
+      166,
+      37.4,
+      36.0
+    ],
+    "fluid_cat_maine_coon_run_3": [
+      155,
+      69.95,
+      33.0
+    ],
+    "fluid_cat_maine_coon_run_2": [
+      145,
+      64.95,
+      33.0
+    ],
+    "fluid_penguin_rockhopper_run_0": [
+      146,
+      45.1,
+      34.0
+    ],
+    "fluid_penguin_rockhopper_run_1": [
+      146,
+      53.1,
+      34.0
+    ],
+    "fluid_cat_british_run_1": [
+      160,
+      46.85,
+      39.0
+    ],
+    "fluid_cat_british_run_0": [
+      159,
+      48.85,
+      39.0
+    ],
+    "fluid_dog_shepherd_run_3": [
+      166,
+      44.4,
+      36.0
+    ],
+    "fluid_dog_shepherd_run_2": [
+      165,
+      52.4,
+      36.0
+    ],
+    "fluid_penguin_rockhopper_walk_4": [
+      136,
+      37.1,
+      34.0
+    ],
+    "fluid_penguin_rockhopper_walk_5": [
+      136,
+      37.1,
+      34.0
+    ],
+    "fluid_dog_doberman_walk_1": [
+      153,
+      39.25,
+      35.0
+    ],
+    "fluid_dog_doberman_walk_0": [
+      154,
+      42.25,
+      35.0
+    ],
+    "fluid_cat_walk_5": [
+      162,
+      47.95,
+      33.0
+    ],
+    "fluid_cat_walk_4": [
+      162,
+      45.95,
+      33.0
+    ],
+    "fluid_fox_arctic_run_1": [
+      162,
+      60.8,
+      32.0
+    ],
+    "fluid_fox_arctic_run_0": [
+      163,
+      65.8,
+      32.0
+    ],
+    "fluid_cat_british_walk_6": [
+      160,
+      41.85,
+      39.0
+    ],
+    "fluid_cat_british_walk_7": [
+      160,
+      41.85,
+      39.0
+    ],
+    "fluid_fox_run_7": [
+      165,
+      62.8,
+      32.0
+    ],
+    "fluid_fox_run_6": [
+      164,
+      52.8,
+      32.0
+    ],
+    "fluid_dog_doberman_run_7": [
+      153,
+      44.25,
+      35.0
+    ],
+    "fluid_dog_doberman_run_6": [
+      154,
+      30.25,
+      35.0
+    ],
+    "fluid_cat_siamese_run_4": [
+      167,
+      57.8,
+      32.0
+    ],
+    "fluid_cat_siamese_run_5": [
+      168,
+      61.8,
+      32.0
+    ],
+    "fluid_cat_siamese_walk_0": [
+      168,
+      51.8,
+      32.0
+    ],
+    "fluid_cat_siamese_walk_1": [
+      168,
+      50.8,
+      32.0
+    ],
+    "fluid_dog_bull_terrier_run_1": [
+      158,
+      77.65,
+      31.0
+    ],
+    "fluid_dog_bull_terrier_run_0": [
+      159,
+      74.65,
+      31.0
+    ],
+    "fluid_cat_maine_coon_walk_3": [
+      156,
+      56.95,
+      33.0
+    ],
+    "fluid_cat_maine_coon_walk_2": [
+      156,
+      56.95,
+      33.0
+    ],
+    "fluid_dog_corgi_run_0": [
+      155,
+      75.55,
+      37.0
+    ],
+    "fluid_dog_corgi_run_1": [
+      155,
+      73.55,
+      37.0
+    ],
+    "fluid_fox_walk_1": [
+      165,
+      48.8,
+      32.0
+    ],
+    "fluid_fox_walk_0": [
+      165,
+      48.8,
+      32.0
+    ],
+    "fluid_penguin_run_0": [
+      141,
+      48.25,
+      35.0
+    ],
+    "fluid_penguin_run_1": [
+      141,
+      47.25,
+      35.0
+    ],
+    "fluid_cat_run_4": [
+      162,
+      52.95,
+      33.0
+    ],
+    "fluid_dog_shepherd_walk_4": [
+      165,
+      39.4,
+      36.0
+    ],
+    "fluid_dog_shepherd_walk_5": [
+      166,
+      37.4,
+      36.0
+    ],
+    "fluid_cat_run_5": [
+      159,
+      69.95,
+      33.0
+    ],
+    "fluid_cat_maine_coon_run_7": [
+      156,
+      66.95,
+      33.0
+    ],
+    "fluid_cat_maine_coon_run_6": [
+      156,
+      61.95,
+      33.0
+    ],
+    "fluid_penguin_rockhopper_run_4": [
+      145,
+      51.1,
+      34.0
+    ],
+    "fluid_penguin_rockhopper_run_5": [
+      145,
+      52.1,
+      34.0
+    ],
+    "fluid_cat_british_run_5": [
+      160,
+      49.85,
+      39.0
+    ],
+    "fluid_cat_british_run_4": [
+      160,
+      47.85,
+      39.0
+    ],
+    "fluid_dog_shepherd_run_7": [
+      166,
+      50.4,
+      36.0
+    ],
+    "fluid_dog_shepherd_run_6": [
+      166,
+      42.4,
+      36.0
+    ],
+    "fluid_fox_arctic_walk_6": [
+      163,
+      57.8,
+      32.0
+    ],
+    "fluid_fox_arctic_walk_7": [
+      162,
+      57.8,
+      32.0
+    ],
+    "fluid_penguin_walk_7": [
+      130,
+      31.25,
+      35.0
+    ],
+    "fluid_penguin_walk_6": [
+      131,
+      34.25,
+      35.0
+    ],
+    "fluid_dog_bull_terrier_walk_0": [
+      158,
+      66.65,
+      31.0
+    ],
+    "fluid_dog_bull_terrier_walk_1": [
+      158,
+      69.65,
+      31.0
+    ],
+    "fluid_dog_corgi_run_4": [
+      155,
+      71.55,
+      37.0
+    ],
+    "fluid_dog_corgi_run_5": [
+      155,
+      70.55,
+      37.0
+    ],
+    "fluid_fox_walk_5": [
+      165,
+      46.8,
+      32.0
+    ],
+    "fluid_fox_walk_4": [
+      165,
+      46.8,
+      32.0
+    ],
+    "fluid_penguin_run_4": [
+      140,
+      44.25,
+      35.0
+    ],
+    "fluid_penguin_run_5": [
+      140,
+      44.25,
+      35.0
+    ],
+    "fluid_fox_arctic_run_5": [
+      163,
+      61.8,
+      32.0
+    ],
+    "fluid_fox_arctic_run_4": [
+      163,
+      61.8,
+      32.0
+    ],
+    "fluid_dog_doberman_walk_5": [
+      154,
+      38.25,
+      35.0
+    ],
+    "fluid_dog_doberman_walk_4": [
+      154,
+      39.25,
+      35.0
+    ],
+    "fluid_cat_walk_1": [
+      162,
+      44.95,
+      33.0
+    ],
+    "fluid_cat_walk_0": [
+      162,
+      44.95,
+      33.0
+    ],
+    "fluid_penguin_rockhopper_walk_0": [
+      136,
+      37.1,
+      34.0
+    ],
+    "fluid_penguin_rockhopper_walk_1": [
+      136,
+      37.1,
+      34.0
+    ],
+    "fluid_cat_british_walk_2": [
+      160,
+      41.85,
+      39.0
+    ],
+    "fluid_cat_british_walk_3": [
+      160,
+      39.85,
+      39.0
+    ],
+    "fluid_cat_siamese_run_0": [
+      167,
+      71.8,
+      32.0
+    ],
+    "fluid_cat_siamese_run_1": [
+      167,
+      67.8,
+      32.0
+    ],
+    "fluid_dog_doberman_run_3": [
+      154,
+      39.25,
+      35.0
+    ],
+    "fluid_dog_doberman_run_2": [
+      154,
+      50.25,
+      35.0
+    ],
+    "fluid_fox_run_3": [
+      165,
+      54.8,
+      32.0
+    ],
+    "fluid_fox_run_2": [
+      165,
+      71.8,
+      32.0
+    ],
+    "fluid_cat_maine_coon_walk_7": [
+      156,
+      58.95,
+      33.0
+    ],
+    "fluid_cat_maine_coon_walk_6": [
+      156,
+      57.95,
+      33.0
+    ],
+    "fluid_cat_siamese_walk_4": [
+      168,
+      50.8,
+      32.0
+    ],
+    "fluid_cat_siamese_walk_5": [
+      168,
+      50.8,
+      32.0
+    ],
+    "fluid_dog_bull_terrier_run_5": [
+      159,
+      69.65,
+      31.0
+    ],
+    "fluid_dog_bull_terrier_run_4": [
+      159,
+      68.65,
+      31.0
+    ],
+    "fluid_dog_corgi_run_3": [
+      155,
+      71.55,
+      37.0
+    ],
+    "fluid_dog_corgi_run_2": [
+      154,
+      71.55,
+      37.0
+    ],
+    "fluid_fox_walk_2": [
+      165,
+      47.8,
+      32.0
+    ],
+    "fluid_fox_walk_3": [
+      164,
+      44.8,
+      32.0
+    ],
+    "fluid_penguin_run_3": [
+      141,
+      37.25,
+      35.0
+    ],
+    "fluid_penguin_run_2": [
+      141,
+      33.25,
+      35.0
+    ],
+    "fluid_dog_doberman_walk_2": [
+      154,
+      39.25,
+      35.0
+    ],
+    "fluid_dog_doberman_walk_3": [
+      153,
+      39.25,
+      35.0
+    ],
+    "fluid_cat_walk_6": [
+      162,
+      45.95,
+      33.0
+    ],
+    "fluid_cat_walk_7": [
+      162,
+      45.95,
+      33.0
+    ],
+    "fluid_penguin_rockhopper_walk_7": [
+      136,
+      37.1,
+      34.0
+    ],
+    "fluid_penguin_rockhopper_walk_6": [
+      135,
+      37.1,
+      34.0
+    ],
+    "fluid_fox_arctic_run_2": [
+      163,
+      62.8,
+      32.0
+    ],
+    "fluid_fox_arctic_run_3": [
+      163,
+      58.8,
+      32.0
+    ],
+    "fluid_cat_british_walk_5": [
+      160,
+      41.85,
+      39.0
+    ],
+    "fluid_cat_british_walk_4": [
+      160,
+      42.85,
+      39.0
+    ],
+    "fluid_fox_run_4": [
+      165,
+      61.8,
+      32.0
+    ],
+    "fluid_fox_run_5": [
+      164,
+      55.8,
+      32.0
+    ],
+    "fluid_cat_siamese_run_7": [
+      168,
+      55.8,
+      32.0
+    ],
+    "fluid_cat_siamese_run_6": [
+      168,
+      63.8,
+      32.0
+    ],
+    "fluid_dog_doberman_run_4": [
+      154,
+      40.25,
+      35.0
+    ],
+    "fluid_dog_doberman_run_5": [
+      154,
+      43.25,
+      35.0
+    ],
+    "fluid_cat_maine_coon_walk_0": [
+      156,
+      56.95,
+      33.0
+    ],
+    "fluid_cat_maine_coon_walk_1": [
+      156,
+      56.95,
+      33.0
+    ],
+    "fluid_cat_siamese_walk_3": [
+      168,
+      51.8,
+      32.0
+    ],
+    "fluid_cat_siamese_walk_2": [
+      168,
+      51.8,
+      32.0
+    ],
+    "fluid_dog_bull_terrier_run_2": [
+      158,
+      66.65,
+      31.0
+    ],
+    "fluid_dog_bull_terrier_run_3": [
+      159,
+      66.65,
+      31.0
+    ],
+    "fluid_dog_shepherd_walk_3": [
+      165,
+      38.4,
+      36.0
+    ],
+    "fluid_cat_run_3": [
+      161,
+      49.95,
+      33.0
+    ],
+    "fluid_cat_run_2": [
+      162,
+      52.95,
+      33.0
+    ],
+    "fluid_dog_shepherd_walk_2": [
+      165,
+      40.4,
+      36.0
+    ],
+    "fluid_cat_maine_coon_run_0": [
+      155,
+      77.95,
+      33.0
+    ],
+    "fluid_cat_maine_coon_run_1": [
+      155,
+      76.95,
+      33.0
+    ],
+    "fluid_penguin_rockhopper_run_3": [
+      146,
+      38.1,
+      34.0
+    ],
+    "fluid_penguin_rockhopper_run_2": [
+      146,
+      45.1,
+      34.0
+    ],
+    "fluid_cat_british_run_2": [
+      159,
+      56.85,
+      39.0
+    ],
+    "fluid_cat_british_run_3": [
+      160,
+      39.85,
+      39.0
+    ],
+    "fluid_dog_shepherd_run_0": [
+      166,
+      44.4,
+      36.0
+    ],
+    "fluid_dog_shepherd_run_1": [
+      165,
+      51.4,
+      36.0
+    ],
+    "fluid_fox_arctic_walk_1": [
+      162,
+      59.8,
+      32.0
+    ],
+    "fluid_fox_arctic_walk_0": [
+      163,
+      59.8,
+      32.0
+    ],
+    "fluid_penguin_walk_0": [
+      131,
+      30.25,
+      35.0
+    ],
+    "fluid_penguin_walk_1": [
+      130,
+      32.25,
+      35.0
+    ],
+    "fluid_dog_bull_terrier_walk_7": [
+      158,
+      69.65,
+      31.0
+    ],
+    "fluid_dog_bull_terrier_walk_6": [
+      159,
+      69.65,
+      31.0
+    ]
+  },
+  "poses": {
+    "island_parrot_classic_fly_03": {
+      "angle": 11.75,
+      "width": 1.045,
+      "height": 0.968,
+      "bend": 0.042
+    },
+    "island_parrot_classic_fly_02": {
+      "angle": 12.5,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "companion_dog_cardigan_jump_00": {
+      "angle": -10,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_dog_cardigan_jump_01": {
+      "angle": -4,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_fox_arctic_walk_1": {
+      "angle": 5,
+      "width": 1.06,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "companion_lion_adult_play_01": {
+      "angle": -14,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_fox_arctic_walk_0": {
+      "angle": 5,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "companion_lion_adult_play_00": {
+      "angle": -17,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lion_cub_walk_05": {
+      "angle": 4.0,
+      "width": 1.0,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "companion_lion_cub_walk_04": {
+      "angle": 4.0,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "companion_lion_adult_walk_03": {
+      "angle": -5.0,
+      "width": 0.985,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "companion_lion_adult_walk_02": {
+      "angle": -5.0,
+      "width": 0.985,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "island_parrot_budgie_fly_07": {
+      "angle": -6.25,
+      "width": 0.985,
+      "height": 1.032,
+      "bend": -0.042
+    },
+    "island_parrot_budgie_fly_06": {
+      "angle": -7.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_dog_corgi_idle": {
+      "angle": 4,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_dog_cardigan_idle_01": {
+      "angle": -4.0,
+      "width": 1.03,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_dog_cardigan_idle_00": {
+      "angle": -4.0,
+      "width": 1.03,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "sprite_dog_swipe_0": {
+      "angle": -5,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "sprite_dog_swipe_1": {
+      "angle": -5,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_dog_bull_terrier_idle": {
+      "angle": 8,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_dog_shepherd_run_1": {
+      "angle": -5,
+      "width": 1.06,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_dog_shepherd_run_0": {
+      "angle": -5,
+      "width": 1.06,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "island_parrot_budgie_idle": {
+      "angle": 5,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_fox_play": {
+      "angle": -16,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "sprite_dog_lie_2": {
+      "angle": 14,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "companion_dog_cardigan_sleep_00": {
+      "angle": 9,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "companion_dog_cardigan_sleep_01": {
+      "angle": 9,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_parrot_cockatiel_fly_03": {
+      "angle": -4.0,
+      "width": 0.955,
+      "height": 0.968,
+      "bend": 0.042
+    },
+    "island_parrot_cockatiel_fly_02": {
+      "angle": -4.0,
+      "width": 0.985,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "island_parrot_macaw_fly_04": {
+      "angle": -17.0,
+      "width": 1.0,
+      "height": 0.955,
+      "bend": 0.06
+    },
+    "island_parrot_macaw_fly_05": {
+      "angle": -17.0,
+      "width": 1.0,
+      "height": 0.968,
+      "bend": 0.042
+    },
+    "island_fox_sleep": {
+      "angle": 11,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "companion_dog_cardigan_play_00": {
+      "angle": -16,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_dog_cardigan_play_01": {
+      "angle": -16,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lion_cub_run_03": {
+      "angle": 4.75,
+      "width": 0.94,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "companion_lion_cub_run_02": {
+      "angle": 4.0,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "island_cat_maine_coon_idle": {
+      "angle": -5,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lion_adult_jump_01": {
+      "angle": -5,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_parrot_macaw_jump": {
+      "angle": 7,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lion_adult_jump_00": {
+      "angle": 7,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_parrot_cockatiel_idle": {
+      "angle": 8,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_fox_arctic_jump": {
+      "angle": 11,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_parrot_cockatiel_sleep": {
+      "angle": 15,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_dog_bull_terrier_sleep": {
+      "angle": 12,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_penguin_rockhopper_play": {
+      "angle": 13,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "sprite_dog_run_0": {
+      "angle": -4.25,
+      "width": 1.015,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "sprite_dog_run_1": {
+      "angle": -5.0,
+      "width": 1.0,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_parrot_macaw_walk_0": {
+      "angle": -5,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_parrot_macaw_walk_1": {
+      "angle": -5,
+      "width": 0.94,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "companion_lioness_walk_05": {
+      "angle": 5.75,
+      "width": 1.0,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "companion_lioness_walk_04": {
+      "angle": 5.0,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "island_parrot_jump": {
+      "angle": 8,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lion_adult_idle_00": {
+      "angle": -5.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_dog_cardigan_run_04": {
+      "angle": -7,
+      "width": 1.0,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "companion_lion_adult_idle_01": {
+      "angle": -5.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_dog_doberman_sleep": {
+      "angle": 13,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "companion_lion_adult_run_00": {
+      "angle": -6.5,
+      "width": 1.0,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "island_penguin_idle": {
+      "angle": -5,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lion_adult_run_01": {
+      "angle": -5.75,
+      "width": 1.0,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "island_cat_siamese_play": {
+      "angle": 4,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_parrot_budgie_sleep": {
+      "angle": 13,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_dog_doberman_idle": {
+      "angle": 6,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lioness_run_01": {
+      "angle": -0.25,
+      "width": 0.985,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "companion_lioness_run_00": {
+      "angle": -3.25,
+      "width": 1.015,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "companion_lion_cub_run_04": {
+      "angle": 5.5,
+      "width": 0.94,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_dog_corgi_run_1": {
+      "angle": 4,
+      "width": 1.0,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_dog_corgi_run_0": {
+      "angle": 1,
+      "width": 1.06,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "companion_lion_cub_run_05": {
+      "angle": 5.5,
+      "width": 0.94,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "island_parrot_macaw_fly_03": {
+      "angle": -16.25,
+      "width": 1.0,
+      "height": 0.968,
+      "bend": 0.042
+    },
+    "island_cat_maine_coon_sleep": {
+      "angle": 15,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_parrot_macaw_fly_02": {
+      "angle": -14.75,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "companion_lion_cub_jump_00": {
+      "angle": -8,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lion_cub_jump_01": {
+      "angle": -2,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_cat_siamese_run_0": {
+      "angle": 1,
+      "width": 0.94,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "island_cat_siamese_run_1": {
+      "angle": 1,
+      "width": 0.94,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_penguin_rockhopper_walk_1": {
+      "angle": 1,
+      "width": 1.06,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "island_penguin_rockhopper_walk_0": {
+      "angle": 7,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_dog_corgi_jump": {
+      "angle": 4,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_cat_british_play": {
+      "angle": -5,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_dog_cardigan_walk_04": {
+      "angle": -4,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "companion_lioness_walk_02": {
+      "angle": 5.0,
+      "width": 0.97,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "companion_lioness_walk_03": {
+      "angle": 5.0,
+      "width": 0.985,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "island_dog_corgi_walk_3": {
+      "angle": 1.0,
+      "width": 1.045,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_dog_corgi_walk_2": {
+      "angle": 1.0,
+      "width": 1.06,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "companion_lion_adult_run_07": {
+      "angle": -5.75,
+      "width": 1.0,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "companion_lion_cub_idle_01": {
+      "angle": 5.5,
+      "width": 0.97,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lion_adult_run_06": {
+      "angle": -5.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lion_cub_idle_00": {
+      "angle": 5.5,
+      "width": 0.97,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_dog_bull_terrier_jump": {
+      "angle": 2,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "sprite_dog_walk_0": {
+      "angle": -5,
+      "width": 1.06,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "sprite_dog_walk_1": {
+      "angle": -8,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "companion_lioness_play_00": {
+      "angle": -7,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lioness_play_01": {
+      "angle": -7,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lioness_run_06": {
+      "angle": -3.25,
+      "width": 0.985,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lioness_run_07": {
+      "angle": -4.75,
+      "width": 1.015,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "island_parrot_budgie_jump": {
+      "angle": -4,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_parrot_sleep": {
+      "angle": 15,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_parrot_cockatiel_jump": {
+      "angle": 8,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_cat_british_sleep": {
+      "angle": 10,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_parrot_macaw_idle": {
+      "angle": -5,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_cat_maine_coon_jump": {
+      "angle": -8,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_cat_walk_0": {
+      "angle": -4,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_cat_walk_1": {
+      "angle": -7,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "island_fox_arctic_idle": {
+      "angle": 8,
+      "width": 1.06,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_penguin_rockhopper_sleep": {
+      "angle": 16,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_parrot_classic_fly_04": {
+      "angle": 11.0,
+      "width": 1.06,
+      "height": 0.955,
+      "bend": 0.06
+    },
+    "island_parrot_classic_fly_05": {
+      "angle": 11.75,
+      "width": 1.06,
+      "height": 0.968,
+      "bend": 0.042
+    },
+    "island_penguin_sleep": {
+      "angle": 14,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "companion_lion_cub_walk_02": {
+      "angle": 4.75,
+      "width": 0.985,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "companion_lion_cub_walk_03": {
+      "angle": 4.0,
+      "width": 1.0,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "island_cat_play": {
+      "angle": -13,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lion_adult_sleep_00": {
+      "angle": 14,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "companion_lion_adult_sleep_01": {
+      "angle": 14,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_parrot_budgie_fly_00": {
+      "angle": -4.75,
+      "width": 0.955,
+      "height": 1.045,
+      "bend": -0.06
+    },
+    "island_parrot_budgie_fly_01": {
+      "angle": -4.75,
+      "width": 0.955,
+      "height": 1.032,
+      "bend": -0.042
+    },
+    "sprite_dog_with_ball_3": {
+      "angle": -5,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "sprite_dog_with_ball_2": {
+      "angle": -5,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lion_adult_walk_04": {
+      "angle": -5.0,
+      "width": 0.955,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "companion_lion_adult_walk_05": {
+      "angle": -5.0,
+      "width": 0.955,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "island_fox_arctic_run_1": {
+      "angle": 8,
+      "width": 0.94,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "companion_lion_cub_play_00": {
+      "angle": -2,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_fox_arctic_run_0": {
+      "angle": 11,
+      "width": 0.94,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "companion_lion_cub_play_01": {
+      "angle": -5,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lioness_idle_01": {
+      "angle": 2.0,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lioness_idle_00": {
+      "angle": 2.0,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_parrot_cockatiel_walk_0": {
+      "angle": 8,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_parrot_cockatiel_walk_1": {
+      "angle": 5,
+      "width": 0.94,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "island_parrot_idle": {
+      "angle": 8,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_dog_doberman_jump": {
+      "angle": 3,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_cat_sleep": {
+      "angle": 12,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_parrot_cockatiel_fly_04": {
+      "angle": -4.0,
+      "width": 0.955,
+      "height": 0.955,
+      "bend": 0.06
+    },
+    "island_parrot_cockatiel_fly_05": {
+      "angle": -4.0,
+      "width": 0.985,
+      "height": 0.968,
+      "bend": 0.042
+    },
+    "island_penguin_jump": {
+      "angle": 7,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lioness_jump_00": {
+      "angle": 17,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "sprite_dog_idle_2": {
+      "angle": -5.75,
+      "width": 1.045,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lioness_jump_01": {
+      "angle": 5,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "sprite_dog_idle_3": {
+      "angle": -5.75,
+      "width": 1.045,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lioness_walk_06": {
+      "angle": 6.5,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lioness_walk_07": {
+      "angle": 5.75,
+      "width": 1.0,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "island_cat_siamese_sleep": {
+      "angle": 13,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_cat_siamese_jump": {
+      "angle": 4,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_dog_corgi_sleep": {
+      "angle": 8,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "companion_lion_adult_run_03": {
+      "angle": -5.0,
+      "width": 1.0,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "companion_lion_adult_run_02": {
+      "angle": -5.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "island_cat_maine_coon_run_1": {
+      "angle": -8,
+      "width": 1.0,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_cat_maine_coon_run_0": {
+      "angle": -8,
+      "width": 1.0,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "island_parrot_play": {
+      "angle": 8,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lioness_run_02": {
+      "angle": -2.5,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "companion_lioness_run_03": {
+      "angle": -4.75,
+      "width": 1.03,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "island_parrot_macaw_fly_07": {
+      "angle": -14.0,
+      "width": 1.0,
+      "height": 1.032,
+      "bend": -0.042
+    },
+    "island_parrot_macaw_fly_06": {
+      "angle": -16.25,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lion_cub_run_00": {
+      "angle": 5.5,
+      "width": 0.94,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "companion_lion_cub_run_01": {
+      "angle": 4.75,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "island_penguin_walk_1": {
+      "angle": -5,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "island_penguin_walk_0": {
+      "angle": -5,
+      "width": 0.94,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_penguin_rockhopper_jump": {
+      "angle": 18,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_parrot_macaw_play": {
+      "angle": -17,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_cat_siamese_walk_1": {
+      "angle": 4,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "island_dog_shepherd_walk_0": {
+      "angle": -5,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_cat_siamese_walk_0": {
+      "angle": 4,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_dog_shepherd_walk_1": {
+      "angle": -5,
+      "width": 1.06,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "island_fox_arctic_play": {
+      "angle": -4,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_cat_maine_coon_walk_1": {
+      "angle": -8,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "sprite_dog_run_3": {
+      "angle": -4.25,
+      "width": 1.015,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "sprite_dog_run_2": {
+      "angle": -2.75,
+      "width": 0.985,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "island_cat_maine_coon_walk_0": {
+      "angle": -5,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_cat_idle": {
+      "angle": -4,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_dog_cardigan_walk_00": {
+      "angle": -4,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_parrot_walk_0": {
+      "angle": 14,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_parrot_walk_1": {
+      "angle": 17,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "island_fox_arctic_sleep": {
+      "angle": 9,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "sprite_dog_swipe_2": {
+      "angle": -5,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_fox_jump": {
+      "angle": -4,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_fox_walk_0": {
+      "angle": -4,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_fox_walk_1": {
+      "angle": -4,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "island_cat_british_run_1": {
+      "angle": 1,
+      "width": 0.94,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_cat_british_run_0": {
+      "angle": 1,
+      "width": 0.94,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "island_dog_doberman_walk_1": {
+      "angle": 3,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "island_dog_doberman_walk_0": {
+      "angle": 6,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "sprite_dog_lie_1": {
+      "angle": 14,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "sprite_dog_lie_0": {
+      "angle": 14,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "companion_lioness_sleep_00": {
+      "angle": 12,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_parrot_budgie_walk_0": {
+      "angle": 8,
+      "width": 0.94,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "companion_lioness_sleep_01": {
+      "angle": 12,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "island_parrot_budgie_walk_1": {
+      "angle": 8,
+      "width": 0.94,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "island_penguin_rockhopper_run_0": {
+      "angle": 1,
+      "width": 0.94,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "island_penguin_rockhopper_run_1": {
+      "angle": 13,
+      "width": 0.94,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_penguin_run_1": {
+      "angle": -2,
+      "width": 1.0,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_penguin_run_0": {
+      "angle": 4,
+      "width": 1.06,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "island_parrot_cockatiel_fly_00": {
+      "angle": -4.0,
+      "width": 1.0,
+      "height": 1.045,
+      "bend": -0.06
+    },
+    "island_parrot_cockatiel_fly_01": {
+      "angle": -4.0,
+      "width": 1.0,
+      "height": 1.032,
+      "bend": -0.042
+    },
+    "island_parrot_classic_fly_00": {
+      "angle": 8.75,
+      "width": 0.985,
+      "height": 1.045,
+      "bend": -0.06
+    },
+    "island_parrot_classic_fly_01": {
+      "angle": 11.0,
+      "width": 0.97,
+      "height": 1.032,
+      "bend": -0.042
+    },
+    "island_cat_run_1": {
+      "angle": -10,
+      "width": 0.94,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_cat_run_0": {
+      "angle": -10,
+      "width": 0.94,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "island_cat_british_idle": {
+      "angle": 4,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lion_cub_walk_06": {
+      "angle": 4.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lion_cub_walk_07": {
+      "angle": 4.0,
+      "width": 1.0,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "companion_lion_adult_walk_00": {
+      "angle": -5.0,
+      "width": 0.985,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "companion_lion_adult_walk_01": {
+      "angle": -5.0,
+      "width": 0.97,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "island_parrot_budgie_fly_04": {
+      "angle": -6.25,
+      "width": 1.0,
+      "height": 0.955,
+      "bend": 0.06
+    },
+    "island_parrot_budgie_fly_05": {
+      "angle": -7.0,
+      "width": 1.0,
+      "height": 0.968,
+      "bend": 0.042
+    },
+    "island_penguin_play": {
+      "angle": 7,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_cat_siamese_idle": {
+      "angle": 1,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_dog_doberman_play": {
+      "angle": 9,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_parrot_cockatiel_fly_07": {
+      "angle": -4.0,
+      "width": 1.0,
+      "height": 1.032,
+      "bend": -0.042
+    },
+    "island_parrot_cockatiel_fly_06": {
+      "angle": -4.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "sprite_dog_idle_1": {
+      "angle": -5.75,
+      "width": 1.045,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "sprite_dog_idle_0": {
+      "angle": -5.75,
+      "width": 1.045,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_parrot_classic_fly_07": {
+      "angle": 9.5,
+      "width": 1.015,
+      "height": 1.032,
+      "bend": -0.042
+    },
+    "island_parrot_classic_fly_06": {
+      "angle": 11.75,
+      "width": 1.045,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_penguin_rockhopper_idle": {
+      "angle": 10,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lion_cub_walk_01": {
+      "angle": 5.5,
+      "width": 0.97,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "companion_lion_cub_walk_00": {
+      "angle": 4.75,
+      "width": 0.985,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_parrot_budgie_fly_03": {
+      "angle": -5.5,
+      "width": 1.0,
+      "height": 0.968,
+      "bend": 0.042
+    },
+    "island_dog_bull_terrier_walk_1": {
+      "angle": 8,
+      "width": 0.94,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "island_parrot_budgie_fly_02": {
+      "angle": -5.5,
+      "width": 0.985,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "island_dog_bull_terrier_walk_0": {
+      "angle": 8,
+      "width": 0.94,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "sprite_dog_with_ball_0": {
+      "angle": -5,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "sprite_dog_with_ball_1": {
+      "angle": -5,
+      "width": 1.06,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_cat_jump": {
+      "angle": -4,
+      "width": 0.94,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lion_adult_walk_07": {
+      "angle": -5.0,
+      "width": 1.0,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "companion_lion_adult_walk_06": {
+      "angle": -5.0,
+      "width": 0.985,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_parrot_cockatiel_play": {
+      "angle": -4,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_cat_maine_coon_play": {
+      "angle": -17,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_dog_bull_terrier_play": {
+      "angle": 2,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_dog_bull_terrier_run_0": {
+      "angle": 2,
+      "width": 1.06,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "island_dog_bull_terrier_run_1": {
+      "angle": 2,
+      "width": 1.06,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_fox_idle": {
+      "angle": -7,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "companion_lioness_walk_01": {
+      "angle": 5.0,
+      "width": 0.985,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "companion_lioness_walk_00": {
+      "angle": 5.0,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_parrot_budgie_play": {
+      "angle": -4,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_dog_cardigan_run_00": {
+      "angle": -7,
+      "width": 1.0,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "island_dog_corgi_walk_0": {
+      "angle": 1.0,
+      "width": 1.03,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_dog_corgi_walk_1": {
+      "angle": 1.0,
+      "width": 1.045,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "island_fox_run_1": {
+      "angle": -10,
+      "width": 0.94,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_fox_run_0": {
+      "angle": -7,
+      "width": 0.94,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "companion_lion_adult_run_04": {
+      "angle": -5.0,
+      "width": 1.0,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_parrot_macaw_sleep": {
+      "angle": -12,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "companion_lion_adult_run_05": {
+      "angle": -5.0,
+      "width": 1.0,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "companion_lioness_run_05": {
+      "angle": -1.75,
+      "width": 0.97,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "companion_lioness_run_04": {
+      "angle": -2.5,
+      "width": 1.0,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "sprite_dog_walk_2": {
+      "angle": -5,
+      "width": 1.06,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_cat_british_jump": {
+      "angle": 7,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "island_cat_british_walk_0": {
+      "angle": 1,
+      "width": 0.94,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "island_cat_british_walk_1": {
+      "angle": 1,
+      "width": 0.94,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "companion_lion_cub_run_07": {
+      "angle": 5.5,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "companion_lion_cub_run_06": {
+      "angle": 5.5,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "island_parrot_macaw_fly_00": {
+      "angle": -12.5,
+      "width": 1.0,
+      "height": 1.045,
+      "bend": -0.06
+    },
+    "island_parrot_macaw_fly_01": {
+      "angle": -13.25,
+      "width": 1.0,
+      "height": 1.032,
+      "bend": -0.042
+    },
+    "island_dog_corgi_play": {
+      "angle": 4,
+      "width": 1.0,
+      "height": 0.94,
+      "bend": -0.07
+    },
+    "companion_lion_cub_sleep_00": {
+      "angle": 12,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "companion_lion_cub_sleep_01": {
+      "angle": 12,
+      "width": 0.91,
+      "height": 0.87,
+      "bend": 0.07
+    },
+    "sprite_dog_run_4": {
+      "angle": -5.0,
+      "width": 1.0,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "sprite_dog_run_5": {
+      "angle": -2.75,
+      "width": 0.985,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_dog_doberman_run_1": {
+      "angle": 6,
+      "width": 0.94,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "island_dog_doberman_run_0": {
+      "angle": 6,
+      "width": 1.0,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_fox_arctic_run_6": {
+      "angle": 2.75,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_fox_arctic_run_7": {
+      "angle": 2.0,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_penguin_rockhopper_walk_3": {
+      "angle": 7.0,
+      "width": 0.955,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_penguin_rockhopper_walk_2": {
+      "angle": 7.0,
+      "width": 0.97,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_dog_doberman_walk_6": {
+      "angle": 6.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_dog_doberman_walk_7": {
+      "angle": 6.75,
+      "width": 1.0,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_cat_walk_2": {
+      "angle": -5.5,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_cat_walk_3": {
+      "angle": -5.5,
+      "width": 0.94,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_cat_british_walk_1": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_cat_british_walk_0": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "fluid_dog_doberman_run_0": {
+      "angle": 6.0,
+      "width": 0.97,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_dog_doberman_run_1": {
+      "angle": 4.5,
+      "width": 0.97,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_cat_siamese_run_3": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_cat_siamese_run_2": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_fox_run_0": {
+      "angle": -6.25,
+      "width": 0.955,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_fox_run_1": {
+      "angle": -7.0,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_cat_siamese_walk_7": {
+      "angle": 4.0,
+      "width": 1.0,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_cat_siamese_walk_6": {
+      "angle": 4.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_dog_bull_terrier_run_6": {
+      "angle": 0.5,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_dog_bull_terrier_run_7": {
+      "angle": -0.25,
+      "width": 1.0,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_cat_maine_coon_walk_4": {
+      "angle": -8.0,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "fluid_cat_maine_coon_walk_5": {
+      "angle": -8.0,
+      "width": 1.0,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_dog_corgi_run_7": {
+      "angle": 3.25,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_dog_corgi_run_6": {
+      "angle": 2.5,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_fox_walk_6": {
+      "angle": -4.0,
+      "width": 1.03,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_fox_walk_7": {
+      "angle": -4.0,
+      "width": 1.03,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_penguin_run_7": {
+      "angle": 7.0,
+      "width": 1.06,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_penguin_run_6": {
+      "angle": 7.0,
+      "width": 1.06,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_fox_arctic_walk_5": {
+      "angle": 0.5,
+      "width": 0.94,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_fox_arctic_walk_4": {
+      "angle": 0.5,
+      "width": 0.94,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "fluid_penguin_walk_4": {
+      "angle": -5.0,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "fluid_penguin_walk_5": {
+      "angle": -4.25,
+      "width": 1.015,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_dog_bull_terrier_walk_3": {
+      "angle": -2.5,
+      "width": 1.0,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_dog_bull_terrier_walk_2": {
+      "angle": -2.5,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_cat_run_7": {
+      "angle": -7.75,
+      "width": 0.955,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_dog_shepherd_walk_7": {
+      "angle": -4.25,
+      "width": 1.045,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_dog_shepherd_walk_6": {
+      "angle": -2.75,
+      "width": 1.06,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_cat_run_6": {
+      "angle": -9.25,
+      "width": 0.955,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_cat_maine_coon_run_4": {
+      "angle": -8.75,
+      "width": 0.985,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "fluid_cat_maine_coon_run_5": {
+      "angle": -8.0,
+      "width": 1.0,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_penguin_rockhopper_run_7": {
+      "angle": 18.0,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_penguin_rockhopper_run_6": {
+      "angle": 18.0,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_cat_british_run_6": {
+      "angle": 1.75,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_cat_british_run_7": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_dog_shepherd_run_4": {
+      "angle": -5.0,
+      "width": 1.015,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "fluid_dog_shepherd_run_5": {
+      "angle": -5.0,
+      "width": 1.015,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_fox_arctic_walk_2": {
+      "angle": -0.25,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_fox_arctic_walk_3": {
+      "angle": 0.5,
+      "width": 0.94,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_penguin_walk_3": {
+      "angle": -4.25,
+      "width": 1.03,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_penguin_walk_2": {
+      "angle": -3.5,
+      "width": 1.06,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_dog_bull_terrier_walk_4": {
+      "angle": -3.25,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "fluid_dog_bull_terrier_walk_5": {
+      "angle": -3.25,
+      "width": 1.0,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_dog_shepherd_walk_0": {
+      "angle": -5.0,
+      "width": 1.03,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "fluid_cat_run_0": {
+      "angle": -9.25,
+      "width": 0.97,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_cat_run_1": {
+      "angle": -9.25,
+      "width": 0.955,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_dog_shepherd_walk_1": {
+      "angle": -5.0,
+      "width": 1.03,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_cat_maine_coon_run_3": {
+      "angle": -9.5,
+      "width": 0.97,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_cat_maine_coon_run_2": {
+      "angle": -8.75,
+      "width": 0.985,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_penguin_rockhopper_run_0": {
+      "angle": 18.0,
+      "width": 0.94,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_penguin_rockhopper_run_1": {
+      "angle": 18.0,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_cat_british_run_1": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_cat_british_run_0": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_dog_shepherd_run_3": {
+      "angle": -5.0,
+      "width": 1.045,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_dog_shepherd_run_2": {
+      "angle": -5.0,
+      "width": 1.045,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_penguin_rockhopper_walk_4": {
+      "angle": 7.0,
+      "width": 0.94,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "fluid_penguin_rockhopper_walk_5": {
+      "angle": 7.0,
+      "width": 0.97,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_dog_doberman_walk_1": {
+      "angle": 6.0,
+      "width": 0.985,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_dog_doberman_walk_0": {
+      "angle": 6.75,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "fluid_cat_walk_5": {
+      "angle": -5.5,
+      "width": 0.94,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_cat_walk_4": {
+      "angle": -5.5,
+      "width": 0.94,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "fluid_fox_arctic_run_1": {
+      "angle": 2.0,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_fox_arctic_run_0": {
+      "angle": 2.0,
+      "width": 0.94,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_cat_british_walk_6": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_cat_british_walk_7": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_fox_run_7": {
+      "angle": -5.5,
+      "width": 0.985,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_fox_run_6": {
+      "angle": -6.25,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_dog_doberman_run_7": {
+      "angle": 7.5,
+      "width": 0.97,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_dog_doberman_run_6": {
+      "angle": 6.75,
+      "width": 0.97,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_cat_siamese_run_4": {
+      "angle": 1.75,
+      "width": 0.94,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "fluid_cat_siamese_run_5": {
+      "angle": 2.5,
+      "width": 0.94,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_cat_siamese_walk_0": {
+      "angle": 3.25,
+      "width": 1.015,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "fluid_cat_siamese_walk_1": {
+      "angle": 2.5,
+      "width": 1.045,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_dog_bull_terrier_run_1": {
+      "angle": 0.5,
+      "width": 0.955,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_dog_bull_terrier_run_0": {
+      "angle": -0.25,
+      "width": 0.985,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_cat_maine_coon_walk_3": {
+      "angle": -8.0,
+      "width": 1.0,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_cat_maine_coon_walk_2": {
+      "angle": -8.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_dog_corgi_run_0": {
+      "angle": 4.0,
+      "width": 0.94,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_dog_corgi_run_1": {
+      "angle": 2.5,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_fox_walk_1": {
+      "angle": -4.0,
+      "width": 1.045,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_fox_walk_0": {
+      "angle": -4.0,
+      "width": 1.03,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "fluid_penguin_run_0": {
+      "angle": 7.0,
+      "width": 1.06,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_penguin_run_1": {
+      "angle": 7.0,
+      "width": 1.06,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_cat_run_4": {
+      "angle": -11.5,
+      "width": 1.0,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "fluid_dog_shepherd_walk_4": {
+      "angle": -4.25,
+      "width": 1.045,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "fluid_dog_shepherd_walk_5": {
+      "angle": -2.75,
+      "width": 1.06,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_cat_run_5": {
+      "angle": -12.25,
+      "width": 0.985,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_cat_maine_coon_run_7": {
+      "angle": -8.0,
+      "width": 1.0,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_cat_maine_coon_run_6": {
+      "angle": -8.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_penguin_rockhopper_run_4": {
+      "angle": 16.5,
+      "width": 0.94,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "fluid_penguin_rockhopper_run_5": {
+      "angle": 17.5,
+      "width": 0.94,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_cat_british_run_5": {
+      "angle": 2.5,
+      "width": 0.94,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_cat_british_run_4": {
+      "angle": 2.5,
+      "width": 0.94,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "fluid_dog_shepherd_run_7": {
+      "angle": -5.0,
+      "width": 1.03,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_dog_shepherd_run_6": {
+      "angle": -5.0,
+      "width": 1.03,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_fox_arctic_walk_6": {
+      "angle": -0.25,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_fox_arctic_walk_7": {
+      "angle": -0.25,
+      "width": 0.94,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_penguin_walk_7": {
+      "angle": -1.25,
+      "width": 1.015,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_penguin_walk_6": {
+      "angle": -2.0,
+      "width": 1.015,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_dog_bull_terrier_walk_0": {
+      "angle": -1.75,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "fluid_dog_bull_terrier_walk_1": {
+      "angle": -2.5,
+      "width": 1.0,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_dog_corgi_run_4": {
+      "angle": 4.0,
+      "width": 0.94,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "fluid_dog_corgi_run_5": {
+      "angle": 3.25,
+      "width": 0.94,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_fox_walk_5": {
+      "angle": -4.0,
+      "width": 1.045,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_fox_walk_4": {
+      "angle": -4.0,
+      "width": 1.06,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "fluid_penguin_run_4": {
+      "angle": 7.0,
+      "width": 1.06,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "fluid_penguin_run_5": {
+      "angle": 7.0,
+      "width": 1.06,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_fox_arctic_run_5": {
+      "angle": 5.0,
+      "width": 0.955,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_fox_arctic_run_4": {
+      "angle": 5.75,
+      "width": 0.97,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "fluid_dog_doberman_walk_5": {
+      "angle": 6.0,
+      "width": 1.0,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_dog_doberman_walk_4": {
+      "angle": 5.25,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "fluid_cat_walk_1": {
+      "angle": -5.5,
+      "width": 0.94,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_cat_walk_0": {
+      "angle": -5.5,
+      "width": 0.94,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "fluid_penguin_rockhopper_walk_0": {
+      "angle": 7.0,
+      "width": 0.985,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "fluid_penguin_rockhopper_walk_1": {
+      "angle": 7.0,
+      "width": 0.97,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_cat_british_walk_2": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_cat_british_walk_3": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_cat_siamese_run_0": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_cat_siamese_run_1": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_dog_doberman_run_3": {
+      "angle": 6.0,
+      "width": 0.985,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_dog_doberman_run_2": {
+      "angle": 5.25,
+      "width": 0.985,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_fox_run_3": {
+      "angle": -7.0,
+      "width": 0.94,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_fox_run_2": {
+      "angle": -7.0,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_cat_maine_coon_walk_7": {
+      "angle": -7.25,
+      "width": 1.0,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_cat_maine_coon_walk_6": {
+      "angle": -8.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_cat_siamese_walk_4": {
+      "angle": 4.0,
+      "width": 1.0,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "fluid_cat_siamese_walk_5": {
+      "angle": 4.0,
+      "width": 1.0,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_dog_bull_terrier_run_5": {
+      "angle": -0.25,
+      "width": 1.0,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_dog_bull_terrier_run_4": {
+      "angle": -1.75,
+      "width": 1.0,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "fluid_dog_corgi_run_3": {
+      "angle": 2.5,
+      "width": 0.94,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_dog_corgi_run_2": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_fox_walk_2": {
+      "angle": -4.0,
+      "width": 1.06,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_fox_walk_3": {
+      "angle": -4.0,
+      "width": 1.06,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_penguin_run_3": {
+      "angle": 7.0,
+      "width": 1.06,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_penguin_run_2": {
+      "angle": 7.0,
+      "width": 1.06,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_dog_doberman_walk_2": {
+      "angle": 6.0,
+      "width": 0.97,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_dog_doberman_walk_3": {
+      "angle": 5.25,
+      "width": 0.985,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_cat_walk_6": {
+      "angle": -5.5,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_cat_walk_7": {
+      "angle": -5.5,
+      "width": 0.94,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_penguin_rockhopper_walk_7": {
+      "angle": 7.0,
+      "width": 1.015,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_penguin_rockhopper_walk_6": {
+      "angle": 7.0,
+      "width": 1.015,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_fox_arctic_run_2": {
+      "angle": 2.0,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_fox_arctic_run_3": {
+      "angle": 3.5,
+      "width": 0.955,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_cat_british_walk_5": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_cat_british_walk_4": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 0.965,
+      "bend": 0.045
+    },
+    "fluid_fox_run_4": {
+      "angle": -7.0,
+      "width": 0.955,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "fluid_fox_run_5": {
+      "angle": -7.0,
+      "width": 0.985,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_cat_siamese_run_7": {
+      "angle": 1.0,
+      "width": 0.94,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_cat_siamese_run_6": {
+      "angle": 1.75,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": 0.0
+    },
+    "fluid_dog_doberman_run_4": {
+      "angle": 6.0,
+      "width": 0.955,
+      "height": 0.935,
+      "bend": 0.085
+    },
+    "fluid_dog_doberman_run_5": {
+      "angle": 6.0,
+      "width": 0.955,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_cat_maine_coon_walk_0": {
+      "angle": -6.5,
+      "width": 1.0,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "fluid_cat_maine_coon_walk_1": {
+      "angle": -7.25,
+      "width": 1.0,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_cat_siamese_walk_3": {
+      "angle": 4.0,
+      "width": 1.015,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_cat_siamese_walk_2": {
+      "angle": 3.25,
+      "width": 1.045,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_dog_bull_terrier_run_2": {
+      "angle": -1.0,
+      "width": 0.955,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_dog_bull_terrier_run_3": {
+      "angle": -2.5,
+      "width": 0.985,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_dog_shepherd_walk_3": {
+      "angle": -5.0,
+      "width": 1.015,
+      "height": 0.975,
+      "bend": 0.032
+    },
+    "fluid_cat_run_3": {
+      "angle": -9.25,
+      "width": 0.985,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_cat_run_2": {
+      "angle": -8.5,
+      "width": 0.955,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_dog_shepherd_walk_2": {
+      "angle": -5.0,
+      "width": 1.015,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_cat_maine_coon_run_0": {
+      "angle": -8.0,
+      "width": 1.0,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_cat_maine_coon_run_1": {
+      "angle": -8.0,
+      "width": 1.0,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_penguin_rockhopper_run_3": {
+      "angle": 16.5,
+      "width": 0.94,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_penguin_rockhopper_run_2": {
+      "angle": 17.5,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_cat_british_run_2": {
+      "angle": 1.75,
+      "width": 0.94,
+      "height": 1.0,
+      "bend": -0.0
+    },
+    "fluid_cat_british_run_3": {
+      "angle": 2.5,
+      "width": 0.94,
+      "height": 0.954,
+      "bend": 0.06
+    },
+    "fluid_dog_shepherd_run_0": {
+      "angle": -5.0,
+      "width": 1.03,
+      "height": 1.065,
+      "bend": -0.085
+    },
+    "fluid_dog_shepherd_run_1": {
+      "angle": -5.0,
+      "width": 1.03,
+      "height": 1.046,
+      "bend": -0.06
+    },
+    "fluid_fox_arctic_walk_1": {
+      "angle": -0.25,
+      "width": 0.94,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_fox_arctic_walk_0": {
+      "angle": 0.5,
+      "width": 0.94,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "fluid_penguin_walk_0": {
+      "angle": -3.5,
+      "width": 1.045,
+      "height": 1.035,
+      "bend": -0.045
+    },
+    "fluid_penguin_walk_1": {
+      "angle": -4.25,
+      "width": 1.06,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_dog_bull_terrier_walk_7": {
+      "angle": -0.25,
+      "width": 1.0,
+      "height": 1.025,
+      "bend": -0.032
+    },
+    "fluid_dog_bull_terrier_walk_6": {
+      "angle": -1.0,
+      "width": 1.0,
+      "height": 1.0,
+      "bend": 0.0
+    }
+  },
+  "fits": {
+    "knitHat": {
+      "companion_dog_cardigan_jump_00": [
+        158.6,
+        53.0,
+        64.75
+      ],
+      "companion_dog_cardigan_jump_01": [
+        158.6,
+        71.0,
+        64.75
+      ],
+      "island_dog_corgi_idle": [
+        139.52,
+        83.8,
+        68.45
+      ],
+      "companion_dog_cardigan_idle_01": [
+        158.6,
+        81.0,
+        64.75
+      ],
+      "companion_dog_cardigan_idle_00": [
+        158.6,
+        81.0,
+        64.75
+      ],
+      "sprite_dog_swipe_0": [
+        261.67,
+        213.88,
+        116.22
+      ],
+      "sprite_dog_swipe_1": [
+        269.67,
+        146.88,
+        116.22
+      ],
+      "island_dog_bull_terrier_idle": [
+        143.9,
+        85.23,
+        51.15
+      ],
+      "island_dog_shepherd_run_1": [
+        157.28,
+        54.2,
+        63.0
+      ],
+      "island_dog_shepherd_run_0": [
+        168.28,
+        51.2,
+        63.0
+      ],
+      "sprite_dog_lie_2": [
+        223.67,
+        269.88,
+        116.22
+      ],
+      "companion_dog_cardigan_sleep_00": [
+        158.6,
+        115.0,
+        64.75
+      ],
+      "companion_dog_cardigan_sleep_01": [
+        158.6,
+        116.0,
+        64.75
+      ],
+      "companion_dog_cardigan_play_00": [
+        151.6,
+        110.0,
+        64.75
+      ],
+      "companion_dog_cardigan_play_01": [
+        155.6,
+        103.0,
+        64.75
+      ],
+      "island_cat_maine_coon_idle": [
+        143.34,
+        61.19,
+        61.05
+      ],
+      "island_dog_bull_terrier_sleep": [
+        133.9,
+        123.23,
+        51.15
+      ],
+      "sprite_dog_run_0": [
+        271.67,
+        146.88,
+        116.22
+      ],
+      "sprite_dog_run_1": [
+        262.67,
+        145.88,
+        116.22
+      ],
+      "companion_dog_cardigan_run_04": [
+        157.6,
+        78.0,
+        64.75
+      ],
+      "island_dog_doberman_sleep": [
+        137.55,
+        119.85,
+        57.75
+      ],
+      "island_cat_siamese_play": [
+        130.76,
+        101.48,
+        60.8
+      ],
+      "island_dog_doberman_idle": [
+        132.55,
+        52.85,
+        57.75
+      ],
+      "island_dog_corgi_run_1": [
+        143.52,
+        74.8,
+        68.45
+      ],
+      "island_dog_corgi_run_0": [
+        151.52,
+        84.8,
+        68.45
+      ],
+      "island_cat_maine_coon_sleep": [
+        137.34,
+        118.19,
+        61.05
+      ],
+      "island_cat_siamese_run_0": [
+        147.76,
+        85.48,
+        60.8
+      ],
+      "island_cat_siamese_run_1": [
+        152.76,
+        79.48,
+        60.8
+      ],
+      "island_dog_corgi_jump": [
+        142.52,
+        97.8,
+        68.45
+      ],
+      "island_cat_british_play": [
+        135.44,
+        95.21,
+        81.9
+      ],
+      "companion_dog_cardigan_walk_04": [
+        158.6,
+        76.0,
+        64.75
+      ],
+      "island_dog_corgi_walk_3": [
+        141.52,
+        78.8,
+        68.45
+      ],
+      "island_dog_corgi_walk_2": [
+        141.52,
+        77.8,
+        68.45
+      ],
+      "island_dog_bull_terrier_jump": [
+        142.9,
+        85.23,
+        51.15
+      ],
+      "sprite_dog_walk_0": [
+        271.67,
+        146.88,
+        116.22
+      ],
+      "sprite_dog_walk_1": [
+        262.67,
+        145.88,
+        116.22
+      ],
+      "island_cat_british_sleep": [
+        132.44,
+        106.21,
+        81.9
+      ],
+      "island_cat_maine_coon_jump": [
+        140.34,
+        87.19,
+        61.05
+      ],
+      "island_cat_walk_0": [
+        148.35,
+        56.86,
+        61.05
+      ],
+      "island_cat_walk_1": [
+        148.35,
+        56.86,
+        61.05
+      ],
+      "island_cat_play": [
+        139.35,
+        101.86,
+        61.05
+      ],
+      "sprite_dog_with_ball_3": [
+        269.67,
+        146.88,
+        116.22
+      ],
+      "sprite_dog_with_ball_2": [
+        261.67,
+        213.88,
+        116.22
+      ],
+      "island_dog_doberman_jump": [
+        145.55,
+        69.85,
+        57.75
+      ],
+      "island_cat_sleep": [
+        143.35,
+        118.86,
+        61.05
+      ],
+      "sprite_dog_idle_2": [
+        269.67,
+        146.88,
+        116.22
+      ],
+      "sprite_dog_idle_3": [
+        262.67,
+        145.88,
+        116.22
+      ],
+      "island_cat_siamese_sleep": [
+        141.76,
+        119.48,
+        60.8
+      ],
+      "island_cat_siamese_jump": [
+        151.76,
+        72.48,
+        60.8
+      ],
+      "island_dog_corgi_sleep": [
+        138.52,
+        124.8,
+        68.45
+      ],
+      "island_cat_maine_coon_run_1": [
+        142.34,
+        87.19,
+        61.05
+      ],
+      "island_cat_maine_coon_run_0": [
+        132.34,
+        83.19,
+        61.05
+      ],
+      "island_cat_siamese_walk_1": [
+        153.76,
+        58.48,
+        60.8
+      ],
+      "island_dog_shepherd_walk_0": [
+        152.28,
+        49.2,
+        63.0
+      ],
+      "island_cat_siamese_walk_0": [
+        153.76,
+        59.48,
+        60.8
+      ],
+      "island_dog_shepherd_walk_1": [
+        153.28,
+        49.2,
+        63.0
+      ],
+      "island_cat_maine_coon_walk_1": [
+        143.34,
+        67.19,
+        61.05
+      ],
+      "sprite_dog_run_3": [
+        271.67,
+        146.88,
+        116.22
+      ],
+      "sprite_dog_run_2": [
+        281.67,
+        168.88,
+        116.22
+      ],
+      "island_cat_maine_coon_walk_0": [
+        143.34,
+        66.19,
+        61.05
+      ],
+      "island_cat_idle": [
+        140.35,
+        57.86,
+        61.05
+      ],
+      "companion_dog_cardigan_walk_00": [
+        158.6,
+        76.0,
+        64.75
+      ],
+      "sprite_dog_swipe_2": [
+        261.67,
+        213.88,
+        116.22
+      ],
+      "island_cat_british_run_1": [
+        145.44,
+        58.21,
+        81.9
+      ],
+      "island_cat_british_run_0": [
+        145.44,
+        75.21,
+        81.9
+      ],
+      "island_dog_doberman_walk_1": [
+        140.55,
+        59.85,
+        57.75
+      ],
+      "island_dog_doberman_walk_0": [
+        139.55,
+        55.85,
+        57.75
+      ],
+      "sprite_dog_lie_1": [
+        223.67,
+        269.88,
+        116.22
+      ],
+      "sprite_dog_lie_0": [
+        223.67,
+        269.88,
+        116.22
+      ],
+      "island_cat_run_1": [
+        156.35,
+        71.86,
+        61.05
+      ],
+      "island_cat_run_0": [
+        157.35,
+        69.86,
+        61.05
+      ],
+      "island_cat_british_idle": [
+        140.44,
+        46.21,
+        81.9
+      ],
+      "island_cat_siamese_idle": [
+        145.76,
+        50.48,
+        60.8
+      ],
+      "island_dog_doberman_play": [
+        130.55,
+        93.85,
+        57.75
+      ],
+      "sprite_dog_idle_1": [
+        271.67,
+        146.88,
+        116.22
+      ],
+      "sprite_dog_idle_0": [
+        269.67,
+        146.88,
+        116.22
+      ],
+      "island_dog_bull_terrier_walk_1": [
+        144.9,
+        91.23,
+        51.15
+      ],
+      "island_dog_bull_terrier_walk_0": [
+        143.9,
+        85.23,
+        51.15
+      ],
+      "sprite_dog_with_ball_0": [
+        261.67,
+        213.88,
+        116.22
+      ],
+      "sprite_dog_with_ball_1": [
+        271.67,
+        146.88,
+        116.22
+      ],
+      "island_cat_jump": [
+        149.35,
+        63.86,
+        61.05
+      ],
+      "island_cat_maine_coon_play": [
+        117.34,
+        113.19,
+        61.05
+      ],
+      "island_dog_bull_terrier_play": [
+        129.9,
+        110.23,
+        51.15
+      ],
+      "island_dog_bull_terrier_run_0": [
+        168.9,
+        75.23,
+        51.15
+      ],
+      "island_dog_bull_terrier_run_1": [
+        153.9,
+        73.23,
+        51.15
+      ],
+      "companion_dog_cardigan_run_00": [
+        157.6,
+        92.0,
+        64.75
+      ],
+      "island_dog_corgi_walk_0": [
+        141.52,
+        79.8,
+        68.45
+      ],
+      "island_dog_corgi_walk_1": [
+        141.52,
+        79.8,
+        68.45
+      ],
+      "sprite_dog_walk_2": [
+        269.67,
+        146.88,
+        116.22
+      ],
+      "island_cat_british_jump": [
+        148.44,
+        62.21,
+        81.9
+      ],
+      "island_cat_british_walk_0": [
+        146.44,
+        51.21,
+        81.9
+      ],
+      "island_cat_british_walk_1": [
+        146.44,
+        52.21,
+        81.9
+      ],
+      "island_dog_corgi_play": [
+        137.52,
+        112.8,
+        68.45
+      ],
+      "sprite_dog_run_4": [
+        262.67,
+        145.88,
+        116.22
+      ],
+      "sprite_dog_run_5": [
+        281.67,
+        168.88,
+        116.22
+      ],
+      "island_dog_doberman_run_1": [
+        143.55,
+        49.85,
+        57.75
+      ],
+      "island_dog_doberman_run_0": [
+        159.55,
+        60.85,
+        57.75
+      ],
+      "fluid_dog_doberman_walk_6": [
+        151.55,
+        43.85,
+        57.75
+      ],
+      "fluid_dog_doberman_walk_7": [
+        151.55,
+        43.85,
+        57.75
+      ],
+      "fluid_cat_walk_2": [
+        160.35,
+        53.86,
+        61.05
+      ],
+      "fluid_cat_walk_3": [
+        160.35,
+        54.86,
+        61.05
+      ],
+      "fluid_cat_british_walk_1": [
+        158.44,
+        51.21,
+        81.9
+      ],
+      "fluid_cat_british_walk_0": [
+        158.44,
+        51.21,
+        81.9
+      ],
+      "fluid_dog_doberman_run_0": [
+        151.55,
+        54.85,
+        57.75
+      ],
+      "fluid_dog_doberman_run_1": [
+        151.55,
+        58.85,
+        57.75
+      ],
+      "fluid_cat_siamese_run_3": [
+        165.76,
+        67.48,
+        60.8
+      ],
+      "fluid_cat_siamese_run_2": [
+        159.76,
+        76.48,
+        60.8
+      ],
+      "fluid_cat_siamese_walk_7": [
+        165.76,
+        59.48,
+        60.8
+      ],
+      "fluid_cat_siamese_walk_6": [
+        165.76,
+        59.48,
+        60.8
+      ],
+      "fluid_dog_bull_terrier_run_6": [
+        154.9,
+        63.23,
+        51.15
+      ],
+      "fluid_dog_bull_terrier_run_7": [
+        154.9,
+        76.23,
+        51.15
+      ],
+      "fluid_cat_maine_coon_walk_4": [
+        155.34,
+        67.19,
+        61.05
+      ],
+      "fluid_cat_maine_coon_walk_5": [
+        155.34,
+        68.19,
+        61.05
+      ],
+      "fluid_dog_corgi_run_7": [
+        153.52,
+        80.8,
+        68.45
+      ],
+      "fluid_dog_corgi_run_6": [
+        152.52,
+        73.8,
+        68.45
+      ],
+      "fluid_dog_bull_terrier_walk_3": [
+        155.9,
+        73.23,
+        51.15
+      ],
+      "fluid_dog_bull_terrier_walk_2": [
+        155.9,
+        75.23,
+        51.15
+      ],
+      "fluid_cat_run_7": [
+        160.35,
+        60.86,
+        61.05
+      ],
+      "fluid_dog_shepherd_walk_7": [
+        164.28,
+        51.2,
+        63.0
+      ],
+      "fluid_dog_shepherd_walk_6": [
+        165.28,
+        48.2,
+        63.0
+      ],
+      "fluid_cat_run_6": [
+        160.35,
+        55.86,
+        61.05
+      ],
+      "fluid_cat_maine_coon_run_4": [
+        149.34,
+        80.19,
+        61.05
+      ],
+      "fluid_cat_maine_coon_run_5": [
+        154.34,
+        79.19,
+        61.05
+      ],
+      "fluid_cat_british_run_6": [
+        157.44,
+        59.21,
+        81.9
+      ],
+      "fluid_cat_british_run_7": [
+        158.44,
+        62.21,
+        81.9
+      ],
+      "fluid_dog_shepherd_run_4": [
+        165.28,
+        61.2,
+        63.0
+      ],
+      "fluid_dog_shepherd_run_5": [
+        165.28,
+        61.2,
+        63.0
+      ],
+      "fluid_dog_bull_terrier_walk_4": [
+        155.9,
+        77.23,
+        51.15
+      ],
+      "fluid_dog_bull_terrier_walk_5": [
+        155.9,
+        78.23,
+        51.15
+      ],
+      "fluid_dog_shepherd_walk_0": [
+        165.28,
+        49.2,
+        63.0
+      ],
+      "fluid_cat_run_0": [
+        159.35,
+        71.86,
+        61.05
+      ],
+      "fluid_cat_run_1": [
+        160.35,
+        71.86,
+        61.05
+      ],
+      "fluid_dog_shepherd_walk_1": [
+        165.28,
+        48.2,
+        63.0
+      ],
+      "fluid_cat_maine_coon_run_3": [
+        154.34,
+        79.19,
+        61.05
+      ],
+      "fluid_cat_maine_coon_run_2": [
+        144.34,
+        74.19,
+        61.05
+      ],
+      "fluid_cat_british_run_1": [
+        158.44,
+        56.21,
+        81.9
+      ],
+      "fluid_cat_british_run_0": [
+        157.44,
+        58.21,
+        81.9
+      ],
+      "fluid_dog_shepherd_run_3": [
+        165.28,
+        55.2,
+        63.0
+      ],
+      "fluid_dog_shepherd_run_2": [
+        164.28,
+        63.2,
+        63.0
+      ],
+      "fluid_dog_doberman_walk_1": [
+        150.55,
+        44.85,
+        57.75
+      ],
+      "fluid_dog_doberman_walk_0": [
+        151.55,
+        47.85,
+        57.75
+      ],
+      "fluid_cat_walk_5": [
+        160.35,
+        56.86,
+        61.05
+      ],
+      "fluid_cat_walk_4": [
+        160.35,
+        54.86,
+        61.05
+      ],
+      "fluid_cat_british_walk_6": [
+        158.44,
+        51.21,
+        81.9
+      ],
+      "fluid_cat_british_walk_7": [
+        158.44,
+        51.21,
+        81.9
+      ],
+      "fluid_dog_doberman_run_7": [
+        150.55,
+        49.85,
+        57.75
+      ],
+      "fluid_dog_doberman_run_6": [
+        151.55,
+        35.85,
+        57.75
+      ],
+      "fluid_cat_siamese_run_4": [
+        164.76,
+        65.48,
+        60.8
+      ],
+      "fluid_cat_siamese_run_5": [
+        165.76,
+        69.48,
+        60.8
+      ],
+      "fluid_cat_siamese_walk_0": [
+        165.76,
+        59.48,
+        60.8
+      ],
+      "fluid_cat_siamese_walk_1": [
+        165.76,
+        58.48,
+        60.8
+      ],
+      "fluid_dog_bull_terrier_run_1": [
+        154.9,
+        83.23,
+        51.15
+      ],
+      "fluid_dog_bull_terrier_run_0": [
+        155.9,
+        80.23,
+        51.15
+      ],
+      "fluid_cat_maine_coon_walk_3": [
+        155.34,
+        66.19,
+        61.05
+      ],
+      "fluid_cat_maine_coon_walk_2": [
+        155.34,
+        66.19,
+        61.05
+      ],
+      "fluid_dog_corgi_run_0": [
+        153.52,
+        84.8,
+        68.45
+      ],
+      "fluid_dog_corgi_run_1": [
+        153.52,
+        82.8,
+        68.45
+      ],
+      "fluid_cat_run_4": [
+        160.35,
+        61.86,
+        61.05
+      ],
+      "fluid_dog_shepherd_walk_4": [
+        164.28,
+        50.2,
+        63.0
+      ],
+      "fluid_dog_shepherd_walk_5": [
+        165.28,
+        48.2,
+        63.0
+      ],
+      "fluid_cat_run_5": [
+        157.35,
+        78.86,
+        61.05
+      ],
+      "fluid_cat_maine_coon_run_7": [
+        155.34,
+        76.19,
+        61.05
+      ],
+      "fluid_cat_maine_coon_run_6": [
+        155.34,
+        71.19,
+        61.05
+      ],
+      "fluid_cat_british_run_5": [
+        158.44,
+        59.21,
+        81.9
+      ],
+      "fluid_cat_british_run_4": [
+        158.44,
+        57.21,
+        81.9
+      ],
+      "fluid_dog_shepherd_run_7": [
+        165.28,
+        61.2,
+        63.0
+      ],
+      "fluid_dog_shepherd_run_6": [
+        165.28,
+        53.2,
+        63.0
+      ],
+      "fluid_dog_bull_terrier_walk_0": [
+        154.9,
+        72.23,
+        51.15
+      ],
+      "fluid_dog_bull_terrier_walk_1": [
+        154.9,
+        75.23,
+        51.15
+      ],
+      "fluid_dog_corgi_run_4": [
+        153.52,
+        80.8,
+        68.45
+      ],
+      "fluid_dog_corgi_run_5": [
+        153.52,
+        79.8,
+        68.45
+      ],
+      "fluid_dog_doberman_walk_5": [
+        151.55,
+        43.85,
+        57.75
+      ],
+      "fluid_dog_doberman_walk_4": [
+        151.55,
+        44.85,
+        57.75
+      ],
+      "fluid_cat_walk_1": [
+        160.35,
+        53.86,
+        61.05
+      ],
+      "fluid_cat_walk_0": [
+        160.35,
+        53.86,
+        61.05
+      ],
+      "fluid_cat_british_walk_2": [
+        158.44,
+        51.21,
+        81.9
+      ],
+      "fluid_cat_british_walk_3": [
+        158.44,
+        49.21,
+        81.9
+      ],
+      "fluid_cat_siamese_run_0": [
+        164.76,
+        79.48,
+        60.8
+      ],
+      "fluid_cat_siamese_run_1": [
+        164.76,
+        75.48,
+        60.8
+      ],
+      "fluid_dog_doberman_run_3": [
+        151.55,
+        44.85,
+        57.75
+      ],
+      "fluid_dog_doberman_run_2": [
+        151.55,
+        55.85,
+        57.75
+      ],
+      "fluid_cat_maine_coon_walk_7": [
+        155.34,
+        68.19,
+        61.05
+      ],
+      "fluid_cat_maine_coon_walk_6": [
+        155.34,
+        67.19,
+        61.05
+      ],
+      "fluid_cat_siamese_walk_4": [
+        165.76,
+        58.48,
+        60.8
+      ],
+      "fluid_cat_siamese_walk_5": [
+        165.76,
+        58.48,
+        60.8
+      ],
+      "fluid_dog_bull_terrier_run_5": [
+        155.9,
+        75.23,
+        51.15
+      ],
+      "fluid_dog_bull_terrier_run_4": [
+        155.9,
+        74.23,
+        51.15
+      ],
+      "fluid_dog_corgi_run_3": [
+        153.52,
+        80.8,
+        68.45
+      ],
+      "fluid_dog_corgi_run_2": [
+        152.52,
+        80.8,
+        68.45
+      ],
+      "fluid_dog_doberman_walk_2": [
+        151.55,
+        44.85,
+        57.75
+      ],
+      "fluid_dog_doberman_walk_3": [
+        150.55,
+        44.85,
+        57.75
+      ],
+      "fluid_cat_walk_6": [
+        160.35,
+        54.86,
+        61.05
+      ],
+      "fluid_cat_walk_7": [
+        160.35,
+        54.86,
+        61.05
+      ],
+      "fluid_cat_british_walk_5": [
+        158.44,
+        51.21,
+        81.9
+      ],
+      "fluid_cat_british_walk_4": [
+        158.44,
+        52.21,
+        81.9
+      ],
+      "fluid_cat_siamese_run_7": [
+        165.76,
+        63.48,
+        60.8
+      ],
+      "fluid_cat_siamese_run_6": [
+        165.76,
+        71.48,
+        60.8
+      ],
+      "fluid_dog_doberman_run_4": [
+        151.55,
+        45.85,
+        57.75
+      ],
+      "fluid_dog_doberman_run_5": [
+        151.55,
+        48.85,
+        57.75
+      ],
+      "fluid_cat_maine_coon_walk_0": [
+        155.34,
+        66.19,
+        61.05
+      ],
+      "fluid_cat_maine_coon_walk_1": [
+        155.34,
+        66.19,
+        61.05
+      ],
+      "fluid_cat_siamese_walk_3": [
+        165.76,
+        59.48,
+        60.8
+      ],
+      "fluid_cat_siamese_walk_2": [
+        165.76,
+        59.48,
+        60.8
+      ],
+      "fluid_dog_bull_terrier_run_2": [
+        154.9,
+        72.23,
+        51.15
+      ],
+      "fluid_dog_bull_terrier_run_3": [
+        155.9,
+        72.23,
+        51.15
+      ],
+      "fluid_dog_shepherd_walk_3": [
+        164.28,
+        49.2,
+        63.0
+      ],
+      "fluid_cat_run_3": [
+        159.35,
+        58.86,
+        61.05
+      ],
+      "fluid_cat_run_2": [
+        160.35,
+        61.86,
+        61.05
+      ],
+      "fluid_dog_shepherd_walk_2": [
+        164.28,
+        51.2,
+        63.0
+      ],
+      "fluid_cat_maine_coon_run_0": [
+        154.34,
+        87.19,
+        61.05
+      ],
+      "fluid_cat_maine_coon_run_1": [
+        154.34,
+        86.19,
+        61.05
+      ],
+      "fluid_cat_british_run_2": [
+        157.44,
+        66.21,
+        81.9
+      ],
+      "fluid_cat_british_run_3": [
+        158.44,
+        49.21,
+        81.9
+      ],
+      "fluid_dog_shepherd_run_0": [
+        165.28,
+        55.2,
+        63.0
+      ],
+      "fluid_dog_shepherd_run_1": [
+        164.28,
+        62.2,
+        63.0
+      ],
+      "fluid_dog_bull_terrier_walk_7": [
+        154.9,
+        75.23,
+        51.15
+      ],
+      "fluid_dog_bull_terrier_walk_6": [
+        155.9,
+        75.23,
+        51.15
+      ]
+    }
+  }
+}

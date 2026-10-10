@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 251 tests, a Release build, and static analysis on September 28,
+> build passed 295 tests, a Release build, and static analysis on October 6,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -70,6 +70,51 @@ The collection contains **20 visual variants across six species**:
   <img src="Docs/Media/colorful-night-dark.png" width="240" alt="Starry night enclosure">
 </p>
 
+## Accessories and wardrobe
+
+Open **Pets → Wardrobe** on any pet card, or **Arcade → Shop → Accessories**.
+Try an accessory before buying and preview it while standing, walking, running,
+or resting. Choose **Buy**, then **Wear accessory**; closing the preview does not
+change the pet. Choose **No accessory → Remove accessory** to take it off.
+The purchase/apply button stays at the bottom while the wardrobe scrolls,
+including when using larger system text. Walking/running previews sample at
+30 Hz so short run frames are not skipped; the preview pauses when scrolled out
+of view, in the background, or with Reduce Motion enabled.
+
+| Accessory | Coins |
+| --- | ---: |
+| Cloud beanie | 70 |
+| Little crown | 110 |
+| Berry bow | 50 |
+
+Each purchase is permanent and reusable across all 20 pet variants, including
+several pets at once. A pet wears one head accessory at a time. Outfits persist
+across launches and appear in the enclosure, playroom, walks, arcades, Home Screen
+widget, Lock Screen and Dynamic Island. Pets away on a discovery walk can change
+their outfit after returning.
+
+Each accessory uses **441 complete redrawn outfit frames** for all 20 pet variants
+(**1,323 frames** across the beanie, crown and bow),
+including every walking, running, flying, playing, jumping and sleeping frame.
+The hat wraps the head and hides the ears; it is part of each alternate sprite.
+Original artwork without accessories and movement timing remain unchanged.
+Crowns sit between the ears; bows follow the side of the head. Their perspective
+and contact with the fur are authored for each pose, including sleep.
+
+The app, widget and Live Activities use the same authored outfit frames and
+original canvas registration. Matching timer fonts replace the bare pet in
+Dynamic Island and on the Lock Screen; a colour-preservation mask keeps each accessory’s
+original colours with custom coats. The original coat uses the completed sprite
+directly, without drawing a second, identical accessory layer.
+
+Timer fonts live only in the widget/Live Activity extension, in **60 small
+collections** split by breed and accessory. A collection is registered on first
+use and contains 24 faces for both surfaces and all six movement modes. Successful
+lookups are cached; pets without accessories do not load these collections.
+The app and widget retain their own outfit PNGs for foreground and snapshot
+rendering. Cached images and lossless duplicate glyph references avoid an added
+background animation loop. These are earned in-game coins, not real-money purchases.
+
 ## Walks and finds
 
 Tap the **compass on Island** to open walks and the finds album in a separate
@@ -102,6 +147,15 @@ the pet has returned, the landscape stays still and shows that it is home. Empty
 enclosures stop the display-link animation loop.
 Animations pause when the app becomes inactive. Actual battery and thermal
 behaviour still needs measurement on a physical iPhone.
+
+Foreground movement targets up to 60 Hz in the enclosure, playroom and walks.
+Sprite resolution and static scenery are reused between pose changes; moving
+coordinates do not require rebuilding the same artwork. Resting enclosure pets
+keep their behaviour timers without publishing identical pictures every frame.
+The enclosure also pauses outside the scroll viewport and on other tabs.
+The playroom restores its 60 Hz target after Reduce Motion is switched off.
+These changes preserve the approved sprite pixels, gait sequences and system
+animation timing in Dynamic Island and on the Lock Screen.
 
 The compass gains a small dot when a find is ready. In Russian, open
 **Остров → компас «Прогулки» → Альбом находок**.
@@ -199,7 +253,7 @@ place a widget on the Home Screen automatically.
 ### Requirements
 
 - macOS and Xcode with an installed iOS Simulator runtime.
-- iOS **17.0 or later**; recent simulator verification used **iOS 26.5**.
+- iOS **17.0 or later**; current simulator verification uses **iOS 27.0**.
 - A compatible iPhone or simulator for Dynamic Island testing, and a physical
   iPhone with Always-On Display to verify that behaviour on hardware.
 - No external package dependencies are required to build the iOS app.
@@ -250,10 +304,12 @@ and **Настройки → Иконка приложения**.
 ## Tests and validation
 
 Run the **PetIsland** test action with **Command-U** in Xcode. The latest verified
-suite has **190 passing tests**, including save recovery, pet placement, arcade
+suite covers save recovery, pet placement, arcade
 rules, movement geometry, sprite registration, Live Activity color persistence
 and contrast, alternate-icon configuration, discovery persistence, automatic
-returns, and exclusion between walks and Live Activities.
+returns, exclusion between walks and Live Activities, accessory ownership, failed
+purchases, outfit persistence, complete outfit coverage, original canvas sizes,
+mirrored timer/PNG registration, and rendered silhouettes without bare ears.
 
 For the full automated check, install the Python tooling dependencies and run:
 
@@ -264,7 +320,8 @@ python -m pip install -r Tools/requirements-dev.txt
 bash Tools/check_project.sh
 ```
 
-The script validates timer fonts, natural gaits, and the bundled lion/Cardigan frames;
+The script validates timer fonts, complete outfit frames and colour masks, natural gaits,
+and the bundled lion/Cardigan frames;
 then runs the simulator tests, a Release build, and static analysis. Reports go
 to `outputs/qa/`. Set `PET_TEST_DESTINATION` to select a particular simulator,
 `PET_PYTHON` to choose a Python interpreter, or `PET_REPORT_DIR` to choose a new
@@ -274,6 +331,15 @@ These checks use only committed application resources and do not require artwork
 drafts or generation tools. Automated and simulator checks do not replace
 physical-device coverage, complete VoiceOver and Dynamic Type checks,
 minimum-supported-iOS testing, or performance measurements.
+
+For an isolated simulator benchmark, run
+`PetAccessoryTests/testAccessoryColdStartRecordsTimeAndMemory` in a fresh test
+host. It records the first outfit font lookup's wall time, CPU time and memory
+footprint. `testAccessorySixPetRenderingPerformance` measures 12 offscreen gait
+phases for six dressed pets. Compare the same simulator and build configuration;
+these measurements do not estimate iPhone battery life or display frame rate.
+Set `PET_DERIVED_DATA` and `PET_RELEASE_DERIVED_DATA` when running the check script
+to verify packaging in fresh build directories.
 
 ## Project structure
 

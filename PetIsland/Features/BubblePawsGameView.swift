@@ -159,7 +159,7 @@ struct BubblePawsGameView: View {
             }
             // Existing artwork is rendered as-is; only this game's stage changes.
             PetArtwork(species: pet.species, coat: pet.coat, customColor: pet.customColor,
-                       breed: pet.resolvedBreed, pose: .idle, animatesMotion: false)
+                       breed: pet.resolvedBreed, pose: .idle, animatesMotion: false, accessory: pet.outfit?.headwear)
                 .frame(width: 96, height: 88)
                 .position(x: 68, y: 505)
                 .accessibilityHidden(true)
@@ -541,7 +541,7 @@ struct BubblePawsCover: View {
                 Spacer()
             }.padding(.top, 10)
             PetArtwork(species: pet.species, coat: pet.coat, customColor: pet.customColor,
-                       breed: pet.resolvedBreed, pose: .idle, animatesMotion: false)
+                       breed: pet.resolvedBreed, pose: .idle, animatesMotion: false, accessory: pet.outfit?.headwear)
                 .frame(width: 62, height: 54).offset(x: -15, y: 35)
             BubbleCannon(angle: 0.2).frame(width: 54, height: 54).offset(x: 26, y: 28)
         }

@@ -290,7 +290,7 @@ struct SkyPawsPlayerArtwork: View {
                 breed: pet.resolvedBreed,
                 pose: pet.species == .parrot ? .fly : .jump,
                 step: frame,
-                animatesMotion: false
+                animatesMotion: false, accessory: pet.outfit?.headwear
             )
         }
     }

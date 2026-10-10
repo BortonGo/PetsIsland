@@ -5,6 +5,7 @@ struct PetCollectionView: View {
     var showsDismissButton = true
     @Environment(\.dismiss) private var dismiss
     @State private var editorRoute: PetEditorRoute?
+    @State private var wardrobePet: PetProfile?
     @State private var pendingRemoval: PetProfile?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -42,6 +43,9 @@ struct PetCollectionView: View {
                     return await controller.updatePet(profile)
                 }
             }
+        }
+        .sheet(item: $wardrobePet) { pet in
+            PetWardrobeView(controller: controller, petID: pet.id)
         }
         .confirmationDialog(
             "Remove this pet?",
@@ -108,7 +112,7 @@ struct PetCollectionView: View {
                     PetArtwork(
                         species: pet.species, coat: pet.coat, customColor: pet.customColor,
                         breed: pet.resolvedBreed, pose: pet.species == .parrot ? .fly : .idle,
-                        animatesMotion: false
+                        animatesMotion: false, accessory: pet.outfit?.headwear
                     )
                     .frame(height: 105)
                     .frame(maxWidth: .infinity)
@@ -123,6 +127,14 @@ struct PetCollectionView: View {
             }
             .buttonStyle(.plain)
             .disabled(controller.isBusy)
+            Button { wardrobePet = pet } label: {
+                Label("Wardrobe", systemImage: "sparkles")
+                    .font(.caption.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 44)
+            }
+            .buttonStyle(.plain)
+            .disabled(controller.isBusy)
+            .accessibilityIdentifier("pet.wardrobe.\(pet.id)")
             HStack {
                 Group {
                     if isAway { Label("Out exploring", systemImage: "pawprint") }

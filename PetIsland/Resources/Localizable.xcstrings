@@ -1,567 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Soft bed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Soft bed"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Мягкая лежанка"
-          }
-        }
-      }
-    },
-    "Leaf nest" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Leaf nest"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Гнёздышко из листьев"
-          }
-        }
-      }
-    },
-    "Little swing" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Little swing"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Качели"
-          }
-        }
-      }
-    },
-    "Splash pool" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Splash pool"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Купальня"
-          }
-        }
-      }
-    },
-    "Warm stone" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warm stone"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Тёплый камень"
-          }
-        }
-      }
-    },
-    "Play ball" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Play ball"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Мячик"
-          }
-        }
-      }
-    },
-    "A soft place for a dog to curl up and rest." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A soft place for a dog to curl up and rest."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Мягкое место, где собака может свернуться и отдохнуть."
-          }
-        }
-      }
-    },
-    "Foxes rustle the leaves, then settle into their nest." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Foxes rustle the leaves, then settle into their nest."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Лисы шуршат листьями, а потом устраиваются в гнёздышке."
-          }
-        }
-      }
-    },
-    "Parrots land here and enjoy a gentle swing." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Parrots land here and enjoy a gentle swing."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Попугаи садятся на жердочку и слегка покачиваются."
-          }
-        }
-      }
-    },
-    "A little pool for penguins, with ripples and splashes." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A little pool for penguins, with ripples and splashes."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Небольшая купальня для пингвинов, с волнами и брызгами."
-          }
-        }
-      }
-    },
-    "A sunny resting spot for lions and their cubs." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A sunny resting spot for lions and their cubs."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Тёплое место для отдыха львов и львят."
-          }
-        }
-      }
-    },
-    "Cats, dogs, foxes and lions can nudge this little ball." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cats, dogs, foxes and lions can nudge this little ball."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Кошки, собаки, лисы и львы могут играть с этим мячиком."
-          }
-        }
-      }
-    },
-    "Left corner" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Left corner"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Слева"
-          }
-        }
-      }
-    },
-    "Right corner" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Right corner"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Справа"
-          }
-        }
-      }
-    },
-    "Upper perch" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Upper perch"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Наверху"
-          }
-        }
-      }
-    },
-    "Free place" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Free place"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Свободно"
-          }
-        }
-      }
-    },
-    "Two ground places and one upper perch. Keep the middle free for walking." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Two ground places and one upper perch. Keep the middle free for walking."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Два места на земле и одно наверху. Середина остаётся свободной для прогулок."
-          }
-        }
-      }
-    },
-    "One bulky item at a time: a box or a leaf nest. Everything else stays in your collection." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "One bulky item at a time: a box or a leaf nest. Everything else stays in your collection."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Можно поставить один крупный предмет: коробку или гнёздышко. Остальное останется в коллекции."
-          }
-        }
-      }
-    },
-    "Move item" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Move item"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Переставить"
-          }
-        }
-      }
-    },
-    "Choose a place" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose a place"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выбери место"
-          }
-        }
-      }
-    },
-    "Replace placed items?" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Replace placed items?"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Заменить предметы?"
-          }
-        }
-      }
-    },
-    "Replace" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Replace"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Заменить"
-          }
-        }
-      }
-    },
-    "Replaced items return to your collection. You never need to buy them again." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Replaced items return to your collection. You never need to buy them again."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Заменённые предметы вернутся в коллекцию. Покупать их заново не нужно."
-          }
-        }
-      }
-    },
-    "Choose a place and replace an item to make room." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose a place and replace an item to make room."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Выбери место и замени предмет, чтобы освободить его."
-          }
-        }
-      }
-    },
-    "In use" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "In use"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Занято"
-          }
-        }
-      }
-    },
-    "Available" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Available"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Свободно"
-          }
-        }
-      }
-    },
-    "Invite a pet" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Invite a pet"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Позвать питомца"
-          }
-        }
-      }
-    },
-    "More transparency reveals the glass beneath the color. Its appearance depends on your wallpaper. At 0%, the chosen color stays solid." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "More transparency reveals the glass beneath the color. Its appearance depends on your wallpaper. At 0%, the chosen color stays solid."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Чем выше прозрачность, тем заметнее стекло под цветом. Его вид зависит от обоев. При 0% выбранный цвет остаётся сплошным."
-          }
-        }
-      }
-    },
-    "Reduce Transparency is enabled in iPhone settings. The card uses a solid background; your glass preference is saved." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reduce Transparency is enabled in iPhone settings. The card uses a solid background; your glass preference is saved."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "В настройках iPhone включено «Уменьшение прозрачности». Фон будет сплошным, а ваш выбор прозрачности сохранится."
-          }
-        }
-      }
-    },
-    "Glass" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Glass"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Стекло"
-          }
-        }
-      }
-    },
-    "Solid background" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Solid background"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сплошной фон"
-          }
-        }
-      }
-    },
-    "Liquid Glass" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liquid Glass"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liquid Glass"
-          }
-        }
-      }
-    },
-    "Transparency" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transparency"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Прозрачность"
-          }
-        }
-      }
-    },
     "" : {
 
     },
@@ -1757,6 +1196,7 @@
       }
     },
     "A little hiding place for cats. Tap the box to invite one." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1819,6 +1259,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Немного веселья"
+          }
+        }
+      }
+    },
+    "A little pool for penguins, with ripples and splashes." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A little pool for penguins, with ripples and splashes."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Небольшая купальня для пингвинов, с волнами и брызгами."
           }
         }
       }
@@ -1985,6 +1442,23 @@
         }
       }
     },
+    "A soft place for a dog to curl up and rest." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A soft place for a dog to curl up and rest."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мягкое место, где собака может свернуться и отдохнуть."
+          }
+        }
+      }
+    },
     "A space is kept for your exploring pet." : {
       "localizations" : {
         "en" : {
@@ -1997,6 +1471,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Место гуляющего питомца сохранится до его возвращения."
+          }
+        }
+      }
+    },
+    "A sunny resting spot for lions and their cubs." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A sunny resting spot for lions and their cubs."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тёплое место для отдыха львов и львят."
           }
         }
       }
@@ -2052,6 +1543,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "О Live Activities"
+          }
+        }
+      }
+    },
+    "Accessories" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessories"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Аксессуары"
           }
         }
       }
@@ -2456,6 +1964,23 @@
         }
       }
     },
+    "Available" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Available"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Свободно"
+          }
+        }
+      }
+    },
     "Avoid storm clouds and spike orbs." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2568,6 +2093,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Мишка"
+          }
+        }
+      }
+    },
+    "Berry bow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Berry bow"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ягодный бантик"
           }
         }
       }
@@ -2802,6 +2344,23 @@
         }
       }
     },
+    "Buy once and dress any of your pets. The same accessory can be worn by several friends." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buy once and dress any of your pets. The same accessory can be worn by several friends."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одна покупка для всех питомцев. Один аксессуар могут носить сразу несколько друзей."
+          }
+        }
+      }
+    },
     "Buy once. Place and remove whenever you like." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2958,6 +2517,23 @@
         }
       }
     },
+    "Cats, dogs, foxes and lions can nudge this little ball." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cats, dogs, foxes and lions can nudge this little ball."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кошки, собаки, лисы и львы могут играть с этим мячиком."
+          }
+        }
+      }
+    },
     "Ceiling in %@ misses" : {
       "comment" : "A label that shows the player's current ceiling, represented by a series of filled circles, and the number of misses remaining.",
       "isCommentAutoGenerated" : true
@@ -3040,6 +2616,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выбери питомца"
+          }
+        }
+      }
+    },
+    "Choose a place" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a place"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбери место"
+          }
+        }
+      }
+    },
+    "Choose a place and replace an item to make room." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a place and replace an item to make room."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выбери место и замени предмет, чтобы освободить его."
           }
         }
       }
@@ -3242,6 +2852,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Облачный"
+          }
+        }
+      }
+    },
+    "Cloud beanie" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloud beanie"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Облачная шапочка"
           }
         }
       }
@@ -4101,6 +3728,23 @@
         }
       }
     },
+    "Foxes rustle the leaves, then settle into their nest." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foxes rustle the leaves, then settle into their nest."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лисы шуршат листьями, а потом устраиваются в гнёздышке."
+          }
+        }
+      }
+    },
     "Fragile platforms break after one landing." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4108,6 +3752,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Хрупкие платформы ломаются после первого приземления."
+          }
+        }
+      }
+    },
+    "Free place" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free place"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Свободно"
           }
         }
       }
@@ -4235,6 +3896,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Поселите питомца на острове. Гладьте его, играйте вместе и выбирайте пейзажи."
+          }
+        }
+      }
+    },
+    "Glass" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glass"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стекло"
           }
         }
       }
@@ -4518,6 +4196,40 @@
         }
       }
     },
+    "In use" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In use"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Занято"
+          }
+        }
+      }
+    },
+    "In wardrobe" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In wardrobe"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В гардеробе"
+          }
+        }
+      }
+    },
     "Includes the +%@ first-game bonus" : {
       "comment" : "A footnote that appears in the game's game over screen when a player has received a bonus for playing the game for the first time.",
       "isCommentAutoGenerated" : true,
@@ -4582,6 +4294,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Позвать котика"
+          }
+        }
+      }
+    },
+    "Invite a pet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invite a pet"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Позвать питомца"
           }
         }
       }
@@ -4702,6 +4431,23 @@
         }
       }
     },
+    "Leaf nest" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leaf nest"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Гнёздышко из листьев"
+          }
+        }
+      }
+    },
     "Leave this game" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4720,6 +4466,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выйти без награды"
+          }
+        }
+      }
+    },
+    "Left corner" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left corner"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Слева"
           }
         }
       }
@@ -4825,6 +4588,23 @@
         }
       }
     },
+    "Liquid Glass" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liquid Glass"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liquid Glass"
+          }
+        }
+      }
+    },
     "Listening to the reeds" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4859,6 +4639,23 @@
         }
       }
     },
+    "Little crown" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Little crown"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Маленькая корона"
+          }
+        }
+      }
+    },
     "Little grove" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -4889,6 +4686,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ленточка"
+          }
+        }
+      }
+    },
+    "Little swing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Little swing"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Качели"
           }
         }
       }
@@ -5181,6 +4995,23 @@
         }
       }
     },
+    "More transparency reveals the glass beneath the color. Its appearance depends on your wallpaper. At 0%, the chosen color stays solid." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More transparency reveals the glass beneath the color. Its appearance depends on your wallpaper. At 0%, the chosen color stays solid."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Чем выше прозрачность, тем заметнее стекло под цветом. Его вид зависит от обоев. При 0% выбранный цвет остаётся сплошным."
+          }
+        }
+      }
+    },
     "Motion & widget" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5188,6 +5019,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Движение и виджет"
+          }
+        }
+      }
+    },
+    "Move item" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move item"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переставить"
           }
         }
       }
@@ -5410,6 +5258,23 @@
         }
       }
     },
+    "No accessory" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No accessory"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Без аксессуара"
+          }
+        }
+      }
+    },
     "No account · No tracking" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5526,6 +5391,23 @@
         }
       }
     },
+    "One bulky item at a time: a box or a leaf nest. Everything else stays in your collection." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One bulky item at a time: a box or a leaf nest. Everything else stays in your collection."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Можно поставить один крупный предмет: коробку или гнёздышко. Остальное останется в коллекции."
+          }
+        }
+      }
+    },
     "One space is reserved for your travelling pet." : {
       "localizations" : {
         "ru" : {
@@ -5608,6 +5490,23 @@
         }
       }
     },
+    "Outfits can be changed when this pet returns." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Outfits can be changed when this pet returns."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переодеть питомца можно после возвращения с прогулки."
+          }
+        }
+      }
+    },
     "Parrot" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5615,6 +5514,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Попугай"
+          }
+        }
+      }
+    },
+    "Parrots land here and enjoy a gentle swing." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parrots land here and enjoy a gentle swing."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попугаи садятся на жердочку и слегка покачиваются."
           }
         }
       }
@@ -5827,6 +5743,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Имя питомца"
+          }
+        }
+      }
+    },
+    "Pet not found" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pet not found"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Питомец не найден"
           }
         }
       }
@@ -6151,6 +6084,23 @@
         }
       }
     },
+    "Play ball" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Play ball"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мячик"
+          }
+        }
+      }
+    },
     "Play together" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6258,6 +6208,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Предпросмотр"
+          }
+        }
+      }
+    },
+    "Preview movement" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview movement"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Движение при примерке"
           }
         }
       }
@@ -6478,6 +6445,40 @@
         }
       }
     },
+    "Reduce Transparency is enabled in iPhone settings. The card uses a solid background; your glass preference is saved." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reduce Transparency is enabled in iPhone settings. The card uses a solid background; your glass preference is saved."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В настройках iPhone включено «Уменьшение прозрачности». Фон будет сплошным, а ваш выбор прозрачности сохранится."
+          }
+        }
+      }
+    },
+    "Remove accessory" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove accessory"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Снять аксессуар"
+          }
+        }
+      }
+    },
     "Remove from island" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -6524,6 +6525,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Удалить этого питомца?"
+          }
+        }
+      }
+    },
+    "Replace" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заменить"
+          }
+        }
+      }
+    },
+    "Replace placed items?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace placed items?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заменить предметы?"
+          }
+        }
+      }
+    },
+    "Replaced items return to your collection. You never need to buy them again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replaced items return to your collection. You never need to buy them again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заменённые предметы вернутся в коллекцию. Покупать их заново не нужно."
           }
         }
       }
@@ -6589,7 +6641,6 @@
       }
     },
     "Resting" : {
-      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -6629,6 +6680,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Повторить"
+          }
+        }
+      }
+    },
+    "Right corner" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right corner"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Справа"
           }
         }
       }
@@ -6770,7 +6838,6 @@
       }
     },
     "Running" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -7274,6 +7341,23 @@
         }
       }
     },
+    "Soft bed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soft bed"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мягкая лежанка"
+          }
+        }
+      }
+    },
     "Soft feather" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -7308,6 +7392,23 @@
         }
       }
     },
+    "Solid background" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solid background"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сплошной фон"
+          }
+        }
+      }
+    },
     "Species" : {
       "localizations" : {
         "ru" : {
@@ -7325,6 +7426,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Время вместе без давления"
+          }
+        }
+      }
+    },
+    "Splash pool" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Splash pool"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Купальня"
+          }
+        }
+      }
+    },
+    "Standing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standing"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Стоит"
           }
         }
       }
@@ -8173,6 +8308,23 @@
         }
       }
     },
+    "Transparency" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transparency"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Прозрачность"
+          }
+        }
+      }
+    },
     "Treat" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8191,6 +8343,91 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Попробовать ещё раз"
+          }
+        }
+      }
+    },
+    "Try it on before buying. One purchase for all your pets." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try it on before buying. One purchase for all your pets."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Примеряйте перед покупкой. Аксессуар подойдёт всем вашим питомцам."
+          }
+        }
+      }
+    },
+    "Try on" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try on"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Примерить"
+          }
+        }
+      }
+    },
+    "Trying on" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trying on"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Примерка"
+          }
+        }
+      }
+    },
+    "Two ground places and one upper perch. Keep the middle free for walking." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Two ground places and one upper perch. Keep the middle free for walking."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Два места на земле и одно наверху. Середина остаётся свободной для прогулок."
+          }
+        }
+      }
+    },
+    "Upper perch" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upper perch"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Наверху"
           }
         }
       }
@@ -8373,6 +8610,23 @@
         }
       }
     },
+    "Walking" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walking"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Идёт"
+          }
+        }
+      }
+    },
     "Walks" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8397,6 +8651,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Гуляет"
+          }
+        }
+      }
+    },
+    "Wardrobe" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wardrobe"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Гардероб"
           }
         }
       }
@@ -8436,6 +8707,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Тёплый песок"
+          }
+        }
+      }
+    },
+    "Warm stone" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warm stone"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тёплый камень"
           }
         }
       }
@@ -8518,6 +8806,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Не удалось прочитать сохранение. Ваши файлы сохранены. Разблокируйте iPhone и попробуйте ещё раз."
+          }
+        }
+      }
+    },
+    "Wear accessory" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wear accessory"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Надеть"
+          }
+        }
+      }
+    },
+    "Wearing now" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wearing now"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас надето"
           }
         }
       }

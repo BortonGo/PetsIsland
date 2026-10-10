@@ -243,7 +243,7 @@ struct ArcadeGameCover: View {
                 ArcadePlatformArtwork(fragile: false).frame(width: 55, height: 22).offset(x: 7, y: 36)
                 ArcadePlatformArtwork(fragile: true).frame(width: 35, height: 16).offset(x: -28, y: -35)
                 PetArtwork(species: pet.species, coat: pet.coat, customColor: pet.customColor,
-                           breed: pet.resolvedBreed, pose: .jump, animatesMotion: false)
+                           breed: pet.resolvedBreed, pose: .jump, animatesMotion: false, accessory: pet.outfit?.headwear)
                     .frame(width: 77, height: 67).offset(x: 5, y: -3)
             }
         }

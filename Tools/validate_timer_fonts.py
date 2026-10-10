@@ -85,35 +85,40 @@ def strike_bitmap(asset, ppem, dynamic_island=False):
     return grounded
 
 
-checked = 0
-for filename, prefix in [('PetIslandTimerPets', 'PetIslandTimer'),
-                         ('PetIslandLockTimerPets', 'PetIslandLockTimer')]:
-    faces = {prefix + breed + mode for breed in PREFIXES for mode in MODES}
-    found = set()
-    path = ROOT / 'PetIslandLiveActivity/Resources' / f'{filename}.ttc'
-    for font in TTCollection(path).fonts:
-        name = font['name'].getDebugName(6)
-        if name not in faces:
-            continue
-        found.add(name)
-        em = font['head'].unitsPerEm
-        assert font['hhea'].ascent == round(em * CANVAS[1] / CANVAS[0]), name
-        assert font['hhea'].descent == 0 and font['hhea'].lineGap == 0, name
-        for ppem, strike in font['sbix'].strikes.items():
-            for digit in range(10):
-                glyph_name = f'd{digit}'
-                glyph = strike.glyphs[glyph_name]
-                image = Image.open(BytesIO(glyph.imageData)).convert('RGBA')
-                assert image.size == (ppem, round(ppem * CANVAS[1] / CANVAS[0])), name
-                breed, mode = next((b, m) for b in PREFIXES for m in MODES if name == prefix + b + m)
-                asset = asset_for_digit(breed, mode, digit)
-                expected = strike_bitmap(asset, ppem, dynamic_island=prefix == 'PetIslandTimer')
-                assert image.tobytes() == expected.tobytes(), (name, digit, 'bitmap differs from app registration')
-                if not asset.startswith('companion_'):
-                    assert image.getbbox()[3] == round(BASELINE * ppem / CANVAS[0]), (name, digit)
-                assert glyph.originOffsetX == 0, name
-                assert glyph.originOffsetY == -round(font['glyf'][glyph_name].yMin * ppem / em), name
-                assert font['hmtx'][glyph_name] == (em, 0), name
-                checked += 1
-    assert found == faces, faces - found
-print(f'Validated {checked} bitmaps, {len(PREFIXES) * len(MODES) * 2} faces, shared registration and CoreText bearings.')
+def validate():
+    checked = 0
+    for filename, prefix in [('PetIslandTimerPets', 'PetIslandTimer'),
+                             ('PetIslandLockTimerPets', 'PetIslandLockTimer')]:
+        faces = {prefix + breed + mode for breed in PREFIXES for mode in MODES}
+        found = set()
+        path = ROOT / 'PetIslandLiveActivity/Resources' / f'{filename}.ttc'
+        for font in TTCollection(path).fonts:
+            name = font['name'].getDebugName(6)
+            if name not in faces:
+                continue
+            found.add(name)
+            em = font['head'].unitsPerEm
+            assert font['hhea'].ascent == round(em * CANVAS[1] / CANVAS[0]), name
+            assert font['hhea'].descent == 0 and font['hhea'].lineGap == 0, name
+            for ppem, strike in font['sbix'].strikes.items():
+                for digit in range(10):
+                    glyph_name = f'd{digit}'
+                    glyph = strike.glyphs[glyph_name]
+                    image = Image.open(BytesIO(glyph.imageData)).convert('RGBA')
+                    assert image.size == (ppem, round(ppem * CANVAS[1] / CANVAS[0])), name
+                    breed, mode = next((b, m) for b in PREFIXES for m in MODES if name == prefix + b + m)
+                    asset = asset_for_digit(breed, mode, digit)
+                    expected = strike_bitmap(asset, ppem, dynamic_island=prefix == 'PetIslandTimer')
+                    assert image.tobytes() == expected.tobytes(), (name, digit, 'bitmap differs from app registration')
+                    if not asset.startswith('companion_'):
+                        assert image.getbbox()[3] == round(BASELINE * ppem / CANVAS[0]), (name, digit)
+                    assert glyph.originOffsetX == 0, name
+                    assert glyph.originOffsetY == -round(font['glyf'][glyph_name].yMin * ppem / em), name
+                    assert font['hmtx'][glyph_name] == (em, 0), name
+                    checked += 1
+        assert found == faces, faces - found
+    print(f'Validated {checked} bitmaps, {len(PREFIXES) * len(MODES) * 2} faces, shared registration and CoreText bearings.')
+
+
+if __name__ == "__main__":
+    validate()

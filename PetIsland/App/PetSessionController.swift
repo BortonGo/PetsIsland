@@ -170,6 +170,7 @@ final class PetSessionController: ObservableObject {
         guard !state.pets.contains(where: { $0.id == newPet.id }), state.pets.count < 12 else { return false }
         var normalized = newPet
         normalized.normalizeName()
+        normalized.outfit = nil
         var candidate = state
         candidate.pets.append(normalized)
         if session == nil, candidate.activePetIDs.count < PersistedAppState.maximumActivePets {
@@ -186,6 +187,8 @@ final class PetSessionController: ObservableObject {
               let index = state.pets.firstIndex(where: { $0.id == updatedPet.id }) else { return false }
         var normalized = updatedPet
         normalized.normalizeName()
+        // Appearance editors may hold an older draft; wardrobe owns this field.
+        normalized.outfit = state.pets[index].outfit
         var candidate = state
         candidate.pets[index] = normalized
         return await commitState(candidate)
@@ -319,6 +322,10 @@ final class PetSessionController: ObservableObject {
         let activityAppearanceChanged = settings.liveActivityBackgroundColor != candidate.settings.liveActivityBackgroundColor
             || settings.liveActivityBackgroundTransparency != candidate.settings.liveActivityBackgroundTransparency
         let discoveriesChanged = state.discoveries != candidate.discoveries
+        let activityPetID = activity?.attributes.pet.id
+        let outfitChanged = activityPetID.map { id in
+            state.pets.first { $0.id == id }?.outfit != candidate.pets.first { $0.id == id }?.outfit
+        } ?? false
         state = candidate
         settings = candidate.settings
         completedOnboarding = candidate.completedOnboarding
@@ -329,11 +336,12 @@ final class PetSessionController: ObservableObject {
         } else if discoveriesChanged {
             synchronizeSharedDiscoveryWalk()
         }
-        if activityAppearanceChanged, let activity {
-            let content = activity.content.state.updatingAppearance(
+        if activityAppearanceChanged || outfitChanged, let activity {
+            var content = activity.content.state.updatingAppearance(
                 color: settings.liveActivityBackgroundColor,
                 transparency: settings.liveActivityBackgroundTransparency
             )
+            content.petOutfit = candidate.pets.first { $0.id == activity.attributes.pet.id }?.outfit ?? PetOutfit()
             await activity.update(ActivityContent(state: content, staleDate: activity.attributes.endsAt))
         }
         return true
@@ -417,6 +425,30 @@ final class PetSessionController: ObservableObject {
         defer { finishSave() }
         var candidate = arcadeState
         guard candidate.progress.purchaseHabitatItem(item), await commitArcade(candidate) else { return false }
+        Haptics.success(enabled: settings.hapticsEnabled)
+        return true
+    }
+
+    func purchaseAccessory(_ item: PetAccessory) async -> Bool {
+        guard didBootstrap, !isBusy else { return false }
+        await beginSave()
+        defer { finishSave() }
+        var candidate = arcadeState
+        guard candidate.progress.purchaseAccessory(item), await commitArcade(candidate) else { return false }
+        Haptics.success(enabled: settings.hapticsEnabled)
+        return true
+    }
+
+    func equipAccessory(_ item: PetAccessory?, for petID: UUID) async -> Bool {
+        guard didBootstrap, !isBusy, !isPetOnDiscoveryWalk(petID),
+              item.map({ arcadeProgress.ownedAccessories.contains($0) }) ?? true else { return false }
+        await beginSave()
+        defer { finishSave() }
+        guard !isPetOnDiscoveryWalk(petID),
+              let index = state.pets.firstIndex(where: { $0.id == petID }) else { return false }
+        var candidate = state
+        candidate.pets[index].outfit = item.map { PetOutfit(headwear: $0) }
+        guard await commitState(candidate) else { return false }
         Haptics.success(enabled: settings.hapticsEnabled)
         return true
     }
@@ -961,7 +993,8 @@ final class PetSessionController: ObservableObject {
             species: pet.species,
             coat: pet.coat,
             customColor: pet.customColor,
-            breed: pet.resolvedBreed
+            breed: pet.resolvedBreed,
+            outfit: pet.outfit
         )
     }
 
@@ -1001,7 +1034,8 @@ final class PetSessionController: ObservableObject {
                 snapshot: session.snapshot,
                 lastInteraction: nil,
                 backgroundColor: settings.liveActivityBackgroundColor,
-                backgroundTransparency: settings.liveActivityBackgroundTransparency
+                backgroundTransparency: settings.liveActivityBackgroundTransparency,
+                petOutfit: leadPet.outfit ?? PetOutfit()
             ),
             staleDate: session.endsAt
         )

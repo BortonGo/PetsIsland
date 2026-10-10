@@ -234,7 +234,7 @@ struct HabitatEditorView: View {
                         pose: pet.species == .parrot ? .fly : .idle,
                         direction: .right,
                         step: 0,
-                        animatesMotion: false
+                        animatesMotion: false, accessory: pet.outfit?.headwear
                     )
                     .frame(width: 66, height: 56)
 
@@ -385,11 +385,13 @@ struct HabitatEditorCanvas: View {
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var motion = HabitatMotionSimulation()
     @State private var isVisible = false
+    @State private var isInViewport = false
 
     var body: some View {
         GeometryReader { proxy in
             ZStack(alignment: .bottom) {
                 HabitatThemeBackdrop(theme: palette)
+                    .equatable()
                 if pets.isEmpty {
                     if !motion.furniture.isEmpty {
                         Label("Empty enclosure", systemImage: "pawprint")
@@ -437,7 +439,7 @@ struct HabitatEditorCanvas: View {
                         PetArtwork(species: actor.profile.species, coat: actor.profile.coat,
                                    customColor: actor.profile.customColor, breed: actor.profile.resolvedBreed,
                                    pose: actor.pose, direction: .right, step: reduceMotion ? 0 : actor.step,
-                                   animatesMotion: false, usesNaturalGait: true)
+                                   animatesMotion: false, usesNaturalGait: true, accessory: actor.profile.outfit?.headwear)
                             .scaleEffect(x: actor.facing, y: 1)
                             .offset(y: actor.visualOffsetY)
                         if actor.affection > 0 {
@@ -464,12 +466,12 @@ struct HabitatEditorCanvas: View {
             .onAppear {
                 isVisible = true
                 configure(in: proxy.size)
-                motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && scenePhase == .active)
+                motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isInViewport && scenePhase == .active)
             }
             .onChange(of: pets) { previous, value in
                 configure(in: proxy.size)
                 if previous.isEmpty && !value.isEmpty {
-                    motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && scenePhase == .active)
+                    motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && isInViewport && scenePhase == .active)
                 }
             }
             .onChange(of: vitalsByPetID) { _, _ in configure(in: proxy.size) }
@@ -479,9 +481,13 @@ struct HabitatEditorCanvas: View {
             .onChange(of: petScale) { _, _ in configure(in: proxy.size) }
         }
         .onDisappear { isVisible = false; motion.stop() }
-        .onChange(of: reduceMotion) { _, value in motion.start(reduceMotion: value, active: isAnimationEnabled && isVisible && scenePhase == .active) }
-        .onChange(of: scenePhase) { _, phase in motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && phase == .active) }
-        .onChange(of: isAnimationEnabled) { _, value in motion.start(reduceMotion: reduceMotion, active: value && isVisible && scenePhase == .active) }
+        .onPetViewportVisibilityChange { value in
+            isInViewport = value
+            motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && value && scenePhase == .active)
+        }
+        .onChange(of: reduceMotion) { _, value in motion.start(reduceMotion: value, active: isAnimationEnabled && isVisible && isInViewport && scenePhase == .active) }
+        .onChange(of: scenePhase) { _, phase in motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && isInViewport && phase == .active) }
+        .onChange(of: isAnimationEnabled) { _, value in motion.start(reduceMotion: reduceMotion, active: value && isVisible && isInViewport && scenePhase == .active) }
     }
 
     private func configure(in size: CGSize) {
@@ -595,13 +601,27 @@ final class HabitatMotionSimulation: ObservableObject {
         /// A small entry/exit arc; the floor shadow keeps the ordinary ground anchor.
         var visualOffsetY: CGFloat = 0
 
+        /// Timers, random seeds and steering still advance while a pet rests,
+        /// but none of them requires a new SwiftUI render of the enclosure.
+        func hasSameAppearance(as other: Actor) -> Bool {
+            id == other.id && profile == other.profile && position == other.position
+                && pose == other.pose && facing == other.facing && step == other.step
+                && affection == other.affection && visualOffsetY == other.visualOffsetY
+        }
+
         mutating func random() -> Double {
             seed = seed &* 6364136223846793005 &+ 1442695040888963407
             return Double(seed >> 11) / Double(UInt64.max >> 11)
         }
     }
 
-    @Published private(set) var actors: [Actor] = []
+    private(set) var actors: [Actor] = [] {
+        willSet {
+            if !actors.elementsEqual(newValue, by: { $0.hasSameAppearance(as: $1) }) {
+                objectWillChange.send()
+            }
+        }
+    }
     @Published private(set) var boxOccupantID: UUID?
     @Published private(set) var boxPhase: CozyBoxPhase = .empty
     enum FurniturePhase: String { case approaching, settling, using, leaving }
@@ -666,9 +686,13 @@ final class HabitatMotionSimulation: ObservableObject {
         let previousPetWidth = petWidth
         let wasBoxEnabled = self.hasCozyBox
         let oldBoxSlot = boxPlacement.slot
+        let placements = PetHabitatState.normalizedFurniture(furniture ?? (hasCozyBox ? [.init(item: .cozyBox, slot: .right)] : []))
+        if previousSize != newSize || self.furniture != placements || previousPetWidth != min(newSize.width * 0.24, 78) * petScale {
+            objectWillChange.send()
+        }
         size = newSize
         petWidth = min(size.width * 0.24, 78) * petScale
-        self.furniture = PetHabitatState.normalizedFurniture(furniture ?? (hasCozyBox ? [.init(item: .cozyBox, slot: .right)] : []))
+        self.furniture = placements
         self.hasCozyBox = self.furniture.contains { $0.item == .cozyBox }
         let existing = Dictionary(uniqueKeysWithValues: actors.map { ($0.id, $0) })
         actors = pets.enumerated().map { index, profile in
@@ -708,9 +732,9 @@ final class HabitatMotionSimulation: ObservableObject {
 
     func start(reduceMotion: Bool, active: Bool) {
         reduced = reduceMotion
-        stop()
-        guard active, !actors.isEmpty else { return }
+        guard active, !actors.isEmpty else { stop(); return }
         if reduceMotion {
+            stop()
             if boxPhase != .resting { cancelBoxVisit() }
             for slot in Array(furnitureVisits.keys) { cancelFurnitureVisit(slot) }
             actors = actors.map { actor in
@@ -725,6 +749,9 @@ final class HabitatMotionSimulation: ObservableObject {
             }
             return
         }
+        // Visibility and scene activation can arrive together. Reusing the
+        // current link avoids throwing away its timestamp and a display frame.
+        guard displayLink == nil else { return }
         let link = CADisplayLink(target: Target(self), selector: #selector(Target.tick(_:)))
         link.preferredFrameRateRange = CAFrameRateRange(minimum: 30, maximum: 60, preferred: 60)
         link.add(to: .main, forMode: .common)
@@ -1417,7 +1444,7 @@ extension HabitatMotionSimulation {
     }
 }
 
-private struct HabitatThemeBackdrop: View {
+private struct HabitatThemeBackdrop: View, Equatable {
     let theme: HabitatThemePresentation
 
     var body: some View {
@@ -1596,7 +1623,7 @@ private struct HabitatResidentStatusRow: View {
                 pose: .idle,
                 direction: .right,
                 step: 0,
-                animatesMotion: false
+                animatesMotion: false, accessory: pet.outfit?.headwear
             )
             .frame(width: 46, height: 42)
 
@@ -1677,7 +1704,7 @@ private struct HabitatStatusDots: View {
 }
 
 /// Presentation-only colors. The shared enum preserves stable saved theme IDs.
-private struct HabitatThemePresentation: Identifiable {
+private struct HabitatThemePresentation: Identifiable, Equatable {
     var id: HabitatTheme { theme }
     let theme: HabitatTheme
     let name: LocalizedStringKey

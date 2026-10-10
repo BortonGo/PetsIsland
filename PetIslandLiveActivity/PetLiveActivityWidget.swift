@@ -25,7 +25,7 @@ struct PetLiveActivityWidget: Widget {
                 }
                 DynamicIslandExpandedRegion(.center) {
                     ActivityPetTrack(
-                        identity: context.attributes.pet,
+                        identity: currentIdentity(context),
                         snapshot: resolvedSnapshot(context),
                         isStale: context.isStale,
                         spriteSize: CGSize(width: 50, height: 44)
@@ -68,6 +68,12 @@ struct PetLiveActivityWidget: Widget {
             }
             .widgetURL(deepLink(for: context.attributes.sessionID))
         }
+    }
+
+    private func currentIdentity(_ context: ActivityViewContext<PetActivityAttributes>) -> PetActivityIdentity {
+        var pet = context.attributes.pet
+        pet.outfit = context.state.petOutfit ?? pet.outfit
+        return pet
     }
 
     private func resolvedSnapshot(_ context: ActivityViewContext<PetActivityAttributes>) -> PetSnapshot {
@@ -132,15 +138,17 @@ private struct CompactTimerPet: View {
                 for: context.attributes.pet,
                 mode: context.attributes.motionMode
             ) {
-                PetTimerGlyph(
+                PetOutfittedTimerGlyph(
                     timerStart: context.attributes.startedAt,
                     timerEnd: context.attributes.endsAt,
-                    fontName: fontName,
+                    baseFontName: fontName,
                     viewport: viewport,
-                    direction: snapshot.direction
+                    direction: snapshot.direction,
+                    species: context.attributes.pet.species,
+                    coat: context.attributes.pet.coat,
+                    customColor: context.attributes.pet.customColor,
+                    accessory: (context.state.petOutfit ?? context.attributes.pet.outfit)?.headwear
                 )
-                .petCoat(species: context.attributes.pet.species,
-                         coat: context.attributes.pet.coat, customColor: context.attributes.pet.customColor)
             } else {
                 compactArtwork(pose: snapshot.pose, step: 0)
             }
@@ -164,7 +172,7 @@ private struct CompactTimerPet: View {
             direction: context.state.snapshot.direction,
             step: step,
             animatesMotion: false,
-            surface: .dynamicIsland
+            surface: .dynamicIsland, accessory: (context.state.petOutfit ?? context.attributes.pet.outfit)?.headwear
         )
     }
 }
@@ -305,15 +313,17 @@ private struct LockScreenTimerPet: View {
                 for: context.attributes.pet,
                 mode: context.attributes.motionMode
             ) {
-                PetTimerGlyph(
+                PetOutfittedTimerGlyph(
                     timerStart: context.attributes.startedAt,
                     timerEnd: context.attributes.endsAt,
-                    fontName: fontName,
+                    baseFontName: fontName,
                     viewport: viewport,
-                    direction: snapshot.direction
+                    direction: snapshot.direction,
+                    species: context.attributes.pet.species,
+                    coat: context.attributes.pet.coat,
+                    customColor: context.attributes.pet.customColor,
+                    accessory: (context.state.petOutfit ?? context.attributes.pet.outfit)?.headwear
                 )
-                .petCoat(species: context.attributes.pet.species,
-                         coat: context.attributes.pet.coat, customColor: context.attributes.pet.customColor)
             } else {
                 artwork(pose: snapshot.pose)
             }
@@ -332,7 +342,7 @@ private struct LockScreenTimerPet: View {
             pose: pose,
             direction: context.state.snapshot.direction,
             step: 0,
-            animatesMotion: false
+            animatesMotion: false, accessory: (context.state.petOutfit ?? context.attributes.pet.outfit)?.headwear
         )
     }
 }
@@ -493,7 +503,7 @@ private struct ActivityAnimatedPet: View {
             direction: direction,
             step: PetLiveMotionSequence.spriteStep(for: snapshot, phaseOffset: index),
             animatesMotion: false,
-            surface: .dynamicIsland
+            surface: .dynamicIsland, accessory: identity.outfit?.headwear
         )
         .contentTransition(.identity)
     }

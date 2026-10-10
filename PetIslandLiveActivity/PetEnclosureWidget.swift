@@ -150,7 +150,7 @@ private struct PetEnclosureView: View {
                                 pose: effectivePose(for: projection),
                                 direction: projection.direction,
                                 step: projection.spriteStep,
-                                animatesMotion: false
+                                animatesMotion: false, accessory: resident.profile.outfit?.headwear
                             )
                             .frame(width: petSize, height: petSize * 0.86)
                             .shadow(color: .black.opacity(0.24), radius: 2, y: 3)

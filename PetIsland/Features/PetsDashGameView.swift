@@ -356,7 +356,7 @@ struct PetsDashPlayerArtwork: View {
                 breed: pet.resolvedBreed,
                 pose: pet.species == .parrot ? .fly : .run,
                 step: frame,
-                animatesMotion: false
+                animatesMotion: false, accessory: pet.outfit?.headwear
             )
         }
     }

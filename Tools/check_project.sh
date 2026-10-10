@@ -7,8 +7,11 @@ if [[ -z "${DEVELOPER_DIR:-}" && -d /Applications/Xcode.app/Contents/Developer ]
 fi
 PET_PYTHON="${PET_PYTHON:-python3}"
 PET_REPORT_DIR="${PET_REPORT_DIR:-outputs/qa/check-$(date +%Y%m%d-%H%M%S)}"
+PET_DERIVED_DATA="${PET_DERIVED_DATA:-outputs/DerivedData}"
+PET_RELEASE_DERIVED_DATA="${PET_RELEASE_DERIVED_DATA:-outputs/ReleaseValidation}"
 mkdir -p "$PET_REPORT_DIR"
 "$PET_PYTHON" Tools/validate_timer_fonts.py | tee "$PET_REPORT_DIR/fonts.log"
+"$PET_PYTHON" Tools/validate_accessories.py | tee "$PET_REPORT_DIR/accessories.log"
 "$PET_PYTHON" Tools/validate_natural_gaits.py | tee "$PET_REPORT_DIR/gaits.log"
 "$PET_PYTHON" Tools/validate_companion_assets.py | tee "$PET_REPORT_DIR/new-pets.log"
 if [[ -z "${PET_TEST_DESTINATION:-}" ]]; then
@@ -27,11 +30,11 @@ if [[ "$PET_TEST_DESTINATION" == *id=* ]]; then
   xcrun simctl bootstatus "$PET_SIM_ID" -b > "$PET_REPORT_DIR/simulator.log"
 fi
 xcodebuild test -project PetIsland.xcodeproj -scheme PetIsland \
-  -destination "$PET_TEST_DESTINATION" -derivedDataPath outputs/DerivedData \
+  -destination "$PET_TEST_DESTINATION" -derivedDataPath "$PET_DERIVED_DATA" \
   -resultBundlePath "$PET_REPORT_DIR/Tests.xcresult" \
   CODE_SIGN_IDENTITY=- SWIFT_EMIT_LOC_STRINGS=NO > "$PET_REPORT_DIR/tests.log" 2>&1 || { tail -n 80 "$PET_REPORT_DIR/tests.log"; exit 1; }
 xcodebuild build analyze -project PetIsland.xcodeproj -scheme PetIsland \
   -configuration Release -destination 'generic/platform=iOS' \
-  -derivedDataPath outputs/ReleaseValidation CODE_SIGNING_ALLOWED=NO \
+  -derivedDataPath "$PET_RELEASE_DERIVED_DATA" CODE_SIGNING_ALLOWED=NO \
   SWIFT_EMIT_LOC_STRINGS=NO > "$PET_REPORT_DIR/release.log" 2>&1 || { tail -n 80 "$PET_REPORT_DIR/release.log"; exit 1; }
 printf 'Checks passed. Reports: %s\n' "$PET_REPORT_DIR"

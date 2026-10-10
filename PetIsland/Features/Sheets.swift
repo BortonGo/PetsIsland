@@ -270,7 +270,7 @@ struct PetPicker: View {
                     pose: profile.species == .parrot ? .fly : .idle,
                     direction: .right,
                     step: 0,
-                    animatesMotion: false
+                    animatesMotion: false, accessory: profile.outfit?.headwear
                 )
                 .frame(width: 66, height: 52)
 

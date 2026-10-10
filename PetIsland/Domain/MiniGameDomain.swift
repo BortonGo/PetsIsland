@@ -54,6 +54,7 @@ struct ArcadeProgress: Codable, Equatable, Sendable {
     private(set) var highScores: [MiniGameKind: Int]
     private(set) var inventory: ArcadeInventory
     private(set) var lastPlayedAt: Date?
+    private(set) var ownedAccessories: Set<PetAccessory>
     private(set) var ownedHabitatItems: Set<HabitatItemKind>
     private(set) var hasImportedLegacyFurniture: Bool
 
@@ -65,6 +66,7 @@ struct ArcadeProgress: Codable, Equatable, Sendable {
         inventory: ArcadeInventory = ArcadeInventory(),
         lastPlayedAt: Date? = nil,
         ownedHabitatItems: Set<HabitatItemKind> = [],
+        ownedAccessories: Set<PetAccessory> = [],
         hasImportedLegacyFurniture: Bool = true
     ) {
         self.coins = max(coins, 0)
@@ -74,6 +76,7 @@ struct ArcadeProgress: Codable, Equatable, Sendable {
         self.inventory = inventory
         self.lastPlayedAt = lastPlayedAt
         self.ownedHabitatItems = ownedHabitatItems
+        self.ownedAccessories = ownedAccessories
         self.hasImportedLegacyFurniture = hasImportedLegacyFurniture
     }
 
@@ -149,6 +152,14 @@ struct ArcadeProgress: Codable, Equatable, Sendable {
         return true
     }
 
+    @discardableResult
+    mutating func purchaseAccessory(_ item: PetAccessory) -> Bool {
+        guard !ownedAccessories.contains(item), coins >= item.price else { return false }
+        coins -= item.price
+        ownedAccessories.insert(item)
+        return true
+    }
+
     mutating func importLegacyFurniture(hasCozyBox: Bool) {
         guard !hasImportedLegacyFurniture else { return }
         if hasCozyBox { ownedHabitatItems.insert(.cozyBox) }
@@ -157,7 +168,7 @@ struct ArcadeProgress: Codable, Equatable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case coins, totalScore, gamesPlayed, highScores, inventory, lastPlayedAt
-        case ownedHabitatItems, hasImportedLegacyFurniture
+        case ownedHabitatItems, hasImportedLegacyFurniture, ownedAccessories
     }
 
     init(from decoder: Decoder) throws {
@@ -171,6 +182,8 @@ struct ArcadeProgress: Codable, Equatable, Sendable {
             lastPlayedAt: try values.decodeIfPresent(Date.self, forKey: .lastPlayedAt),
             ownedHabitatItems: Set((try values.decodeIfPresent([String].self, forKey: .ownedHabitatItems) ?? [])
                 .compactMap(HabitatItemKind.init(rawValue:))),
+            ownedAccessories: Set((try values.decodeIfPresent([String].self, forKey: .ownedAccessories) ?? [])
+                .compactMap(PetAccessory.init(rawValue:))),
             hasImportedLegacyFurniture: try values.decodeIfPresent(Bool.self, forKey: .hasImportedLegacyFurniture) ?? false
         )
     }

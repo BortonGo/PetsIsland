@@ -114,7 +114,7 @@ private struct IslandView: View {
             petScale: 1.2,
             hasCozyBox: controller.habitat.configuration.hasCozyBox,
             furniture: controller.habitat.configuration.furniture,
-            isAnimationEnabled: !showsHabitatEditor && !showsIslandSetup && !showsDiscoveries && !controller.showsPlayYard
+            isAnimationEnabled: controller.selectedTab == .island && !showsHabitatEditor && !showsIslandSetup && !showsDiscoveries && !controller.showsPlayYard
         )
         .frame(height: 240)
         .overlay(alignment: .topLeading) {
@@ -439,7 +439,7 @@ private struct LiveActivityColorEditor: View {
                         customColor: controller.profile.customColor,
                         breed: controller.profile.breed,
                         pose: .sleep,
-                        animatesMotion: false
+                        animatesMotion: false, accessory: controller.profile.outfit?.headwear
                     )
                     .frame(width: 84, height: 72)
                     .frame(maxWidth: .infinity)

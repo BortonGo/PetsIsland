@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Only the visible, uncovered sheet runs a 30 Hz timeline. Dates drive the scene;
+/// Only the visible, uncovered sheet runs a 60 Hz timeline. Dates drive the scene;
 /// no frame updates are persisted and no background simulation is required.
 struct PetDiscoverySceneView: View {
     let walk: PetDiscoveryWalk
@@ -19,7 +19,7 @@ struct PetDiscoverySceneView: View {
 
     var body: some View {
         let plan = PetDiscoveryScenePlan(walk: walk)
-        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !animates)) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 60, paused: !animates)) { timeline in
             let frame = plan.frame(at: hasReturned || isComplete ? walk.endsAt : timeline.date)
             VStack(spacing: 0) {
                 GeometryReader { proxy in
@@ -101,7 +101,7 @@ struct PetDiscoverySceneView: View {
                 .position(ground)
             PetArtwork(species: pet.species, coat: pet.coat, customColor: pet.customColor,
                        breed: pet.resolvedBreed, pose: pose, direction: frame.direction, step: step,
-                       animatesMotion: false, usesNaturalGait: true)
+                       animatesMotion: false, usesNaturalGait: true, accessory: pet.outfit?.headwear)
                 .frame(width: width, height: width * 0.8)
                 // The shared artwork's baseline is 160 on its 220 × 176 canvas.
                 .position(x: ground.x, y: ground.y - width * 72 / 220 - flightLift)
@@ -140,8 +140,24 @@ struct DiscoveryLandscape: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
+        DiscoveryLandscapeDrawing(route: route, foreground: foreground, activity: activity,
+                                  actionTime: actionTime, dark: colorScheme == .dark)
+            .equatable()
+    }
+}
+
+/// Moving a pet must not redraw all the trees, fences and background paths.
+/// Resolve the environment outside the cache key so theme changes still render.
+private struct DiscoveryLandscapeDrawing: View, Equatable {
+    let route: PetWalkRoute
+    let foreground: Bool
+    let activity: PetDiscoveryScenePlan.Activity
+    let actionTime: TimeInterval
+    let dark: Bool
+
+    var body: some View {
         Canvas { context, size in
-            var painter = DiscoveryLandscapePainter(context: context, dark: colorScheme == .dark, route: route)
+            var painter = DiscoveryLandscapePainter(context: context, dark: dark, route: route)
             painter.context.scaleBy(x: size.width / 360, y: size.height / 240)
             if foreground {
                 painter.foreground(activity: activity, time: actionTime)
