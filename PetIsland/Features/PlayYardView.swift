@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit
+import Combine
 
 /// An in-app playground for all six enclosure residents.
 ///
@@ -9,6 +10,7 @@ struct PlayYardView: View {
     @Environment(\.dismiss) private var dismiss
     @PetReduceMotion private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
+    @ObservedObject private var power = PetPowerMonitor.shared
     @StateObject private var simulation: PlayYardSimulation
     @State private var isVisible = false
 
@@ -67,7 +69,7 @@ struct PlayYardView: View {
                 .onAppear {
                     isVisible = true
                     simulation.configure(roomSize: proxy.size)
-                    if scenePhase == .active { simulation.start(reduceMotion: reduceMotion) }
+                    if scenePhase == .active { simulation.start(reduceMotion: reduceMotion, powerPolicy: power.policy) }
                 }
                 .onChange(of: proxy.size) { _, newSize in
                     simulation.configure(roomSize: newSize)
@@ -97,8 +99,9 @@ struct PlayYardView: View {
         .onChange(of: reduceMotion) { _, newValue in
             simulation.setReduceMotion(newValue)
         }
+        .onChange(of: power.policy) { _, value in simulation.setPowerPolicy(value) }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active && isVisible { simulation.start(reduceMotion: reduceMotion) }
+            if phase == .active && isVisible { simulation.start(reduceMotion: reduceMotion, powerPolicy: power.policy) }
             else { simulation.stop() }
         }
         .onDisappear {
@@ -532,7 +535,8 @@ enum PlayYardGameRules {
 }
 
 @MainActor
-final class PlayYardSimulation: NSObject, ObservableObject {
+final class PlayYardSimulation: NSObject, @MainActor ObservableObject {
+    let objectWillChange = ObservableObjectPublisher()
     struct Actor: Identifiable {
         let profile: PetProfile
         var position: CGPoint = .zero
@@ -549,6 +553,13 @@ final class PlayYardSimulation: NSObject, ObservableObject {
         let size: CGFloat
 
         var id: UUID { profile.id }
+
+        func hasSameAppearance(as other: Self, reduceMotion: Bool) -> Bool {
+            profile == other.profile && position == other.position && direction == other.direction
+                && pose == other.pose && step == other.step && size == other.size
+                && isAirborne == other.isAirborne
+                && (reduceMotion || pose != .fly || motionPhase == other.motionPhase)
+        }
     }
 
     struct Frame {
@@ -561,12 +572,25 @@ final class PlayYardSimulation: NSObject, ObservableObject {
         var fetcherID: UUID?
         var score = 0
         var throwCount = 0
+
+        func hasSameAppearance(as other: Self, reduceMotion: Bool) -> Bool {
+            ballPosition == other.ballPosition && ballAngle == other.ballAngle
+                && isDraggingBall == other.isDraggingBall && dragOrigin == other.dragOrigin
+                && phase == other.phase && fetcherID == other.fetcherID
+                && score == other.score && throwCount == other.throwCount
+                && actors.elementsEqual(other.actors, by: { $0.hasSameAppearance(as: $1, reduceMotion: reduceMotion) })
+        }
     }
 
-    @Published private(set) var frame: Frame
+    private(set) var frame: Frame {
+        willSet {
+            if !frame.hasSameAppearance(as: newValue, reduceMotion: reduceMotion) { objectWillChange.send() }
+        }
+    }
 
     private var displayLink: CADisplayLink?
-    var preferredFramesPerSecond: Int? { displayLink?.preferredFramesPerSecond }
+    private var powerPolicy: PetAnimationPowerPolicy = .normal
+    var preferredFramesPerSecond: Int? { displayLink.flatMap { $0.preferredFrameRateRange.preferred.map(Int.init) } }
     private var roomSize = CGSize.zero
     private var ballVelocity = CGVector.zero
     private var lastTimestamp: CFTimeInterval?
@@ -629,7 +653,8 @@ final class PlayYardSimulation: NSObject, ObservableObject {
         }
     }
 
-    func start(reduceMotion: Bool) {
+    func start(reduceMotion: Bool, powerPolicy: PetAnimationPowerPolicy = .normal) {
+        self.powerPolicy = powerPolicy
         self.reduceMotion = reduceMotion
         guard displayLink == nil else {
             setReduceMotion(reduceMotion)
@@ -637,7 +662,7 @@ final class PlayYardSimulation: NSObject, ObservableObject {
         }
 
         let link = CADisplayLink(target: DisplayLinkTarget(self), selector: #selector(DisplayLinkTarget.update(_:)))
-        link.preferredFramesPerSecond = reduceMotion ? 15 : 60
+        link.preferredFrameRateRange = frameRateRange
         link.add(to: .main, forMode: .common)
         displayLink = link
         lastTimestamp = nil
@@ -668,7 +693,17 @@ final class PlayYardSimulation: NSObject, ObservableObject {
 
     func setReduceMotion(_ enabled: Bool) {
         reduceMotion = enabled
-        displayLink?.preferredFramesPerSecond = enabled ? 15 : 60
+        displayLink?.preferredFrameRateRange = frameRateRange
+    }
+
+    func setPowerPolicy(_ value: PetAnimationPowerPolicy) {
+        powerPolicy = value
+        displayLink?.preferredFrameRateRange = frameRateRange
+    }
+
+    private var frameRateRange: CAFrameRateRange {
+        let rate = Float(reduceMotion ? 15 : powerPolicy.framesPerSecond)
+        return CAFrameRateRange(minimum: min(rate, 30), maximum: rate, preferred: rate)
     }
 
     func reset() {

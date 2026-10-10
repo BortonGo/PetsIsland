@@ -2,6 +2,52 @@ import XCTest
 @testable import PetIsland
 
 final class PetFurnitureTests: XCTestCase {
+    @MainActor
+    func testRestingFurniturePublishesOnlyVisibleChanges() throws {
+        for (item, species) in [(HabitatItemKind.softBed, PetSpecies.dog), (.warmStone, .lion)] {
+            let pet = furniturePet(species)
+            let simulation = HabitatMotionSimulation()
+            simulation.configure(pets: [pet], size: furnitureCanvas, furniture: [.init(item: item, slot: .left)])
+            XCTAssertTrue(simulation.requestFurniture(.left))
+            XCTAssertTrue(advance(simulation, slot: .left, until: .using))
+            for _ in 0..<180 { simulation.advance(by: 1.0 / 60) }
+            let elapsed = try XCTUnwrap(simulation.furnitureVisits[.left]?.elapsed)
+            var publications = 0, visibleChanges = 0
+            let observation = simulation.objectWillChange.sink { publications += 1 }
+            defer { observation.cancel() }
+            for _ in 0..<120 {
+                let before = simulation.actors
+                simulation.advance(by: 1.0 / 60)
+                if !before.elementsEqual(simulation.actors, by: { $0.hasSameAppearance(as: $1) }) { visibleChanges += 1 }
+            }
+            print("Resting \(item): publications=\(publications), visible_changes=\(visibleChanges), ticks=120")
+            XCTAssertEqual(publications, visibleChanges)
+            XCTAssertEqual(try XCTUnwrap(simulation.furnitureVisits[.left]?.elapsed), elapsed + 2, accuracy: 0.000001)
+            XCTAssertTrue(advance(simulation, slot: .left, until: .leaving), "The internal timer must still finish the visit")
+        }
+    }
+
+    @MainActor
+    func testAnimatedFurnitureStillPublishesEveryVisibleEffectFrame() throws {
+        for (item, species) in [(HabitatItemKind.leafNest, PetSpecies.fox), (.birdPerch, .parrot),
+                                (.splashBath, .penguin), (.playBall, .dog)] {
+            let simulation = HabitatMotionSimulation()
+            let slot = item.slots[0]
+            simulation.configure(pets: [furniturePet(species)], size: furnitureCanvas,
+                                 furniture: [.init(item: item, slot: slot)])
+            XCTAssertTrue(simulation.requestFurniture(slot))
+            XCTAssertTrue(advance(simulation, slot: slot, until: .using))
+            var publications = 0
+            let observation = simulation.objectWillChange.sink { publications += 1 }
+            defer { observation.cancel() }
+            for _ in 0..<30 {
+                let before = publications
+                simulation.advance(by: 1.0 / 60)
+                XCTAssertGreaterThan(publications, before, "\(item)'s visible effect must not freeze")
+            }
+        }
+    }
+
     func testEveryItemChargesOnceAndPersistsOwnership() throws {
         for item in HabitatItemKind.allCases {
             var progress = ArcadeProgress(coins: item.price + 7)

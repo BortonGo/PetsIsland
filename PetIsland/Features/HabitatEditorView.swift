@@ -383,6 +383,7 @@ struct HabitatEditorCanvas: View {
     var isAnimationEnabled = true
     @PetReduceMotion private var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
+    @ObservedObject private var power = PetPowerMonitor.shared
     @StateObject private var motion = HabitatMotionSimulation()
     @State private var isVisible = false
     @State private var isInViewport = false
@@ -466,12 +467,12 @@ struct HabitatEditorCanvas: View {
             .onAppear {
                 isVisible = true
                 configure(in: proxy.size)
-                motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isInViewport && scenePhase == .active)
+                motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isInViewport && scenePhase == .active, powerPolicy: power.policy)
             }
             .onChange(of: pets) { previous, value in
                 configure(in: proxy.size)
                 if previous.isEmpty && !value.isEmpty {
-                    motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && isInViewport && scenePhase == .active)
+                    motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && isInViewport && scenePhase == .active, powerPolicy: power.policy)
                 }
             }
             .onChange(of: vitalsByPetID) { _, _ in configure(in: proxy.size) }
@@ -483,11 +484,12 @@ struct HabitatEditorCanvas: View {
         .onDisappear { isVisible = false; motion.stop() }
         .onPetViewportVisibilityChange { value in
             isInViewport = value
-            motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && value && scenePhase == .active)
+            motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && value && scenePhase == .active, powerPolicy: power.policy)
         }
-        .onChange(of: reduceMotion) { _, value in motion.start(reduceMotion: value, active: isAnimationEnabled && isVisible && isInViewport && scenePhase == .active) }
-        .onChange(of: scenePhase) { _, phase in motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && isInViewport && phase == .active) }
-        .onChange(of: isAnimationEnabled) { _, value in motion.start(reduceMotion: reduceMotion, active: value && isVisible && isInViewport && scenePhase == .active) }
+        .onChange(of: reduceMotion) { _, value in motion.start(reduceMotion: value, active: isAnimationEnabled && isVisible && isInViewport && scenePhase == .active, powerPolicy: power.policy) }
+        .onChange(of: scenePhase) { _, phase in motion.start(reduceMotion: reduceMotion, active: isAnimationEnabled && isVisible && isInViewport && phase == .active, powerPolicy: power.policy) }
+        .onChange(of: isAnimationEnabled) { _, value in motion.start(reduceMotion: reduceMotion, active: value && isVisible && isInViewport && scenePhase == .active, powerPolicy: power.policy) }
+        .onChange(of: power.policy) { _, value in motion.setPowerPolicy(value) }
     }
 
     private func configure(in size: CGSize) {
@@ -633,8 +635,22 @@ final class HabitatMotionSimulation: ObservableObject {
         var origin: CGPoint = .zero
         var originOffset: CGFloat = 0
         var exitPoint: CGPoint = .zero
+
+        func hasSameAppearance(as other: Self) -> Bool {
+            guard placement == other.placement, petID == other.petID, phase == other.phase else { return false }
+            // These four objects animate their own artwork while occupied.
+            // Bed/stone rest timers and approach bookkeeping are invisible.
+            let animated = phase == .using && [.leafNest, .birdPerch, .splashBath, .playBall].contains(placement.item)
+            return !animated || elapsed == other.elapsed
+        }
     }
-    @Published private(set) var furnitureVisits: [HabitatFurnitureSlot: FurnitureVisit] = [:]
+    private(set) var furnitureVisits: [HabitatFurnitureSlot: FurnitureVisit] = [:] {
+        willSet {
+            if furnitureVisits.count != newValue.count || !furnitureVisits.allSatisfy({ slot, visit in
+                newValue[slot].map { visit.hasSameAppearance(as: $0) } ?? false
+            }) { objectWillChange.send() }
+        }
+    }
     private(set) var furniture: [HabitatFurniturePlacement] = []
     private var nextFurnitureVisit: [HabitatFurnitureSlot: Double] = [:]
     private(set) var boxRestPose: PetPose = .sleep
@@ -645,6 +661,8 @@ final class HabitatMotionSimulation: ObservableObject {
     private var reduced = false
     private var clock = 0.0
     private var displayLink: CADisplayLink?
+    private var powerPolicy: PetAnimationPowerPolicy = .normal
+    var preferredFramesPerSecond: Int? { displayLink.flatMap { $0.preferredFrameRateRange.preferred.map(Int.init) } }
     private var lastTimestamp: CFTimeInterval?
     var isRunning: Bool { displayLink != nil }
     var isBoxOccupied: Bool { boxOccupantID != nil }
@@ -730,7 +748,8 @@ final class HabitatMotionSimulation: ObservableObject {
         if actors.isEmpty { stop() }
     }
 
-    func start(reduceMotion: Bool, active: Bool) {
+    func start(reduceMotion: Bool, active: Bool, powerPolicy: PetAnimationPowerPolicy = .normal) {
+        setPowerPolicy(powerPolicy)
         reduced = reduceMotion
         guard active, !actors.isEmpty else { stop(); return }
         if reduceMotion {
@@ -753,9 +772,16 @@ final class HabitatMotionSimulation: ObservableObject {
         // current link avoids throwing away its timestamp and a display frame.
         guard displayLink == nil else { return }
         let link = CADisplayLink(target: Target(self), selector: #selector(Target.tick(_:)))
-        link.preferredFrameRateRange = CAFrameRateRange(minimum: 30, maximum: 60, preferred: 60)
+        let rate = Float(powerPolicy.framesPerSecond)
+        link.preferredFrameRateRange = CAFrameRateRange(minimum: 30, maximum: rate, preferred: rate)
         link.add(to: .main, forMode: .common)
         displayLink = link
+    }
+
+    func setPowerPolicy(_ value: PetAnimationPowerPolicy) {
+        powerPolicy = value
+        let rate = Float(value.framesPerSecond)
+        displayLink?.preferredFrameRateRange = CAFrameRateRange(minimum: 30, maximum: rate, preferred: rate)
     }
 
     func stop() {

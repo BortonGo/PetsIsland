@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A91000000000000000000001 /* PetPowerMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A92000000000000000000001 /* PetPowerMonitor.swift */; };
 		E10000000000000000000001 /* PetDesign.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000001 /* PetDesign.swift */; };
 		A10000000000000000000001 /* PetIslandApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* PetIslandApp.swift */; };
 		A10000000000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ContentView.swift */; };
@@ -107,6 +108,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A92000000000000000000001 /* PetPowerMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetPowerMonitor.swift; sourceTree = "<group>"; };
 		E20000000000000000000001 /* PetDesign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetDesign.swift; sourceTree = "<group>"; };
 		A20000000000000000000001 /* PetIslandApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetIslandApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -224,6 +226,7 @@
 			isa = PBXGroup;
 			children = (
 				A20000000000000000000001 /* PetIslandApp.swift */,
+				A92000000000000000000001 /* PetPowerMonitor.swift */,
 				A20000000000000000000002 /* ContentView.swift */,
 				A20000000000000000000003 /* PetSessionController.swift */,
 			);
@@ -489,6 +492,7 @@
 				ACCF00000000000000000200 /* PetWardrobeView.swift in Sources */,
 				ACCF00000000000000000100 /* PetAccessories.swift in Sources */,
 				A10000000000000000000001 /* PetIslandApp.swift in Sources */,
+				A91000000000000000000001 /* PetPowerMonitor.swift in Sources */,
 				A10000000000000000000002 /* ContentView.swift in Sources */,
 				A10000000000000000000003 /* PetSessionController.swift in Sources */,
 				A10000000000000000000005 /* PetPixelArtwork.swift in Sources */,

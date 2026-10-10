@@ -5,6 +5,140 @@ import SwiftUI
 
 final class PetDomainTests: XCTestCase {
 
+    func testPowerPolicyUsesThirtyFramesOnlyWhenEnergyOrHeatRequiresIt() {
+        for thermal: ProcessInfo.ThermalState in [.nominal, .fair, .serious, .critical] {
+            let regular = PetAnimationPowerPolicy(lowPowerMode: false, thermalState: thermal)
+            XCTAssertEqual(regular.framesPerSecond, thermal == .nominal || thermal == .fair ? 60 : 30)
+            let lowPower = PetAnimationPowerPolicy(lowPowerMode: true, thermalState: thermal)
+            XCTAssertEqual(lowPower.framesPerSecond, 30)
+            XCTAssertEqual(lowPower.frameInterval, 1.0 / 30)
+        }
+    }
+
+    @MainActor
+    func testPowerMonitorRespondsToEventsWithoutPollingOrRedundantPublications() async throws {
+        let center = NotificationCenter()
+        var current = PetAnimationPowerPolicy.normal
+        var reads = 0
+        var monitor: PetPowerMonitor? = PetPowerMonitor(center: center, readPolicy: { reads += 1; return current })
+        XCTAssertEqual(reads, 1)
+        XCTAssertEqual(monitor?.policy, .normal)
+        var publications = 0
+        let observation = monitor?.objectWillChange.sink { publications += 1 }
+        center.post(name: .NSProcessInfoPowerStateDidChange, object: nil)
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertEqual(publications, 0)
+        current = .constrained
+        center.post(name: ProcessInfo.thermalStateDidChangeNotification, object: nil)
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertEqual(monitor?.policy, .constrained)
+        XCTAssertEqual(publications, 1)
+        current = .normal
+        center.post(name: UIApplication.didBecomeActiveNotification, object: nil)
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertEqual(monitor?.policy, .normal)
+        XCTAssertEqual(publications, 2)
+        let lastReads = reads
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertEqual(reads, lastReads, "No periodic work while idle")
+        observation?.cancel()
+        let wasReleased = { [weak monitor] in monitor == nil }
+        monitor = nil
+        XCTAssertTrue(wasReleased())
+        center.post(name: .NSProcessInfoPowerStateDidChange, object: nil)
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertEqual(reads, lastReads, "Observers must be released with their owner")
+    }
+
+    @MainActor
+    func testPowerTransitionsPreservePetStateAndNeverRestartHiddenScenes() {
+        let habitat = HabitatMotionSimulation()
+        habitat.configure(pets: [.starter], size: CGSize(width: 345, height: 240))
+        let yard = PlayYardSimulation(pets: [.starter], hapticsEnabled: false)
+        yard.configure(roomSize: CGSize(width: 393, height: 740))
+        defer { habitat.stop(); yard.stop() }
+        habitat.start(reduceMotion: false, active: true)
+        yard.start(reduceMotion: false)
+        for _ in 0..<90 { habitat.advance(by: 1.0 / 60); yard.advance(by: 1.0 / 60) }
+        let actors = habitat.actors
+        let frame = yard.frame
+        for policy: PetAnimationPowerPolicy in [.constrained, .normal, .constrained] {
+            habitat.setPowerPolicy(policy); yard.setPowerPolicy(policy)
+            XCTAssertEqual(habitat.preferredFramesPerSecond, policy.framesPerSecond)
+            XCTAssertEqual(yard.preferredFramesPerSecond, policy.framesPerSecond)
+            XCTAssertEqual(habitat.actors, actors, "Changing refresh rate must not reset position or gait")
+            XCTAssertTrue(yard.frame.hasSameAppearance(as: frame, reduceMotion: false))
+        }
+        yard.setReduceMotion(true)
+        XCTAssertEqual(yard.preferredFramesPerSecond, 15)
+        yard.setPowerPolicy(.normal)
+        XCTAssertEqual(yard.preferredFramesPerSecond, 15, "Accessibility setting takes precedence")
+        yard.setReduceMotion(false)
+        XCTAssertEqual(yard.preferredFramesPerSecond, 60)
+        habitat.start(reduceMotion: false, active: false)
+        yard.stop()
+        habitat.setPowerPolicy(.constrained); yard.setPowerPolicy(.constrained)
+        XCTAssertNil(habitat.preferredFramesPerSecond)
+        XCTAssertNil(yard.preferredFramesPerSecond)
+        habitat.start(reduceMotion: true, active: true, powerPolicy: .constrained)
+        XCTAssertFalse(habitat.isRunning)
+        habitat.start(reduceMotion: false, active: true, powerPolicy: .constrained)
+        yard.start(reduceMotion: false, powerPolicy: .constrained)
+        XCTAssertEqual(habitat.preferredFramesPerSecond, 30)
+        XCTAssertEqual(yard.preferredFramesPerSecond, 30)
+    }
+
+    @MainActor
+    func testLowerRefreshRateKeepsWalkingSpeedAndStrideDistance() {
+        let pet = PetProfile(id: UUID(uuidString: "01000000-0000-0000-0000-000000000001")!,
+                             name: "Pixel", species: .dog, coat: .sunrise, createdAt: .distantPast)
+        var distances: [Double] = []
+        var lastActors: [HabitatMotionSimulation.Actor] = []
+        for fps in [60, 30] {
+            let habitat = HabitatMotionSimulation()
+            habitat.configure(pets: [pet], size: CGSize(width: 600, height: 300))
+            var distance = 0.0
+            for _ in 0..<(fps * 5) {
+                let before = habitat.actors[0]
+                habitat.advance(by: 1 / Double(fps))
+                let after = habitat.actors[0]
+                distance += hypot(after.position.x - before.position.x, after.position.y - before.position.y)
+                XCTAssertEqual(after.visualOffsetY, 0)
+            }
+            distances.append(distance); lastActors.append(habitat.actors[0])
+        }
+        XCTAssertGreaterThan(distances[0], 20)
+        XCTAssertEqual(distances[0], distances[1], accuracy: 3, "Rendering at 30 Hz must not halve the walking speed")
+        XCTAssertEqual(lastActors[0].gaitPhase, lastActors[1].gaitPhase, accuracy: 0.12)
+    }
+
+    @MainActor
+    func testFlyingAndFetchingRemainAnimatedAtBothRefreshRates() {
+        let bird = PetProfile(id: UUID(), name: "Bird", species: .parrot, coat: .sunrise, createdAt: .now)
+        for fps in [30, 60] {
+            let flying = PlayYardSimulation(pets: [bird], hapticsEnabled: false)
+            flying.configure(roomSize: CGSize(width: 393, height: 740))
+            var publications = 0
+            let observation = flying.objectWillChange.sink { publications += 1 }
+            for _ in 0..<fps { flying.advance(by: 1 / Double(fps)) }
+            XCTAssertEqual(publications, fps, "Continuous bird lift remains visible even between sprite changes")
+            observation.cancel()
+            let yard = PlayYardSimulation(pets: [.starter], hapticsEnabled: false)
+            yard.configure(roomSize: CGSize(width: 393, height: 740))
+            let start = yard.frame.ballPosition
+            yard.dragBall(to: start)
+            yard.dragBall(to: CGPoint(x: start.x + 60, y: start.y - 70))
+            yard.throwBall(toward: CGPoint(x: start.x + 120, y: start.y - 150))
+            for _ in 0..<(fps * 30) {
+                yard.advance(by: 1 / Double(fps))
+                XCTAssertTrue(yard.frame.ballPosition.x.isFinite && yard.frame.ballPosition.y.isFinite)
+                if yard.frame.score > 0 { break }
+            }
+            XCTAssertEqual(yard.frame.throwCount, 1)
+            XCTAssertEqual(yard.frame.score, 1, "Catching and returning the ball must work at \(fps) Hz")
+        }
+    }
+
     func testCareItemsRequireAPositiveBenefit() {
         let full = PetVitals(fullness: 1, happiness: 1, energy: 1)
         for item in ArcadeItemKind.allCases {
@@ -276,6 +410,26 @@ final class PetDomainTests: XCTestCase {
         let oldPublications = publications
         simulation.pet(pet.id)
         XCTAssertGreaterThan(publications, oldPublications, "Touch feedback must still appear immediately")
+    }
+
+    @MainActor
+    func testIdlePlayYardDoesNotPublishInvisibleMotionPhaseChanges() {
+        let yard = PlayYardSimulation(pets: [.starter], hapticsEnabled: false)
+        yard.configure(roomSize: CGSize(width: 393, height: 740))
+        var publications = 0, visibleChanges = 0
+        let observation = yard.objectWillChange.sink { publications += 1 }
+        defer { observation.cancel() }
+        for _ in 0..<120 {
+            let before = yard.frame.actors[0]
+            yard.advance(by: 1.0 / 60)
+            let after = yard.frame.actors[0]
+            if before.position != after.position || before.step != after.step || before.pose != after.pose {
+                visibleChanges += 1
+            }
+        }
+        print("Idle playroom: publications=\(publications), visible_changes=\(visibleChanges), ticks=120")
+        XCTAssertEqual(publications, visibleChanges)
+        XCTAssertGreaterThan(yard.frame.actors[0].motionPhase, 0, "Keep the internal clock advancing")
     }
 
     @MainActor

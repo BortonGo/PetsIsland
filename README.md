@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 305 tests, a Release build, and static analysis on October 10,
+> build passed 313 tests, a Release build, and static analysis on October 10,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -310,6 +310,34 @@ testing; launching the extension scheme directly opens a widget preview flow.
 
 In Russian, the new settings are **Остров → Настройка острова → Цвет карточки**
 and **Настройки → Иконка приложения**.
+
+## Foreground performance
+
+The enclosure, walking scene, and playroom normally target 60 frames per second.
+Low Power Mode or a serious/critical thermal state switches these foreground
+scenes to 30 FPS; returning to normal restores 60 FPS. Simulation time and
+stride distance do not change, so pets do not slow down or reset their poses.
+The system's Reduce Motion preference still takes precedence. Arcade gameplay,
+Dynamic Island, and Lock Screen rendering keep their existing behavior.
+
+One shared observer listens to system power/thermal notifications and refreshes
+when the app becomes active. It adds no polling or background timer. Hidden
+scenes remain stopped when the power state changes. Frame-rate requests follow
+[Apple's display-link guidance](https://developer.apple.com/documentation/quartzcore/cadisplaylink/preferredframeraterange);
+the actual refresh rate is controlled by iOS.
+
+Invisible simulation bookkeeping no longer invalidates the playroom or resting
+furniture. In a deterministic 120-tick simulator check, an idle playroom went
+from 120 view updates to 5; a pet on a soft bed went from 123 to 3, and on a warm
+stone from 122 to 2. The remaining updates match actual visible changes. Flying
+birds, animated furniture, and ball interactions continue to publish their frames.
+These counts measure avoided UI updates, **not battery savings**. Two 30-second
+physical iPhone 17 Pro checks on iOS 27.0.1 covered a playroom ball return with
+five pets and the saved island with five residents, a box, and a bed. Instruments
+reported a nominal thermal state throughout both recordings. Peak process
+footprints were about 80 MiB and 85 MiB respectively. These were optimized debug
+builds on USB power; longer unplugged battery and frame-pacing measurements
+remain pending.
 
 ## Tests and validation
 

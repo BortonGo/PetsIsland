@@ -8,6 +8,7 @@ struct PetDiscoverySceneView: View {
     let isComplete: Bool
     let viewportHeight: CGFloat
     @Environment(\.scenePhase) private var scenePhase
+    @ObservedObject private var power = PetPowerMonitor.shared
     @PetReduceMotion private var reduceMotion
     @State private var isVisible = false
     @State private var isInViewport = false
@@ -19,7 +20,7 @@ struct PetDiscoverySceneView: View {
 
     var body: some View {
         let plan = PetDiscoveryScenePlan(walk: walk)
-        TimelineView(.animation(minimumInterval: 1.0 / 60, paused: !animates)) { timeline in
+        TimelineView(.animation(minimumInterval: power.policy.frameInterval, paused: !animates)) { timeline in
             let frame = plan.frame(at: hasReturned || isComplete ? walk.endsAt : timeline.date)
             VStack(spacing: 0) {
                 GeometryReader { proxy in
