@@ -10321,6 +10321,1094 @@
           }
         }
       }
+    },
+    "Along the way" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Along the way"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "По дороге"
+          }
+        }
+      }
+    },
+    "First steps" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First steps"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Первые шаги"
+          }
+        }
+      }
+    },
+    "A little pause" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A little pause"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Небольшая остановка"
+          }
+        }
+      }
+    },
+    "A surprise for home" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A surprise for home"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сюрприз для дома"
+          }
+        }
+      }
+    },
+    "A small surprise" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A small surprise"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Маленький сюрприз"
+          }
+        }
+      }
+    },
+    "A curious detour" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A curious detour"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Любопытный поворот"
+          }
+        }
+      }
+    },
+    "A quiet discovery" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A quiet discovery"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тихая находка"
+          }
+        }
+      }
+    },
+    "Treasures" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Treasures"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Находки"
+          }
+        }
+      }
+    },
+    "Stories" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stories"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Истории"
+          }
+        }
+      }
+    },
+    "Album section" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Album section"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Раздел альбома"
+          }
+        }
+      }
+    },
+    "%lld of %lld stories" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld of %lld stories"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld из %lld историй"
+          }
+        }
+      }
+    },
+    "The same find can bring a different story. New stories wait on familiar paths." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The same find can bring a different story. New stories wait on familiar paths."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Даже знакомая находка может принести новую историю. Возвращайся на любимые тропинки."
+          }
+        }
+      }
+    },
+    "Your first walk story is still ahead." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your first walk story is still ahead."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Первая история прогулки ещё впереди."
+          }
+        }
+      }
+    },
+    "%@ followed a stripe in the path and found it continued across a pebble. A very small map, with home at the end." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ followed a stripe in the path and found it continued across a pebble. A very small map, with home at the end."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ замечает полоску на дорожке: она будто продолжается на камушке. Получилась крошечная карта, которая ведёт домой."
+          }
+        }
+      }
+    },
+    "%@ chose a pebble warmed by the sun. Perhaps a little of that warmth will stay in your pocket." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ chose a pebble warmed by the sun. Perhaps a little of that warmth will stay in your pocket."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ выбирает камушек, согретый солнцем. Может быть, в кармане сохранится немного этого тепла."
+          }
+        }
+      }
+    },
+    "%@ watched a beetle disappear beneath a clover leaf. The beetle kept its hiding place; you get the lucky leaf." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ watched a beetle disappear beneath a clover leaf. The beetle kept its hiding place; you get the lucky leaf."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ наблюдает, как жук прячется под клевером. У жука остаётся укрытие, а у тебя — листочек на удачу."
+          }
+        }
+      }
+    },
+    "%@ rested beside a patch of clover until the breeze settled. This leaf is a reminder that there is no need to hurry." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ rested beside a patch of clover until the breeze settled. This leaf is a reminder that there is no need to hurry."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ отдыхает у клевера, пока ветер не стихает. Этот листочек напоминает: торопиться совсем не обязательно."
+          }
+        }
+      }
+    },
+    "%@ almost walked past a flower growing through a crack. Even the path has a secret garden." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ almost walked past a flower growing through a crack. Even the path has a secret garden."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ замечает цветок в щёлке между камнями. Оказывается, даже у дорожки есть свой тайный сад."
+          }
+        }
+      }
+    },
+    "%@ found a fallen flower beside a sunny bench. It seemed too lovely to leave without a place in your album." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ found a fallen flower beside a sunny bench. It seemed too lovely to leave without a place in your album."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ находит опавший цветок возле солнечной скамейки. Такая красота заслуживает места в твоём альбоме."
+          }
+        }
+      }
+    },
+    "%@ followed a ribbon fluttering on a low twig. It looks like the garden tried to wrap itself as a present." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ followed a ribbon fluttering on a low twig. It looks like the garden tried to wrap itself as a present."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ замечает ленточку на низкой ветке. Похоже, сад пытается упаковать себя в подарок."
+          }
+        }
+      }
+    },
+    "%@ brought a ribbon from the quiet end of the path. A bookmark for a day you might want to remember." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ brought a ribbon from the quiet end of the path. A bookmark for a day you might want to remember."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ приносит ленточку с тихого края дорожки. Будет закладкой для дня, который хочется запомнить."
+          }
+        }
+      }
+    },
+    "%@ found a shell hiding in a tiny pool. The tide left a little treasure chest with nothing to unlock." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ found a shell hiding in a tiny pool. The tide left a little treasure chest with nothing to unlock."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ находит ракушку в маленькой лужице. После отлива остаётся сундучок, которому не нужен ключ."
+          }
+        }
+      }
+    },
+    "%@ waited for a wave to retreat before choosing this shell. It carries a little pause between two waves." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ waited for a wave to retreat before choosing this shell. It carries a little pause between two waves."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ждёт, пока волна отступит, и выбирает ракушку. В ней будто остаётся тишина между двумя волнами."
+          }
+        }
+      }
+    },
+    "%@ spotted a flash between the pebbles. It was not a star after all, but it can still brighten your album." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ spotted a flash between the pebbles. It was not a star after all, but it can still brighten your album."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ замечает блеск среди камушков. Это не звезда, но сиять в твоём альбоме она умеет не хуже."
+          }
+        }
+      }
+    },
+    "%@ held a smooth piece of sea glass up to the light. For a moment, the whole shore had its colour." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ held a smooth piece of sea glass up to the light. For a moment, the whole shore had its colour."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ рассматривает гладкое морское стёклышко на свету. На миг весь берег окрашивается в его цвет."
+          }
+        }
+      }
+    },
+    "%@ found a twig shaped like a question mark. Where has it sailed? The sea is keeping that story to itself." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ found a twig shaped like a question mark. Where has it sailed? The sea is keeping that story to itself."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ находит веточку в форме вопросительного знака. Где она плавала? Эту историю море пока хранит при себе."
+          }
+        }
+      }
+    },
+    "%@ sat beside a piece of driftwood and watched the water. It has travelled enough; your island can be its home now." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ sat beside a piece of driftwood and watched the water. It has travelled enough; your island can be its home now."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ отдыхает рядом с морской веточкой и смотрит на воду. Веточка уже напутешествовалась — теперь её дом на твоём острове."
+          }
+        }
+      }
+    },
+    "%@ sorted through pebbles until one rolled in a perfect circle. This one would win a very quiet race." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ sorted through pebbles until one rolled in a perfect circle. This one would win a very quiet race."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ перебирает камушки, и один катится ровным кружочком. В очень тихой гонке он точно победит."
+          }
+        }
+      }
+    },
+    "%@ found a stone beside a line of sea foam. A small reminder of a wave that has already gone." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ found a stone beside a line of sea foam. A small reminder of a wave that has already gone."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ находит камушек у полоски морской пены. Маленькое напоминание о волне, которая уже ушла."
+          }
+        }
+      }
+    },
+    "%@ followed a feather caught in a slow swirl of air. The forest was playing catch without making a sound." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ followed a feather caught in a slow swirl of air. The forest was playing catch without making a sound."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ следит за пёрышком, которое кружится в воздухе. Лес играет в догонялки, не издавая ни звука."
+          }
+        }
+      }
+    },
+    "%@ found a feather resting on the moss. Some gifts arrive so softly that nobody hears them." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ found a feather resting on the moss. Some gifts arrive so softly that nobody hears them."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ находит пёрышко на мху. Некоторые подарки появляются так тихо, что никто их не слышит."
+          }
+        }
+      }
+    },
+    "%@ found a pinecone balanced on a root like a little tower. It stayed standing all the way to your album." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ found a pinecone balanced on a root like a little tower. It stayed standing all the way to your album."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ замечает шишку на корне — совсем как маленькую башню. До самого альбома башня не разваливается."
+          }
+        }
+      }
+    },
+    "%@ chose a pinecone from a warm patch of forest floor. It brings a little woodland afternoon home with it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ chose a pinecone from a warm patch of forest floor. It brings a little woodland afternoon home with it."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ выбирает шишку на тёплом лесном пятачке. Вместе с ней домой приходит кусочек лесного дня."
+          }
+        }
+      }
+    },
+    "%@ found an acorn tucked into a hollow root. Someone started a tiny pantry and forgot the address." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ found an acorn tucked into a hollow root. Someone started a tiny pantry and forgot the address."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ находит жёлудь в углублении корня. Кто-то устроил крошечную кладовую и забыл адрес."
+          }
+        }
+      }
+    },
+    "%@ paused under the trees with an acorn nearby. It is a small thing with a very patient plan to become a tree." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ paused under the trees with an acorn nearby. It is a small thing with a very patient plan to become a tree."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ отдыхает под деревьями рядом с жёлудем. Такой маленький, а терпеливо планирует стать целым деревом."
+          }
+        }
+      }
+    },
+    "%@ followed a leaf spinning down the path. One last dance, then a place in your collection." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ followed a leaf spinning down the path. One last dance, then a place in your collection."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ следует за листочком, который кружится над тропинкой. Последний танец — и место в твоей коллекции."
+          }
+        }
+      }
+    },
+    "%@ found a bright leaf on the shadowy path. A little window of autumn light to keep for another day." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ found a bright leaf on the shadowy path. A little window of autumn light to keep for another day."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ находит яркий лист на тенистой тропинке. Маленькое окошко осеннего света, которое можно сохранить."
+          }
+        }
+      }
+    },
+    "The garden gate is behind us. There is a sunny patch just ahead." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The garden gate is behind us. There is a sunny patch just ahead."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Калитка уже позади. Впереди — солнечный пятачок."
+          }
+        }
+      }
+    },
+    "Something rustles in the flower bed. A short pause to look closer." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something rustles in the flower bed. A short pause to look closer."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На клумбе что-то шуршит. Можно остановиться и рассмотреть поближе."
+          }
+        }
+      }
+    },
+    "There is a small surprise to bring home. The garden knows how to give presents." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There is a small surprise to bring home. The garden knows how to give presents."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для дома находится маленький сюрприз. Сад умеет делать подарки."
+          }
+        }
+      }
+    },
+    "A beetle crosses the path as if it knows a secret shortcut." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A beetle crosses the path as if it knows a secret shortcut."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Жук пересекает дорожку, будто знает тайный короткий путь."
+          }
+        }
+      }
+    },
+    "A low branch shakes in the breeze. There is something interesting underneath." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A low branch shakes in the breeze. There is something interesting underneath."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Низкая ветка качается от ветра. Под ней что-то интересное."
+          }
+        }
+      }
+    },
+    "The detour was worth it. A tiny keepsake is coming back with us." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The detour was worth it. A tiny keepsake is coming back with us."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Небольшой крюк того стоил. Домой отправится кое-что на память."
+          }
+        }
+      }
+    },
+    "The quiet side of the garden smells of grass and warm earth." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The quiet side of the garden smells of grass and warm earth."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На тихой стороне сада пахнет травой и тёплой землёй."
+          }
+        }
+      }
+    },
+    "A little rest beside the bench. The flowers sway without any hurry." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A little rest beside the bench. The flowers sway without any hurry."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Небольшой отдых у скамейки. Цветы покачиваются и никуда не спешат."
+          }
+        }
+      }
+    },
+    "One small thing will help remember this peaceful corner." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One small thing will help remember this peaceful corner."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Одна маленькая вещица поможет запомнить этот спокойный уголок."
+          }
+        }
+      }
+    },
+    "The sand is soft here. Little waves draw lines along the beach." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The sand is soft here. Little waves draw lines along the beach."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Здесь мягкий песок. Маленькие волны рисуют полоски вдоль берега."
+          }
+        }
+      }
+    },
+    "The water retreats, leaving a fresh row of pebbles to inspect." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The water retreats, leaving a fresh row of pebbles to inspect."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вода отступает, оставляя новый ряд камушков для осмотра."
+          }
+        }
+      }
+    },
+    "The shore has left something small enough to take home." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The shore has left something small enough to take home."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Берег оставляет кое-что совсем маленькое — как раз для дома."
+          }
+        }
+      }
+    },
+    "A trail of bubbles leads towards the reeds. It looks worth following." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A trail of bubbles leads towards the reeds. It looks worth following."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цепочка пузырьков ведёт к камышам. Интересно, что там дальше."
+          }
+        }
+      }
+    },
+    "There is a glint where a wave has just passed. Time for a closer look." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There is a glint where a wave has just passed. Time for a closer look."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Там, где только что прошла волна, что-то блестит. Стоит присмотреться."
+          }
+        }
+      }
+    },
+    "A little beach mystery is solved. Its souvenir can travel home." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A little beach mystery is solved. Its souvenir can travel home."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Маленькая загадка берега разгадана. Сувенир можно забрать домой."
+          }
+        }
+      }
+    },
+    "The waves make an unhurried rhythm. There is plenty of time to listen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The waves make an unhurried rhythm. There is plenty of time to listen."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Волны шумят неторопливо. Можно просто немного послушать."
+          }
+        }
+      }
+    },
+    "A sheltered patch beside the reeds makes a lovely resting place." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A sheltered patch beside the reeds makes a lovely resting place."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У камышей есть укромный уголок — хорошее место для передышки."
+          }
+        }
+      }
+    },
+    "A small keepsake will carry a little of this calm back to the island." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A small keepsake will carry a little of this calm back to the island."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Маленькая находка унесёт на остров немного этого спокойствия."
+          }
+        }
+      }
+    },
+    "The trees make a cool arch over the path. A woodland walk begins." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The trees make a cool arch over the path. A woodland walk begins."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Деревья образуют прохладную арку над тропинкой. Лесная прогулка начинается."
+          }
+        }
+      }
+    },
+    "There is a soft rustle near the roots. The ground has little secrets too." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There is a soft rustle near the roots. The ground has little secrets too."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Возле корней тихо шуршит. У земли тоже есть маленькие секреты."
+          }
+        }
+      }
+    },
+    "Something from this woodland corner is ready for the album." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something from this woodland corner is ready for the album."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кое-что из этого лесного уголка уже ждёт места в альбоме."
+          }
+        }
+      }
+    },
+    "A winding root looks almost like an arrow pointing into the grove." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A winding root looks almost like an arrow pointing into the grove."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Извилистый корень похож на стрелку, которая указывает в глубь рощи."
+          }
+        }
+      }
+    },
+    "Behind the fallen log, a patch of moss hides a tiny surprise." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Behind the fallen log, a patch of moss hides a tiny surprise."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "За поваленным бревном мох прячет крошечный сюрприз."
+          }
+        }
+      }
+    },
+    "A small discovery makes the winding path worth remembering." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A small discovery makes the winding path worth remembering."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "С маленькой находкой извилистая тропинка запомнится надолго."
+          }
+        }
+      }
+    },
+    "Light filters between the leaves. The grove feels especially quiet." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light filters between the leaves. The grove feels especially quiet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Свет просачивается между листьями. Сегодня в роще особенно тихо."
+          }
+        }
+      }
+    },
+    "A pause beside the mossy log. Even the leaves seem to whisper." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A pause beside the mossy log. Even the leaves seem to whisper."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Передышка у мшистого бревна. Кажется, даже листья говорят шёпотом."
+          }
+        }
+      }
+    },
+    "A little piece of the grove will keep this calm moment in the album." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A little piece of the grove will keep this calm moment in the album."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Маленький кусочек рощи сохранит эту тихую минуту в альбоме."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

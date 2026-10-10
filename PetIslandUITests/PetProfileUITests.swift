@@ -149,6 +149,84 @@ final class PetProfileUITests: XCTestCase {
         capture("Card — empty memories")
     }
 
+    func testPersonalStoriesAlbumKeepsEachVersionAndReopensTheSameStory() {
+        launch("-profile-stories", "-profile-route=album")
+        XCTAssertTrue(app.navigationBars["Finds album"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["4 of 12 treasures"].exists)
+        app.segmentedControls.buttons["Stories"].tap()
+        XCTAssertTrue(app.staticTexts["8 of 36 stories"].waitForExistence(timeout: 5))
+        let memories = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "discoveries.memory."))
+        let memory = memories.firstMatch
+        reveal(memory)
+        XCTAssertTrue(memory.label.contains("Пиксель"))
+        XCTAssertFalse(memories.matching(NSPredicate(format: "label CONTAINS %@", "Корги")).firstMatch.exists)
+        let identifier = memory.identifier
+        capture("Walks — personal stories album")
+        memory.tap()
+        XCTAssertTrue(app.navigationBars["Walk memory"].waitForExistence(timeout: 5))
+        let story = app.staticTexts["discoveries.story.text"]
+        XCTAssertTrue(story.waitForExistence(timeout: 5))
+        let originalText = story.label
+        XCTAssertTrue(originalText.contains("Пиксель"))
+        XCTAssertTrue(app.staticTexts["A curious detour"].exists)
+        capture("Walks — saved story")
+        let journal = app.buttons["Along the way"]
+        reveal(journal); journal.tap()
+        let first = app.descendants(matching: .any).matching(identifier: "discoveries.chapter.0").firstMatch
+        reveal(first)
+        XCTAssertTrue(first.label.contains("First steps"))
+        let last = app.descendants(matching: .any).matching(identifier: "discoveries.chapter.2").firstMatch
+        reveal(last)
+        capture("Walks — complete journal")
+        app.navigationBars["Walk memory"].buttons["Done"].tap()
+        app.buttons[identifier].tap()
+        XCTAssertTrue(story.waitForExistence(timeout: 5))
+        XCTAssertEqual(story.label, originalText)
+    }
+
+    func testActiveWalkShowsOnlyTheCurrentJournalChapter() {
+        launch("-profile-away", "-profile-route=walks")
+        XCTAssertTrue(app.navigationBars["Walks"].waitForExistence(timeout: 10))
+        capture("Walks — active shore")
+        let chapter = app.descendants(matching: .any).matching(identifier: "discoveries.chapter.0").firstMatch
+        reveal(chapter)
+        XCTAssertTrue(chapter.label.contains("First steps"))
+        XCTAssertFalse(app.descendants(matching: .any).matching(identifier: "discoveries.chapter.1").firstMatch.exists)
+        XCTAssertFalse(app.descendants(matching: .any).matching(identifier: "discoveries.chapter.2").firstMatch.exists)
+        XCTAssertFalse(app.buttons["discoveries.collect"].exists)
+        XCTAssertTrue(app.buttons["End walk"].exists)
+        capture("Walks — first note, no find spoiler")
+        app.buttons["End walk"].tap()
+        // The system confirmation can be a popover without a Cancel button.
+        app.coordinate(withNormalizedOffset: CGVector(dx: 0.9, dy: 0.2)).tap()
+        XCTAssertTrue(chapter.waitForExistence(timeout: 5))
+        XCTAssertEqual(app.buttons.matching(identifier: "End walk").count, 1)
+    }
+
+    func testRussianWalkStoryAndJournalRemainReachableWithLargeText() {
+        launch("-profile-ready", "-profile-stories", "-profile-route=walks", "-profile-russian", "-profile-light", "-profile-large")
+        let collect = app.buttons["discoveries.collect"]
+        XCTAssertTrue(collect.waitForExistence(timeout: 10))
+        reveal(collect); collect.tap()
+        let story = app.staticTexts["discoveries.story.text"]
+        XCTAssertTrue(story.waitForExistence(timeout: 5))
+        reveal(story)
+        XCTAssertTrue(story.label.contains("Пиксель"))
+        capture("Walks — Russian story, large text")
+        let journal = app.buttons["По дороге"]
+        reveal(journal); journal.tap()
+        let first = app.descendants(matching: .any).matching(identifier: "discoveries.chapter.0").firstMatch
+        reveal(first)
+        XCTAssertTrue(first.label.contains("Первые шаги"))
+        capture("Walks — Russian journal, large text")
+        let last = app.descendants(matching: .any).matching(identifier: "discoveries.chapter.2").firstMatch
+        reveal(last)
+        XCTAssertTrue(last.label.contains("Сюрприз для дома"))
+        let share = app.buttons["Поделиться воспоминанием"]
+        reveal(share)
+        XCTAssertTrue(share.isEnabled)
+    }
+
     func testQuietMomentIsFreeAndOnlyAppliesToTheOpenedPet() {
         launch("-profile-collection")
         let pet = app.buttons["pet.profile.CD000000-0000-0000-0000-000000000002"]

@@ -105,7 +105,7 @@ enum IslandBackupCodec {
     static let maximumBytes = 12 * 1_024 * 1_024
     private struct Envelope: Codable {
         var format = "org.bortongo.pet-island.backup"
-        var version = 2
+        var version = 3
         let payload: Data
         let checksum: String
     }
@@ -126,7 +126,7 @@ enum IslandBackupCodec {
             let decoder = JSONDecoder()
             let envelope = try decoder.decode(Envelope.self, from: data)
             guard envelope.format == "org.bortongo.pet-island.backup" else { throw IslandBackupError.invalid }
-            guard (1...2).contains(envelope.version) else { throw IslandBackupError.newerVersion }
+            guard (1...3).contains(envelope.version) else { throw IslandBackupError.newerVersion }
             guard envelope.checksum == digest(envelope.payload) else { throw IslandBackupError.invalid }
             // App decoders deliberately repair old internal saves. An imported
             // file must instead be complete: never silently replace missing pets.

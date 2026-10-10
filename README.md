@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 355 tests (345 unit and 10 UI tests), a Release build, and static analysis on October 10,
+> build passed 367 tests (354 unit and 13 UI tests), a Release build, and static analysis on October 10,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -96,7 +96,7 @@ Habits are descriptive and do not make other food or activities less useful.
 Friendship follows the pet's identity through renames, restarts and island backups.
 Older saves start with no friendship history; existing walk memories remain
 available for familiar paths. Old backup files still open. New copies use format
-version 2 so an older app cannot silently discard the new progress on import.
+version 3 so an older app cannot silently discard friendship or story variants on import.
 The feature adds no background work, animation loop or separate timer.
 
 ## Accessories and wardrobe
@@ -163,6 +163,21 @@ it, with no missed-day penalty. The **Finds album** saves each discovery with
 its pet, date, and a short story that can be shared as text. Progress stays on
 the device and survives app restarts. Walks do not change pet artwork,
 existing animation assets, care, or coins.
+
+Each find has **three stories**, for **36 stories** across the collection.
+The story is chosen and saved at departure, favouring variants not yet collected
+and avoiding the previous variant for that find. Reopening the app, collecting
+late, or retrying a failed save does not change it. Old memories keep their
+original text, and cancelled walks do not consume a find or story.
+
+The active walk shows a short **Along the way** note at the start, after 40%,
+and after 80% of the journey, without revealing the exact find. After collection,
+all three notes remain in a collapsed journal inside the memory. The album has
+separate **Treasures** and **Stories** sections, so stories no longer sit below
+the entire collection grid. A pet's personal album keeps only that companion's
+memories. Sharing includes the exact story shown. Notes use the existing minute
+countdown; no extra timer or background work is added. Island backups preserve
+the selected stories and still accept older format 1 and 2 files.
 
 The active walk now shows its own landscape inside the walks sheet: a garden with
 flowers and bushes, a shore with pebbles and reeds, or a grove with roots, mushrooms

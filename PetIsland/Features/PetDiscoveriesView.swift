@@ -52,7 +52,7 @@ private struct PetDiscoveriesContent: View {
                         .id(walk.id)
                         .padding(8)
                     Group {
-                        if scenePhase == .active, !walk.isReady(at: .now) {
+                        if scenePhase == .active, !showsAlbum, collectedMemory == nil, !showsCancelConfirmation, !walk.isReady(at: .now) {
                             // Only the countdown uses this slow timeline; the scene has its own visibility gate.
                             TimelineView(.periodic(from: walk.startedAt, by: 60)) { context in
                                 walkContent(walk, at: context.date)
@@ -148,6 +148,14 @@ private struct PetDiscoveriesContent: View {
                     .foregroundStyle(PetDesign.secondary)
                     .frame(minHeight: 44)
                     .disabled(controller.isBusy)
+            }
+            if let story = walk.story, let latest = walk.journalChapters(at: now).last {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Along the way").font(.subheadline.weight(.semibold))
+                    PetWalkJournal(route: walk.route, story: story, chapters: [latest])
+                }
+                .padding(16)
+                .background(PetDesign.soft, in: RoundedRectangle(cornerRadius: 16))
             }
         }
     }
@@ -316,10 +324,11 @@ struct PetDiscoveriesAlbum: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var selectedMemory: PetDiscoveryMemory?
+    @State private var showsStories = false
 
     private var newestMemories: [PetDiscoveryMemory] {
         controller.discoveries.memories.filter { petID == nil || $0.pet.id == petID }
-            .sorted { $0.foundAt > $1.foundAt }
+            .sorted { $0.foundAt == $1.foundAt ? $0.id.uuidString < $1.id.uuidString : $0.foundAt > $1.foundAt }
     }
 
     var body: some View {
@@ -339,15 +348,25 @@ struct PetDiscoveriesAlbum: View {
                                 .padding(.top, 3)
                         }
                     }
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 260 : 135), spacing: 12)], spacing: 12) {
-                        ForEach(PetDiscoveryKind.allCases, id: \.self) { kind in
-                            treasureTile(kind)
-                        }
+                    Picker("Album section", selection: $showsStories) {
+                        Text("Treasures").tag(false)
+                        Text("Stories").tag(true)
                     }
-                    if !newestMemories.isEmpty {
-                        Text("Walk memories")
+                    .pickerStyle(.segmented)
+                    .accessibilityIdentifier("discoveries.album.section")
+                    if !showsStories {
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: dynamicTypeSize.isAccessibilitySize ? 260 : 135), spacing: 12)], spacing: 12) {
+                            ForEach(PetDiscoveryKind.allCases, id: \.self) { kind in
+                                treasureTile(kind)
+                            }
+                        }
+                    } else {
+                        Text("\(Set(newestMemories.map(\.storyID)).count) of \(PetDiscoveryKind.allCases.count * PetWalkStory.allCases.count) stories")
                             .font(PetDesign.title(.title3))
                             .accessibilityAddTraits(.isHeader)
+                        Text(newestMemories.isEmpty ? "Your first walk story is still ahead."
+                             : "The same find can bring a different story. New stories wait on familiar paths." as LocalizedStringKey)
+                            .font(.subheadline).foregroundStyle(PetDesign.secondary)
                         ForEach(newestMemories) { memory in
                             Button { selectedMemory = memory } label: {
                                 HStack(alignment: .top, spacing: 14) {
@@ -355,6 +374,8 @@ struct PetDiscoveriesAlbum: View {
                                     VStack(alignment: .leading, spacing: 5) {
                                         Text(memory.discovery.discoveryTitle).font(.headline)
                                         Text(memory.pet.name).font(.subheadline)
+                                        Text((memory.story ?? .original).title)
+                                            .font(.caption).foregroundStyle(PetDesign.secondary)
                                         Text(memory.foundAt, format: .dateTime.day().month().year())
                                             .font(.caption)
                                             .foregroundStyle(PetDesign.secondary)
@@ -369,6 +390,7 @@ struct PetDiscoveriesAlbum: View {
                                 .petSurface(radius: 20)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityIdentifier("discoveries.memory.\(memory.id.uuidString)")
                         }
                     }
                 }
@@ -443,12 +465,24 @@ struct PetDiscoveryMemoryView: View {
                         Text(memory.discovery.discoveryTitle)
                             .font(PetDesign.title(.largeTitle))
                             .fixedSize(horizontal: false, vertical: true)
-                        Text(memory.discovery.discoveryStory(petName: memory.pet.name))
+                        if let story = memory.story {
+                            Text(story.title).font(.subheadline).foregroundStyle(PetDesign.secondary)
+                        }
+                        Text(memory.storyText)
                             .font(.body)
                             .lineSpacing(5)
                             .fixedSize(horizontal: false, vertical: true)
+                            .accessibilityIdentifier("discoveries.story.text")
                     }
                     .multilineTextAlignment(.center)
+                    if let story = memory.story {
+                        DisclosureGroup("Along the way") {
+                            PetWalkJournal(route: memory.route, story: story, chapters: PetWalkChapter.allCases)
+                                .padding(.top, 14)
+                        }
+                        .font(.subheadline.weight(.medium))
+                        .padding(18).petSurface(radius: 20)
+                    }
                     VStack(spacing: 6) {
                         DiscoveryPetPortrait(pet: memory.pet)
                             .frame(width: 100, height: 80)
@@ -466,7 +500,7 @@ struct PetDiscoveryMemoryView: View {
                             .font(.subheadline)
                             .foregroundStyle(PetDesign.secondary)
                     }
-                    ShareLink(item: "\(memory.discovery.discoveryTitle)\n\(memory.discovery.discoveryStory(petName: memory.pet.name))") {
+                    ShareLink(item: memory.shareText) {
                         Label("Share a memory", systemImage: "square.and.arrow.up")
                     }
                     .buttonStyle(PetQuietButtonStyle())

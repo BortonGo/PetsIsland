@@ -41,6 +41,24 @@ enum PetDiscoveryKind: String, Codable, CaseIterable, Identifiable, Hashable, Se
     var id: String { rawValue }
 }
 
+/// Saved at departure; reopening or returning later never rerolls a story.
+enum PetWalkStory: Int, Codable, CaseIterable, Hashable, Sendable {
+    case original, curious, quiet
+}
+
+enum PetWalkChapter: Int, CaseIterable, Identifiable, Sendable {
+    case settingOut, exploring, homeward
+    var id: Int { rawValue }
+    var progress: Double {
+        switch self { case .settingOut: 0; case .exploring: 0.4; case .homeward: 0.8 }
+    }
+}
+
+struct PetDiscoveryStoryID: Hashable {
+    let discovery: PetDiscoveryKind
+    let story: PetWalkStory
+}
+
 /// A walk is independent of the animation and Live Activity session. Keeping
 /// the companion as a value also preserves memories after a rename or removal.
 struct PetDiscoveryWalk: Codable, Equatable, Identifiable, Sendable {
@@ -50,6 +68,8 @@ struct PetDiscoveryWalk: Codable, Equatable, Identifiable, Sendable {
     let startedAt: Date
     let endsAt: Date
     let discovery: PetDiscoveryKind
+    /// nil keeps the original story and no journal for old saves.
+    let story: PetWalkStory?
 
     init?(
         id: UUID = UUID(),
@@ -57,7 +77,8 @@ struct PetDiscoveryWalk: Codable, Equatable, Identifiable, Sendable {
         route: PetWalkRoute,
         startedAt: Date,
         endsAt: Date,
-        discovery: PetDiscoveryKind
+        discovery: PetDiscoveryKind,
+        story: PetWalkStory? = nil
     ) {
         guard startedAt.timeIntervalSinceReferenceDate.isFinite,
               endsAt.timeIntervalSinceReferenceDate.isFinite,
@@ -70,6 +91,7 @@ struct PetDiscoveryWalk: Codable, Equatable, Identifiable, Sendable {
         self.startedAt = startedAt
         self.endsAt = endsAt
         self.discovery = discovery
+        self.story = story
     }
 
     func isReady(at date: Date) -> Bool {
@@ -82,8 +104,13 @@ struct PetDiscoveryWalk: Codable, Equatable, Identifiable, Sendable {
         return date.timeIntervalSince(startedAt) / endsAt.timeIntervalSince(startedAt)
     }
 
+    func journalChapters(at date: Date) -> [PetWalkChapter] {
+        guard story != nil, date.timeIntervalSinceReferenceDate.isFinite, date >= startedAt else { return [] }
+        return PetWalkChapter.allCases.filter { progress(at: date) >= $0.progress }
+    }
+
     private enum CodingKeys: String, CodingKey {
-        case id, pet, route, startedAt, endsAt, discovery
+        case id, pet, route, startedAt, endsAt, discovery, story
     }
 
     init(from decoder: Decoder) throws {
@@ -94,8 +121,9 @@ struct PetDiscoveryWalk: Codable, Equatable, Identifiable, Sendable {
         let startedAt = try values.decode(Date.self, forKey: .startedAt)
         let endsAt = try values.decode(Date.self, forKey: .endsAt)
         let discovery = try values.decode(PetDiscoveryKind.self, forKey: .discovery)
+        let story = try values.decodeIfPresent(PetWalkStory.self, forKey: .story)
         guard let walk = Self(id: id, pet: pet, route: route, startedAt: startedAt,
-                              endsAt: endsAt, discovery: discovery) else {
+                              endsAt: endsAt, discovery: discovery, story: story) else {
             throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath,
                                                     debugDescription: "Invalid discovery walk"))
         }
@@ -110,6 +138,9 @@ struct PetDiscoveryMemory: Codable, Equatable, Identifiable, Sendable {
     let discovery: PetDiscoveryKind
     /// The planned return, so opening the app later never changes the memory.
     let foundAt: Date
+    let story: PetWalkStory?
+
+    var storyID: PetDiscoveryStoryID { PetDiscoveryStoryID(discovery: discovery, story: story ?? .original) }
 
     init(walk: PetDiscoveryWalk) {
         id = walk.id
@@ -117,10 +148,11 @@ struct PetDiscoveryMemory: Codable, Equatable, Identifiable, Sendable {
         route = walk.route
         discovery = walk.discovery
         foundAt = walk.endsAt
+        story = walk.story
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, pet, route, discovery, foundAt
+        case id, pet, route, discovery, foundAt, story
     }
 
     init(from decoder: Decoder) throws {
@@ -130,6 +162,7 @@ struct PetDiscoveryMemory: Codable, Equatable, Identifiable, Sendable {
         route = try values.decode(PetWalkRoute.self, forKey: .route)
         discovery = try values.decode(PetDiscoveryKind.self, forKey: .discovery)
         foundAt = try values.decode(Date.self, forKey: .foundAt)
+        story = try values.decodeIfPresent(PetWalkStory.self, forKey: .story)
         guard foundAt.timeIntervalSinceReferenceDate.isFinite,
               route.discoveryIDs.contains(discovery) else {
             throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath,
@@ -157,9 +190,16 @@ struct PetDiscoveriesState: Codable, Equatable, Sendable {
         let discovered = discoveredKinds
         let discovery = options.first { !discovered.contains($0) }
             ?? options[completedOnRoute % options.count]
+        let earlier = memories.filter { $0.discovery == discovery }
+        let lastStory = earlier.last.map { $0.story ?? .original }
+        let counts = Dictionary(grouping: earlier, by: { $0.story ?? .original }).mapValues(\.count)
+        let story = PetWalkStory.allCases.filter { $0 != lastStory }.min {
+            let left = counts[$0, default: 0], right = counts[$1, default: 0]
+            return left == right ? $0.rawValue < $1.rawValue : left < right
+        } ?? .original
         guard let walk = PetDiscoveryWalk(pet: pet, route: route, startedAt: date,
                                           endsAt: date.addingTimeInterval(route.duration),
-                                          discovery: discovery) else { return false }
+                                          discovery: discovery, story: story) else { return false }
         activeWalk = walk
         return true
     }

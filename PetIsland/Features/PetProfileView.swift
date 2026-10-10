@@ -41,6 +41,16 @@ struct PetProfileDebugHostView: View {
             state.discoveries.startWalk(pet: pet, route: .garden, at: .now.addingTimeInterval(-86400))
             state.discoveries.collectWalk(at: .now)
         }
+        if args.contains("-profile-stories") {
+            state.discoveries = PetDiscoveriesState()
+            for day in 0..<8 {
+                let start = Date.now.addingTimeInterval(Double(day - 12) * 86400)
+                state.discoveries.startWalk(pet: pet, route: .garden, at: start)
+                state.discoveries.collectWalk(at: start.addingTimeInterval(3600))
+            }
+            state.discoveries.startWalk(pet: lead, route: .grove, at: .now.addingTimeInterval(-7200))
+            state.discoveries.collectWalk(at: .now)
+        }
         if args.contains("-profile-away") || args.contains("-profile-ready") {
             state.discoveries.startWalk(pet: pet, route: .shore,
                                        at: .now.addingTimeInterval(args.contains("-profile-ready") ? -3600 : -300))
