@@ -15,7 +15,8 @@ final class PetProfileUITests: XCTestCase {
     override func tearDownWithError() throws { app?.terminate() }
 
     private func launch(_ arguments: String...) {
-        app.launchArguments = ["-pet-profile-preview", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"] + arguments
+        let russian = arguments.contains("-profile-russian")
+        app.launchArguments = ["-pet-profile-preview", "-AppleLanguages", russian ? "(ru)" : "(en)", "-AppleLocale", russian ? "ru_RU" : "en_US"] + arguments
         if arguments.contains("-profile-large") {
             app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXL"]
         }
@@ -146,6 +147,61 @@ final class PetProfileUITests: XCTestCase {
         let empty = app.staticTexts["Your first shared memory is still ahead. Bring back a find from a walk."]
         reveal(empty)
         capture("Card — empty memories")
+    }
+
+    func testQuietMomentIsFreeAndOnlyAppliesToTheOpenedPet() {
+        launch("-profile-collection")
+        let pet = app.buttons["pet.profile.CD000000-0000-0000-0000-000000000002"]
+        XCTAssertTrue(pet.waitForExistence(timeout: 10))
+        pet.tap()
+        let attention = app.buttons["profile.bond.attention"]
+        reveal(attention)
+        XCTAssertTrue(attention.isEnabled)
+        attention.tap()
+        XCTAssertTrue(app.staticTexts["profile.bond.feedback"].waitForExistence(timeout: 5))
+        XCTAssertFalse(attention.isEnabled)
+        capture("Friendship — first moment")
+        reveal(app.staticTexts["profile.stock.food"])
+        XCTAssertEqual(app.staticTexts["profile.stock.food"].label, "In stock: 3")
+        app.navigationBars["Pet card"].buttons["Done"].tap()
+        app.buttons["pet.profile.CD000000-0000-0000-0000-000000000001"].tap()
+        reveal(attention)
+        XCTAssertTrue(attention.isEnabled)
+        app.navigationBars["Pet card"].buttons["Done"].tap()
+        pet.tap()
+        reveal(attention)
+        XCTAssertFalse(attention.isEnabled)
+    }
+
+    func testFriendshipHabitsRemainReadableWithLargeTextAndAwayPet() {
+        launch("-profile-bond", "-profile-away", "-profile-light", "-profile-large")
+        XCTAssertTrue(app.navigationBars["Pet card"].waitForExistence(timeout: 10))
+        let attention = app.buttons["profile.bond.attention"]
+        reveal(attention)
+        XCTAssertFalse(attention.isEnabled)
+        XCTAssertEqual(app.staticTexts["profile.bond.stage"].label, "Trusted friend")
+        let habits = app.buttons["profile.bond.habits"]
+        reveal(habits); habits.tap()
+        let game = app.staticTexts["Bubble Paws"]
+        reveal(game)
+        capture("Friendship — habits, large text")
+        let explanation = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@", "Attention, useful care")).firstMatch
+        reveal(explanation)
+        capture("Friendship — no missed-day penalty")
+    }
+
+    func testRussianFriendshipShowsLocalizedActionAndFeedback() {
+        launch("-profile-russian")
+        let attention = app.buttons["profile.bond.attention"]
+        XCTAssertTrue(attention.waitForExistence(timeout: 10))
+        reveal(attention)
+        XCTAssertTrue(attention.label.contains("Побыть рядом"))
+        XCTAssertEqual(app.staticTexts["profile.bond.stage"].label, "Знакомитесь")
+        attention.tap()
+        XCTAssertTrue(app.staticTexts["profile.bond.feedback"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["profile.bond.feedback"].label, "Пиксель радуется, что ты рядом.")
+        XCTAssertTrue(attention.label.contains("Вы побыли рядом"))
+        capture("Friendship — Russian")
     }
 
     func testBackupPreviewCancellationKeepsCurrentPetWithLargeText() {

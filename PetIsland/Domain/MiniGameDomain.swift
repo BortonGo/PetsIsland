@@ -199,6 +199,7 @@ struct ArcadeState: Codable, Equatable, Sendable {
     var pendingCareEvents: [PetCareEvent] = []
     var completedRuns: [CompletedArcadeRun] = []
     var bubblePawsRuns: [BubblePawsCheckpoint] = []
+    var bondsByPetID: [UUID: PetBond] = [:]
 
     init(
         progress: ArcadeProgress = ArcadeProgress(),
@@ -213,6 +214,7 @@ struct ArcadeState: Codable, Equatable, Sendable {
         let petIDs = Set(pets.map(\.id))
         vitalsByPetID = vitalsByPetID.filter { petIDs.contains($0.key) }
         vitalsUpdatedAtByPetID = vitalsUpdatedAtByPetID.filter { petIDs.contains($0.key) }
+        bondsByPetID = bondsByPetID.filter { petIDs.contains($0.key) }
         let completedIDs = Set(completedRuns.map(\.id))
         var seenPets: Set<UUID> = []
         bubblePawsRuns = bubblePawsRuns.filter {
@@ -236,7 +238,7 @@ struct ArcadeState: Codable, Equatable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case schemaVersion, progress, vitalsByPetID, vitalsUpdatedAtByPetID, pendingCareEvents, completedRuns, bubblePawsRuns
+        case schemaVersion, progress, vitalsByPetID, vitalsUpdatedAtByPetID, pendingCareEvents, completedRuns, bubblePawsRuns, bondsByPetID
     }
 
     init(from decoder: Decoder) throws {
@@ -246,6 +248,8 @@ struct ArcadeState: Codable, Equatable, Sendable {
         // A damaged optional game must never prevent loading pets, coins or care.
         let checkpoints = (try? values.decode([DecodedBubbleCheckpoint].self, forKey: .bubblePawsRuns)) ?? []
         bubblePawsRuns = checkpoints.compactMap(\.value).filter(\.isValid)
+        // Optional new progress must not make an older collection unreadable.
+        bondsByPetID = try values.decodeIfPresent([UUID: PetBond].self, forKey: .bondsByPetID) ?? [:]
         schemaVersion = Self.schemaVersion
         progress = try values.decodeIfPresent(ArcadeProgress.self, forKey: .progress) ?? ArcadeProgress()
         vitalsByPetID = try values.decodeIfPresent([UUID: PetVitals].self, forKey: .vitalsByPetID) ?? [:]

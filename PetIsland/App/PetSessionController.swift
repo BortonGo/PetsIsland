@@ -487,6 +487,28 @@ final class PetSessionController: ObservableObject {
             from: arcadeState.vitalsUpdatedAtByPetID[petID] ?? .distantPast, to: date)
     }
 
+    func bond(for petID: UUID) -> PetBond {
+        arcadeState.bondsByPetID[petID] ?? PetBond()
+    }
+
+    func canSharePetMoment(with petID: UUID, at date: Date = .now) -> Bool {
+        didBootstrap && !isBusy && pets.contains { $0.id == petID }
+            && !isPetOnDiscoveryWalk(petID, at: date) && bond(for: petID).canShare(.attention, at: date)
+    }
+
+    @discardableResult
+    func sharePetMoment(with petID: UUID, at date: Date = .now) async -> Bool {
+        guard canSharePetMoment(with: petID, at: date) else { return false }
+        await beginSave()
+        defer { finishSave() }
+        guard state.pets.contains(where: { $0.id == petID }), !isPetOnDiscoveryWalk(petID, at: date) else { return false }
+        var candidate = arcadeState
+        guard candidate.bondsByPetID[petID, default: PetBond()].shareAttention(at: date),
+              await commitArcade(candidate) else { return false }
+        Haptics.success(enabled: settings.hapticsEnabled)
+        return true
+    }
+
     /// A read-only snapshot keyed by identity, never by the currently selected lead.
     func profileOverview(for petID: UUID, at date: Date = .now) -> PetProfileOverview? {
         guard let pet = pets.first(where: { $0.id == petID }) else { return nil }
@@ -523,6 +545,9 @@ final class PetSessionController: ObservableObject {
         candidate.vitalsUpdatedAtByPetID[petID] = date
         candidate.pendingCareEvents.append(event)
         candidate.completedRuns.append(CompletedArcadeRun(id: runID, payout: payout))
+        if score > 0 {
+            candidate.bondsByPetID[petID, default: PetBond()].recordGame(game, at: date)
+        }
         candidate.completedRuns = Array(candidate.completedRuns.suffix(128))
         if game == .bubblePaws {
             candidate.bubblePawsRuns.removeAll { $0.petID == petID && $0.runID == runID }
@@ -624,6 +649,7 @@ final class PetSessionController: ObservableObject {
         candidate.vitalsByPetID[petID] = event.applying(to: vitals(for: petID))
         candidate.vitalsUpdatedAtByPetID[petID] = event.date
         candidate.pendingCareEvents.append(event)
+        candidate.bondsByPetID[petID, default: PetBond()].recordCare(item, at: event.date)
         guard await commitArcade(candidate) else { return false }
         _ = await flushCareEvents()
         Haptics.success(enabled: settings.hapticsEnabled)

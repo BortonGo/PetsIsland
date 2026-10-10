@@ -71,6 +71,8 @@ struct IslandBackup: Codable, Equatable, Identifiable, Sendable {
             }
         }
         guard Set(arcade.vitalsByPetID.keys).isSubset(of: ids),
+              Set(arcade.bondsByPetID.keys).isSubset(of: ids),
+              arcade.bondsByPetID.values.allSatisfy(\.isValid),
               Set(arcade.vitalsUpdatedAtByPetID.keys).isSubset(of: ids),
               arcade.vitalsByPetID.values.allSatisfy({ [$0.fullness, $0.happiness, $0.energy].allSatisfy { $0.isFinite && (0...1).contains($0) } }),
               habitat.leadDynamicIslandPetID == nil,
@@ -103,7 +105,7 @@ enum IslandBackupCodec {
     static let maximumBytes = 12 * 1_024 * 1_024
     private struct Envelope: Codable {
         var format = "org.bortongo.pet-island.backup"
-        var version = 1
+        var version = 2
         let payload: Data
         let checksum: String
     }
@@ -124,7 +126,7 @@ enum IslandBackupCodec {
             let decoder = JSONDecoder()
             let envelope = try decoder.decode(Envelope.self, from: data)
             guard envelope.format == "org.bortongo.pet-island.backup" else { throw IslandBackupError.invalid }
-            guard envelope.version == 1 else { throw IslandBackupError.newerVersion }
+            guard (1...2).contains(envelope.version) else { throw IslandBackupError.newerVersion }
             guard envelope.checksum == digest(envelope.payload) else { throw IslandBackupError.invalid }
             // App decoders deliberately repair old internal saves. An imported
             // file must instead be complete: never silently replace missing pets.
@@ -156,6 +158,7 @@ enum IslandBackupCodec {
                   habitat["schemaVersion"] as? Int == PetHabitatState.currentSchemaVersion
             else { throw IslandBackupError.newerVersion }
             let result = try decoder.decode(IslandBackup.self, from: envelope.payload)
+            if envelope.version >= 2, arcade["bondsByPetID"] == nil { throw IslandBackupError.invalid }
             guard result.app.pets.count == pets.count, result.app.activePetIDs.count == activeIDs.count,
                   result.arcade.bubblePawsRuns.count == runs.count,
                   result.habitat.residentPetIDs.count == residents.count,

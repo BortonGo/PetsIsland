@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 341 tests (334 unit and 7 UI tests), a Release build, and static analysis on October 10,
+> build passed 355 tests (345 unit and 10 UI tests), a Release build, and static analysis on October 10,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -76,6 +76,28 @@ The collection contains **20 visual variants across six species**:
   <img src="Docs/Media/colorful-meadow-light.png" width="240" alt="Sunny meadow enclosure">
   <img src="Docs/Media/colorful-night-dark.png" width="240" alt="Starry night enclosure">
 </p>
+
+## Friendship and little habits
+
+Open **Pets → your pet → Your friendship** (**Ваша дружба**) to share a free
+quiet moment. Each companion has its own lasting friendship, from getting
+acquainted to becoming inseparable. Attention, useful care inside the app, and
+finishing an arcade game with a positive score each add one moment per local
+calendar day. Repeated taps and failed saves add nothing. There is no streak,
+decay, coin cost, or penalty for time away; pets on a walk can be greeted after
+they return. This progression does not change vitals, art, gaits or DI behaviour.
+
+**Little habits** stays collapsed until opened. It reveals familiar care, games
+and walking routes from actual shared activities. Care and games count the first
+successful choice of each day; routes use that pet's collected walk memories.
+A favourite needs at least three repeats and a clear lead over other choices.
+Habits are descriptive and do not make other food or activities less useful.
+
+Friendship follows the pet's identity through renames, restarts and island backups.
+Older saves start with no friendship history; existing walk memories remain
+available for familiar paths. Old backup files still open. New copies use format
+version 2 so an older app cannot silently discard the new progress on import.
+The feature adds no background work, animation loop or separate timer.
 
 ## Accessories and wardrobe
 
@@ -235,7 +257,7 @@ can be restored at any time.
 
 Open **Settings → Island backup** (**Настройки → Копия острова**) to save one
 JSON file through the system Files picker. It includes pets and their outfits,
-coins, supplies, purchases, enclosure layout, settings, finds, the current walk,
+coins, supplies, purchases, friendship, habits, enclosure layout, settings, finds, the current walk,
 records and unfinished Bubble Paws games. Keep the exported file outside the app
 to transfer the island to another device or recover after reinstalling.
 
@@ -374,7 +396,7 @@ remain pending.
 ## Tests and validation
 
 The **PetIslandUITests** target exercises the collection-to-card flow, care stock
-updates, the selected companion in the shop and walks, return/collection, backup
+updates, per-pet friendship and large-text habits, the selected companion in the shop and walks, return/collection, backup
 export/import through Files, restore confirmation and cancellation, and large text
 layouts. These tests use in-memory fixtures and run only in Simulator.
 Their screenshots are attached to the Xcode test results.
@@ -439,8 +461,8 @@ Tools/                    Resource validation and automated build checks
 ## Further development
 
 The next focus is device testing and polishing the existing pet, enclosure, and
-arcade experience. Pet habits, cozy objects, illustrated postcards, and a future
-way to support the author are ideas for later, not current features.
+arcade experience. Richer discoveries, illustrated postcards, shared pet scenes
+and a future way to support the author are ideas for later, not current features.
 
 ## License
 

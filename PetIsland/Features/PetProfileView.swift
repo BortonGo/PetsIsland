@@ -49,8 +49,16 @@ struct PetProfileDebugHostView: View {
         if !args.contains("-profile-empty") {
             inventory.add(.food, count: 3); inventory.add(.treat, count: 2); inventory.add(.toy)
         }
-        let arcade = ArcadeState(progress: ArcadeProgress(coins: 120, inventory: inventory, ownedAccessories: [.knitHat]),
+        var arcade = ArcadeState(progress: ArcadeProgress(coins: 120, inventory: inventory, ownedAccessories: [.knitHat]),
                                  vitalsByPetID: [pet.id: PetVitals(fullness: 0.65, happiness: 0.82, energy: 0.72)])
+        if args.contains("-profile-bond") {
+            for daysAgo in (1...6).reversed() {
+                let date = Calendar.current.date(byAdding: .day, value: -daysAgo, to: .now)!
+                arcade.bondsByPetID[pet.id, default: PetBond()].shareAttention(at: date)
+                arcade.bondsByPetID[pet.id, default: PetBond()].recordCare(.toy, at: date)
+                arcade.bondsByPetID[pet.id, default: PetBond()].recordGame(.bubblePaws, at: date)
+            }
+        }
         var recoveryData: Data?
         backupFixture = args.contains("-profile-backup")
             ? IslandBackup(app: state, arcade: arcade, habitat: PetHabitatState(residentPetIDs: state.pets.map(\.id))) : nil
@@ -167,6 +175,7 @@ struct PetProfileView: View {
             VStack(spacing: 20) {
                 portrait(overview)
                 vitals(overview.vitals)
+                PetBondView(controller: controller, overview: overview, date: date)
                 care(overview.pet)
                 destinations(overview)
                 memories(overview.memories)

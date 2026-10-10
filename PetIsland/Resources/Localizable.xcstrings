@@ -9981,6 +9981,346 @@
           }
         }
       }
+    },
+    "Your friendship" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your friendship"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваша дружба"
+          }
+        }
+      }
+    },
+    "Spend time together" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spend time together"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Побыть рядом"
+          }
+        }
+      }
+    },
+    "A little moment together" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A little moment together"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы побыли рядом"
+          }
+        }
+      }
+    },
+    "%@ is happy to have you close." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is happy to have you close."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ радуется, что ты рядом."
+          }
+        }
+      }
+    },
+    "A quiet moment will be waiting after the walk." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A quiet moment will be waiting after the walk."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Можно побыть рядом, когда питомец вернётся с прогулки."
+          }
+        }
+      }
+    },
+    "Shared favourites appear as you spend time together." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shared favourites appear as you spend time together."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Любимые занятия проявятся, когда вы проведёте больше времени вместе."
+          }
+        }
+      }
+    },
+    "A familiar ritual" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A familiar ritual"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Привычный ритуал"
+          }
+        }
+      }
+    },
+    "Often played together" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Often played together"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Часто играете вместе"
+          }
+        }
+      }
+    },
+    "A familiar path" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A familiar path"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Знакомая тропинка"
+          }
+        }
+      }
+    },
+    "Attention, useful care and finishing a game with points each bring you closer once a day. Time away never reduces your friendship." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attention, useful care and finishing a game with points each bring you closer once a day. Time away never reduces your friendship."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Внимание, полезная забота и игра с набранными очками сближают вас — каждый вид занятия раз в день. Пропуски не отнимают дружбу."
+          }
+        }
+      }
+    },
+    "Rituals and games count your first shared choice of the day. A favourite appears after at least three repeats; equal favourites stay undecided." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rituals and games count your first shared choice of the day. A favourite appears after at least three repeats; equal favourites stay undecided."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для ритуалов и игр учитывается первый выбор за день. Любимое занятие появится после трёх повторений, если его выбирали чаще остальных."
+          }
+        }
+      }
+    },
+    "Little habits" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Little habits"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Маленькие привычки"
+          }
+        }
+      }
+    },
+    "Getting acquainted" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Getting acquainted"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Знакомитесь"
+          }
+        }
+      }
+    },
+    "Growing closer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Growing closer"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Становитесь ближе"
+          }
+        }
+      }
+    },
+    "Trusted friend" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trusted friend"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доверяет тебе"
+          }
+        }
+      }
+    },
+    "Inseparable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inseparable"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Неразлучные друзья"
+          }
+        }
+      }
+    },
+    "Every little moment helps you get to know each other." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every little moment helps you get to know each other."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Маленькие моменты вместе помогают узнать друг друга."
+          }
+        }
+      }
+    },
+    "Your shared moments are becoming a lovely habit." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your shared moments are becoming a lovely habit."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Время вместе становится доброй привычкой."
+          }
+        }
+      }
+    },
+    "There is comfort in your company." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "There is comfort in your company."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рядом с тобой спокойно и уютно."
+          }
+        }
+      }
+    },
+    "A familiar friend, always happy to see you." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A familiar friend, always happy to see you."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Старый друг, который всегда рад встрече."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
