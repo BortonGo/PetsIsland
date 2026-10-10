@@ -76,6 +76,9 @@
 		ACCF00000000000000000601 /* PetOutfitFonts in Resources */ = {isa = PBXBuildFile; fileRef = ACCE00000000000000000006 /* PetOutfitFonts */; };
 		ACCF00000000000000000701 /* PetOutfits in Resources */ = {isa = PBXBuildFile; fileRef = ACCE00000000000000000007 /* PetOutfits */; };
 		ACCF00000000000000000500 /* PetAccessoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACCE00000000000000000005 /* PetAccessoryTests.swift */; };
+		BACC10000000000000000001 /* IslandBackup.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACC20000000000000000001 /* IslandBackup.swift */; };
+		BACC10000000000000000002 /* IslandBackupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACC20000000000000000002 /* IslandBackupView.swift */; };
+		BACC10000000000000000003 /* IslandBackupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BACC20000000000000000003 /* IslandBackupTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -175,6 +178,9 @@
 		ACCE00000000000000000006 /* PetOutfitFonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PetOutfitFonts; sourceTree = "<group>"; };
 		ACCE00000000000000000007 /* PetOutfits */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PetOutfits; sourceTree = "<group>"; };
 		ACCE00000000000000000005 /* PetAccessoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetAccessoryTests.swift; sourceTree = "<group>"; };
+		BACC20000000000000000001 /* IslandBackup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IslandBackup.swift; sourceTree = "<group>"; };
+		BACC20000000000000000002 /* IslandBackupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IslandBackupView.swift; sourceTree = "<group>"; };
+		BACC20000000000000000003 /* IslandBackupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IslandBackupTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -300,7 +306,7 @@
 		};
 		D60000000000000000000002 /* Data */ = {
 			isa = PBXGroup;
-			children = (D20000000000000000000002 /* PetStore.swift */, );
+			children = (D20000000000000000000002 /* PetStore.swift */, BACC20000000000000000001 /* IslandBackup.swift */, );
 			path = Data;
 			sourceTree = "<group>";
 		};
@@ -308,6 +314,7 @@
 			isa = PBXGroup;
 			children = (
 				ACCE00000000000000000002 /* PetWardrobeView.swift */,
+				BACC20000000000000000002 /* IslandBackupView.swift */,
 				ACCD20000000000000000001 /* PetProfileView.swift */,
 				E20000000000000000000001 /* PetDesign.swift */,
 				D20000000000000000000004 /* HomeView.swift */,
@@ -334,6 +341,7 @@
 			children = (
 				ACCE00000000000000000005 /* PetAccessoryTests.swift */,
 				T20000000000000000000001 /* PetDomainTests.swift */,
+				BACC20000000000000000003 /* IslandBackupTests.swift */,
 				C20000000000000000000003 /* PetDiscoveriesTests.swift */,
 				F20000000000000000000026 /* PetDiscoverySceneTests.swift */,
 				C20000000000000000000004 /* PetDiscoveryControllerTests.swift */,
@@ -514,6 +522,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BACC10000000000000000002 /* IslandBackupView.swift in Sources */,
+				BACC10000000000000000001 /* IslandBackup.swift in Sources */,
 				ACCF00000000000000000200 /* PetWardrobeView.swift in Sources */,
 				ACCD10000000000000000001 /* PetProfileView.swift in Sources */,
 				ACCF00000000000000000100 /* PetAccessories.swift in Sources */,
@@ -572,6 +582,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BACC10000000000000000003 /* IslandBackupTests.swift in Sources */,
 				ACCF00000000000000000500 /* PetAccessoryTests.swift in Sources */,
 				T10000000000000000000001 /* PetDomainTests.swift in Sources */,
 				C10000000000000000000004 /* PetDiscoveriesTests.swift in Sources */,

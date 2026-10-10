@@ -9556,6 +9556,431 @@
           }
         }
       }
+    },
+    "An automatic copy of your current island will be kept before anything is replaced." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "An automatic copy of your current island will be kept before anything is replaced."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перед заменой будет автоматически сохранена копия текущего острова."
+          }
+        }
+      }
+    },
+    "Backup contents" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup contents"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что в копии"
+          }
+        }
+      }
+    },
+    "Backup saved." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backup saved."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Копия сохранена."
+          }
+        }
+      }
+    },
+    "Backups stay where you save them. Pet Island does not upload them to a server. Live Activities and the app icon stay on this device." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Backups stay where you save them. Pet Island does not upload them to a server. Live Activities and the app icon stay on this device."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Копии остаются там, где ты их сохранишь. Pet Island не отправляет их на сервер. Live Activity и иконка приложения не переносятся."
+          }
+        }
+      }
+    },
+    "Bring your Dynamic Island pet home before restoring a backup." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bring your Dynamic Island pet home before restoring a backup."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Перед восстановлением верни питомца из Dynamic Island домой."
+          }
+        }
+      }
+    },
+    "Finds" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finds"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Находки"
+          }
+        }
+      }
+    },
+    "Island backup" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Island backup"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Копия острова"
+          }
+        }
+      }
+    },
+    "Island before last restore" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Island before last restore"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Остров до восстановления"
+          }
+        }
+      }
+    },
+    "Keep your island safe" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep your island safe"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохрани свой остров"
+          }
+        }
+      }
+    },
+    "Open a backup" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open a backup"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть копию"
+          }
+        }
+      }
+    },
+    "Please wait for your island to finish saving, then try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please wait for your island to finish saving, then try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дождись сохранения острова и попробуй ещё раз."
+          }
+        }
+      }
+    },
+    "Replace your current island?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Replace your current island?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Заменить текущий остров?"
+          }
+        }
+      }
+    },
+    "Restore this island" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore this island"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Восстановить этот остров"
+          }
+        }
+      }
+    },
+    "Restoring was interrupted. Your previous island is saved. Reopen the app to finish recovery." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restoring was interrupted. Your previous island is saved. Reopen the app to finish recovery."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Восстановление прервано. Прежний остров сохранён. Открой приложение заново, чтобы завершить возврат."
+          }
+        }
+      }
+    },
+    "Save a backup" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save a backup"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранить копию"
+          }
+        }
+      }
+    },
+    "Save your pets, outfits, coins, supplies, furniture, finds and games in one file. Keep it in Files or on another device." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save your pets, outfits, coins, supplies, furniture, finds and games in one file. Keep it in Files or on another device."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Питомцы, наряды, монеты, запасы, обстановка, находки и игры — в одном файле. Сохрани его в «Файлы» или на другое устройство."
+          }
+        }
+      }
+    },
+    "Saved games" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved games"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранённые игры"
+          }
+        }
+      }
+    },
+    "The backup could not be restored. Your previous island is still in place." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The backup could not be restored. Your previous island is still in place."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось восстановить копию. Твой прежний остров остался на месте."
+          }
+        }
+      }
+    },
+    "The saved walk keeps its original return time." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The saved walk keeps its original return time."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "У прогулки сохранится прежнее время возвращения."
+          }
+        }
+      }
+    },
+    "This backup is too large to open safely." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This backup is too large to open safely."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эта копия слишком большая для безопасного открытия."
+          }
+        }
+      }
+    },
+    "This backup needs a newer version of Pet Island." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This backup needs a newer version of Pet Island."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для этой копии нужна более новая версия Pet Island."
+          }
+        }
+      }
+    },
+    "This is not a valid Pet Island backup. Your island has not been replaced." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is not a valid Pet Island backup. Your island has not been replaced."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файл не является исправной копией Pet Island. Твой остров не заменён."
+          }
+        }
+      }
+    },
+    "This replaces your current island, including pets and coins. The two islands are not combined. You can return to the automatic copy afterwards." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This replaces your current island, including pets and coins. The two islands are not combined. You can return to the automatic copy afterwards."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Эта копия заменит текущий остров вместе с питомцами и монетами. Острова не объединяются. После восстановления можно вернуться к автоматически сохранённой копии."
+          }
+        }
+      }
+    },
+    "You can review the file before replacing anything. A copy of your current island is kept automatically before restoring." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You can review the file before replacing anything. A copy of your current island is kept automatically before restoring."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сначала ты увидишь содержимое файла. Перед восстановлением мы автоматически сохраним копию текущего острова."
+          }
+        }
+      }
+    },
+    "Your island has been restored." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your island has been restored."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Твой остров восстановлен."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

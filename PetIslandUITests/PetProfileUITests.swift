@@ -16,6 +16,9 @@ final class PetProfileUITests: XCTestCase {
 
     private func launch(_ arguments: String...) {
         app.launchArguments = ["-pet-profile-preview", "-AppleLanguages", "(en)", "-AppleLocale", "en_US"] + arguments
+        if arguments.contains("-profile-large") {
+            app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXL"]
+        }
         app.launch()
     }
 
@@ -143,5 +146,83 @@ final class PetProfileUITests: XCTestCase {
         let empty = app.staticTexts["Your first shared memory is still ahead. Bring back a find from a walk."]
         reveal(empty)
         capture("Card — empty memories")
+    }
+
+    func testBackupPreviewCancellationKeepsCurrentPetWithLargeText() {
+        launch("-profile-backup", "-profile-light", "-profile-large")
+        let backups = app.buttons["settings.backup"]
+        XCTAssertTrue(app.tabBars.buttons["Settings"].waitForExistence(timeout: 10))
+        reveal(backups); backups.tap()
+        XCTAssertTrue(app.navigationBars["Island backup"].waitForExistence(timeout: 5))
+        let previous = app.buttons["backup.recovery"]
+        reveal(previous); previous.tap()
+        XCTAssertTrue(app.navigationBars["Backup contents"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Луна"].exists)
+        XCTAssertTrue(app.buttons["backup.restore"].isHittable)
+        capture("Backup preview — large text")
+        app.navigationBars["Backup contents"].buttons["Cancel"].tap()
+        app.navigationBars["Island backup"].buttons["Done"].tap()
+        app.tabBars.buttons["Pets"].tap()
+        let pet = app.buttons["pet.profile.CD000000-0000-0000-0000-000000000002"]
+        reveal(pet)
+        XCTAssertTrue(pet.label.contains("Пиксель"))
+    }
+
+    func testBackupRestoresSelectedCopyAndOffersReturnToPreviousIsland() {
+        launch("-profile-backup")
+        let backups = app.buttons["settings.backup"]
+        XCTAssertTrue(app.tabBars.buttons["Settings"].waitForExistence(timeout: 10))
+        reveal(backups); backups.tap()
+        XCTAssertTrue(app.navigationBars["Island backup"].waitForExistence(timeout: 5))
+        capture("Backup — dark")
+        let previous = app.buttons["backup.recovery"]
+        reveal(previous); previous.tap()
+        XCTAssertTrue(app.navigationBars["Backup contents"].waitForExistence(timeout: 5))
+        capture("Backup — contents")
+        app.buttons["backup.restore"].tap()
+        XCTAssertTrue(app.staticTexts["Replace your current island?"].waitForExistence(timeout: 5))
+        let confirm = app.buttons.matching(identifier: "Restore this island").allElementsBoundByIndex.last
+        XCTAssertNotNil(confirm)
+        confirm?.tap()
+        XCTAssertTrue(app.staticTexts["Your island has been restored."].waitForExistence(timeout: 10))
+        reveal(previous); previous.tap()
+        XCTAssertTrue(app.navigationBars["Backup contents"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Пиксель"].exists)
+        app.navigationBars["Backup contents"].buttons["Cancel"].tap()
+        app.navigationBars["Island backup"].buttons["Done"].tap()
+        app.tabBars.buttons["Pets"].tap()
+        XCTAssertTrue(app.buttons["pet.profile.CD000000-0000-0000-0000-000000000002"].label.contains("Луна"))
+    }
+
+    func testBackupFileExportAndImportKeepIslandUntilConfirmation() {
+        launch("-profile-backup")
+        let backups = app.buttons["settings.backup"]
+        XCTAssertTrue(app.tabBars.buttons["Settings"].waitForExistence(timeout: 10))
+        reveal(backups); backups.tap()
+        XCTAssertTrue(app.navigationBars["Island backup"].waitForExistence(timeout: 5))
+        app.buttons["backup.export"].tap()
+        let save = app.buttons["DOCPicker.actionButton"]
+        XCTAssertTrue(save.waitForExistence(timeout: 10))
+        // Files persists between test launches; never overwrite or import a previous run's copy.
+        let uniqueName = "Backup-" + UUID().uuidString.prefix(8)
+        let filename = app.textFields["DOCPicker.filenameTextField"]
+        XCTAssertTrue(filename.waitForExistence(timeout: 5))
+        filename.tap()
+        filename.typeText(uniqueName + "\n")
+        capture("Backup — Files export")
+        save.tap()
+        XCTAssertTrue(app.staticTexts["Backup saved."].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["backup.import"].waitForExistence(timeout: 5))
+        app.buttons["backup.import"].tap()
+        let file = app.collectionViews.cells.matching(NSPredicate(format: "label CONTAINS %@", uniqueName)).firstMatch
+        XCTAssertTrue(file.waitForExistence(timeout: 10), app.debugDescription)
+        capture("Backup — Files import")
+        file.tap()
+        XCTAssertTrue(app.navigationBars["Backup contents"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["Пиксель"].exists)
+        app.navigationBars["Backup contents"].buttons["Cancel"].tap()
+        app.navigationBars["Island backup"].buttons["Done"].tap()
+        app.tabBars.buttons["Pets"].tap()
+        XCTAssertTrue(app.buttons["pet.profile.CD000000-0000-0000-0000-000000000002"].label.contains("Пиксель"))
     }
 }

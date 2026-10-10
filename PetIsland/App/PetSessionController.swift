@@ -53,6 +53,7 @@ final class PetSessionController: ObservableObject {
 
     private let store: any PetStore
     private let arcadeStore: any ArcadeStore
+    private let backupStore: any IslandBackupStore
     private let behavior = PetBehaviorMachine()
     private var activity: Activity<PetActivityAttributes>?
     private var state = PersistedAppState()
@@ -69,10 +70,12 @@ final class PetSessionController: ObservableObject {
 
     init(
         store: any PetStore = FilePetStore(),
-        arcadeStore: any ArcadeStore = FileArcadeStore()
+        arcadeStore: any ArcadeStore = FileArcadeStore(),
+        backupStore: (any IslandBackupStore)? = nil
     ) {
         self.store = store
         self.arcadeStore = arcadeStore
+        self.backupStore = backupStore ?? (store is FilePetStore ? FileIslandBackupStore() : InMemoryIslandBackupStore())
     }
 
     var isBusy: Bool { isSavingChanges || operation == .starting || operation == .stopping || operation == .loading || operation == .loadFailed }
@@ -95,6 +98,10 @@ final class PetSessionController: ObservableObject {
         if !didBootstrap {
             operation = .loading
             do {
+                if let interrupted = try await backupStore.pendingRestore() {
+                    try await writeBackupStores(IslandBackupCodec.decode(interrupted))
+                    try await backupStore.finishRestore()
+                }
                 let loadedState = try await store.load()
                 let loadedArcade = try await arcadeStore.load()
                 state = loadedState
@@ -314,6 +321,7 @@ final class PetSessionController: ObservableObject {
     }
 
     private func commitState(_ candidate: PersistedAppState, syncPets: Bool = true) async -> Bool {
+        guard operation != .loadFailed else { return false }
         do { try await store.save(candidate) }
         catch {
             alertMessage = String(localized: "Your changes could not be saved. Please try again.")
@@ -349,6 +357,101 @@ final class PetSessionController: ObservableObject {
 
     var habitatResidents: [PetProfile] {
         habitatResidents(at: .now)
+    }
+
+    var canRestoreIsland: Bool {
+        !isBusy && didBootstrap && session == nil && placement != .dynamicIsland
+            && habitat.configuration.leadDynamicIslandPetID == nil
+    }
+
+    func exportIslandBackup() async throws -> Data {
+        guard !isBusy, didBootstrap else { throw IslandBackupError.busy }
+        await beginSave()
+        defer { finishSave() }
+        let snapshot = try await captureIslandBackup()
+        return try await Task.detached(priority: .userInitiated) { try IslandBackupCodec.encode(snapshot) }.value
+    }
+
+    func islandRecoveryBackup() async throws -> Data? {
+        try await backupStore.recoveryBackup()
+    }
+
+    func restoreIslandBackup(_ data: Data) async throws {
+        let imported = try await Task.detached(priority: .userInitiated) { try IslandBackupCodec.decode(data) }.value
+        guard !isBusy, didBootstrap else { throw IslandBackupError.busy }
+        guard canRestoreIsland else { throw IslandBackupError.travelling }
+        await beginSave()
+        defer { finishSave() }
+        let previous = try await captureIslandBackup()
+        let previousData = try IslandBackupCodec.encode(previous)
+        // Failure here cannot have changed a save. Keep the journal on disk if
+        // rolling back later fails, so bootstrap retries before loading any data.
+        do { try await backupStore.beginRestore(previous: previousData) }
+        catch {
+            let needsRecovery: Bool
+            do { needsRecovery = try await backupStore.pendingRestore() != nil }
+            catch { needsRecovery = true }
+            if needsRecovery {
+                didBootstrap = false
+                operation = .loadFailed
+                throw IslandBackupError.recoveryRequired
+            }
+            throw error
+        }
+        discoveryReturnTask?.cancel()
+        do {
+            try await writeBackupStores(imported)
+            try await backupStore.finishRestore()
+        } catch {
+            do {
+                try await writeBackupStores(previous)
+                try await backupStore.finishRestore()
+                publishRestoredIsland(previous)
+            } catch {
+                didBootstrap = false
+                operation = .loadFailed
+                throw IslandBackupError.recoveryRequired
+            }
+            throw IslandBackupError.saveFailed
+        }
+        publishRestoredIsland(imported)
+    }
+
+    private func captureIslandBackup() async throws -> IslandBackup {
+        guard await flushCareEvents() else { throw IslandBackupError.busy }
+        let shared = PetHabitatStore.load()
+        var savedArcade = arcadeState
+        savedArcade.mergeVitals(from: shared)
+        savedArcade.reconcile(with: state.pets)
+        var savedApp = state
+        savedApp.activeSession = nil
+        savedApp.dismissedActivitySessionID = nil
+        var configuration = shared.configuration
+        configuration.reconcile(availablePetIDs: Set(state.pets.map(\.id)))
+        if !configuration.returnDynamicIslandLeadToHabitat() { configuration.setDynamicIslandLead(nil) }
+        return IslandBackup(app: savedApp, arcade: savedArcade, habitat: configuration)
+    }
+
+    private func writeBackupStores(_ backup: IslandBackup) async throws {
+        try await store.save(backup.app)
+        try await arcadeStore.save(backup.arcade)
+        try PetHabitatStore.save(backup.sharedHabitat)
+        try PetLifeStore.save(backup.sharedLife)
+    }
+
+    private func publishRestoredIsland(_ backup: IslandBackup) {
+        state = backup.app
+        arcadeState = backup.arcade
+        settings = state.settings
+        history = state.history
+        completedOnboarding = state.completedOnboarding
+        habitat = backup.sharedHabitat
+        lifeState = backup.sharedLife
+        placement = .enclosure
+        session = nil
+        operation = .idle
+        publishPetCollection()
+        WidgetCenter.shared.reloadTimelines(ofKind: "PetIsland.Enclosure")
     }
 
     func habitatResidents(at date: Date) -> [PetProfile] {
@@ -528,6 +631,7 @@ final class PetSessionController: ObservableObject {
     }
 
     private func commitArcade(_ candidate: ArcadeState) async -> Bool {
+        guard operation != .loadFailed else { return false }
         do { try await arcadeStore.save(candidate) }
         catch {
             alertMessage = String(localized: "Arcade progress could not be saved. Please try again.")
@@ -1295,6 +1399,7 @@ final class PetSessionController: ObservableObject {
     }
 
     private func persist() async {
+        guard operation != .loadFailed else { return }
         do {
             try await store.save(state)
         } catch {
@@ -1305,6 +1410,7 @@ final class PetSessionController: ObservableObject {
     private func persistArcade() async {
         await beginSave()
         defer { finishSave() }
+        guard operation != .loadFailed else { return }
         do {
             try await arcadeStore.save(arcadeState)
         } catch {

@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 323 tests (319 unit and 4 UI tests), a Release build, and static analysis on October 10,
+> build passed 341 tests (334 unit and 7 UI tests), a Release build, and static analysis on October 10,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -231,6 +231,26 @@ can be restored at any time.
   <img src="Docs/Media/app-icons.png" width="1000" alt="The five optional Pet Island app icons">
 </p>
 
+## Island backups
+
+Open **Settings → Island backup** (**Настройки → Копия острова**) to save one
+JSON file through the system Files picker. It includes pets and their outfits,
+coins, supplies, purchases, enclosure layout, settings, finds, the current walk,
+records and unfinished Bubble Paws games. Keep the exported file outside the app
+to transfer the island to another device or recover after reinstalling.
+
+**Open a backup** validates the format, size, checksum and save data, then shows
+the pets and inventory before asking to replace the island. Import replaces the
+whole save; it does not add coins or merge collections. Before writing, the app
+saves an automatic return copy, available as **Island before last restore**.
+If writing fails or the process stops midway, a durable journal restores the
+previous island before normal loading resumes.
+
+Bring a pet home from Dynamic Island before importing. Live Activity sessions
+and the system app icon are not transferred. A saved discovery walk keeps its
+original return time. Export is manual; there are no scheduled uploads or new
+background timers. The import limit is 12 MiB.
+
 ## Dynamic Island and Lock Screen
 
 Take one pet from the island with you in a Live Activity. The compact and
@@ -315,6 +335,10 @@ testing; launching the extension scheme directly opens a widget preview flow.
 8. Start a discovery walk, close and reopen the app, and check that the pet
    stays away until its return time. Collect its find, open the album, and
    try ending another walk early.
+9. Save an island backup in Files, open it to review its contents, and cancel.
+   When ready to test restoration, confirm replacement and check the pets,
+   supplies, furniture, album and saved game. The automatic return copy remains
+   available in the same settings screen.
 
 In Russian, the new settings are **Остров → Настройка острова → Цвет карточки**
 and **Настройки → Иконка приложения**.
@@ -350,12 +374,14 @@ remain pending.
 ## Tests and validation
 
 The **PetIslandUITests** target exercises the collection-to-card flow, care stock
-updates, the selected companion in the shop and walks, return/collection, and
-large text layouts. These tests use in-memory fixtures and run only in Simulator.
+updates, the selected companion in the shop and walks, return/collection, backup
+export/import through Files, restore confirmation and cancellation, and large text
+layouts. These tests use in-memory fixtures and run only in Simulator.
 Their screenshots are attached to the Xcode test results.
 
 Run the **PetIsland** test action with **Command-U** in Xcode. The latest verified
-suite covers save recovery, pet placement, arcade
+suite covers save recovery, full-island backup validation, interrupted restore
+rollback, return copies, repeated import without duplicated coins or pets, pet placement, arcade
 rules, per-pet Bubble Paws recovery, interrupted shots, care availability and
 repeated taps, movement geometry, sprite registration, Live Activity color persistence
 and contrast, alternate-icon configuration, discovery persistence, automatic

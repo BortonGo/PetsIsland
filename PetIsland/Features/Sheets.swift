@@ -413,6 +413,7 @@ struct SettingsView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var draft: AppSettings
     @State private var showsAppIcons = false
+    @State private var showsIslandBackup = false
 
     init(controller: PetSessionController, showsDismissButton: Bool = true) {
         self.controller = controller
@@ -461,6 +462,17 @@ struct SettingsView: View {
                     .font(.subheadline)
                     .padding(18)
                     .petSurface()
+                    Button { showsIslandBackup = true } label: {
+                        HStack(spacing: 14) {
+                            Label("Island backup", systemImage: "externaldrive")
+                                .font(.subheadline.weight(.semibold))
+                            Spacer()
+                            Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(PetDesign.secondary)
+                        }.padding(18).petSurface()
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(controller.isBusy)
+                    .accessibilityIdentifier("settings.backup")
                     DisclosureGroup {
                         VStack(alignment: .leading, spacing: 16) {
                             Label("Dynamic Island is available on supported iPhones.", systemImage: "iphone.gen3")
@@ -511,6 +523,7 @@ struct SettingsView: View {
             }
         }
         .sheet(isPresented: $showsAppIcons) { AppIconPickerView() }
+        .sheet(isPresented: $showsIslandBackup) { IslandBackupView(controller: controller) }
         .onChange(of: draft) { _, newSettings in
             guard !showsDismissButton else { return }
             Task { await controller.updateSettings(newSettings) }

@@ -23,6 +23,7 @@ struct PetProfileRefreshSchedule: TimelineSchedule {
 struct PetProfileDebugHostView: View {
     @StateObject private var controller: PetSessionController
     private let petID: UUID
+    private let backupFixture: IslandBackup?
 
     init() {
         let args = ProcessInfo.processInfo.arguments
@@ -50,19 +51,36 @@ struct PetProfileDebugHostView: View {
         }
         let arcade = ArcadeState(progress: ArcadeProgress(coins: 120, inventory: inventory, ownedAccessories: [.knitHat]),
                                  vitalsByPetID: [pet.id: PetVitals(fullness: 0.65, happiness: 0.82, energy: 0.72)])
-        _controller = StateObject(wrappedValue: PetSessionController(store: InMemoryPetStore(state), arcadeStore: InMemoryArcadeStore(arcade)))
+        var recoveryData: Data?
+        backupFixture = args.contains("-profile-backup")
+            ? IslandBackup(app: state, arcade: arcade, habitat: PetHabitatState(residentPetIDs: state.pets.map(\.id))) : nil
+        if args.contains("-profile-backup") {
+            var saved = state
+            saved.pets[1].name = "Луна"
+            let backup = IslandBackup(app: saved, arcade: arcade,
+                                      habitat: PetHabitatState(residentPetIDs: saved.pets.map(\.id)))
+            recoveryData = try? IslandBackupCodec.encode(backup)
+        }
+        _controller = StateObject(wrappedValue: PetSessionController(store: InMemoryPetStore(state), arcadeStore: InMemoryArcadeStore(arcade),
+            backupStore: InMemoryIslandBackupStore(recovery: recoveryData)))
     }
 
     var body: some View {
         Group {
             if controller.operation == .loading { ProgressView() }
-            else if ProcessInfo.processInfo.arguments.contains("-profile-collection") {
+            else if ProcessInfo.processInfo.arguments.contains("-profile-collection") || ProcessInfo.processInfo.arguments.contains("-profile-backup") {
                 HomeView(controller: controller)
-                    .onAppear { controller.selectedTab = .pets }
+                    .onAppear { controller.selectedTab = ProcessInfo.processInfo.arguments.contains("-profile-backup") ? .settings : .pets }
             }
             else { PetProfileView(controller: controller, petID: petID) }
         }
-        .task { await controller.bootstrap() }
+        .task {
+            if let backupFixture, controller.operation == .loading {
+                try? PetHabitatStore.save(backupFixture.sharedHabitat)
+                try? PetLifeStore.save(backupFixture.sharedLife)
+            }
+            await controller.bootstrap()
+        }
         .preferredColorScheme(ProcessInfo.processInfo.arguments.contains("-profile-light") ? .light : .dark)
         .dynamicTypeSize(ProcessInfo.processInfo.arguments.contains("-profile-large") ? .accessibility3 : .large)
     }
