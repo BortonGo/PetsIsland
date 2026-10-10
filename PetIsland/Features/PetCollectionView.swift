@@ -6,6 +6,7 @@ struct PetCollectionView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var editorRoute: PetEditorRoute?
     @State private var wardrobePet: PetProfile?
+    @State private var detailPet: PetProfile?
     @State private var pendingRemoval: PetProfile?
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
@@ -46,6 +47,9 @@ struct PetCollectionView: View {
         }
         .sheet(item: $wardrobePet) { pet in
             PetWardrobeView(controller: controller, petID: pet.id)
+        }
+        .sheet(item: $detailPet) { pet in
+            PetProfileView(controller: controller, petID: pet.id)
         }
         .confirmationDialog(
             "Remove this pet?",
@@ -107,7 +111,7 @@ struct PetCollectionView: View {
         let isAway = controller.isPetOnDiscoveryWalk(pet.id)
 
         return VStack(alignment: .leading, spacing: 0) {
-            Button { editorRoute = PetEditorRoute(profile: pet, isNew: false) } label: {
+            Button { detailPet = pet } label: {
                 VStack(alignment: .leading, spacing: 8) {
                     PetArtwork(
                         species: pet.species, coat: pet.coat, customColor: pet.customColor,
@@ -127,6 +131,8 @@ struct PetCollectionView: View {
             }
             .buttonStyle(.plain)
             .disabled(controller.isBusy)
+            .accessibilityIdentifier("pet.profile.\(pet.id)")
+            .accessibilityHint("Open pet card")
             Button { wardrobePet = pet } label: {
                 Label("Wardrobe", systemImage: "sparkles")
                     .font(.caption.weight(.semibold))
@@ -236,7 +242,7 @@ private struct PetEditorRoute: Identifiable {
     let isNew: Bool
 }
 
-private struct PetProfileEditor: View {
+struct PetProfileEditor: View {
     let isNew: Bool
     let sessionIsActive: Bool
     let onSave: (PetProfile) async -> Bool

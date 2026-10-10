@@ -1,182 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Choose an available pet first." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose an available pet first."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сначала выберите питомца."
-          }
-        }
-      }
-    },
-    "Care is available after the walk." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Care is available after the walk."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Можно дать после прогулки."
-          }
-        }
-      }
-    },
-    "No items in stock." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No items in stock."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Пока нет в запасе."
-          }
-        }
-      }
-    },
-    "Not needed right now." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Not needed right now."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сейчас не требуется."
-          }
-        }
-      }
-    },
-    "Continue game" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continue game"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Продолжить игру"
-          }
-        }
-      }
-    },
-    "Game not saved" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Game not saved"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Игра не сохранена"
-          }
-        }
-      }
-    },
-    "Your last move was not applied. Free some space if needed and try again." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your last move was not applied. Free some space if needed and try again."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Последний ход не применён. При необходимости освободите место и попробуйте ещё раз."
-          }
-        }
-      }
-    },
-    "Start a new game?" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start a new game?"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Начать новую игру?"
-          }
-        }
-      }
-    },
-    "New game" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New game"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Новая игра"
-          }
-        }
-      }
-    },
-    "This will replace your saved Bubble Paws game for this pet." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This will replace your saved Bubble Paws game for this pet."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сохранённая партия в «Пузырьках» для этого питомца будет заменена."
-          }
-        }
-      }
-    },
-    "Your board is saved. You can return even after closing the app." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your board is saved. You can return even after closing the app."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Поле сохранено. Можно вернуться к игре даже после закрытия приложения."
-          }
-        }
-      }
-    },
     "" : {
 
     },
@@ -790,6 +614,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@, бежит по полосе %2$lld"
+          }
+        }
+      }
+    },
+    "%@'s walk is here. One friend explores at a time." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s walk is here. One friend explores at a time."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас гуляет %@. На прогулку ходят по одному."
           }
         }
       }
@@ -1920,6 +1761,23 @@
         }
       }
     },
+    "All memories" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All memories"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все воспоминания"
+          }
+        }
+      }
+    },
     "Almost back" : {
       "localizations" : {
         "en" : {
@@ -2671,6 +2529,39 @@
         }
       }
     },
+    "Care" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Care"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Забота"
+          }
+        }
+      }
+    },
+    "Care is available after the walk." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Care is available after the walk."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Можно дать после прогулки."
+          }
+        }
+      }
+    },
     "Cat" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2826,6 +2717,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Выбери место и замени предмет, чтобы освободить его."
+          }
+        }
+      }
+    },
+    "Choose an available pet first." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose an available pet first."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сначала выберите питомца."
           }
         }
       }
@@ -3116,6 +3024,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Продолжить"
+          }
+        }
+      }
+    },
+    "Continue game" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue game"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продолжить игру"
           }
         }
       }
@@ -3999,6 +3924,23 @@
         }
       }
     },
+    "Game not saved" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Game not saved"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Игра не сохранена"
+          }
+        }
+      }
+    },
     "Games" : {
       "localizations" : {
         "ru" : {
@@ -4358,6 +4300,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "В запасе"
+          }
+        }
+      }
+    },
+    "In stock: %@" : {
+
+    },
+    "In stock: %lld" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In stock: %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В запасе: %lld"
           }
         }
       }
@@ -5316,6 +5278,23 @@
         }
       }
     },
+    "New game" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New game"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Новая игра"
+          }
+        }
+      }
+    },
     "New pet" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5479,6 +5458,23 @@
         }
       }
     },
+    "No items in stock." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No items in stock."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока нет в запасе."
+          }
+        }
+      }
+    },
     "No pets yet" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -5492,6 +5488,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Питомцев пока нет"
+          }
+        }
+      }
+    },
+    "Not needed right now." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not needed right now."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сейчас не требуется."
           }
         }
       }
@@ -5606,6 +5619,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "На Dynamic Island появляется только главный питомец. Жителей вольера можно выбрать на вкладке «Остров»."
+          }
+        }
+      }
+    },
+    "Open pet card" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open pet card"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть карточку питомца"
           }
         }
       }
@@ -5817,6 +5847,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Аркада питомцев"
+          }
+        }
+      }
+    },
+    "Pet card" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pet card"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Карточка питомца"
           }
         }
       }
@@ -6217,6 +6264,7 @@
       }
     },
     "Play" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ru" : {
           "stringUnit" : {
@@ -6839,6 +6887,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Отдыхает в коробке"
+          }
+        }
+      }
+    },
+    "Restock supplies" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restock supplies"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пополнить запасы"
           }
         }
       }
@@ -7668,6 +7733,23 @@
         }
       }
     },
+    "Start a new game?" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a new game?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Начать новую игру?"
+          }
+        }
+      }
+    },
     "Start a session" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8351,6 +8433,22 @@
         }
       }
     },
+    "This will replace your saved Bubble Paws game for this pet." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This will replace your saved Bubble Paws game for this pet."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранённая партия в «Пузырьках» для этого питомца будет заменена."
+          }
+        }
+      }
+    },
     "Throw a ball" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -8470,6 +8568,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Сейчас вместе"
+          }
+        }
+      }
+    },
+    "Together since %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Together since %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вместе с %@"
           }
         }
       }
@@ -9139,6 +9253,22 @@
         }
       }
     },
+    "Your board is saved. You can return even after closing the app." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your board is saved. You can return even after closing the app."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поле сохранено. Можно вернуться к игре даже после закрытия приложения."
+          }
+        }
+      }
+    },
     "Your changes could not be saved. Please try again." : {
       "localizations" : {
         "ru" : {
@@ -9209,6 +9339,23 @@
         }
       }
     },
+    "Your first shared memory is still ahead. Bring back a find from a walk." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your first shared memory is still ahead. Bring back a find from a walk."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Первое общее воспоминание ещё впереди. Принесите находку с прогулки."
+          }
+        }
+      }
+    },
     "Your game is waiting for you." : {
       "localizations" : {
         "ru" : {
@@ -9243,6 +9390,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Твой остров, твой ритм"
+          }
+        }
+      }
+    },
+    "Your last move was not applied. Free some space if needed and try again." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your last move was not applied. Free some space if needed and try again."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последний ход не применён. При необходимости освободите место и попробуйте ещё раз."
           }
         }
       }

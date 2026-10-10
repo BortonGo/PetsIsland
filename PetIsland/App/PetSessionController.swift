@@ -367,8 +367,8 @@ final class PetSessionController: ObservableObject {
         pets.filter { !isPetWithYou($0.id) }
     }
 
-    private func isPetWithYou(_ petID: UUID) -> Bool {
-        if let session = state.activeSession, session.petID == petID, !session.isExpired(at: .now) {
+    private func isPetWithYou(_ petID: UUID, at date: Date = .now) -> Bool {
+        if let session = state.activeSession, session.petID == petID, !session.isExpired(at: date) {
             return true
         }
         return (placement == .dynamicIsland && profile.id == petID)
@@ -382,6 +382,23 @@ final class PetSessionController: ObservableObject {
     func vitals(for petID: UUID, at date: Date = .now) -> PetVitals {
         (arcadeState.vitalsByPetID[petID] ?? PetVitals()).projected(
             from: arcadeState.vitalsUpdatedAtByPetID[petID] ?? .distantPast, to: date)
+    }
+
+    /// A read-only snapshot keyed by identity, never by the currently selected lead.
+    func profileOverview(for petID: UUID, at date: Date = .now) -> PetProfileOverview? {
+        guard let pet = pets.first(where: { $0.id == petID }) else { return nil }
+        let location: PetProfileOverview.Location
+        if isPetOnDiscoveryWalk(petID, at: date) { location = .walking }
+        else if isPetWithYou(petID, at: date) { location = .withYou }
+        else if habitatResidents(at: date).contains(where: { $0.id == petID }) { location = .enclosure }
+        else { location = .home }
+        return PetProfileOverview(
+            pet: pet, vitals: vitals(for: petID, at: date), location: location,
+            walk: discoveries.activeWalk.flatMap { $0.pet.id == petID ? $0 : nil },
+            memories: discoveries.memories.filter { $0.pet.id == petID }.sorted {
+                $0.foundAt == $1.foundAt ? $0.id.uuidString < $1.id.uuidString : $0.foundAt > $1.foundAt
+            }
+        )
     }
 
     func completeMiniGame(

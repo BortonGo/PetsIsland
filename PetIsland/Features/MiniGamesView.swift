@@ -22,12 +22,13 @@ struct MiniGamesView: View {
     @State private var message: String?
     @State private var selectedPage: ArcadePage = .games
 
-    init(controller: PetSessionController, showsDismissButton: Bool = true) {
+    init(controller: PetSessionController, showsDismissButton: Bool = true,
+         initialPetID: UUID? = nil, startsInShop: Bool = false) {
         self.controller = controller
         self.showsDismissButton = showsDismissButton
-        _selectedPetID = State(initialValue: controller.pets.first?.id)
+        _selectedPetID = State(initialValue: initialPetID ?? controller.pets.first?.id)
         _selectedPage = State(
-            initialValue: ProcessInfo.processInfo.arguments.contains("-arcade-shop-preview")
+            initialValue: startsInShop || ProcessInfo.processInfo.arguments.contains("-arcade-shop-preview")
                 ? .shop
                 : .games
         )
@@ -1238,7 +1239,7 @@ struct SkyHopEngine {
     }
 }
 
-private extension ArcadeItemKind {
+extension ArcadeItemKind {
     var title: String {
         switch self {
         case .food: String(localized: "Pet food")

@@ -5,6 +5,142 @@ import SwiftUI
 
 final class PetDomainTests: XCTestCase {
 
+    func testProfileRefreshStopsWhenCoveredAndOtherwiseTicksOnceAMinute() {
+        let start = Date(timeIntervalSince1970: 2000)
+        XCTAssertEqual(Array(PetProfileRefreshSchedule(paused: true).entries(from: start, mode: .normal)), [start])
+        let entries = Array(PetProfileRefreshSchedule(paused: false).entries(from: start, mode: .normal).prefix(3))
+        XCTAssertEqual(entries, [start, start.addingTimeInterval(60), start.addingTimeInterval(120)])
+    }
+
+    @MainActor
+    func testProfileOverviewIsReadOnlyAndUsesRequestedPet() async throws {
+        let original = PetHabitatStore.load()
+        defer { try? PetHabitatStore.save(original) }
+        let state = profileCardState()
+        let pet = state.pets[1]
+        let store = InMemoryPetStore(state)
+        let arcade = InMemoryArcadeStore(ArcadeState(vitalsByPetID: [pet.id: PetVitals(fullness: 0.4, happiness: 0.6, energy: 0.7)]))
+        let controller = PetSessionController(store: store, arcadeStore: arcade)
+        XCTAssertNil(controller.profileOverview(for: pet.id))
+        await controller.bootstrap()
+        XCTAssertTrue(controller.saveHabitat(theme: .meadow, residentPetIDs: [pet.id]))
+        let saved = await store.load()
+        let shared = PetHabitatStore.load()
+        let overview = try XCTUnwrap(controller.profileOverview(for: pet.id))
+        XCTAssertEqual(overview.pet, pet)
+        XCTAssertEqual(overview.vitals.fullness, 0.4)
+        XCTAssertEqual(overview.location, .enclosure)
+        XCTAssertEqual(controller.profileOverview(for: state.pets[0].id)?.location, .home)
+        XCTAssertNil(controller.profileOverview(for: UUID()))
+        for _ in 0..<20 { _ = controller.profileOverview(for: pet.id) }
+        let after = await store.load()
+        XCTAssertEqual(after, saved)
+        XCTAssertEqual(PetHabitatStore.load(), shared, "Opening a card must not rewrite placement or sprites")
+    }
+
+    @MainActor
+    func testProfileWalkReturnUpdatesLocationWithoutHidingUncollectedFind() async throws {
+        let original = PetHabitatStore.load()
+        defer { try? PetHabitatStore.save(original) }
+        let state = profileCardState()
+        let pet = state.pets[1]
+        let controller = PetSessionController(store: InMemoryPetStore(state), arcadeStore: InMemoryArcadeStore())
+        await controller.bootstrap()
+        XCTAssertTrue(controller.saveHabitat(theme: .meadow, residentPetIDs: [pet.id]))
+        let start = Date.now
+        let started = await controller.startDiscoveryWalk(petID: pet.id, route: .garden, at: start)
+        XCTAssertTrue(started)
+        let walk = try XCTUnwrap(controller.discoveries.activeWalk)
+        XCTAssertEqual(controller.profileOverview(for: pet.id, at: walk.endsAt.addingTimeInterval(-1))?.location, .walking)
+        XCTAssertEqual(controller.profileOverview(for: pet.id, at: walk.endsAt)?.location, .enclosure)
+        XCTAssertEqual(controller.profileOverview(for: pet.id, at: walk.endsAt)?.walk, walk)
+        XCTAssertNil(controller.profileOverview(for: state.pets[0].id)?.walk)
+        let collected = await controller.collectDiscoveryWalk(at: walk.endsAt)
+        XCTAssertNotNil(collected)
+        let returned = try XCTUnwrap(controller.profileOverview(for: pet.id, at: walk.endsAt))
+        XCTAssertNil(returned.walk)
+        XCTAssertEqual(returned.memories.map(\.id), [walk.id])
+    }
+
+    @MainActor
+    func testProfileMemoriesFollowIdentityAcrossRenameAndMatchingNames() async throws {
+        let original = PetHabitatStore.load()
+        defer { try? PetHabitatStore.save(original) }
+        var state = profileCardState()
+        let start = Date.now.addingTimeInterval(-10000)
+        let pet = state.pets[1]
+        state.discoveries.startWalk(pet: pet, route: .garden, at: start)
+        state.discoveries.collectWalk(at: start.addingTimeInterval(1300))
+        state.discoveries.startWalk(pet: state.pets[0], route: .garden, at: start.addingTimeInterval(1500))
+        state.discoveries.collectWalk(at: start.addingTimeInterval(2800))
+        state.discoveries.startWalk(pet: pet, route: .shore, at: start.addingTimeInterval(3000))
+        state.discoveries.collectWalk(at: start.addingTimeInterval(5500))
+        state.pets[1].name = "Renamed"
+        let controller = PetSessionController(store: InMemoryPetStore(state), arcadeStore: InMemoryArcadeStore())
+        await controller.bootstrap()
+        let overview = try XCTUnwrap(controller.profileOverview(for: pet.id))
+        XCTAssertEqual(overview.pet.name, "Renamed")
+        XCTAssertEqual(overview.memories.count, 2)
+        XCTAssertEqual(overview.memories.map(\.route), [.shore, .garden])
+        XCTAssertTrue(overview.memories.allSatisfy { $0.pet.id == pet.id && $0.pet.name == pet.name })
+        XCTAssertEqual(controller.profileOverview(for: state.pets[0].id)?.memories.count, 1)
+    }
+
+    @MainActor
+    func testProfileCareAndWardrobeOnlyChangeRequestedPet() async throws {
+        let original = PetHabitatStore.load()
+        defer { try? PetHabitatStore.save(original) }
+        let state = profileCardState()
+        let lead = state.pets[0], pet = state.pets[1]
+        var stock = ArcadeInventory(); stock.add(.food, count: 2)
+        let controller = PetSessionController(store: InMemoryPetStore(state), arcadeStore: InMemoryArcadeStore(
+            ArcadeState(progress: ArcadeProgress(inventory: stock, ownedAccessories: [.knitHat]),
+                        vitalsByPetID: [pet.id: PetVitals(fullness: 0.4, happiness: 0.6, energy: 0.7)])))
+        await controller.bootstrap()
+        let beforeLead = try XCTUnwrap(controller.profileOverview(for: lead.id))
+        let fed = await controller.useArcadeItem(.food, for: pet.id)
+        XCTAssertTrue(fed)
+        let dressed = await controller.equipAccessory(.knitHat, for: pet.id)
+        XCTAssertTrue(dressed)
+        var renamed = pet; renamed.name = "New name"
+        let saved = await controller.updatePet(renamed)
+        XCTAssertTrue(saved)
+        let overview = try XCTUnwrap(controller.profileOverview(for: pet.id))
+        XCTAssertEqual(overview.pet.name, "New name")
+        XCTAssertEqual(overview.pet.outfit?.headwear, .knitHat)
+        XCTAssertEqual(overview.vitals.fullness, 0.64, accuracy: 0.0001)
+        XCTAssertEqual(controller.arcadeProgress.inventory[.food], 1)
+        XCTAssertEqual(controller.profileOverview(for: lead.id)?.pet, beforeLead.pet)
+        XCTAssertEqual(controller.profileOverview(for: lead.id)?.vitals.fullness, beforeLead.vitals.fullness)
+        XCTAssertEqual(controller.profile.id, lead.id)
+    }
+
+    @MainActor
+    func testProfileOfRemovedPetDoesNotFallBackToLead() async {
+        let original = PetHabitatStore.load()
+        defer { try? PetHabitatStore.save(original) }
+        let state = profileCardState()
+        let pet = state.pets[1]
+        let controller = PetSessionController(store: InMemoryPetStore(state), arcadeStore: InMemoryArcadeStore())
+        await controller.bootstrap()
+        let removed = await controller.removePet(id: pet.id)
+        XCTAssertTrue(removed)
+        XCTAssertNil(controller.profileOverview(for: pet.id))
+        XCTAssertNotNil(controller.profileOverview(for: state.pets[0].id))
+    }
+
+    private func profileCardState() -> PersistedAppState {
+        var state = PersistedAppState()
+        state.pets = [
+            PetProfile(id: UUID(), name: "Same name", species: .dog, coat: .sunrise, createdAt: .now, breed: .corgi),
+            PetProfile(id: UUID(), name: "Same name", species: .cat, coat: .sunrise, createdAt: .now, breed: .maineCoon)
+        ]
+        state.activePetIDs = [state.pets[0].id]
+        state.completedOnboarding = true
+        state.normalizePetCollection()
+        return state
+    }
+
     func testPowerPolicyUsesThirtyFramesOnlyWhenEnergyOrHeatRequiresIt() {
         for thermal: ProcessInfo.ThermalState in [.nominal, .fair, .serious, .critical] {
             let regular = PetAnimationPowerPolicy(lowPowerMode: false, thermalState: thermal)

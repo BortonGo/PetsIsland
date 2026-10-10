@@ -7,7 +7,9 @@ struct ContentView: View {
 
     var body: some View {
 #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-discovery-scene-preview") {
+        if ProcessInfo.processInfo.arguments.contains("-pet-profile-preview") {
+            PetProfileDebugHostView()
+        } else if ProcessInfo.processInfo.arguments.contains("-discovery-scene-preview") {
             PetDiscoverySceneDebugHost()
         } else if ProcessInfo.processInfo.arguments.contains("-arcade-preview") {
             MiniGamesDebugHostView()

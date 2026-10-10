@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 313 tests, a Release build, and static analysis on October 10,
+> build passed 323 tests (319 unit and 4 UI tests), a Release build, and static analysis on October 10,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -41,6 +41,13 @@ The collection contains **20 visual variants across six species**:
 - Pet your companions and open the full-screen playroom to throw a ball and
   play fetch. Grounded movement and gait frames follow the distance travelled.
 - Track fullness, happiness, and energy, with rest and care between games.
+- Tap a companion in **Pets** to open its personal card: current location,
+  fullness, happiness, energy, care supplies, wardrobe, and walk memories.
+  Giving an item uses the existing shared inventory and only affects that pet.
+  Empty supplies, unnecessary care, and care during a walk stay unavailable.
+- The card opens the shop and walk picker with that companion selected.
+  Memories belong to the pet's identity and survive renaming. Editing the name
+  or appearance remains a separate pencil action; the original artwork is reused.
 - Open **Enclosure → Furniture**, tap an owned item and choose its place. Placement
   saves immediately and shows a checkmark; no separate enclosure save is needed.
   Tap a placed item to remove it, or use its **Move item** context menu.
@@ -340,6 +347,11 @@ builds on USB power; longer unplugged battery and frame-pacing measurements
 remain pending.
 
 ## Tests and validation
+
+The **PetIslandUITests** target exercises the collection-to-card flow, care stock
+updates, the selected companion in the shop and walks, return/collection, and
+large text layouts. These tests use in-memory fixtures and run only in Simulator.
+Their screenshots are attached to the Xcode test results.
 
 Run the **PetIsland** test action with **Command-U** in Xcode. The latest verified
 suite covers save recovery, pet placement, arcade

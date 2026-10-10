@@ -3,13 +3,14 @@ import SwiftUI
 /// A dedicated sheet keeps walks and their album one tap away from the island.
 struct PetDiscoveriesView: View {
     @ObservedObject var controller: PetSessionController
+    var preferredPetID: UUID? = nil
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
             GeometryReader { viewport in
                 ScrollView {
-                    PetDiscoveriesContent(controller: controller, viewportHeight: viewport.size.height)
+                    PetDiscoveriesContent(controller: controller, viewportHeight: viewport.size.height, preferredPetID: preferredPetID)
                         .padding(20)
                         .frame(maxWidth: 600)
                         .frame(maxWidth: .infinity)
@@ -34,6 +35,7 @@ struct PetDiscoveriesView: View {
 private struct PetDiscoveriesContent: View {
     @ObservedObject var controller: PetSessionController
     let viewportHeight: CGFloat
+    let preferredPetID: UUID?
     @Environment(\.scenePhase) private var scenePhase
     @State private var showsAlbum = false
     @State private var showsCancelConfirmation = false
@@ -63,7 +65,7 @@ private struct PetDiscoveriesContent: View {
                 }
                 .petSurface()
             } else {
-                PetDiscoveryWalkPicker(controller: controller)
+                PetDiscoveryWalkPicker(controller: controller, selectedPetID: preferredPetID)
             }
             Button { showsAlbum = true } label: {
                 HStack(spacing: 12) {
@@ -170,6 +172,11 @@ private struct PetDiscoveryWalkPicker: View {
     @State private var selectedRoute: PetWalkRoute = .garden
     @State private var isStarting = false
 
+    init(controller: PetSessionController, selectedPetID: UUID? = nil) {
+        self.controller = controller
+        _selectedPetID = State(initialValue: selectedPetID)
+    }
+
     private var selectedPet: PetProfile? {
         controller.availableDiscoveryPets.first { $0.id == selectedPetID }
     }
@@ -202,6 +209,7 @@ private struct PetDiscoveryWalkPicker: View {
                             }
                         }
                         .pickerStyle(.menu)
+                        .accessibilityIdentifier("discoveries.companion")
                         .tint(PetDesign.ink)
                         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
                         .disabled(isStarting)
@@ -302,14 +310,16 @@ private struct PetDiscoveryWalkPicker: View {
     }
 }
 
-private struct PetDiscoveriesAlbum: View {
+struct PetDiscoveriesAlbum: View {
     @ObservedObject var controller: PetSessionController
+    var petID: UUID? = nil
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var selectedMemory: PetDiscoveryMemory?
 
     private var newestMemories: [PetDiscoveryMemory] {
-        controller.discoveries.memories.sorted { $0.foundAt > $1.foundAt }
+        controller.discoveries.memories.filter { petID == nil || $0.pet.id == petID }
+            .sorted { $0.foundAt > $1.foundAt }
     }
 
     var body: some View {
@@ -319,7 +329,7 @@ private struct PetDiscoveriesAlbum: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Small things, sweet memories.")
                             .font(PetDesign.title(.title2))
-                        Text("\(controller.discoveries.discoveredKinds.count) of \(PetDiscoveryKind.allCases.count) treasures")
+                        Text("\(Set(newestMemories.map(\.discovery)).count) of \(PetDiscoveryKind.allCases.count) treasures")
                             .font(.subheadline)
                             .foregroundStyle(PetDesign.secondary)
                         if newestMemories.isEmpty {
@@ -413,7 +423,7 @@ private struct PetDiscoveriesAlbum: View {
     }
 }
 
-private struct PetDiscoveryMemoryView: View {
+struct PetDiscoveryMemoryView: View {
     let memory: PetDiscoveryMemory
     let isNew: Bool
     @Environment(\.dismiss) private var dismiss
@@ -488,7 +498,7 @@ private struct DiscoveryPetPortrait: View {
 }
 
 /// Small vector keepsakes stay crisp at every text size and don't add any pet sprite variants.
-private struct DiscoveryIllustration: View {
+struct DiscoveryIllustration: View {
     let kind: PetDiscoveryKind
     var size: CGFloat = 100
 
@@ -632,7 +642,7 @@ extension PetWalkRoute {
     }
 }
 
-private extension PetDiscoveryKind {
+extension PetDiscoveryKind {
     var discoveryTitle: String {
         switch self {
         case .stripedPebble: String(localized: "Striped pebble")

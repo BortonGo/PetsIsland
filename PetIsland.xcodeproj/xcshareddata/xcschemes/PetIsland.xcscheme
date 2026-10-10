@@ -49,6 +49,10 @@
                ReferencedContainer = "container:PetIsland.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference skipped="NO" parallelizable="NO">
+            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="CAFE00000000000000000007" BuildableName="PetIslandUITests.xctest" BlueprintName="PetIslandUITests" ReferencedContainer="container:PetIsland.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
