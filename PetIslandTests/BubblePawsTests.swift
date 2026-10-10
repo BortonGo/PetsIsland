@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 @testable import PetIsland
 
 final class BubblePawsTests: XCTestCase {
@@ -270,6 +271,11 @@ final class BubblePawsTests: XCTestCase {
                     engine.setAim(best.angle)
                 }
                 engine.shoot(); settle(&engine)
+                let snapshot = engine.snapshot()
+                XCTAssertNotNil(snapshot, "Every settled round and terminal state must be restorable")
+                if let snapshot {
+                    XCTAssertEqual(BubblePawsEngine(snapshot: snapshot)?.snapshot(), snapshot)
+                }
                 XCTAssertTrue(engine.board.cells.keys.allSatisfy(engine.board.isValid))
                 XCTAssertLessThanOrEqual(engine.board.cells.count, 90)
                 if engine.phase == .playing {
@@ -306,6 +312,197 @@ final class BubblePawsTests: XCTestCase {
         XCTAssertEqual(decoded.progress.gamesPlayed, 1)
     }
 
+    func testSavedShotMatchesAnimationAndPreservesFutureRandomSequence() throws {
+        for seed in UInt64(1)...20 {
+            var uninterrupted = BubblePawsEngine(seed: seed)
+            uninterrupted.start(); uninterrupted.setAim(0.45); uninterrupted.shoot()
+            uninterrupted.update(deltaTime: 0.05)
+            let saved = try XCTUnwrap(BubblePawsCheckpoint(engine: uninterrupted, petID: UUID(), runID: UUID()))
+            let decoded = try JSONDecoder().decode(BubblePawsCheckpoint.self, from: JSONEncoder().encode(saved))
+            var restored = try XCTUnwrap(BubblePawsEngine(snapshot: decoded.snapshot))
+            XCTAssertFalse(restored.needsAnimation)
+            settle(&uninterrupted)
+            XCTAssertEqual(restored.snapshot(), uninterrupted.snapshot())
+            for angle in [-0.4, 0.7, 0, -1.1, 0.5] {
+                if uninterrupted.phase == .roundCleared { uninterrupted.nextRound(); restored.nextRound() }
+                guard uninterrupted.canShoot else { break }
+                uninterrupted.swapColors(); restored.swapColors()
+                uninterrupted.setAim(angle); restored.setAim(angle)
+                uninterrupted.shoot(); restored.shoot()
+                settle(&uninterrupted); settle(&restored)
+                XCTAssertEqual(restored.snapshot(), uninterrupted.snapshot())
+            }
+            // Generator state includes the remaining silhouette shuffle, not just the starting seed.
+            uninterrupted.start(); restored.start()
+            XCTAssertEqual(restored.snapshot(), uninterrupted.snapshot())
+        }
+    }
+
+    func testInvalidCheckpointsDoNotPoisonWalletOrValidGames() throws {
+        var engine = BubblePawsEngine(seed: 8); engine.start()
+        let valid = try XCTUnwrap(BubblePawsCheckpoint(engine: engine, petID: UUID(), runID: UUID()))
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(valid)) as? [String: Any])
+        var invalidLevel = object
+        var badSnapshot = try XCTUnwrap(object["snapshot"] as? [String: Any])
+        badSnapshot["level"] = 999
+        invalidLevel["snapshot"] = badSnapshot
+        var futureVersion = object; futureVersion["version"] = 99
+        var state = ArcadeState(progress: ArcadeProgress(coins: 77))
+        state.bubblePawsRuns = [valid]
+        var archive = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(state)) as? [String: Any])
+        archive["bubblePawsRuns"] = [invalidLevel, ["broken": true], futureVersion, object]
+        let decoded = try JSONDecoder().decode(ArcadeState.self, from: JSONSerialization.data(withJSONObject: archive))
+        XCTAssertEqual(decoded.progress.coins, 77)
+        XCTAssertEqual(decoded.bubblePawsRuns, [valid])
+        archive.removeValue(forKey: "bubblePawsRuns")
+        let legacy = try JSONDecoder().decode(ArcadeState.self, from: JSONSerialization.data(withJSONObject: archive))
+        XCTAssertEqual(legacy.progress.coins, 77)
+        XCTAssertTrue(legacy.bubblePawsRuns.isEmpty)
+        archive["bubblePawsRuns"] = "damaged"
+        let damaged = try JSONDecoder().decode(ArcadeState.self, from: JSONSerialization.data(withJSONObject: archive))
+        XCTAssertEqual(damaged.progress.coins, 77)
+        XCTAssertTrue(damaged.bubblePawsRuns.isEmpty)
+    }
+
+    func testCheckpointValidationRejectsDangerousGeometryAndCounters() throws {
+        var engine = BubblePawsEngine(seed: 8); engine.start()
+        let snapshot = try XCTUnwrap(engine.snapshot())
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(snapshot)) as? [String: Any])
+        for (key, value) in [("level", -1), ("score", -1), ("shots", -1), ("misses", 5), ("aimAngle", 10)] {
+            var invalid = object; invalid[key] = value
+            let decoded = try JSONDecoder().decode(BubblePawsEngine.Snapshot.self, from: JSONSerialization.data(withJSONObject: invalid))
+            XCTAssertNil(BubblePawsEngine(snapshot: decoded), key)
+        }
+        for ceiling in [-20, 21, 440] {
+            var invalid = object
+            var board = try XCTUnwrap(invalid["board"] as? [String: Any]); board["ceiling"] = ceiling
+            invalid["board"] = board
+            let decoded = try JSONDecoder().decode(BubblePawsEngine.Snapshot.self, from: JSONSerialization.data(withJSONObject: invalid))
+            XCTAssertNil(BubblePawsEngine(snapshot: decoded))
+        }
+        XCTAssertNil(BubblePawsEngine().snapshot())
+    }
+
+    @MainActor
+    func testCheckpointSurvivesDiskReloadAndEachPetKeepsItsOwnBoard() async throws {
+        let original = PetHabitatStore.load()
+        defer { try? PetHabitatStore.save(original) }
+        let folder = FileManager.default.temporaryDirectory.appending(path: UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let file = folder.appending(path: "arcade.json")
+        var pets = PersistedAppState()
+        let second = PetProfile(id: UUID(), name: "Second", species: .dog, coat: .cloud, createdAt: .now)
+        pets.pets.append(second)
+        let petStore = InMemoryPetStore(pets)
+        let controller = PetSessionController(store: petStore, arcadeStore: FileArcadeStore(fileURL: file))
+        await controller.bootstrap()
+        var checkpoints: [BubblePawsCheckpoint] = []
+        for (index, pet) in controller.pets.enumerated() {
+            var engine = BubblePawsEngine(seed: UInt64(index + 1)); engine.start(); engine.shoot()
+            let checkpoint = try XCTUnwrap(BubblePawsCheckpoint(engine: engine, petID: pet.id, runID: UUID()))
+            let saved = await controller.saveBubblePawsCheckpoint(checkpoint)
+            XCTAssertTrue(saved)
+            checkpoints.append(checkpoint)
+        }
+        let reopened = PetSessionController(store: petStore, arcadeStore: FileArcadeStore(fileURL: file))
+        await reopened.bootstrap()
+        for checkpoint in checkpoints {
+            XCTAssertEqual(reopened.bubblePawsCheckpoint(for: checkpoint.petID), checkpoint)
+        }
+        let removed = await reopened.removePet(id: second.id)
+        XCTAssertTrue(removed)
+        XCTAssertNil(reopened.bubblePawsCheckpoint(for: second.id))
+        XCTAssertEqual(reopened.bubblePawsCheckpoint(for: checkpoints[0].petID), checkpoints[0])
+    }
+
+    @MainActor
+    func testCheckpointAndRewardFailuresKeepLastSaveAndPreventDoublePayout() async throws {
+        let original = PetHabitatStore.load()
+        defer { try? PetHabitatStore.save(original) }
+        let store = BubbleTestStore()
+        let controller = PetSessionController(store: InMemoryPetStore(), arcadeStore: store)
+        var engine = BubblePawsEngine(seed: 4); engine.start()
+        let runID = UUID()
+        await controller.bootstrap()
+        let petID = try XCTUnwrap(controller.pets.first?.id)
+        let first = try XCTUnwrap(BubblePawsCheckpoint(engine: engine, petID: petID, runID: runID))
+        let saved = await controller.saveBubblePawsCheckpoint(first)
+        XCTAssertTrue(saved)
+        engine.shoot()
+        let next = try XCTUnwrap(BubblePawsCheckpoint(engine: engine, petID: petID, runID: runID))
+        await store.setFailure(true)
+        let failed = await controller.saveBubblePawsCheckpoint(next)
+        XCTAssertFalse(failed)
+        XCTAssertEqual(controller.bubblePawsCheckpoint(for: petID), first)
+        let failedReward = await controller.completeMiniGame(.bubblePaws, score: 1600, petID: petID, runID: runID)
+        XCTAssertNil(failedReward)
+        XCTAssertEqual(controller.bubblePawsCheckpoint(for: petID), first)
+        XCTAssertEqual(controller.arcadeProgress.gamesPlayed, 0)
+        await store.setFailure(false)
+        async let firstPayout = controller.completeMiniGame(.bubblePaws, score: 1600, petID: petID, runID: runID)
+        async let repeatedPayout = controller.completeMiniGame(.bubblePaws, score: 1600, petID: petID, runID: runID)
+        let payouts = await [firstPayout, repeatedPayout]
+        XCTAssertNotNil(payouts[0]); XCTAssertEqual(payouts[0], payouts[1])
+        XCTAssertEqual(controller.arcadeProgress.gamesPlayed, 1)
+        XCTAssertNil(controller.bubblePawsCheckpoint(for: petID))
+        let staleWrite = await controller.saveBubblePawsCheckpoint(next)
+        XCTAssertFalse(staleWrite)
+        let persisted = await store.load()
+        XCTAssertEqual(persisted.progress.gamesPlayed, 1)
+        XCTAssertTrue(persisted.bubblePawsRuns.isEmpty)
+    }
+
+    @MainActor
+    func testRestoredViewWaitsOnPauseAndRecoversUnclaimedRewardOnce() async throws {
+        let scene = try XCTUnwrap(UIApplication.shared.connectedScenes.first as? UIWindowScene)
+        let pet = PetProfile.starter
+        var engine = BubblePawsEngine(seed: 4); engine.start()
+        for terminal in [false, true] {
+            if terminal {
+                for _ in 0..<200 {
+                    if engine.phase == .roundCleared { engine.nextRound() }
+                    guard engine.phase == .playing else { break }
+                    engine.shoot(); settle(&engine)
+                }
+                XCTAssertTrue(engine.phase == .won || engine.phase == .gameOver)
+            }
+            let checkpoint = try XCTUnwrap(BubblePawsCheckpoint(engine: engine, petID: pet.id, runID: UUID()))
+            var saves = 0
+            var rewardedRuns: [UUID] = []
+            let view = BubblePawsGameView(pet: pet, highScore: 0, checkpoint: checkpoint, onSave: { _ in
+                saves += 1; return true
+            }, onFinish: { score, id in
+                XCTAssertEqual(score, checkpoint.snapshot.score)
+                rewardedRuns.append(id)
+                return ArcadePayout(score: score, coinsEarned: 10, isNewHighScore: false,
+                                    receivedDailyBonus: true, wasTired: false)
+            })
+            .environment(\.locale, Locale(identifier: "ru"))
+            .environment(\.dynamicTypeSize, terminal ? .large : .xxxLarge)
+            .preferredColorScheme(.dark)
+            let host = UIHostingController(rootView: view)
+            let window = UIWindow(windowScene: scene)
+            window.frame = CGRect(x: 0, y: 0, width: terminal ? 393 : 320, height: terminal ? 852 : 568)
+            window.rootViewController = host
+            window.makeKeyAndVisible()
+            defer { window.isHidden = true }
+            try await Task.sleep(for: .milliseconds(200))
+            host.view.layoutIfNeeded()
+            XCTAssertEqual(saves, 0, "Opening or waiting on a saved board must not write per frame")
+            XCTAssertEqual(rewardedRuns, terminal ? [checkpoint.runID] : [])
+            let screenshot = UIGraphicsImageRenderer(bounds: host.view.bounds).image { _ in
+                host.view.drawHierarchy(in: host.view.bounds, afterScreenUpdates: true)
+            }
+            let attachment = XCTAttachment(image: screenshot)
+            attachment.name = terminal ? "Bubble-restored-reward-ru" : "Bubble-resume-small-large-text-ru"
+            attachment.lifetime = .keepAlways
+            add(attachment)
+            host.view.setNeedsLayout(); host.view.layoutIfNeeded()
+            try await Task.sleep(for: .milliseconds(100))
+            XCTAssertEqual(rewardedRuns, terminal ? [checkpoint.runID] : [])
+        }
+    }
+
     private func cell(_ row: Int, _ column: Int) -> BubbleCell { BubbleCell(row: row, column: column) }
     private func settle(_ engine: inout BubblePawsEngine) {
         for _ in 0..<600 {
@@ -313,5 +510,16 @@ final class BubblePawsTests: XCTestCase {
             engine.update(deltaTime: 1 / 120.0)
         }
         XCTFail("Shot or effect failed to settle")
+    }
+}
+
+private actor BubbleTestStore: ArcadeStore {
+    private var value = ArcadeState()
+    private var fails = false
+    func setFailure(_ value: Bool) { fails = value }
+    func load() async -> ArcadeState { value }
+    func save(_ state: ArcadeState) async throws {
+        if fails { throw CocoaError(.fileWriteOutOfSpace) }
+        value = state
     }
 }

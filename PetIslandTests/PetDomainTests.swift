@@ -5,6 +5,114 @@ import SwiftUI
 
 final class PetDomainTests: XCTestCase {
 
+    func testCareItemsRequireAPositiveBenefit() {
+        let full = PetVitals(fullness: 1, happiness: 1, energy: 1)
+        for item in ArcadeItemKind.allCases {
+            XCTAssertFalse(ArcadeEconomy.hasBenefit(item, for: full), "\(item)")
+        }
+        XCTAssertFalse(ArcadeEconomy.hasBenefit(.toy, for: PetVitals(fullness: 0.5, happiness: 1, energy: 0.5)))
+        XCTAssertFalse(ArcadeEconomy.hasBenefit(.food, for: PetVitals(fullness: 1, happiness: 0.5, energy: 0.5)))
+        XCTAssertTrue(ArcadeEconomy.hasBenefit(.treat, for: PetVitals(fullness: 1, happiness: 0.5, energy: 1)))
+        XCTAssertTrue(ArcadeEconomy.hasBenefit(.treat, for: PetVitals(fullness: 0.5, happiness: 1, energy: 1)))
+        XCTAssertTrue(ArcadeEconomy.hasBenefit(.vitamins, for: PetVitals(fullness: 1, happiness: 0.5, energy: 1)))
+        XCTAssertTrue(ArcadeEconomy.hasBenefit(.vitamins, for: PetVitals(fullness: 1, happiness: 1, energy: 0.5)))
+        XCTAssertTrue(ArcadeEconomy.hasBenefit(.food, for: PetVitals(fullness: 0.99, happiness: 1, energy: 1)))
+    }
+
+    @MainActor
+    func testCareRejectsUnloadedUnknownAndWalkingPetsWithoutConsumingItems() async throws {
+        let original = PetHabitatStore.load()
+        defer { try? PetHabitatStore.save(original) }
+        let pet = PetProfile(id: UUID(), name: "Care test", species: .cat, coat: .sunrise, createdAt: .now)
+        var state = PersistedAppState(); state.pets = [pet]; state.activePetIDs = [pet.id]
+        var inventory = ArcadeInventory()
+        for item in ArcadeItemKind.allCases { inventory.add(item) }
+        let store = InMemoryArcadeStore(ArcadeState(progress: ArcadeProgress(coins: 100, inventory: inventory)))
+        let controller = PetSessionController(store: InMemoryPetStore(state), arcadeStore: store)
+        let unloaded = await controller.useArcadeItem(.food, for: pet.id)
+        XCTAssertFalse(unloaded)
+        await controller.bootstrap()
+        let unknown = await controller.useArcadeItem(.food, for: UUID())
+        XCTAssertFalse(unknown)
+        let started = await controller.startDiscoveryWalk(petID: pet.id, route: .garden, at: .now)
+        XCTAssertTrue(started)
+        for item in ArcadeItemKind.allCases {
+            XCTAssertNotNil(controller.arcadeItemUnavailableReason(item, for: pet.id))
+            let given = await controller.useArcadeItem(item, for: pet.id)
+            XCTAssertFalse(given)
+            XCTAssertEqual(controller.arcadeProgress.inventory[item], 1)
+        }
+        // Shopping remains available while the pet is away; only giving is blocked.
+        let bought = await controller.purchaseArcadeItem(.food)
+        XCTAssertTrue(bought)
+        XCTAssertEqual(controller.arcadeProgress.inventory[.food], 2)
+        _ = await controller.cancelDiscoveryWalk()
+        let givenAfterReturn = await controller.useArcadeItem(.food, for: pet.id)
+        XCTAssertTrue(givenAfterReturn)
+        XCTAssertEqual(controller.arcadeProgress.inventory[.food], 1)
+    }
+
+    @MainActor
+    func testCareRechecksWidgetUpdatesAndSerializesRepeatedTaps() async throws {
+        let original = PetHabitatStore.load()
+        defer { try? PetHabitatStore.save(original) }
+        let pet = PetProfile(id: UUID(), name: "Care test", species: .cat, coat: .sunrise, createdAt: .now)
+        var state = PersistedAppState(); state.pets = [pet]; state.activePetIDs = [pet.id]
+        var inventory = ArcadeInventory(); inventory.add(.food, count: 3); inventory.add(.toy)
+        let store = InMemoryArcadeStore(ArcadeState(progress: ArcadeProgress(inventory: inventory)))
+        let controller = PetSessionController(store: InMemoryPetStore(state), arcadeStore: store)
+        await controller.bootstrap()
+        try PetHabitatStore.update { shared in
+            let index = shared.residents.firstIndex { $0.id == pet.id }!
+            shared.residents[index].vitals = PetVitals(fullness: 1, happiness: 1, energy: 0.5)
+            shared.residents[index].vitalsUpdatedAt = .now
+        }
+        let food = await controller.useArcadeItem(.food, for: pet.id)
+        let toy = await controller.useArcadeItem(.toy, for: pet.id)
+        XCTAssertFalse(food); XCTAssertFalse(toy)
+        XCTAssertEqual(controller.arcadeProgress.inventory[.food], 3)
+        XCTAssertEqual(controller.arcadeProgress.inventory[.toy], 1)
+        XCTAssertEqual(controller.vitals(for: pet.id).energy, 0.5, accuracy: 0.001)
+        try PetHabitatStore.update { shared in
+            let index = shared.residents.firstIndex { $0.id == pet.id }!
+            shared.residents[index].vitals.fullness = 0.9
+            shared.residents[index].vitalsUpdatedAt = .now
+        }
+        async let first = controller.useArcadeItem(.food, for: pet.id)
+        async let second = controller.useArcadeItem(.food, for: pet.id)
+        let results = await [first, second]
+        XCTAssertEqual(results.filter { $0 }.count, 1)
+        XCTAssertEqual(controller.arcadeProgress.inventory[.food], 2)
+        XCTAssertEqual(controller.vitals(for: pet.id).fullness, 1)
+        let saved = await store.load()
+        XCTAssertEqual(saved.progress.inventory[.food], 2)
+        XCTAssertTrue(saved.pendingCareEvents.isEmpty)
+    }
+
+    @MainActor
+    func testFailedCareSaveKeepsInventoryAndVitalsThenRetryAppliesOnce() async {
+        let original = PetHabitatStore.load()
+        defer { try? PetHabitatStore.save(original) }
+        let pet = PetProfile(id: UUID(), name: "Care test", species: .cat, coat: .sunrise, createdAt: .now)
+        var state = PersistedAppState(); state.pets = [pet]; state.activePetIDs = [pet.id]
+        var inventory = ArcadeInventory(); inventory.add(.food)
+        let store = FailableArcadeStore(ArcadeState(progress: ArcadeProgress(inventory: inventory)))
+        let controller = PetSessionController(store: InMemoryPetStore(state), arcadeStore: store)
+        await controller.bootstrap()
+        let fullness = controller.vitals(for: pet.id).fullness
+        await store.setFailure(true)
+        let failed = await controller.useArcadeItem(.food, for: pet.id)
+        XCTAssertFalse(failed)
+        XCTAssertEqual(controller.arcadeProgress.inventory[.food], 1)
+        XCTAssertEqual(controller.vitals(for: pet.id).fullness, fullness)
+        await store.setFailure(false)
+        let retry = await controller.useArcadeItem(.food, for: pet.id)
+        let duplicate = await controller.useArcadeItem(.food, for: pet.id)
+        XCTAssertTrue(retry); XCTAssertFalse(duplicate)
+        XCTAssertEqual(controller.arcadeProgress.inventory[.food], 0)
+        XCTAssertEqual(controller.vitals(for: pet.id).fullness, min(fullness + 0.24, 1), accuracy: 0.00001)
+    }
+
     func testAllSelectableAppIconsAreBundledWithPreviews() throws {
         let bundleIcons = try XCTUnwrap(Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any])
         let primary = try XCTUnwrap(bundleIcons["CFBundlePrimaryIcon"] as? [String: Any])

@@ -198,6 +198,7 @@ struct ArcadeState: Codable, Equatable, Sendable {
     var vitalsUpdatedAtByPetID: [UUID: Date] = [:]
     var pendingCareEvents: [PetCareEvent] = []
     var completedRuns: [CompletedArcadeRun] = []
+    var bubblePawsRuns: [BubblePawsCheckpoint] = []
 
     init(
         progress: ArcadeProgress = ArcadeProgress(),
@@ -212,6 +213,12 @@ struct ArcadeState: Codable, Equatable, Sendable {
         let petIDs = Set(pets.map(\.id))
         vitalsByPetID = vitalsByPetID.filter { petIDs.contains($0.key) }
         vitalsUpdatedAtByPetID = vitalsUpdatedAtByPetID.filter { petIDs.contains($0.key) }
+        let completedIDs = Set(completedRuns.map(\.id))
+        var seenPets: Set<UUID> = []
+        bubblePawsRuns = bubblePawsRuns.filter {
+            $0.isValid && petIDs.contains($0.petID) && !completedIDs.contains($0.runID)
+                && seenPets.insert($0.petID).inserted
+        }
         for petID in petIDs where vitalsByPetID[petID] == nil {
             vitalsByPetID[petID] = PetVitals()
         }
@@ -229,18 +236,26 @@ struct ArcadeState: Codable, Equatable, Sendable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case schemaVersion, progress, vitalsByPetID, vitalsUpdatedAtByPetID, pendingCareEvents, completedRuns
+        case schemaVersion, progress, vitalsByPetID, vitalsUpdatedAtByPetID, pendingCareEvents, completedRuns, bubblePawsRuns
     }
 
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         pendingCareEvents = try values.decodeIfPresent([PetCareEvent].self, forKey: .pendingCareEvents) ?? []
         completedRuns = try values.decodeIfPresent([CompletedArcadeRun].self, forKey: .completedRuns) ?? []
+        // A damaged optional game must never prevent loading pets, coins or care.
+        let checkpoints = (try? values.decode([DecodedBubbleCheckpoint].self, forKey: .bubblePawsRuns)) ?? []
+        bubblePawsRuns = checkpoints.compactMap(\.value).filter(\.isValid)
         schemaVersion = Self.schemaVersion
         progress = try values.decodeIfPresent(ArcadeProgress.self, forKey: .progress) ?? ArcadeProgress()
         vitalsByPetID = try values.decodeIfPresent([UUID: PetVitals].self, forKey: .vitalsByPetID) ?? [:]
         vitalsUpdatedAtByPetID = try values.decodeIfPresent([UUID: Date].self, forKey: .vitalsUpdatedAtByPetID) ?? [:]
     }
+}
+
+private struct DecodedBubbleCheckpoint: Decodable {
+    let value: BubblePawsCheckpoint?
+    init(from decoder: Decoder) throws { value = try? BubblePawsCheckpoint(from: decoder) }
 }
 
 struct CompletedArcadeRun: Codable, Equatable, Sendable {
@@ -311,6 +326,13 @@ enum ArcadeEconomy {
             happiness: vitals.happiness + 0.08,
             energy: vitals.energy - 0.055
         )
+    }
+
+    static func hasBenefit(_ item: ArcadeItemKind, for vitals: PetVitals) -> Bool {
+        let after = self.vitals(vitals, afterUsing: item)
+        return after.fullness > vitals.fullness + 0.000_001
+            || after.happiness > vitals.happiness + 0.000_001
+            || after.energy > vitals.energy + 0.000_001
     }
 
     static func vitals(_ vitals: PetVitals, afterUsing item: ArcadeItemKind) -> PetVitals {

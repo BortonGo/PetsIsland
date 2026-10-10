@@ -3,6 +3,7 @@ import SwiftUI
 struct BubblePawsGameView: View {
     let pet: PetProfile
     let highScore: Int
+    let onSave: (BubblePawsCheckpoint) async -> Bool
     let onFinish: (Int, UUID) async -> ArcadePayout?
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
@@ -15,6 +16,22 @@ struct BubblePawsGameView: View {
     @State private var payout: ArcadePayout?
     @State private var isSavingResult = false
     @State private var didSaveResult = false
+    @State private var isSavingTurn = false
+    @State private var showsSaveError = false
+    @State private var confirmsRestart = false
+
+    init(pet: PetProfile, highScore: Int, checkpoint: BubblePawsCheckpoint?,
+         onSave: @escaping (BubblePawsCheckpoint) async -> Bool,
+         onFinish: @escaping (Int, UUID) async -> ArcadePayout?) {
+        self.pet = pet; self.highScore = highScore
+        self.onSave = onSave; self.onFinish = onFinish
+        if let checkpoint, checkpoint.petID == pet.id, checkpoint.isValid,
+           let restored = BubblePawsEngine(snapshot: checkpoint.snapshot) {
+            _engine = State(initialValue: restored)
+            _runID = State(initialValue: checkpoint.runID)
+            _isPaused = State(initialValue: restored.phase == .playing)
+        }
+    }
 
     private var finished: Bool { engine.phase == .won || engine.phase == .gameOver }
 
@@ -38,18 +55,27 @@ struct BubblePawsGameView: View {
                 }
                 controls.padding(.bottom, 8)
             }
-            .disabled(isPaused || engine.phase != .playing)
+            .disabled(isPaused || engine.phase != .playing || isSavingTurn)
             .accessibilityHidden(isPaused || engine.phase != .playing)
 
             if isPaused {
-                GamePausePanel(safeArea: EdgeInsets()) {
-                    lastTick = nil; isPaused = false
-                } onExit: { dismiss() }
+                GamePanelViewport(safeArea: EdgeInsets()) { pausePanel }
             } else if engine.phase != .playing {
                 GamePanelViewport(safeArea: EdgeInsets()) { panel }
             }
         }
+        .disabled(isSavingTurn)
         .persistentSystemOverlays(.hidden)
+        .alert("Game not saved", isPresented: $showsSaveError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Your last move was not applied. Free some space if needed and try again.")
+        }
+        .confirmationDialog("Start a new game?", isPresented: $confirmsRestart, titleVisibility: .visible) {
+            Button("New game", role: .destructive) { restart() }
+        } message: {
+            Text("This will replace your saved Bubble Paws game for this pet.")
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase != .active {
                 lastTick = nil
@@ -60,6 +86,7 @@ struct BubblePawsGameView: View {
             if finished { saveResultIfNeeded() }
         }
         .onAppear {
+            if finished { saveResultIfNeeded() }
 #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("-bubble-paws-autostart"), engine.phase == .ready { restart() }
 #endif
@@ -171,7 +198,9 @@ struct BubblePawsGameView: View {
                     .position(BubbleBoard.launcher)
             }
             Button {
-                engine.swapColors()
+                var candidate = engine
+                candidate.swapColors()
+                saveTurn(candidate)
             } label: {
                 VStack(spacing: 4) {
                     ZStack(alignment: .bottomTrailing) {
@@ -198,11 +227,11 @@ struct BubblePawsGameView: View {
                 .frame(width: 320, height: 463)
                 .gesture(DragGesture(minimumDistance: 0)
                     .onChanged { value in
-                        guard !isPaused else { return }
+                        guard !isPaused, !isSavingTurn else { return }
                         engine.aim(at: value.location)
                     }
                     .onEnded { value in
-                        guard !isPaused, scenePhase == .active else { return }
+                        guard !isPaused, !isSavingTurn, scenePhase == .active else { return }
                         engine.aim(at: value.location)
                         fire()
                     })
@@ -281,7 +310,11 @@ struct BubblePawsGameView: View {
             } else if engine.phase == .roundCleared {
                 Text("\(engine.score) points").font(.title3.monospacedDigit())
                 Text("Ready for the next round?").foregroundStyle(.secondary)
-                Button("Next round") { engine.nextRound(); lastTick = nil }
+                Button("Next round") {
+                    var candidate = engine
+                    candidate.nextRound()
+                    saveTurn(candidate)
+                }
                     .buttonStyle(PetPrimaryButtonStyle())
             } else {
                 Text("\(engine.score) points").font(.title3.monospacedDigit())
@@ -299,7 +332,7 @@ struct BubblePawsGameView: View {
                     .buttonStyle(PetPrimaryButtonStyle())
                     .disabled(isSavingResult || !didSaveResult)
             }
-            Button(finished && payout == nil ? "Leave without reward" : "Back to Arcade") { dismiss() }
+            Button("Back to Arcade") { dismiss() }
                 .disabled(isSavingResult)
         }
         .padding(24)
@@ -308,9 +341,30 @@ struct BubblePawsGameView: View {
         .padding(20)
     }
 
+    private var pausePanel: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "moon.zzz").font(.title2)
+            Text("Pause").font(.system(.title2, design: .rounded).bold())
+            Text("Your board is saved. You can return even after closing the app.")
+                .font(.subheadline).foregroundStyle(.secondary)
+            Button("Keep playing") { lastTick = nil; isPaused = false }
+                .buttonStyle(PetPrimaryButtonStyle())
+                .accessibilityIdentifier("bubble.resume")
+            Button("Back to Arcade") { dismiss() }
+            Button("New game") { confirmsRestart = true }
+                .font(.subheadline).foregroundStyle(.secondary)
+        }
+        .multilineTextAlignment(.center)
+        .padding(24)
+        .frame(maxWidth: 350)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 28))
+        .padding(20)
+    }
+
     private func fire() {
-        guard !isPaused, scenePhase == .active else { return }
-        if engine.shoot() { lastTick = nil }
+        guard !isPaused, !isSavingTurn, scenePhase == .active else { return }
+        var candidate = engine
+        if candidate.shoot() { saveTurn(candidate) }
     }
     private func tick(at date: Date) {
         guard scenePhase == .active, !isPaused, engine.needsAnimation else { lastTick = nil; return }
@@ -320,8 +374,25 @@ struct BubblePawsGameView: View {
         if !engine.needsAnimation { lastTick = nil }
     }
     private func restart() {
-        runID = UUID(); payout = nil; didSaveResult = false; isSavingResult = false
-        isPaused = false; lastTick = nil; engine.start()
+        var candidate = engine
+        candidate.start()
+        saveTurn(candidate, newRunID: UUID())
+    }
+    private func saveTurn(_ candidate: BubblePawsEngine, newRunID: UUID? = nil) {
+        guard !isSavingTurn else { return }
+        let id = newRunID ?? runID
+        guard let checkpoint = BubblePawsCheckpoint(engine: candidate, petID: pet.id, runID: id) else { return }
+        isSavingTurn = true
+        Task {
+            if await onSave(checkpoint) {
+                engine = candidate; runID = id; lastTick = nil
+                if newRunID != nil { payout = nil; didSaveResult = false }
+                isPaused = scenePhase != .active && engine.phase == .playing
+            } else {
+                showsSaveError = true
+            }
+            isSavingTurn = false
+        }
     }
     private func saveResultIfNeeded() {
         guard finished, !didSaveResult, !isSavingResult else { return }

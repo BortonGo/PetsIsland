@@ -404,10 +404,30 @@ final class PetSessionController: ObservableObject {
         candidate.pendingCareEvents.append(event)
         candidate.completedRuns.append(CompletedArcadeRun(id: runID, payout: payout))
         candidate.completedRuns = Array(candidate.completedRuns.suffix(128))
+        if game == .bubblePaws {
+            candidate.bubblePawsRuns.removeAll { $0.petID == petID && $0.runID == runID }
+        }
         guard await commitArcade(candidate) else { return nil }
         _ = await flushCareEvents()
         Haptics.success(enabled: settings.hapticsEnabled)
         return payout
+    }
+
+    func bubblePawsCheckpoint(for petID: UUID) -> BubblePawsCheckpoint? {
+        arcadeState.bubblePawsRuns.first { $0.petID == petID }
+    }
+
+    func saveBubblePawsCheckpoint(_ checkpoint: BubblePawsCheckpoint) async -> Bool {
+        guard didBootstrap, checkpoint.isValid else { return false }
+        await beginSave()
+        defer { finishSave() }
+        guard state.pets.contains(where: { $0.id == checkpoint.petID }),
+              !isPetOnDiscoveryWalk(checkpoint.petID),
+              !arcadeState.completedRuns.contains(where: { $0.id == checkpoint.runID }) else { return false }
+        var candidate = arcadeState
+        candidate.bubblePawsRuns.removeAll { $0.petID == checkpoint.petID }
+        candidate.bubblePawsRuns.append(checkpoint)
+        return await commitArcade(candidate)
     }
 
     func purchaseArcadeItem(_ item: ArcadeItemKind) async -> Bool {
@@ -453,11 +473,28 @@ final class PetSessionController: ObservableObject {
         return true
     }
 
+    func arcadeItemUnavailableReason(_ item: ArcadeItemKind, for petID: UUID) -> String? {
+        guard didBootstrap, state.pets.contains(where: { $0.id == petID }) else {
+            return String(localized: "Choose an available pet first.")
+        }
+        if isPetOnDiscoveryWalk(petID) { return String(localized: "Care is available after the walk.") }
+        if arcadeProgress.inventory[item] == 0 { return String(localized: "No items in stock.") }
+        if !ArcadeEconomy.hasBenefit(item, for: vitals(for: petID)) {
+            return String(localized: "Not needed right now.")
+        }
+        return nil
+    }
+
     func useArcadeItem(_ item: ArcadeItemKind, for petID: UUID) async -> Bool {
+        guard didBootstrap else { return false }
         await beginSave()
         defer { finishSave() }
-        guard state.pets.contains(where: { $0.id == petID }), await flushCareEvents() else { return false }
+        guard state.pets.contains(where: { $0.id == petID }), !isPetOnDiscoveryWalk(petID),
+              await flushCareEvents() else { return false }
         arcadeState.mergeVitals(from: PetHabitatStore.load())
+        // Recheck after merging widget care and acquiring the save queue: two
+        // taps must not consume the last item twice or feed an already full pet.
+        guard arcadeItemUnavailableReason(item, for: petID) == nil else { return false }
         var candidate = arcadeState
         guard candidate.progress.consume(item) else { return false }
         let neutral = PetVitals(fullness: 0.5, happiness: 0.5, energy: 0.5)

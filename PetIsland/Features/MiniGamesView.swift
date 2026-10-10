@@ -98,7 +98,9 @@ struct MiniGamesView: View {
             case .bubblePaws:
                 BubblePawsGameView(
                     pet: session.pet,
-                    highScore: controller.arcadeProgress.highScore(for: .bubblePaws)
+                    highScore: controller.arcadeProgress.highScore(for: .bubblePaws),
+                    checkpoint: controller.bubblePawsCheckpoint(for: session.pet.id),
+                    onSave: { await controller.saveBubblePawsCheckpoint($0) }
                 ) { score, runID in
                     await controller.completeMiniGame(.bubblePaws, score: score, petID: session.pet.id, runID: runID)
                 }
@@ -367,7 +369,8 @@ struct MiniGamesView: View {
                         .font(.caption).foregroundStyle(PetDesign.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                     HStack {
-                        Text("Play").font(.caption.weight(.semibold))
+                        Text(game == .bubblePaws && controller.bubblePawsCheckpoint(for: pet.id) != nil
+                             ? "Continue game" : "Play").font(.caption.weight(.semibold))
                         Image(systemName: "arrow.up.right").font(.caption)
                     }
                     .padding(.top, 4)
@@ -408,6 +411,7 @@ struct MiniGamesView: View {
     private func shopItem(_ item: ArcadeItemKind, pet: PetProfile) -> some View {
         let price = ArcadeEconomy.price(of: item)
         let owned = controller.arcadeProgress.inventory[item]
+        let unavailableReason = controller.arcadeItemUnavailableReason(item, for: pet.id)
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Image(systemName: item.symbol)
@@ -461,6 +465,8 @@ struct MiniGamesView: View {
                     Task {
                         if await controller.useArcadeItem(item, for: pet.id) {
                             message = String(localized: "\(pet.name) used \(item.title.lowercased()).")
+                        } else if let reason = controller.arcadeItemUnavailableReason(item, for: pet.id) {
+                            message = reason
                         } else {
                             showShopSaveFailure()
                         }
@@ -472,11 +478,17 @@ struct MiniGamesView: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(PetPrimaryButtonStyle())
-                .disabled(controller.isBusy || owned == 0)
+                .disabled(controller.isBusy || unavailableReason != nil)
                 .accessibilityLabel("Give \(item.title) to \(pet.name)")
+                .accessibilityIdentifier("shop.give.\(item.rawValue)")
             }
             .controlSize(.small)
             .frame(maxWidth: .infinity)
+            if let unavailableReason {
+                Text(unavailableReason)
+                    .font(.caption2).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .padding(14)
         .background(

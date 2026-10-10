@@ -2,11 +2,11 @@ import Foundation
 import CoreGraphics
 
 /// Logical coordinates keep collision, aiming and snapping identical on every screen.
-enum BubbleColor: Int, CaseIterable, Sendable {
+enum BubbleColor: Int, Codable, CaseIterable, Sendable {
     case rose, honey, mint, sky, lilac
 }
 
-struct BubbleCell: Hashable, Comparable, Sendable {
+struct BubbleCell: Codable, Hashable, Comparable, Sendable {
     let row: Int
     let column: Int
     static func < (lhs: Self, rhs: Self) -> Bool {
@@ -40,7 +40,7 @@ struct BubbleResolution {
     var points: Int { popped.count * 20 + dropped.count * 40 }
 }
 
-struct BubbleBoard {
+struct BubbleBoard: Codable, Equatable, Sendable {
     static let width: CGFloat = 320
     static let height: CGFloat = 560
     static let radius: CGFloat = 20
@@ -155,8 +155,8 @@ struct BubbleBoard {
 
 /// A shuffled set of silhouettes, with fresh gaps and bounded color clusters on every deal.
 /// The seed makes a reported level reproducible without keeping a catalogue of fixed puzzles.
-struct BubbleLevelGenerator {
-    enum Layout: CaseIterable { case arch, steps, twinPeaks, valley, wave, terraces }
+struct BubbleLevelGenerator: Codable, Equatable, Sendable {
+    enum Layout: String, Codable, CaseIterable, Sendable { case arch, steps, twinPeaks, valley, wave, terraces }
     struct Level {
         let board: BubbleBoard
         let layout: Layout
@@ -166,6 +166,10 @@ struct BubbleLevelGenerator {
     private var previousLayout: Layout?
 
     init(seed: UInt64) { self.seed = seed }
+
+    var isValid: Bool {
+        layouts.count <= Layout.allCases.count && Set(layouts).count == layouts.count
+    }
 
     mutating func random(_ upperBound: Int) -> Int {
         seed = seed &* 6364136223846793005 &+ 1442695040888963407
@@ -241,7 +245,7 @@ struct BubbleLevelGenerator {
 }
 
 struct BubblePawsEngine {
-    enum Phase: Equatable { case ready, playing, roundCleared, won, gameOver }
+    enum Phase: String, Codable, Sendable { case ready, playing, roundCleared, won, gameOver }
     struct Flight {
         let plan: BubbleShotPlan
         let color: BubbleColor
@@ -352,4 +356,83 @@ struct BubblePawsEngine {
         let colors = board.colors
         return colors.isEmpty ? .rose : colors[generator.random(colors.count)]
     }
+}
+
+extension BubblePawsEngine {
+    /// Only settled turns are saved. A shot's deterministic outcome is committed
+    /// before its animation starts, so suspension cannot lose or repeat the shot.
+    struct Snapshot: Codable, Equatable, Sendable {
+        let phase: Phase
+        let board: BubbleBoard
+        let level: Int
+        let score: Int
+        let misses: Int
+        let shots: Int
+        let currentColor: BubbleColor
+        let nextColor: BubbleColor
+        let aimAngle: Double
+        let generator: BubbleLevelGenerator
+
+        var isValid: Bool {
+            guard phase != .ready, (1...BubblePawsEngine.totalLevels).contains(level),
+                  (0...1_000_000).contains(score), (0...10_000).contains(shots),
+                  (0..<(level <= 2 ? 5 : 4)).contains(misses),
+                  aimAngle.isFinite, abs(aimAngle) <= Double.pi * 0.41,
+                  board.ceiling.isFinite, (0...BubbleBoard.dangerY).contains(board.ceiling),
+                  board.ceiling.truncatingRemainder(dividingBy: BubbleBoard.radius) == 0,
+                  board.cells.count <= 90, board.cells.keys.allSatisfy(board.isValid),
+                  generator.isValid else { return false }
+            switch phase {
+            case .ready: return false
+            case .playing:
+                return !board.cells.isEmpty && !board.crossedDangerLine
+                    && board.colors.contains(currentColor) && board.colors.contains(nextColor)
+            case .roundCleared: return board.cells.isEmpty && level < BubblePawsEngine.totalLevels
+            case .won: return board.cells.isEmpty && level == BubblePawsEngine.totalLevels
+            case .gameOver: return !board.cells.isEmpty
+            }
+        }
+    }
+
+    func snapshot() -> Snapshot? {
+        guard phase != .ready else { return nil }
+        var settled = self
+        if let shot = settled.flight {
+            settled.flight = nil
+            settled.resolve(shot)
+        }
+        settled.effects = []
+        settled.update(deltaTime: 0.05)
+        let result = Snapshot(phase: settled.phase, board: settled.board, level: settled.level,
+                              score: settled.score, misses: settled.misses, shots: settled.shots,
+                              currentColor: settled.currentColor, nextColor: settled.nextColor,
+                              aimAngle: settled.aimAngle, generator: settled.generator)
+        return result.isValid ? result : nil
+    }
+
+    init?(snapshot: Snapshot) {
+        guard snapshot.isValid else { return nil }
+        self.init(seed: 1)
+        phase = snapshot.phase; board = snapshot.board; level = snapshot.level
+        score = snapshot.score; misses = snapshot.misses; shots = snapshot.shots
+        currentColor = snapshot.currentColor; nextColor = snapshot.nextColor
+        aimAngle = snapshot.aimAngle; generator = snapshot.generator
+    }
+}
+
+struct BubblePawsCheckpoint: Codable, Equatable, Sendable {
+    let version: Int
+    let petID: UUID
+    let runID: UUID
+    let snapshot: BubblePawsEngine.Snapshot
+
+    init?(engine: BubblePawsEngine, petID: UUID, runID: UUID) {
+        guard let snapshot = engine.snapshot() else { return nil }
+        self.version = 1
+        self.petID = petID
+        self.runID = runID
+        self.snapshot = snapshot
+    }
+
+    var isValid: Bool { version == 1 && snapshot.isValid }
 }

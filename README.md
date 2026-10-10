@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 295 tests, a Release build, and static analysis on October 6,
+> build passed 305 tests, a Release build, and static analysis on October 10,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -188,11 +188,21 @@ three); successful matches do not reset that counter. Reaching the dotted danger
 line ends the run. Clear all five rounds to win.
 Each color also has its own symbol. Scores and earned coins use the existing
 arcade wallet, with duplicate reward protection. Animation runs only during
-shots and effects; leaving the app pauses the game without advancing the board.
+shots and effects. Each pet keeps its own unfinished game: the field, score,
+round, next colors, and remaining level shuffle survive closing the app. A shot's
+result is saved before its animation starts; reopening during a shot resumes after
+that shot, without repeating it. The arcade card shows **Continue game**, and the
+restored game waits on pause. A new game requires confirmation before replacing
+an unfinished one. Failed writes leave the previous turn intact, and a finished
+but unclaimed reward can be retried after reopening.
 
 Games include records, coin rewards, pause/resume, and a local shop with enclosure
 furniture, food, treats, toys, and vitamins. The shop uses earned in-game coins; it does not make
 real-money purchases. Backgrounding a game pauses the action.
+Food, treats, toys, and vitamins are only consumed when they improve at least one
+of the pet's needs. Giving items waits until the pet returns from a walk; buying
+supplies remains available. The shop explains unavailable actions. Repeated taps
+and failed saves do not spend extra items.
 
 ## Appearance
 
@@ -305,7 +315,8 @@ and **Настройки → Иконка приложения**.
 
 Run the **PetIsland** test action with **Command-U** in Xcode. The latest verified
 suite covers save recovery, pet placement, arcade
-rules, movement geometry, sprite registration, Live Activity color persistence
+rules, per-pet Bubble Paws recovery, interrupted shots, care availability and
+repeated taps, movement geometry, sprite registration, Live Activity color persistence
 and contrast, alternate-icon configuration, discovery persistence, automatic
 returns, exclusion between walks and Live Activities, accessory ownership, failed
 purchases, outfit persistence, complete outfit coverage, original canvas sizes,
