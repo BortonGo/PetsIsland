@@ -79,7 +79,8 @@ The collection contains **20 visual variants across six species**:
 
 ## Accessories and wardrobe
 
-Open **Pets → Wardrobe** on any pet card, or **Arcade → Shop → Accessories**.
+Open **Pets → your pet → Wardrobe**, or use the **… → Wardrobe** shortcut on
+its tile. Accessories are also available in **Arcade → Shop → Accessories**.
 Try an accessory before buying and preview it while standing, walking, running,
 or resting. Choose **Buy**, then **Wear accessory**; closing the preview does not
 change the pet. Choose **No accessory → Remove accessory** to take it off.

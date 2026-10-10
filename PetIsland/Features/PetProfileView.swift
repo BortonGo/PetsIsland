@@ -56,7 +56,10 @@ struct PetProfileDebugHostView: View {
     var body: some View {
         Group {
             if controller.operation == .loading { ProgressView() }
-            else if ProcessInfo.processInfo.arguments.contains("-profile-collection") { PetCollectionView(controller: controller) }
+            else if ProcessInfo.processInfo.arguments.contains("-profile-collection") {
+                HomeView(controller: controller)
+                    .onAppear { controller.selectedTab = .pets }
+            }
             else { PetProfileView(controller: controller, petID: petID) }
         }
         .task { await controller.bootstrap() }

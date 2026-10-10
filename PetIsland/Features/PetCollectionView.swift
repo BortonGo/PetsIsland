@@ -106,8 +106,7 @@ struct PetCollectionView: View {
     }
 
     private func petRow(_ pet: PetProfile) -> some View {
-        let partyIndex = controller.activePetIDs.firstIndex(of: pet.id)
-        let isLead = partyIndex == 0
+        let isLead = controller.activePetIDs.first == pet.id
         let isAway = controller.isPetOnDiscoveryWalk(pet.id)
 
         return VStack(alignment: .leading, spacing: 0) {
@@ -128,20 +127,13 @@ struct PetCollectionView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 16)
+                .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
             .disabled(controller.isBusy)
             .accessibilityIdentifier("pet.profile.\(pet.id)")
             .accessibilityHint("Open pet card")
-            Button { wardrobePet = pet } label: {
-                Label("Wardrobe", systemImage: "sparkles")
-                    .font(.caption.weight(.semibold))
-                    .frame(maxWidth: .infinity, minHeight: 44)
-            }
-            .buttonStyle(.plain)
-            .disabled(controller.isBusy)
-            .accessibilityIdentifier("pet.wardrobe.\(pet.id)")
-            HStack {
+            HStack(spacing: 0) {
                 Group {
                     if isAway { Label("Out exploring", systemImage: "pawprint") }
                     else if isLead { Label("Lead pet", systemImage: "crown") }
@@ -153,41 +145,51 @@ struct PetCollectionView: View {
                 .foregroundStyle(PetDesign.secondary)
                 .padding(.leading, 16)
                 Spacer(minLength: 0)
-            Menu {
-                if !isLead {
+                Menu {
                     Button {
-                        Task { _ = await controller.makeLeadPet(id: pet.id) }
+                        wardrobePet = pet
                     } label: {
-                        Label("Make lead", systemImage: "crown")
+                        Label("Wardrobe", systemImage: "sparkles")
                     }
-                    .disabled(controller.session != nil)
-                }
-                Button {
-                    editorRoute = PetEditorRoute(profile: pet, isNew: false)
-                } label: {
-                    Label("Edit", systemImage: "slider.horizontal.3")
-                }
-                .disabled(controller.session?.petID == pet.id)
+                    Section {
+                        if !isLead {
+                            Button {
+                                Task { _ = await controller.makeLeadPet(id: pet.id) }
+                            } label: {
+                                Label("Make lead", systemImage: "crown")
+                            }
+                            .disabled(controller.session != nil)
+                        }
+                        Button {
+                            editorRoute = PetEditorRoute(profile: pet, isNew: false)
+                        } label: {
+                            Label("Edit", systemImage: "slider.horizontal.3")
+                        }
+                        .disabled(controller.session?.petID == pet.id)
+                    }
 
-                if controller.pets.count > 1 {
-                    Button(role: .destructive) {
-                        pendingRemoval = pet
-                    } label: {
-                        Label("Remove pet", systemImage: "trash")
+                    if controller.pets.count > 1 {
+                        Section {
+                            Button(role: .destructive) {
+                                pendingRemoval = pet
+                            } label: {
+                                Label("Remove pet", systemImage: "trash")
+                            }
+                            .disabled(controller.session?.petID == pet.id || isAway)
+                        }
                     }
-                    .disabled(controller.session?.petID == pet.id || isAway)
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .font(.body)
+                        .foregroundStyle(.secondary)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
                 }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.body)
-                    .foregroundStyle(.secondary)
-                    .frame(width: 44, height: 44)
-                    .contentShape(Rectangle())
+                .disabled(controller.isBusy)
+                .accessibilityLabel("Actions for \(pet.name)")
+                .accessibilityIdentifier("pet.actions.\(pet.id)")
             }
-            .disabled(controller.isBusy)
-            .accessibilityLabel("Actions for \(pet.name)")
-            }
-            .padding(.top, 4)
+            .padding(.top, 8)
         }
         .padding(.bottom, 5)
         .petSurface()

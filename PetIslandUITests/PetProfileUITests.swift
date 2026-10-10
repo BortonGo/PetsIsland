@@ -38,6 +38,16 @@ final class PetProfileUITests: XCTestCase {
         launch("-profile-collection")
         let tile = app.buttons["pet.profile.CD000000-0000-0000-0000-000000000002"]
         XCTAssertTrue(tile.waitForExistence(timeout: 10))
+        capture("Pets — compact collection")
+        let actions = app.buttons["pet.actions.CD000000-0000-0000-0000-000000000002"]
+        actions.tap()
+        let quickWardrobe = app.buttons["Wardrobe"]
+        XCTAssertTrue(quickWardrobe.waitForExistence(timeout: 5))
+        quickWardrobe.tap()
+        XCTAssertTrue(app.navigationBars["Wardrobe"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Пиксель"].exists)
+        app.navigationBars["Wardrobe"].buttons["Done"].tap()
+        XCTAssertTrue(tile.waitForExistence(timeout: 5))
         tile.tap()
         XCTAssertTrue(app.navigationBars["Pet card"].waitForExistence(timeout: 5))
         capture("Card — dark")
@@ -114,7 +124,12 @@ final class PetProfileUITests: XCTestCase {
     }
 
     func testLargeTextAndEmptySuppliesRemainReachable() {
-        launch("-profile-empty", "-profile-light", "-profile-large")
+        launch("-profile-empty", "-profile-light", "-profile-large", "-profile-collection")
+        let tile = app.buttons["pet.profile.CD000000-0000-0000-0000-000000000002"]
+        XCTAssertTrue(app.buttons["pet.profile.CD000000-0000-0000-0000-000000000001"].waitForExistence(timeout: 10))
+        capture("Pets — light, large text")
+        reveal(tile)
+        tile.tap()
         XCTAssertTrue(app.navigationBars["Pet card"].waitForExistence(timeout: 10))
         capture("Card — light, large text")
         let give = app.buttons["profile.give.food"]
