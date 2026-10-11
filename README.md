@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 373 tests (354 unit and 19 UI tests), a Release build, and static analysis on October 11,
+> build passed 382 tests (360 unit and 22 UI tests), a Release build, and static analysis on October 11,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -178,6 +178,15 @@ the entire collection grid. A pet's personal album keeps only that companion's
 memories. Sharing includes the exact story shown. Notes use the existing minute
 countdown; no extra timer or background work is added. Island backups preserve
 the selected stories and still accept older format 1 and 2 files.
+
+Open a memory and choose **Make a postcard** to preview a shareable image of
+the companion in the garden, on the shore, or in the grove. The postcard keeps
+the saved name, breed, coat and outfit, plus the find, exact story and return
+date. It also works with old memories, even after a pet is renamed or removed.
+**Share postcard** sends the preview's PNG; **Save to Files** exports the same
+image. Text sharing remains available in the memory. Images are rendered only
+when opened, with a fixed 1080-pixel width and flexible height for long text;
+they add no background timers or changes to pet sprites, gait or Live Activities.
 
 If starting, ending or collecting a walk cannot be saved, the walk sheet shows
 an error and keeps the previous walk or find available for another attempt.
@@ -421,6 +430,10 @@ The **PetIslandUITests** target exercises the collection-to-card flow, care stoc
 updates, per-pet friendship and large-text habits, the selected companion in the shop and walks, return/collection, backup
 export/import through Files, restore confirmation and cancellation, and large text
 layouts. These tests use in-memory fixtures and run only in Simulator.
+Postcard checks cover all 20 companions with each outfit, all 12 finds and old
+stories, complete long text, custom coats, immutable saved appearances, PNG
+sharing, Files export/cancellation, and Russian accessibility text sizes.
+The three postcard UI flows also passed on an iPhone SE simulator with iOS 26.5.
 Their screenshots are attached to the Xcode test results.
 Walk tests also cover retrying failed starts, cancellations and collections,
 returning after backgrounding with Reduce Motion, Russian story counts, empty

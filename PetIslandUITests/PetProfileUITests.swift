@@ -334,6 +334,98 @@ final class PetProfileUITests: XCTestCase {
         XCTAssertTrue(share.isEnabled)
     }
 
+    func testNewWalkPostcardSharesAnImageAndKeepsTheMemory() {
+        launch("-profile-ready", "-profile-route=walks")
+        let collect = app.buttons["discoveries.collect"]
+        XCTAssertTrue(collect.waitForExistence(timeout: 10))
+        reveal(collect); collect.tap()
+        let story = app.staticTexts["discoveries.story.text"]
+        XCTAssertTrue(story.waitForExistence(timeout: 5))
+        let originalText = story.label
+        let postcard = app.buttons["discoveries.postcard"]
+        reveal(postcard); postcard.tap()
+        let image = app.images["postcard.image"]
+        XCTAssertTrue(image.waitForExistence(timeout: 10))
+        XCTAssertTrue(image.label.contains("Пиксель"))
+        XCTAssertTrue((image.value as? String ?? "").contains(originalText))
+        capture("Postcard — shore preview")
+        let share = app.buttons["postcard.share"]
+        reveal(share); share.tap()
+        let copy = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", "Copy")).firstMatch
+        XCTAssertTrue(copy.waitForExistence(timeout: 10), app.debugDescription)
+        capture("Postcard — system image sharing")
+        // Copy is a local share action and exercises PNG transfer without sending anything.
+        copy.tap()
+        XCTAssertTrue(app.navigationBars["Walk postcard"].waitForExistence(timeout: 5))
+        app.navigationBars["Walk postcard"].buttons["Done"].tap()
+        XCTAssertTrue(story.waitForExistence(timeout: 5))
+        XCTAssertEqual(story.label, originalText)
+        app.navigationBars["A new memory"].buttons["Done"].tap()
+        let album = app.buttons["discoveries.album"]
+        reveal(album); album.tap()
+        XCTAssertTrue(app.staticTexts["2 of 12 treasures"].waitForExistence(timeout: 5))
+    }
+
+    func testSavedWalkPostcardExportsPNGToFiles() {
+        launch("-profile-stories", "-profile-route=album")
+        XCTAssertTrue(app.navigationBars["Finds album"].waitForExistence(timeout: 10))
+        app.segmentedControls.buttons["Stories"].tap()
+        let memory = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH %@", "discoveries.memory.")).firstMatch
+        reveal(memory); memory.tap()
+        let postcard = app.buttons["discoveries.postcard"]
+        reveal(postcard); postcard.tap()
+        let export = app.buttons["postcard.save"]
+        XCTAssertTrue(export.waitForExistence(timeout: 10))
+        reveal(export); export.tap()
+        let save = app.navigationBars["FullDocumentManagerViewControllerNavigationBar"].buttons
+            .matching(NSPredicate(format: "identifier == %@ OR label IN %@", "DOCPicker.actionButton", ["Save", "Сохранить"])).firstMatch
+        XCTAssertTrue(save.waitForExistence(timeout: 10))
+        let cancel = app.buttons.matching(NSPredicate(format: "label IN %@", ["Cancel", "Отменить"])).firstMatch
+        if cancel.exists { cancel.tap() }
+        else { app.navigationBars["FullDocumentManagerViewControllerNavigationBar"].swipeDown() }
+        XCTAssertTrue(export.waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["postcard.saved"].exists)
+        export.tap()
+        XCTAssertTrue(save.waitForExistence(timeout: 10))
+        let filename = app.textFields["DOCPicker.filenameTextField"]
+        XCTAssertTrue(filename.waitForExistence(timeout: 5))
+        XCTAssertTrue((filename.value as? String ?? "").contains("Pet-Island-Postcard-"))
+        filename.tap(); filename.typeText("Postcard-" + UUID().uuidString.prefix(8) + "\n")
+        capture("Postcard — PNG in Files")
+        save.tap()
+        let feedback = app.staticTexts["postcard.saved"]
+        XCTAssertTrue(feedback.waitForExistence(timeout: 10))
+        reveal(feedback)
+        XCTAssertEqual(feedback.label, "Postcard saved.")
+        app.navigationBars["Walk postcard"].buttons["Done"].tap()
+        app.navigationBars["Walk memory"].buttons["Done"].tap()
+        XCTAssertTrue(app.staticTexts["8 of 36 stories"].waitForExistence(timeout: 5))
+    }
+
+    func testRussianPostcardKeepsLongNameAndActionsReachableWithLargeText() {
+        launch("-profile-ready", "-profile-route=walks", "-profile-russian", "-profile-long-name", "-profile-large", "-profile-light")
+        let collect = app.buttons["discoveries.collect"]
+        XCTAssertTrue(collect.waitForExistence(timeout: 10))
+        reveal(collect); collect.tap()
+        let postcard = app.buttons["discoveries.postcard"]
+        reveal(postcard)
+        XCTAssertEqual(postcard.label, "Сделать открытку")
+        postcard.tap()
+        let image = app.images["postcard.image"]
+        XCTAssertTrue(image.waitForExistence(timeout: 10))
+        XCTAssertTrue(image.label.contains("Пиксель Пушистый Исследователь Острова"))
+        capture("Postcard — Russian, long name")
+        let share = app.buttons["postcard.share"]
+        reveal(share)
+        XCTAssertEqual(share.label, "Поделиться открыткой")
+        let save = app.buttons["postcard.save"]
+        reveal(save)
+        XCTAssertTrue(save.isEnabled)
+        capture("Postcard — Russian, accessible actions")
+        app.navigationBars["Открытка с прогулки"].buttons["Готово"].tap()
+        XCTAssertTrue(app.buttons["discoveries.postcard"].waitForExistence(timeout: 5))
+    }
+
     func testQuietMomentIsFreeAndOnlyAppliesToTheOpenedPet() {
         launch("-profile-collection")
         let pet = app.buttons["pet.profile.CD000000-0000-0000-0000-000000000002"]

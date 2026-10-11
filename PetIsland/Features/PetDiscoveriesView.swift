@@ -495,6 +495,7 @@ struct PetDiscoveryMemoryView: View {
     let memory: PetDiscoveryMemory
     let isNew: Bool
     @Environment(\.dismiss) private var dismiss
+    @State private var showsPostcard = false
 
     var body: some View {
         NavigationStack {
@@ -546,6 +547,11 @@ struct PetDiscoveryMemoryView: View {
                             .font(.subheadline)
                             .foregroundStyle(PetDesign.secondary)
                     }
+                    Button { showsPostcard = true } label: {
+                        Label(String(localized: "Make a postcard", table: "WalkPostcards"), systemImage: "photo")
+                    }
+                    .buttonStyle(PetPrimaryButtonStyle())
+                    .accessibilityIdentifier("discoveries.postcard")
                     ShareLink(item: memory.shareText) {
                         Label("Share a memory", systemImage: "square.and.arrow.up")
                     }
@@ -562,6 +568,7 @@ struct PetDiscoveryMemoryView: View {
             }
             .petPage()
         }
+        .sheet(isPresented: $showsPostcard) { PetWalkPostcardView(memory: memory) }
     }
 }
 
