@@ -38,6 +38,58 @@ final class PetProfileUITests: XCTestCase {
         add(attachment)
     }
 
+    func testEnclosureMeetingFacesNeighbourPausesAndFinishes() {
+        app.launchArguments = ["-habitat-encounter-preview", "-AppleLanguages", "(en)"]
+        app.launch()
+        app.buttons["encounter.meet"].tap()
+        let phase = app.staticTexts["encounter.phase"]
+        XCTAssertTrue(phase.waitForExistence(timeout: 5))
+        let greeted = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == 'greeting'"), object: phase)
+        XCTAssertEqual(XCTWaiter.wait(for: [greeted], timeout: 12), .completed)
+        capture("Enclosure — greeting with original artwork")
+        app.buttons["encounter.pause"].tap()
+        let pausedPhase = phase.label
+        let unchanged = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != %@", pausedPhase), object: phase)
+        unchanged.isInverted = true
+        XCTAssertEqual(XCTWaiter.wait(for: [unchanged], timeout: 3), .completed)
+        app.buttons["encounter.pause"].tap()
+        let resting = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == 'resting'"), object: phase)
+        XCTAssertEqual(XCTWaiter.wait(for: [resting], timeout: 8), .completed)
+        capture("Enclosure — resting together")
+        let free = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == 'free'"), object: phase)
+        XCTAssertEqual(XCTWaiter.wait(for: [free], timeout: 12), .completed)
+    }
+
+    func testEnclosurePettingAndDepartureReleaseThePair() {
+        app.launchArguments = ["-habitat-encounter-preview", "-encounter-light", "-AppleLanguages", "(ru)",
+                               "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXL"]
+        app.launch()
+        app.buttons["encounter.meet"].tap()
+        let phase = app.staticTexts["encounter.phase"]
+        let greeted = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label == 'greeting'"), object: phase)
+        XCTAssertEqual(XCTWaiter.wait(for: [greeted], timeout: 12), .completed)
+        let neighbour = app.descendants(matching: .any).matching(identifier: "habitat.pet.EC000000-0000-0000-0000-000000000002").firstMatch
+        XCTAssertEqual(neighbour.value as? String, "Здоровается")
+        capture("Enclosure — light, large text, Russian accessibility")
+        neighbour.tap()
+        XCTAssertEqual(phase.label, "free")
+        app.buttons["encounter.remove"].tap()
+        XCTAssertFalse(neighbour.exists)
+        XCTAssertFalse(app.buttons["encounter.meet"].isEnabled)
+        XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "habitat.pet.EC000000-0000-0000-0000-000000000001").firstMatch.exists)
+    }
+
+    func testEnclosureReduceMotionDoesNotStartAMeeting() {
+        app.launchArguments = ["-habitat-encounter-preview", "-encounter-reduced-motion"]
+        app.launch()
+        app.buttons["encounter.meet"].tap()
+        XCTAssertEqual(app.staticTexts["encounter.phase"].label, "free")
+        capture("Enclosure — reduced motion")
+        let meeting = XCTNSPredicateExpectation(predicate: NSPredicate(format: "label != 'free'"), object: app.staticTexts["encounter.phase"])
+        meeting.isInverted = true
+        XCTAssertEqual(XCTWaiter.wait(for: [meeting], timeout: 3), .completed)
+    }
+
     func testCollectionOpensCardAndCareUpdatesStock() {
         launch("-profile-collection")
         let tile = app.buttons["pet.profile.CD000000-0000-0000-0000-000000000002"]

@@ -388,6 +388,19 @@ struct HabitatEditorCanvas: View {
     @State private var isVisible = false
     @State private var isInViewport = false
 
+    init(theme: HabitatTheme, pets: [PetProfile], vitalsByPetID: [UUID: PetVitals], petScale: CGFloat = 1,
+         hasCozyBox: Bool = false, furniture: [HabitatFurniturePlacement]? = nil, isAnimationEnabled: Bool = true,
+         motion: HabitatMotionSimulation? = nil) {
+        self.theme = theme
+        self.pets = pets
+        self.vitalsByPetID = vitalsByPetID
+        self.petScale = petScale
+        self.hasCozyBox = hasCozyBox
+        self.furniture = furniture
+        self.isAnimationEnabled = isAnimationEnabled
+        _motion = StateObject(wrappedValue: motion ?? HabitatMotionSimulation())
+    }
+
     var body: some View {
         GeometryReader { proxy in
             ZStack(alignment: .bottom) {
@@ -458,8 +471,9 @@ struct HabitatEditorCanvas: View {
                     .zIndex(actor.id == motion.boxOccupantID && motion.boxPhase.containsCat
                             ? boxDepth : motion.renderDepth(for: actor))
                     .accessibilityElement(children: .ignore)
+                    .accessibilityIdentifier("habitat.pet.\(actor.id.uuidString)")
                     .accessibilityLabel(actor.profile.name)
-                    .accessibilityValue(status(for: actor.pose))
+                    .accessibilityValue(motion.encounterStatus(for: actor.id) ?? status(for: actor.pose))
                     .accessibilityAction(named: Text("Stroke pet")) { motion.pet(actor.id) }
                 }
             }
@@ -653,6 +667,28 @@ final class HabitatMotionSimulation: ObservableObject {
     }
     private(set) var furniture: [HabitatFurniturePlacement] = []
     private var nextFurnitureVisit: [HabitatFurnitureSlot: Double] = [:]
+    enum EncounterPhase: String, CaseIterable { case approaching, greeting, resting }
+    struct Encounter: Equatable {
+        let leftID: UUID
+        let rightID: UUID
+        let leftTarget: CGPoint
+        let rightTarget: CGPoint
+        let napsTogether: Bool
+        var phase: EncounterPhase = .approaching
+        var elapsed = 0.0
+
+        func contains(_ id: UUID) -> Bool { id == leftID || id == rightID }
+        func target(for id: UUID) -> CGPoint { id == leftID ? leftTarget : rightTarget }
+    }
+    private(set) var encounter: Encounter? {
+        willSet {
+            // The phase is exposed to VoiceOver; its timer is not a drawn frame.
+            if encounter?.phase != newValue?.phase { objectWillChange.send() }
+        }
+    }
+    private var nextEncounter = 8.0
+    private var encounterCooldowns: [UUID: Double] = [:]
+    private var encounterSeed: UInt64 = 0x4845_4C4C_4F21
     private(set) var boxRestPose: PetPose = .sleep
     private(set) var size = CGSize.zero
     private(set) var hasCozyBox = false
@@ -702,6 +738,7 @@ final class HabitatMotionSimulation: ObservableObject {
         self.vitals = vitals
         let previousSize = size
         let previousPetWidth = petWidth
+        let previousFurniture = self.furniture
         let wasBoxEnabled = self.hasCozyBox
         let oldBoxSlot = boxPlacement.slot
         let placements = PetHabitatState.normalizedFurniture(furniture ?? (hasCozyBox ? [.init(item: .cozyBox, slot: .right)] : []))
@@ -745,6 +782,12 @@ final class HabitatMotionSimulation: ObservableObject {
         if self.hasCozyBox && !wasBoxEnabled { scheduleNextBoxVisit() }
         if !self.hasCozyBox { nextBoxVisit = .infinity }
         reconcileFurnitureVisits(resized: previousSize != size || previousPetWidth != petWidth)
+        if let encounter, previousSize != size || previousPetWidth != petWidth || previousFurniture != placements
+            || !actors.contains(where: { $0.id == encounter.leftID })
+            || !actors.contains(where: { $0.id == encounter.rightID }) {
+            endEncounter()
+        }
+        encounterCooldowns = encounterCooldowns.filter { id, _ in actors.contains { $0.id == id } }
         if actors.isEmpty { stop() }
     }
 
@@ -754,6 +797,7 @@ final class HabitatMotionSimulation: ObservableObject {
         guard active, !actors.isEmpty else { stop(); return }
         if reduceMotion {
             stop()
+            endEncounter()
             if boxPhase != .resting { cancelBoxVisit() }
             for slot in Array(furnitureVisits.keys) { cancelFurnitureVisit(slot) }
             actors = actors.map { actor in
@@ -800,6 +844,7 @@ final class HabitatMotionSimulation: ObservableObject {
 
     func pet(_ id: UUID) {
         guard let index = actors.firstIndex(where: { $0.id == id }) else { return }
+        if encounter?.contains(id) == true { endEncounter() }
         if let visit = furnitureVisits.values.first(where: { $0.petID == id }) {
             if reduced || visit.phase == .approaching { cancelFurnitureVisit(visit.placement.slot) }
             else { beginFurnitureExit(visit.placement.slot, actor: actors[index]); return }
@@ -827,16 +872,18 @@ final class HabitatMotionSimulation: ObservableObject {
 
     /// A box reserves one present cat. Other species keep their normal simulation.
     @discardableResult
-    func requestCatToBox(_ petID: UUID? = nil) -> Bool {
+    func requestCatToBox(_ petID: UUID? = nil, interruptsEncounter: Bool = true) -> Bool {
         guard hasCozyBox, boxOccupantID == nil, size.width > 1 else { return false }
         let candidates = actors.indices.filter { index in
             actors[index].profile.species == .cat && !furnitureVisits.values.contains(where: { $0.petID == actors[index].id })
                 && (petID == nil || actors[index].id == petID)
+                && (interruptsEncounter || encounter?.contains(actors[index].id) != true)
         }
         guard let index = candidates.min(by: {
             hypot(actors[$0].position.x - boxCenter.x, actors[$0].position.y - boxCenter.y)
                 < hypot(actors[$1].position.x - boxCenter.x, actors[$1].position.y - boxCenter.y)
         }) else { return false }
+        if encounter?.contains(actors[index].id) == true { endEncounter() }
         // This main-actor reservation happens synchronously, before any cat
         // advances. A second manual or ambient request cannot steal the box.
         boxOccupantID = actors[index].id
@@ -874,19 +921,28 @@ final class HabitatMotionSimulation: ObservableObject {
         requestAmbientFurnitureVisits()
         if hasCozyBox, boxOccupantID == nil, clock >= nextBoxVisit {
             let nearby = actors.filter {
-                $0.profile.species == .cat && hypot($0.position.x - boxCenter.x, $0.position.y - boxCenter.y) <= petWidth * 1.35
+                $0.profile.species == .cat && encounter?.contains($0.id) != true
+                    && hypot($0.position.x - boxCenter.x, $0.position.y - boxCenter.y) <= petWidth * 1.35
             }.min {
                 hypot($0.position.x - boxCenter.x, $0.position.y - boxCenter.y)
                     < hypot($1.position.x - boxCenter.x, $1.position.y - boxCenter.y)
             }
-            if let nearby, requestCatToBox(nearby.id) { }
+            if let nearby, requestCatToBox(nearby.id, interruptsEncounter: false) { }
             else { nextBoxVisit = clock + 2 }
         }
+        requestAmbientEncounter()
+        advanceEncounterClock(by: dt)
         let previous = actors
         var next = actors
         for index in next.indices {
             var actor = next[index]
             actor.affection = max(actor.affection - dt, 0)
+            if let encounter, encounter.contains(actor.id) {
+                advanceEncounterActor(&actor, encounter: encounter, neighbours: previous, by: dt)
+                updateAnimationFrame(for: &actor)
+                next[index] = actor
+                continue
+            }
             if let visit = furnitureVisits.values.first(where: { $0.petID == actor.id }) {
                 advanceFurnitureVisit(visit.placement.slot, actor: &actor, by: dt)
                 updateAnimationFrame(for: &actor)
@@ -1276,9 +1332,9 @@ extension HabitatMotionSimulation {
     }
 
     @discardableResult
-    func requestFurniture(_ slot: HabitatFurnitureSlot, petID: UUID? = nil) -> Bool {
+    func requestFurniture(_ slot: HabitatFurnitureSlot, petID: UUID? = nil, interruptsEncounter: Bool = true) -> Bool {
         guard let placement = furniture.first(where: { $0.slot == slot }), size.width > 1 else { return false }
-        if placement.item == .cozyBox { return requestCatToBox(petID) }
+        if placement.item == .cozyBox { return requestCatToBox(petID, interruptsEncounter: interruptsEncounter) }
         guard furnitureVisits[slot] == nil else { return false }
         let target = furnitureApproach(placement)
         let candidates = actors.indices.filter { index in
@@ -1286,11 +1342,13 @@ extension HabitatMotionSimulation {
             return placement.item.supports(actor.profile.species) && actor.id != boxOccupantID
                 && (petID == nil || actor.id == petID)
                 && !furnitureVisits.values.contains(where: { $0.petID == actor.id })
+                && (interruptsEncounter || encounter?.contains(actor.id) != true)
         }
         guard let index = candidates.min(by: {
             hypot(actors[$0].position.x - target.x, actors[$0].position.y - target.y)
                 < hypot(actors[$1].position.x - target.x, actors[$1].position.y - target.y)
         }) else { return false }
+        if encounter?.contains(actors[index].id) == true { endEncounter() }
         // Reserve synchronously on the main actor, before the first movement.
         var visit = FurnitureVisit(placement: placement, petID: actors[index].id, exitPoint: target)
         actors[index].target = target
@@ -1329,7 +1387,8 @@ extension HabitatMotionSimulation {
                 placement.item.supports(actor.profile.species) && actor.id != boxOccupantID
                     && !furnitureVisits.values.contains(where: { $0.petID == actor.id })
                     && hypot(actor.position.x - target.x, actor.position.y - target.y) < petWidth * 1.5
-            }) { _ = requestFurniture(placement.slot, petID: nearby.id) }
+                && encounter?.contains(actor.id) != true
+            }) { _ = requestFurniture(placement.slot, petID: nearby.id, interruptsEncounter: false) }
         }
     }
 
@@ -1469,6 +1528,238 @@ extension HabitatMotionSimulation {
         }
     }
 }
+
+// Encounters are transient foreground behavior. They share the enclosure clock
+// and never change profiles, vitals, saves, artwork or Live Activity state.
+extension HabitatMotionSimulation {
+    func encounterStatus(for id: UUID) -> String? {
+        guard let encounter, encounter.contains(id) else { return nil }
+        switch encounter.phase {
+        case .approaching: return String(localized: "Meeting a neighbour", table: "HabitatInteractions")
+        case .greeting: return String(localized: "Saying hello", table: "HabitatInteractions")
+        case .resting: return String(localized: "Resting together", table: "HabitatInteractions")
+        }
+    }
+
+    private func availableForEncounter(_ actor: Actor) -> Bool {
+        actor.id != boxOccupantID && !furnitureVisits.values.contains { $0.petID == actor.id }
+            && actor.visualOffsetY == 0 && actor.affection == 0
+            && [.idle, .walk, .run, .fly].contains(actor.pose)
+            && (vitals[actor.id]?.energy ?? 1) >= 0.18
+            && clock >= encounterCooldowns[actor.id, default: 0]
+    }
+
+    /// Both pets are reserved together, synchronously on the main actor.
+    /// Manual furniture invitations can interrupt; ambient furniture cannot.
+    @discardableResult
+    func requestEncounter(between firstID: UUID, and secondID: UUID) -> Bool {
+        guard !reduced, encounter == nil, firstID != secondID, size.width > 1,
+              let first = actors.first(where: { $0.id == firstID }),
+              let second = actors.first(where: { $0.id == secondID }),
+              availableForEncounter(first), availableForEncounter(second),
+              hypot(first.position.x - second.position.x, first.position.y - second.position.y) <= petWidth * 3.2
+        else { return false }
+        let left = first.position.x <= second.position.x ? first : second
+        let right = left.id == firstID ? second : first
+        let spacing = petWidth * 0.82
+        let midpoint = CGPoint(x: (left.position.x + right.position.x) / 2,
+                               y: (left.position.y + right.position.y) / 2)
+        var best: (CGPoint, CGPoint, CGFloat)?
+        for y in [midpoint.y, groundRange.upperBound, groundRange.lowerBound] {
+            for x in [midpoint.x, size.width / 2] {
+                let a = bounded(CGPoint(x: x - spacing / 2, y: y))
+                let b = bounded(CGPoint(x: x + spacing / 2, y: y))
+                guard b.x - a.x >= spacing - 0.01,
+                      encounterPathIsClear(from: left.position, to: a, excluding: [left.id, right.id]),
+                      encounterPathIsClear(from: right.position, to: b, excluding: [left.id, right.id]),
+                      encounterPathIsClear(from: a, to: b, excluding: [left.id, right.id]) else { continue }
+                let travel = hypot(a.x - left.position.x, a.y - left.position.y)
+                    + hypot(b.x - right.position.x, b.y - right.position.y)
+                if best == nil || travel < best!.2 { best = (a, b, travel) }
+            }
+        }
+        guard let best else { return false }
+        let visit = Encounter(leftID: left.id, rightID: right.id, leftTarget: best.0, rightTarget: best.1,
+                              napsTogether: encounterRandom() < 0.45)
+        encounter = visit
+        for index in actors.indices where visit.contains(actors[index].id) {
+            actors[index].target = visit.target(for: actors[index].id)
+            actors[index].velocity = .zero
+            actors[index].travelling = true
+            actors[index].turning = 0
+            actors[index].blockedFor = 0
+            actors[index].pose = .idle
+            updateAnimationFrame(for: &actors[index])
+        }
+        return true
+    }
+
+    private func encounterRandom() -> Double {
+        encounterSeed = encounterSeed &* 6364136223846793005 &+ 1442695040888963407
+        return Double(encounterSeed >> 11) / Double(UInt64.max >> 11)
+    }
+
+    private func requestAmbientEncounter() {
+        guard encounter == nil, actors.count > 1, clock >= nextEncounter else { return }
+        nextEncounter = clock + 3
+        let candidates = actors.filter(availableForEncounter)
+        guard candidates.count > 1 else { return }
+        // Rotate the first candidate without consuming the pets' walking seeds.
+        let offset = Int(encounterRandom() * Double(candidates.count)) % candidates.count
+        for step in candidates.indices {
+            let first = candidates[(step + offset) % candidates.count]
+            let neighbours = candidates.filter { $0.id != first.id }.sorted {
+                hypot($0.position.x - first.position.x, $0.position.y - first.position.y)
+                    < hypot($1.position.x - first.position.x, $1.position.y - first.position.y)
+            }
+            for second in neighbours {
+                if requestEncounter(between: first.id, and: second.id) { return }
+            }
+        }
+    }
+
+    private func encounterPathIsClear(from origin: CGPoint, to target: CGPoint, excluding ids: [UUID]) -> Bool {
+        let distance = hypot(target.x - origin.x, target.y - origin.y)
+        let samples = max(1, Int(ceil(distance / max(petWidth * 0.15, 1))))
+        for step in 0...samples {
+            let progress = CGFloat(step) / CGFloat(samples)
+            let point = CGPoint(x: origin.x + (target.x - origin.x) * progress,
+                                y: origin.y + (target.y - origin.y) * progress)
+            if furnitureBlocks(point) { return false }
+            if actors.contains(where: { other in
+                !ids.contains(other.id) && (
+                    encounterSpaceOverlaps(point, other.position)
+                    || (other.travelling && encounterSpaceOverlaps(point, other.target)))
+            }) { return false }
+        }
+        return true
+    }
+
+    private func encounterSpaceOverlaps(_ first: CGPoint, _ second: CGPoint) -> Bool {
+        abs(first.x - second.x) < petWidth * 0.8 && abs(first.y - second.y) < petWidth * 0.30
+    }
+
+    private func advanceEncounterClock(by dt: Double) {
+        guard var visit = encounter else { return }
+        visit.elapsed += dt
+        switch visit.phase {
+        case .approaching:
+            let participants = actors.filter { visit.contains($0.id) }
+            if participants.count != 2 || visit.elapsed > 10 || participants.contains(where: { $0.blockedFor > 1.2 }) {
+                endEncounter(); return
+            }
+            if participants.allSatisfy({
+                hypot($0.position.x - visit.target(for: $0.id).x, $0.position.y - visit.target(for: $0.id).y) < 0.1
+                    && $0.turning == 0 && $0.facing == ($0.id == visit.leftID ? 1 : -1)
+            }) {
+                visit.phase = .greeting
+                visit.elapsed = 0
+                for index in actors.indices where visit.contains(actors[index].id) { actors[index].affection = 1.5 }
+            }
+        case .greeting:
+            if visit.elapsed >= 2.4 { visit.phase = .resting; visit.elapsed = 0 }
+        case .resting:
+            if visit.elapsed >= (visit.napsTogether ? 7 : 4.5) { endEncounter(); return }
+        }
+        encounter = visit
+    }
+
+    private func advanceEncounterActor(_ actor: inout Actor, encounter visit: Encounter, neighbours: [Actor], by dt: Double) {
+        actor.velocity = visit.phase == .approaching ? actor.velocity : .zero
+        actor.travelling = visit.phase == .approaching
+        guard visit.phase == .approaching else {
+            actor.pose = visit.phase == .resting && visit.napsTogether ? .sleep : .idle
+            return
+        }
+        let target = visit.target(for: actor.id)
+        let dx = target.x - actor.position.x, dy = target.y - actor.position.y
+        let distance = hypot(dx, dy)
+        let facingTarget = distance < 0.1
+            ? (actor.id == visit.leftID ? visit.rightTarget : visit.leftTarget) : target
+        faceBoxTarget(&actor, target: facingTarget)
+        if actor.turning > 0 {
+            actor.turning = max(0, actor.turning - dt)
+            actor.facing = actor.turning > 0.11 ? actor.turnFrom : actor.desiredFacing
+            actor.pose = .idle
+            return
+        }
+        guard distance >= 0.1 else { actor.velocity = .zero; actor.pose = .idle; return }
+        let speed = min(28, sqrt(distance * 100), hypot(actor.velocity.dx, actor.velocity.dy) + dt * 90)
+        let travel = min(distance, speed * dt)
+        let next = CGPoint(x: actor.position.x + dx / distance * travel, y: actor.position.y + dy / distance * travel)
+        // A new visitor has right of way. Stop, then abandon a blocked meeting
+        // instead of pushing through furniture or dragging the other pet along.
+        if furnitureBlocks(next) || neighbours.contains(where: {
+            !visit.contains($0.id) && encounterSpaceOverlaps(next, $0.position)
+        }) {
+            actor.velocity = .zero
+            actor.pose = .idle
+            actor.blockedFor += dt
+            return
+        }
+        actor.blockedFor = 0
+        actor.position = next
+        actor.velocity = CGVector(dx: dx / distance * speed, dy: dy / distance * speed)
+        actor.pose = actor.profile.species == .parrot ? .fly : .walk
+        let stride = petWidth * PetAnimationLibrary.enclosureStrideRatio(
+            for: actor.profile.species, breed: actor.profile.resolvedBreed, pose: actor.pose)
+        actor.gaitPhase += travel / max(stride, 1)
+    }
+
+    private func endEncounter() {
+        guard let visit = encounter else { return }
+        encounter = nil
+        nextEncounter = clock + 18 + encounterRandom() * 12
+        for index in actors.indices where visit.contains(actors[index].id) {
+            encounterCooldowns[actors[index].id] = clock + 35
+            actors[index].velocity = .zero
+            actors[index].target = actors[index].position
+            actors[index].travelling = false
+            actors[index].turning = 0
+            actors[index].blockedFor = 0
+            actors[index].affection = 0
+            actors[index].pose = .idle
+            // Stagger departures so the pair does not immediately walk in lockstep.
+            actors[index].waiting = actors[index].id == visit.leftID ? 0.8 : 2
+            updateAnimationFrame(for: &actors[index])
+        }
+    }
+}
+
+#if DEBUG
+/// Isolated UI fixture: it uses the real canvas and simulation without a store.
+struct HabitatEncounterDebugHost: View {
+    @StateObject private var motion = HabitatMotionSimulation()
+    @State private var active = false
+    @State private var pets = [
+        PetProfile(id: UUID(uuidString: "EC000000-0000-0000-0000-000000000001")!, name: "Pixel",
+                   species: .cat, coat: .sunrise, createdAt: .distantPast, breed: .classicCat,
+                   outfit: PetOutfit(headwear: .knitHat)),
+        PetProfile(id: UUID(uuidString: "EC000000-0000-0000-0000-000000000002")!, name: "Corgi",
+                   species: .dog, coat: .sunrise, createdAt: .distantPast, breed: .corgi)
+    ]
+
+    var body: some View {
+        VStack(spacing: 20) {
+            HabitatEditorCanvas(theme: .sunnyMeadow, pets: pets, vitalsByPetID: [:],
+                                isAnimationEnabled: active, motion: motion)
+                .frame(height: 250)
+            Text(motion.encounter?.phase.rawValue ?? "free").accessibilityIdentifier("encounter.phase")
+            Button("Meet") {
+                _ = motion.requestEncounter(between: pets[0].id, and: pets[1].id)
+                active = true
+            }
+                .disabled(pets.count < 2).accessibilityIdentifier("encounter.meet")
+            Button("Remove neighbour") { pets = Array(pets.prefix(1)) }
+                .accessibilityIdentifier("encounter.remove")
+            Button(active ? "Pause" : "Resume") { active.toggle() }.accessibilityIdentifier("encounter.pause")
+        }
+        .padding(20)
+        .environment(\.petMinimizeMotion, ProcessInfo.processInfo.arguments.contains("-encounter-reduced-motion"))
+        .preferredColorScheme(ProcessInfo.processInfo.arguments.contains("-encounter-light") ? .light : .dark)
+    }
+}
+#endif
 
 private struct HabitatThemeBackdrop: View, Equatable {
     let theme: HabitatThemePresentation

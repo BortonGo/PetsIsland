@@ -87,6 +87,8 @@
 		CA4D10000000000000000001 /* PetWalkPostcard.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4D20000000000000000001 /* PetWalkPostcard.swift */; };
 		CA4D10000000000000000002 /* PetWalkPostcardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA4D20000000000000000002 /* PetWalkPostcardTests.swift */; };
 		CA4D10000000000000000003 /* WalkPostcards.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = CA4D20000000000000000003 /* WalkPostcards.xcstrings */; };
+		EC0110000000000000000001 /* PetEncounterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0120000000000000000001 /* PetEncounterTests.swift */; };
+		EC0110000000000000000002 /* HabitatInteractions.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = EC0120000000000000000002 /* HabitatInteractions.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -197,6 +199,8 @@
 		CA4D20000000000000000001 /* PetWalkPostcard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetWalkPostcard.swift; sourceTree = "<group>"; };
 		CA4D20000000000000000002 /* PetWalkPostcardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetWalkPostcardTests.swift; sourceTree = "<group>"; };
 		CA4D20000000000000000003 /* WalkPostcards.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = WalkPostcards.xcstrings; sourceTree = "<group>"; };
+		EC0120000000000000000001 /* PetEncounterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetEncounterTests.swift; sourceTree = "<group>"; };
+		EC0120000000000000000002 /* HabitatInteractions.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = HabitatInteractions.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -369,6 +373,7 @@
 				F20000000000000000000026 /* PetDiscoverySceneTests.swift */,
 				C20000000000000000000004 /* PetDiscoveryControllerTests.swift */,
 				H20000000000000000000003 /* PetHabitatStateTests.swift */,
+				EC0120000000000000000001 /* PetEncounterTests.swift */,
 				B20000000000000000000002 /* PetCozyBoxTests.swift */,
 				B20000000000000000000004 /* PetFurnitureTests.swift */,
 				F20000000000000000000023 /* BubblePawsTests.swift */,
@@ -378,7 +383,7 @@
 		};
 		R60000000000000000000001 /* Resources */ = {
 			isa = PBXGroup;
-			children = (R20000000000000000000001 /* Localizable.xcstrings */, CA4D20000000000000000003 /* WalkPostcards.xcstrings */, F20000000000000000000001 /* NaturalGaits.xcassets */, );
+			children = (R20000000000000000000001 /* Localizable.xcstrings */, CA4D20000000000000000003 /* WalkPostcards.xcstrings */, EC0120000000000000000002 /* HabitatInteractions.xcstrings */, F20000000000000000000001 /* NaturalGaits.xcassets */, );
 			path = Resources;
 			sourceTree = "<group>";
 		};
@@ -513,6 +518,7 @@
 				A10000000000000000000006 /* Assets.xcassets in Resources */,
 				R10000000000000000000001 /* Localizable.xcstrings in Resources */,
 				CA4D10000000000000000003 /* WalkPostcards.xcstrings in Resources */,
+				EC0110000000000000000002 /* HabitatInteractions.xcstrings in Resources */,
 				S10000000000000000000001 /* PetSprites.xcassets in Resources */,
 				F10000000000000000000001 /* NaturalGaits.xcassets in Resources */,
 			);
@@ -620,6 +626,7 @@
 				F10000000000000000000026 /* PetDiscoverySceneTests.swift in Sources */,
 				C10000000000000000000005 /* PetDiscoveryControllerTests.swift in Sources */,
 				H10000000000000000000004 /* PetHabitatStateTests.swift in Sources */,
+				EC0110000000000000000001 /* PetEncounterTests.swift in Sources */,
 				B10000000000000000000002 /* PetCozyBoxTests.swift in Sources */,
 				B10000000000000000000004 /* PetFurnitureTests.swift in Sources */,
 				F10000000000000000000023 /* BubblePawsTests.swift in Sources */,

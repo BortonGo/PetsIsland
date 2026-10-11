@@ -7,7 +7,9 @@ struct ContentView: View {
 
     var body: some View {
 #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-pet-profile-preview") {
+        if ProcessInfo.processInfo.arguments.contains("-habitat-encounter-preview") {
+            HabitatEncounterDebugHost()
+        } else if ProcessInfo.processInfo.arguments.contains("-pet-profile-preview") {
             PetProfileDebugHostView()
         } else if ProcessInfo.processInfo.arguments.contains("-discovery-scene-preview") {
             PetDiscoverySceneDebugHost()

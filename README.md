@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 382 tests (360 unit and 22 UI tests), a Release build, and static analysis on October 11,
+> build passed 400 tests (375 unit and 25 UI tests), a Release build, and static analysis on October 11,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -71,6 +71,12 @@ The collection contains **20 visual variants across six species**:
   approach, entry, use and exit, so two pets cannot occupy it simultaneously.
 - Existing boxes remain owned without a charge. All animal artwork and sprite
   frames are preserved. The Home Screen widget reflects the placed furniture.
+- Enclosure neighbours occasionally approach each other, greet with small hearts,
+  and rest or nap together. One pair meets at a time, with room for both pets;
+  sleeping pets and furniture occupants are left to their activities. Tap a pet
+  or invite it to furniture to interrupt the meeting. Encounters use the existing
+  art and distance-based gait, pause offscreen, respect Reduce Motion, and add no
+  saved state or background timers. They do not change Dynamic Island behaviour.
 
 <p align="center">
   <img src="Docs/Media/colorful-meadow-light.png" width="240" alt="Sunny meadow enclosure">
