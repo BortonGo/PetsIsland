@@ -359,7 +359,11 @@ private struct PetDiscoveryWalkPicker: View {
             .contentShape(RoundedRectangle(cornerRadius: 16))
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(route.discoveryTitle)
+        .accessibilityValue(Text("\(route.discoveryMinutes) min"))
+        .accessibilityHint(route.discoverySubtitle)
         .accessibilityAddTraits(selected ? [.isSelected] : [])
+        .accessibilityIdentifier("discoveries.route.\(route.rawValue)")
         .disabled(isStarting)
     }
 }
@@ -487,7 +491,8 @@ struct PetDiscoveriesAlbum: View {
         }
         .buttonStyle(.plain)
         .disabled(memory == nil)
-        .accessibilityElement(children: .combine)
+        .accessibilityLabel(memory == nil ? String(localized: "Still a mystery") : kind.discoveryTitle)
+        .accessibilityValue(kind.discoveryRoute.discoveryTitle)
     }
 }
 

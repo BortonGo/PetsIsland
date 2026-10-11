@@ -66,7 +66,8 @@ struct PetProfileDebugHostView: View {
         if !args.contains("-profile-empty") {
             inventory.add(.food, count: 3); inventory.add(.treat, count: 2); inventory.add(.toy)
         }
-        var arcade = ArcadeState(progress: ArcadeProgress(coins: 120, inventory: inventory, ownedAccessories: [.knitHat]),
+        var arcade = ArcadeState(progress: ArcadeProgress(coins: args.contains("-profile-no-coins") ? 0 : 120,
+                                                         inventory: inventory, ownedAccessories: [.knitHat]),
                                  vitalsByPetID: [pet.id: PetVitals(fullness: 0.65, happiness: 0.82, energy: 0.72)])
         if args.contains("-profile-bond") {
             for daysAgo in (1...6).reversed() {
@@ -108,7 +109,8 @@ struct PetProfileDebugHostView: View {
             await controller.bootstrap()
         }
         .preferredColorScheme(ProcessInfo.processInfo.arguments.contains("-profile-light") ? .light : .dark)
-        .dynamicTypeSize(ProcessInfo.processInfo.arguments.contains("-profile-large") ? .accessibility3 : .large)
+        .dynamicTypeSize(ProcessInfo.processInfo.arguments.contains("-profile-largest") ? .accessibility5
+                        : ProcessInfo.processInfo.arguments.contains("-profile-large") ? .accessibility3 : .large)
         .environment(\.petMinimizeMotion, ProcessInfo.processInfo.arguments.contains("-profile-reduced-motion"))
     }
 }
@@ -237,6 +239,7 @@ struct PetProfileView: View {
                 .background { Ellipse().fill(PetDesign.soft).frame(width: 200, height: 110) }
                 .accessibilityHidden(true)
             Text(pet.name).font(PetDesign.title(.title)).multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
             Text(pet.resolvedBreed?.displayName ?? pet.species.displayName)
                 .font(.subheadline).foregroundStyle(PetDesign.secondary)
             location(overview)

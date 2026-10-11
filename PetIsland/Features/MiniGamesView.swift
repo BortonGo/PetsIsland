@@ -12,15 +12,29 @@ private enum ArcadePage: Hashable {
     case shop
 }
 
+private enum ShopCategory: String, CaseIterable {
+    case care, accessories, furniture
+
+    var title: LocalizedStringKey {
+        switch self {
+        case .care: "Care"
+        case .accessories: "Accessories"
+        case .furniture: "Furniture"
+        }
+    }
+}
+
 struct MiniGamesView: View {
     @ObservedObject var controller: PetSessionController
     var showsDismissButton = true
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @PetReduceMotion private var reduceMotion
     @State private var selectedPetID: UUID?
     @State private var activeSession: ActiveArcadeSession?
     @State private var message: String?
     @State private var selectedPage: ArcadePage = .games
+    @State private var shopCategory: ShopCategory = .care
 
     init(controller: PetSessionController, showsDismissButton: Bool = true,
          initialPetID: UUID? = nil, startsInShop: Bool = false) {
@@ -45,7 +59,7 @@ struct MiniGamesView: View {
                             Section {
                                 arcadeContent(for: selectedPet)
                             } header: {
-                                arcadePageHeader(for: selectedPet)
+                                arcadePageHeader
                                     .id("arcade-page-header")
                             }
                         }
@@ -55,9 +69,13 @@ struct MiniGamesView: View {
                     .padding(.bottom, 32)
                 }
                 .onChange(of: selectedPage) { _, _ in
-                    withAnimation(.snappy) {
+                    withAnimation(reduceMotion ? nil : .snappy) {
                         scrollProxy.scrollTo("arcade-page-header", anchor: .top)
                     }
+                }
+                .onChange(of: shopCategory) { _, _ in
+                    // Switching a long category must reveal the new section's top.
+                    scrollProxy.scrollTo("arcade-page-header", anchor: .top)
                 }
             }
             .background(PetDesign.background)
@@ -173,14 +191,17 @@ struct MiniGamesView: View {
             }
         case .shop:
             VStack(spacing: 24) {
-                PetAccessoryShopSection(controller: controller, pet: pet)
-                HabitatFurnitureShopSection(controller: controller)
-                shop(for: pet)
+                shopStatusBar(for: pet)
+                switch shopCategory {
+                case .care: shop(for: pet)
+                case .accessories: PetAccessoryShopSection(controller: controller, pet: pet)
+                case .furniture: HabitatFurnitureShopSection(controller: controller)
+                }
             }
         }
     }
 
-    private func arcadePageHeader(for pet: PetProfile) -> some View {
+    private var arcadePageHeader: some View {
         VStack(spacing: 10) {
             Picker("Arcade section", selection: $selectedPage) {
                 Text("Games").tag(ArcadePage.games)
@@ -189,8 +210,29 @@ struct MiniGamesView: View {
             .pickerStyle(.segmented)
 
             if selectedPage == .shop {
-                shopStatusBar(for: pet)
-                    .transition(.move(edge: .top).combined(with: .opacity))
+                Menu {
+                    Picker("Shop", selection: $shopCategory) {
+                        ForEach(ShopCategory.allCases, id: \.self) { category in
+                            Text(category.title).tag(category)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 12) {
+                        Text(shopCategory.title)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .multilineTextAlignment(.leading)
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.system(size: 14, weight: .semibold))
+                    }
+                    .font(.subheadline.weight(.medium))
+                    .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Shop")
+                .accessibilityValue(Text(shopCategory.title))
+                .accessibilityIdentifier("shop.category")
             }
         }
         .padding(.vertical, 10)
@@ -202,20 +244,23 @@ struct MiniGamesView: View {
         let vitals = controller.vitals(for: pet.id)
 
         return VStack(spacing: 9) {
-            HStack {
+            (dynamicTypeSize.isAccessibilitySize
+             ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8)) : AnyLayout(HStackLayout(spacing: 12))) {
                 Label(pet.name, systemImage: "pawprint.fill")
                     .font(.subheadline.bold())
-                    .lineLimit(1)
-                Spacer()
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Label("\(controller.arcadeProgress.coins)", systemImage: "dollarsign.circle.fill")
                     .font(.subheadline.bold().monospacedDigit())
-                    .foregroundStyle(.orange)
+                    .accessibilityLabel("\(controller.arcadeProgress.coins) coins")
+                    .accessibilityIdentifier("shop.balance")
             }
 
-            HStack(spacing: 8) {
-                compactVital("fork.knife", value: vitals.fullness, color: PetDesign.accent)
-                compactVital("heart.fill", value: vitals.happiness, color: PetDesign.accent)
-                compactVital("bolt.fill", value: vitals.energy, color: PetDesign.accent)
+            (dynamicTypeSize.isAccessibilitySize
+             ? AnyLayout(VStackLayout(spacing: 10)) : AnyLayout(HStackLayout(spacing: 8))) {
+                compactVital("fork.knife", title: "Full", value: vitals.fullness)
+                compactVital("heart.fill", title: "Happy", value: vitals.happiness)
+                compactVital("bolt.fill", title: "Energy", value: vitals.energy)
             }
         }
         .padding(.horizontal, 14)
@@ -226,23 +271,27 @@ struct MiniGamesView: View {
         )
     }
 
-    private func compactVital(_ symbol: String, value: Double, color: Color) -> some View {
+    private func compactVital(_ symbol: String, title: LocalizedStringKey, value: Double) -> some View {
         HStack(spacing: 6) {
             Image(systemName: symbol)
                 .font(.caption.bold())
             ProgressView(value: value)
-                .tint(color)
+                .tint(PetDesign.accent)
             Text("\(Int(value * 100))%")
                 .font(.caption2.bold().monospacedDigit())
         }
-        .foregroundStyle(color)
+        .foregroundStyle(PetDesign.accent)
         .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: .ignore)
+        .accessibilityAddTraits(.isStaticText)
+        .accessibilityLabel(Text(title))
+        .accessibilityValue(Text(value, format: .percent.precision(.fractionLength(0))))
     }
 
     private var walletHeader: some View {
-        HStack(alignment: .top, spacing: 12) {
-            PetScreenHeading(title: "Games")
+        (dynamicTypeSize.isAccessibilitySize
+         ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12)) : AnyLayout(HStackLayout(alignment: .top, spacing: 12))) {
+            PetScreenHeading(title: selectedPage == .shop ? "Shop" : "Games")
             Label("\(controller.arcadeProgress.coins)", systemImage: "circle.circle")
                 .font(.subheadline.weight(.medium).monospacedDigit())
                 .padding(.horizontal, 12)
@@ -277,9 +326,12 @@ struct MiniGamesView: View {
                                 .frame(width: 68, height: 58)
                                 Text(pet.name)
                                     .font(.caption.bold())
-                                    .lineLimit(1)
+                                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
-                            .frame(width: 88, height: 94)
+                            .frame(width: dynamicTypeSize.isAccessibilitySize ? 160 : 104)
+                            .frame(minHeight: 94)
+                            .padding(.vertical, 8)
                             .background(
                                 isSelected ? PetDesign.soft : Color.clear,
                                 in: RoundedRectangle(cornerRadius: 18, style: .continuous)
@@ -290,7 +342,9 @@ struct MiniGamesView: View {
                             }
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel(pet.name)
                         .accessibilityAddTraits(isSelected ? .isSelected : [])
+                        .accessibilityIdentifier("arcade.companion.\(pet.id.uuidString)")
                     }
                 }
                 .padding(.vertical, 2)
@@ -390,18 +444,13 @@ struct MiniGamesView: View {
 
     private func shop(for pet: PetProfile) -> some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Label("Prize shop", systemImage: "storefront.fill")
-                    .font(.title3.bold())
-                Spacer()
-                Text("For \(pet.name)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            Label("Care", systemImage: "storefront.fill")
+                .font(.title3.bold())
+                .accessibilityAddTraits(.isHeader)
 
             LazyVGrid(columns: dynamicTypeSize.isAccessibilitySize
                       ? [GridItem(.flexible())]
-                      : [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                      : [GridItem(.adaptive(minimum: 160), spacing: 12)], spacing: 12) {
                 ForEach(ArcadeItemKind.allCases) { item in
                     shopItem(item, pet: pet)
                 }
@@ -416,10 +465,11 @@ struct MiniGamesView: View {
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Image(systemName: item.symbol)
-                    .font(.title2)
+                    .font(.system(size: 22))
                     .foregroundStyle(item.color)
                     .frame(width: 34, height: 34)
                     .background(item.color.opacity(0.12), in: Circle())
+                    .accessibilityHidden(true)
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
                     Text("In stock")
@@ -443,7 +493,7 @@ struct MiniGamesView: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            HStack(spacing: 8) {
+            VStack(spacing: 8) {
                 Button {
                     Task {
                         if await controller.purchaseArcadeItem(item) {
@@ -455,12 +505,14 @@ struct MiniGamesView: View {
                         }
                     }
                 } label: {
-                    Label("\(price)", systemImage: "dollarsign.circle.fill")
+                    Label("Buy for \(price) coins", systemImage: "dollarsign.circle.fill")
+                        .fixedSize(horizontal: false, vertical: true)
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(PetQuietButtonStyle())
                 .disabled(controller.isBusy || controller.arcadeProgress.coins < price)
                 .accessibilityLabel("Buy \(item.title) for \(price) coins")
+                .accessibilityIdentifier("shop.buy.\(item.rawValue)")
 
                 Button {
                     Task {
@@ -474,8 +526,6 @@ struct MiniGamesView: View {
                     }
                 } label: {
                     Text("Give")
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.78)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(PetPrimaryButtonStyle())
@@ -483,8 +533,12 @@ struct MiniGamesView: View {
                 .accessibilityLabel("Give \(item.title) to \(pet.name)")
                 .accessibilityIdentifier("shop.give.\(item.rawValue)")
             }
-            .controlSize(.small)
             .frame(maxWidth: .infinity)
+            if controller.arcadeProgress.coins < price {
+                Text("\(price - controller.arcadeProgress.coins) more coins needed. Earn coins in arcade games.")
+                    .font(.caption2).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             if let unavailableReason {
                 Text(unavailableReason)
                     .font(.caption2).foregroundStyle(.secondary)

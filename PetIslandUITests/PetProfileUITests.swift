@@ -19,14 +19,33 @@ final class PetProfileUITests: XCTestCase {
         app.launchArguments = ["-pet-profile-preview", "-AppleLanguages", russian ? "(ru)" : "(en)", "-AppleLocale", russian ? "ru_RU" : "en_US"] + arguments
         if arguments.contains("-profile-large") {
             app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXL"]
+        } else if arguments.contains("-profile-largest") {
+            app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
         }
         app.launch()
     }
 
     private func reveal(_ element: XCUIElement) {
-        for _ in 0..<12 {
-            if element.exists && element.isHittable { return }
-            app.swipeUp()
+        // Large fling gestures can carry a control behind a pinned header.
+        // Keep the target in the visible middle and use short, deliberate drags.
+        for _ in 0..<35 {
+            let visible = app.frame
+            var top = (app.navigationBars.allElementsBoundByIndex.last?.frame.maxY ?? visible.minY) + 8
+            let category = app.buttons["shop.category"]
+            if category.exists && category.isHittable { top = max(top, category.frame.maxY + 8) }
+            let footer = app.otherElements["wardrobe.pinnedControls"]
+            let bottom = footer.exists ? footer.frame.minY - 12 : visible.maxY
+            if element.exists && element.isHittable,
+               element.frame.midY > top,
+               element.frame.midY < bottom { return }
+            if element.exists && element.frame.minY > visible.maxY + 100 {
+                app.swipeUp()
+                continue
+            }
+            let down = element.exists && element.frame.midY < top
+            let from = app.coordinate(withNormalizedOffset: CGVector(dx: 0.88, dy: down ? 0.43 : 0.63))
+            let to = app.coordinate(withNormalizedOffset: CGVector(dx: 0.88, dy: down ? 0.63 : 0.43))
+            from.press(forDuration: 0.05, thenDragTo: to, withVelocity: .slow, thenHoldForDuration: 0)
         }
         XCTAssertTrue(element.isHittable, "Unreachable control: \(element)")
     }
@@ -36,6 +55,158 @@ final class PetProfileUITests: XCTestCase {
         attachment.name = name
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+
+    private func element(_ identifier: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(identifier: identifier).firstMatch
+    }
+
+    private func chooseShopCategory(_ name: String) {
+        let category = app.buttons["shop.category"]
+        XCTAssertTrue(category.isHittable)
+        category.tap()
+        app.buttons[name].tap()
+    }
+
+    func testInterfaceShopCategoriesKeepCompanionWalletAndStock() throws {
+        launch("-profile-route=shop")
+        XCTAssertTrue(app.navigationBars["Pet Arcade"].waitForExistence(timeout: 10))
+        let stock = element("shop.stock.food")
+        reveal(stock)
+        XCTAssertTrue(stock.label.contains("3"))
+        capture("Interface — care first, dark")
+        let buy = app.buttons["shop.buy.food"]
+        reveal(buy)
+        XCTAssertGreaterThanOrEqual(buy.frame.height, 44)
+        buy.tap()
+        XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 5))
+        app.alerts.firstMatch.buttons["OK"].tap()
+        XCTAssertTrue(stock.label.contains("4"))
+        let give = app.buttons["shop.give.food"]
+        reveal(give)
+        XCTAssertGreaterThanOrEqual(give.frame.height, 44)
+        give.tap()
+        XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 5))
+        app.alerts.firstMatch.buttons["OK"].tap()
+        XCTAssertTrue(stock.label.contains("3"))
+        chooseShopCategory("Accessories")
+        XCTAssertTrue(app.buttons["accessories.shop.knitHat"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["shop.buy.food"].exists)
+        XCTAssertEqual(element("shop.balance").label, "108 coins")
+        capture("Interface — accessories category")
+        chooseShopCategory("Furniture")
+        let box = app.buttons["furniture.buy.cozyBox"]
+        reveal(box)
+        XCTAssertTrue(box.isEnabled)
+        XCTAssertFalse(app.buttons["accessories.shop.knitHat"].exists)
+        capture("Interface — furniture category")
+        chooseShopCategory("Care")
+        XCTAssertEqual(element("shop.balance").label, "108 coins")
+        reveal(stock)
+        XCTAssertTrue(stock.label.contains("3"))
+        XCTAssertTrue(app.buttons["shop.give.food"].label.contains("Пиксель"))
+        try app.performAccessibilityAudit(for: [.sufficientElementDescription, .hitRegion])
+    }
+
+    func testInterfaceWardrobePurchaseWearAndRemoveRemainSeparate() throws {
+        launch("-profile-route=wardrobe", "-profile-reduced-motion")
+        XCTAssertTrue(app.navigationBars["Wardrobe"].waitForExistence(timeout: 10))
+        let crown = app.buttons["wardrobe.select.tinyCrown"]
+        reveal(crown); crown.tap()
+        XCTAssertTrue(crown.isSelected)
+        let buy = app.buttons["wardrobe.buy"]
+        XCTAssertTrue(buy.isHittable)
+        buy.tap()
+        let apply = app.buttons["wardrobe.apply"]
+        XCTAssertTrue(apply.waitForExistence(timeout: 5))
+        XCTAssertTrue(apply.isEnabled, "Buying does not silently change the pet's outfit")
+        XCTAssertEqual(element("wardrobe.balance").label, "10 coins")
+        capture("Interface — purchased crown, before wearing")
+        apply.tap()
+        let applied = XCTNSPredicateExpectation(predicate: NSPredicate(format: "enabled == false"), object: apply)
+        XCTAssertEqual(XCTWaiter.wait(for: [applied], timeout: 5), .completed)
+        XCTAssertEqual(crown.value as? String, "Wearing now")
+        let none = app.buttons["wardrobe.select.none"]
+        for _ in 0..<6 { if none.isHittable { break }; app.swipeDown() }
+        none.tap()
+        XCTAssertTrue(apply.isEnabled)
+        apply.tap()
+        let removed = XCTNSPredicateExpectation(predicate: NSPredicate(format: "enabled == false"), object: apply)
+        XCTAssertEqual(XCTWaiter.wait(for: [removed], timeout: 5), .completed)
+        XCTAssertEqual(none.value as? String, "Wearing now")
+        XCTAssertEqual(element("wardrobe.balance").label, "10 coins")
+        capture("Interface — accessory removed")
+        try app.performAccessibilityAudit(for: [.sufficientElementDescription, .hitRegion])
+    }
+
+    func testInterfaceWardrobeExplainsDisabledActionsBesideButtonAtLargestText() {
+        for away in [false, true] {
+            launch("-profile-route=wardrobe", "-profile-largest", "-profile-light", "-profile-russian",
+                   "-profile-long-name", away ? "-profile-away" : "-profile-no-coins", "-profile-reduced-motion")
+            XCTAssertTrue(app.navigationBars["Гардероб"].waitForExistence(timeout: 10))
+            let choice = app.buttons[away ? "wardrobe.select.none" : "wardrobe.select.tinyCrown"]
+            reveal(choice); choice.tap()
+            let reason = app.staticTexts["wardrobe.availability"]
+            let action = app.buttons[away ? "wardrobe.apply" : "wardrobe.buy"]
+            reveal(reason)
+            XCTAssertTrue(reason.isHittable)
+            reveal(action)
+            XCTAssertTrue(action.isHittable)
+            XCTAssertFalse(action.isEnabled)
+            XCTAssertLessThanOrEqual(reason.frame.maxY, action.frame.minY)
+            XCTAssertLessThanOrEqual(action.frame.maxY, app.frame.maxY)
+            capture(away ? "Interface — away explanation, largest Russian text" : "Interface — no coins, largest Russian text")
+        }
+    }
+
+    func testInterfaceLongNameAndWalkRoutesRemainAccessibleAtLargestText() throws {
+        launch("-profile-collection", "-profile-long-name", "-profile-largest", "-profile-light", "-profile-russian")
+        let card = app.buttons["pet.profile.CD000000-0000-0000-0000-000000000002"]
+        reveal(card)
+        XCTAssertEqual(card.label, "Пиксель Пушистый Исследователь Острова")
+        capture("Interface — collection, largest text")
+        card.tap()
+        XCTAssertTrue(app.navigationBars["Карточка питомца"].waitForExistence(timeout: 5))
+        capture("Interface — long name in card")
+        let walks = app.buttons["profile.walks"]
+        reveal(walks); walks.tap()
+        XCTAssertTrue(app.navigationBars["Прогулки"].waitForExistence(timeout: 5))
+        for route in ["garden", "grove", "shore"] {
+            let row = app.buttons["discoveries.route.\(route)"]
+            reveal(row); row.tap()
+            XCTAssertTrue(row.isSelected)
+            XCTAssertFalse(row.label.isEmpty)
+            XCTAssertFalse((row.value as? String ?? "").isEmpty)
+        }
+        capture("Interface — route choice, largest text")
+        let start = app.buttons["discoveries.confirmStart"]
+        reveal(start)
+        XCTAssertTrue(start.isEnabled)
+        try app.performAccessibilityAudit(for: [.sufficientElementDescription, .hitRegion])
+    }
+
+    func testInterfaceShopLargestTextKeepsCategoryAndPurchaseReachable() throws {
+        launch("-profile-route=shop", "-profile-largest", "-profile-light", "-profile-long-name", "-profile-russian")
+        XCTAssertTrue(app.navigationBars["Аркада питомцев"].waitForExistence(timeout: 10))
+        let buy = app.buttons["shop.buy.food"]
+        reveal(buy)
+        XCTAssertTrue(buy.isEnabled)
+        XCTAssertTrue(app.buttons["shop.category"].isHittable, "Only compact navigation stays pinned")
+        capture("Interface — shop, largest text")
+        chooseShopCategory("Аксессуары")
+        let crown = app.buttons["accessories.shop.tinyCrown"]
+        reveal(crown)
+        XCTAssertEqual(crown.value as? String, "Монеты: 110")
+        XCTAssertTrue(app.buttons["shop.category"].isHittable)
+        capture("Interface — accessory row, largest text")
+        try app.performAccessibilityAudit(for: [.sufficientElementDescription, .hitRegion])
+        chooseShopCategory("Предметы для вольера")
+        let furniture = app.buttons["furniture.buy.cozyBox"]
+        reveal(furniture)
+        XCTAssertTrue(furniture.isEnabled)
+        XCTAssertTrue(app.buttons["shop.category"].isHittable)
+        capture("Interface — furniture, largest text")
+        try app.performAccessibilityAudit(for: [.sufficientElementDescription, .hitRegion, .textClipped])
     }
 
     func testEnclosureMeetingFacesNeighbourPausesAndFinishes() {
@@ -136,6 +307,8 @@ final class PetProfileUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Pet Arcade"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.segmentedControls.buttons["Shop"].isSelected)
         XCTAssertTrue(app.buttons["Пиксель"].isSelected)
+        app.buttons["shop.category"].tap()
+        app.buttons["Accessories"].tap()
         XCTAssertTrue(app.buttons["accessories.shop.knitHat"].waitForExistence(timeout: 5))
         capture("Shop from card")
         app.navigationBars["Pet Arcade"].buttons["Close"].tap()

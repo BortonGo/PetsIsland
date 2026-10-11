@@ -28,7 +28,6 @@ struct PetWardrobeView: View {
                 if let pet {
                     VStack(spacing: 20) {
                         preview(pet)
-                        availabilityMessage(pet)
                         Text("Buy once and dress any of your pets. The same accessory can be worn by several friends.")
                             .font(.caption).foregroundStyle(PetDesign.secondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -36,6 +35,7 @@ struct PetWardrobeView: View {
                             tile(nil, pet: pet)
                             ForEach(PetAccessory.allCases) { item in tile(item, pet: pet) }
                         }
+                        if dynamicTypeSize.isAccessibilitySize { purchaseControls(pet) }
                     }
                     .padding(20)
                 } else {
@@ -44,19 +44,14 @@ struct PetWardrobeView: View {
             }
             .petPage()
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                if let pet {
-                    VStack(spacing: 10) {
-                        Label("\(controller.arcadeProgress.coins) coins", systemImage: "dollarsign.circle")
-                            .font(.caption.monospacedDigit())
-                            .foregroundStyle(PetDesign.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                        action(pet)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                    .background(PetDesign.background)
-                    .overlay(alignment: .top) { Divider().overlay(PetDesign.separator) }
+                if let pet, !dynamicTypeSize.isAccessibilitySize {
+                    purchaseControls(pet)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 12)
+                        .background(PetDesign.background)
+                        .overlay(alignment: .top) { Divider().overlay(PetDesign.separator) }
+                        .accessibilityElement(children: .contain)
+                        .accessibilityIdentifier("wardrobe.pinnedControls")
                 }
             }
             .navigationTitle("Wardrobe")
@@ -73,9 +68,27 @@ struct PetWardrobeView: View {
         } message: { Text(saveError ?? "") }
     }
 
+    private func purchaseControls(_ pet: PetProfile) -> some View {
+        VStack(spacing: 10) {
+            Label("\(controller.arcadeProgress.coins) coins", systemImage: "dollarsign.circle")
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(PetDesign.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityElement(children: .ignore)
+                .accessibilityAddTraits(.isStaticText)
+                .accessibilityLabel("\(controller.arcadeProgress.coins) coins")
+                .accessibilityIdentifier("wardrobe.balance")
+            availabilityMessage(pet)
+            action(pet)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
     private func preview(_ pet: PetProfile) -> some View {
         VStack(spacing: 12) {
             Text(pet.name).font(.title3.weight(.semibold))
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
             // Some approved run frames last 80 ms; a 12 Hz clock skips them.
             // The equatable sprite resolves only the frames that actually change.
             TimelineView(.animation(minimumInterval: 1.0 / 30, paused: !isVisible || !previewIsInViewport || reduceMotion || scenePhase != .active || pose == .idle || pose == .sleep)) { context in
@@ -99,6 +112,8 @@ struct PetWardrobeView: View {
                 Text("Resting").tag(PetPose.sleep)
             }
             .pickerStyle(.menu)
+            .frame(minHeight: 44)
+            .accessibilityIdentifier("wardrobe.movement")
             .onChange(of: pose) { _, _ in previewStart = .now }
         }
         .frame(maxWidth: .infinity)
@@ -132,6 +147,9 @@ struct PetWardrobeView: View {
         }
         .buttonStyle(.plain)
         .disabled(controller.isBusy)
+        .accessibilityLabel(item?.title ?? String(localized: "No accessory"))
+        .accessibilityValue(item == pet.outfit?.headwear ? String(localized: "Wearing now")
+            : owned ? String(localized: "In wardrobe") : String(localized: "\(item?.price ?? 0) coins"))
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibilityIdentifier("wardrobe.select.\(item?.rawValue ?? "none")")
     }
@@ -176,12 +194,16 @@ struct PetWardrobeView: View {
             if missing > 0 {
                 Text("\(missing) more coins needed. Earn coins in arcade games.")
                     .font(.caption).foregroundStyle(PetDesign.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .accessibilityIdentifier("wardrobe.availability")
             }
         } else if controller.isPetOnDiscoveryWalk(pet.id) {
             Text("Outfits can be changed when this pet returns.")
                 .font(.caption).foregroundStyle(PetDesign.secondary)
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .accessibilityIdentifier("wardrobe.availability")
         }
     }
 
@@ -209,6 +231,7 @@ struct PetAccessoryShopSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label("Accessories", systemImage: "sparkles").font(.title3.weight(.semibold))
+                .accessibilityAddTraits(.isHeader)
             Text("Try it on before buying. One purchase for all your pets.")
                 .font(.caption).foregroundStyle(PetDesign.secondary)
             ForEach(PetAccessory.allCases) { item in
@@ -225,13 +248,18 @@ struct PetAccessoryShopSection: View {
                                 Label("\(item.price)", systemImage: "dollarsign.circle").font(.caption.monospacedDigit())
                             }
                         }
-                        Spacer(minLength: 0)
-                        Text("Try on").font(.caption.weight(.semibold))
-                        Image(systemName: "chevron.right").font(.caption)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        Label("Try on", systemImage: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     .padding(16).petSurface(radius: 20).contentShape(RoundedRectangle(cornerRadius: 20))
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(item.title)
+                .accessibilityValue(controller.arcadeProgress.ownedAccessories.contains(item)
+                    ? String(localized: "In wardrobe") : String(localized: "\(item.price) coins"))
+                .accessibilityHint("Try on")
                 .accessibilityIdentifier("accessories.shop.\(item.rawValue)")
             }
         }

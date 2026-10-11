@@ -13,7 +13,9 @@ struct PetCollectionView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(spacing: 24) {
+                // Only the grid needs lazy placement. Nesting it inside a lazy
+                // stack can repeatedly remeasure very tall accessibility rows.
+                VStack(spacing: 24) {
                     partyHeader
                     collection
                     addButton
@@ -120,7 +122,9 @@ struct PetCollectionView: View {
                     .frame(height: 105)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 15)
-                    Text(pet.name).font(.headline).lineLimit(1)
+                    Text(pet.name).font(.headline)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text(pet.resolvedBreed?.displayName ?? pet.species.displayName)
                         .font(.caption).foregroundStyle(PetDesign.secondary)
                         .lineLimit(2)
@@ -131,6 +135,8 @@ struct PetCollectionView: View {
             }
             .buttonStyle(.plain)
             .disabled(controller.isBusy)
+            .accessibilityLabel(pet.name)
+            .accessibilityValue(pet.resolvedBreed?.displayName ?? pet.species.displayName)
             .accessibilityIdentifier("pet.profile.\(pet.id)")
             .accessibilityHint("Open pet card")
             HStack(spacing: 0) {
@@ -180,7 +186,7 @@ struct PetCollectionView: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis")
-                        .font(.body)
+                        .font(.system(size: 17, weight: .medium))
                         .foregroundStyle(.secondary)
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())

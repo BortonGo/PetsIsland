@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 400 tests (375 unit and 25 UI tests), a Release build, and static analysis on October 11,
+> build passed 405 tests (375 unit and 30 UI tests), a Release build, and static analysis on October 11,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -45,6 +45,9 @@ The collection contains **20 visual variants across six species**:
   fullness, happiness, energy, care supplies, wardrobe, and walk memories.
   Giving an item uses the existing shared inventory and only affects that pet.
   Empty supplies, unnecessary care, and care during a walk stay unavailable.
+- The shop opens with **Care**; its category menu switches directly to
+  **Accessories** or **Furniture**, keeping the chosen companion and inventory.
+  Only section navigation stays pinned, so large text leaves room for the items.
 - The card opens the shop and walk picker with that companion selected.
   Memories belong to the pet's identity and survive renaming. Editing the name
   or appearance remains a separate pencil action; the original artwork is reused.
@@ -112,8 +115,11 @@ its tile. Accessories are also available in **Arcade → Shop → Accessories**.
 Try an accessory before buying and preview it while standing, walking, running,
 or resting. Choose **Buy**, then **Wear accessory**; closing the preview does not
 change the pet. Choose **No accessory → Remove accessory** to take it off.
-The purchase/apply button stays at the bottom while the wardrobe scrolls,
-including when using larger system text. Walking/running previews sample at
+The purchase/apply button stays at the bottom while the wardrobe scrolls.
+At accessibility text sizes, the controls scroll with the content so they cannot
+cover the choices. Missing-coin and away-pet explanations stay beside the action.
+Buying and wearing remain separate actions.
+Walking/running previews sample at
 30 Hz so short run frames are not skipped; the preview pauses when scrolled out
 of view, in the background, or with Reduce Motion enabled.
 
@@ -436,6 +442,12 @@ The **PetIslandUITests** target exercises the collection-to-card flow, care stoc
 updates, per-pet friendship and large-text habits, the selected companion in the shop and walks, return/collection, backup
 export/import through Files, restore confirmation and cancellation, and large text
 layouts. These tests use in-memory fixtures and run only in Simulator.
+Interface checks cover shop category switching without losing the companion or
+stock, buying/wearing/removing an accessory as separate actions, and disabled
+actions with an explanation. They also exercise the largest Russian text size
+and long names, and audit control descriptions and hit regions.
+These five interface flows also passed on an iPhone SE simulator with iOS 26.5;
+the full suite passed on iOS 27.
 Postcard checks cover all 20 companions with each outfit, all 12 finds and old
 stories, complete long text, custom coats, immutable saved appearances, PNG
 sharing, Files export/cancellation, and Russian accessibility text sizes.
@@ -505,8 +517,9 @@ Tools/                    Resource validation and automated build checks
 ## Further development
 
 The next focus is device testing and polishing the existing pet, enclosure, and
-arcade experience. Richer discoveries, illustrated postcards, shared pet scenes
-and a future way to support the author are ideas for later, not current features.
+arcade experience. Walk stories, illustrated postcards and enclosure encounters
+are implemented. Further accessories and a way to support the author remain
+possible later stages; advertising and App Store preparation are deferred.
 
 ## License
 
