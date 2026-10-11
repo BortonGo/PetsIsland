@@ -184,6 +184,113 @@ final class PetProfileUITests: XCTestCase {
         XCTAssertEqual(story.label, originalText)
     }
 
+    func testRussianStoryCountIsLocalized() {
+        launch("-profile-stories", "-profile-route=album", "-profile-russian")
+        XCTAssertTrue(app.navigationBars["Альбом находок"].waitForExistence(timeout: 10))
+        app.segmentedControls.buttons["Истории"].tap()
+        capture("Walk polish — Russian story count")
+        XCTAssertTrue(app.staticTexts["8 из 36 историй"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["8 of 36 stories"].exists)
+    }
+
+    func testWalkStartSaveFailureCanBeRetriedInPlace() {
+        launch("-profile-route=walks", "-profile-fail-walk-save")
+        let start = app.buttons["discoveries.confirmStart"]
+        XCTAssertTrue(start.waitForExistence(timeout: 10))
+        let companion = app.buttons["discoveries.companion"]
+        companion.tap()
+        XCTAssertTrue(app.buttons["Корги"].waitForExistence(timeout: 5))
+        app.buttons["Корги"].tap()
+        XCTAssertEqual(companion.value as? String, "Корги")
+        companion.tap()
+        app.buttons["Пиксель"].tap()
+        XCTAssertEqual(companion.value as? String, "Пиксель")
+        reveal(start); start.tap()
+        let error = app.alerts["Could not save"]
+        XCTAssertTrue(error.waitForExistence(timeout: 5))
+        capture("Walk polish — start save error")
+        error.buttons["OK"].tap()
+        XCTAssertTrue(start.isEnabled)
+        start.tap()
+        XCTAssertTrue(app.buttons["End walk"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.alerts.firstMatch.exists)
+    }
+
+    func testFindCollectionSaveFailureKeepsFindAvailable() {
+        launch("-profile-ready", "-profile-route=walks", "-profile-fail-walk-save")
+        let collect = app.buttons["discoveries.collect"]
+        XCTAssertTrue(collect.waitForExistence(timeout: 10))
+        reveal(collect); collect.tap()
+        let error = app.alerts["Could not save"]
+        XCTAssertTrue(error.waitForExistence(timeout: 5))
+        error.buttons["OK"].tap()
+        XCTAssertTrue(collect.isEnabled)
+        collect.tap()
+        XCTAssertTrue(app.navigationBars["A new memory"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["discoveries.story.text"].label.contains("Пиксель"))
+        app.navigationBars["A new memory"].buttons["Done"].tap()
+        XCTAssertFalse(collect.exists)
+        let album = app.buttons["discoveries.album"]
+        reveal(album); album.tap()
+        XCTAssertTrue(app.staticTexts["2 of 12 treasures"].waitForExistence(timeout: 5))
+    }
+
+    func testCancellationSaveFailureKeepsWalkAndCanRetry() {
+        launch("-profile-away", "-profile-route=walks", "-profile-fail-walk-save")
+        let end = app.buttons["End walk"]
+        XCTAssertTrue(end.waitForExistence(timeout: 10))
+        reveal(end); end.tap()
+        app.buttons.matching(identifier: "End walk").allElementsBoundByIndex.last!.tap()
+        let error = app.alerts["Could not save"]
+        XCTAssertTrue(error.waitForExistence(timeout: 5))
+        error.buttons["OK"].tap()
+        XCTAssertTrue(end.isEnabled)
+        end.tap()
+        app.buttons.matching(identifier: "End walk").allElementsBoundByIndex.last!.tap()
+        XCTAssertTrue(app.buttons["discoveries.confirmStart"].waitForExistence(timeout: 5))
+        let album = app.buttons["discoveries.album"]
+        reveal(album); album.tap()
+        XCTAssertTrue(app.staticTexts["1 of 12 treasures"].waitForExistence(timeout: 5))
+    }
+
+    func testWalkReturnsAfterBackgroundWithReducedMotion() {
+        launch("-profile-returning", "-profile-route=walks", "-profile-reduced-motion")
+        XCTAssertTrue(app.navigationBars["Walks"].waitForExistence(timeout: 10))
+        XCTAssertFalse(app.buttons["discoveries.collect"].exists)
+        XCUIDevice.shared.press(.home)
+        Thread.sleep(forTimeInterval: 16)
+        app.activate()
+        let collect = app.buttons["discoveries.collect"]
+        XCTAssertTrue(collect.waitForExistence(timeout: 10))
+        let scene = app.descendants(matching: .any).matching(identifier: "discoveries.scene").firstMatch
+        XCTAssertEqual(scene.value as? String, "The walk is over. Your pet is home.")
+        capture("Walk polish — returned after background")
+        reveal(collect); collect.tap()
+        XCTAssertTrue(app.navigationBars["A new memory"].waitForExistence(timeout: 5))
+    }
+
+    func testEmptyWalkAlbumAndLongNameRemainReachableWithLargeText() {
+        launch("-profile-empty", "-profile-long-name", "-profile-large", "-profile-light", "-profile-route=walks")
+        XCTAssertTrue(app.navigationBars["Walks"].waitForExistence(timeout: 10))
+        let companion = app.buttons["discoveries.companion"]
+        XCTAssertTrue(companion.label.contains("Пиксель Пушистый Исследователь Острова")
+                      || String(describing: companion.value).contains("Пиксель Пушистый Исследователь Острова"))
+        XCTAssertGreaterThanOrEqual(companion.frame.minY, app.staticTexts["Who's going?"].frame.maxY)
+        XCTAssertGreaterThanOrEqual(app.staticTexts["discoveries.routes.title"].frame.minY, companion.frame.maxY)
+        capture("Walk polish — large name and routes")
+        let start = app.buttons["discoveries.confirmStart"]
+        reveal(start)
+        XCTAssertTrue(start.isEnabled)
+        let album = app.buttons["discoveries.album"]
+        reveal(album); album.tap()
+        XCTAssertTrue(app.staticTexts["0 of 12 treasures"].waitForExistence(timeout: 5))
+        app.segmentedControls.buttons["Stories"].tap()
+        let empty = app.staticTexts["Your first walk story is still ahead."]
+        reveal(empty)
+        XCTAssertTrue(app.staticTexts["0 of 36 stories"].exists)
+        capture("Walk polish — empty stories, large text")
+    }
+
     func testActiveWalkShowsOnlyTheCurrentJournalChapter() {
         launch("-profile-away", "-profile-route=walks")
         XCTAssertTrue(app.navigationBars["Walks"].waitForExistence(timeout: 10))

@@ -28,6 +28,7 @@ struct PetDiscoveriesView: View {
             }
         }
         .presentationDragIndicator(.visible)
+        .interactiveDismissDisabled(controller.isBusy)
     }
 }
 
@@ -40,19 +41,20 @@ private struct PetDiscoveriesContent: View {
     @State private var showsAlbum = false
     @State private var showsCancelConfirmation = false
     @State private var collectedMemory: PetDiscoveryMemory?
+    @State private var saveError: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             if let walk = controller.discoveries.activeWalk {
                 VStack(spacing: 0) {
                     PetDiscoverySceneView(walk: walk,
-                                          isAnimationEnabled: !showsAlbum && collectedMemory == nil && !showsCancelConfirmation,
+                                          isAnimationEnabled: !showsAlbum && collectedMemory == nil && !showsCancelConfirmation && saveError == nil,
                                           isComplete: walk.isReady(at: .now),
                                           viewportHeight: viewportHeight)
                         .id(walk.id)
                         .padding(8)
                     Group {
-                        if scenePhase == .active, !showsAlbum, collectedMemory == nil, !showsCancelConfirmation, !walk.isReady(at: .now) {
+                        if scenePhase == .active, !showsAlbum, collectedMemory == nil, !showsCancelConfirmation, saveError == nil, !walk.isReady(at: .now) {
                             // Only the countdown uses this slow timeline; the scene has its own visibility gate.
                             TimelineView(.periodic(from: walk.startedAt, by: 60)) { context in
                                 walkContent(walk, at: context.date)
@@ -65,7 +67,7 @@ private struct PetDiscoveriesContent: View {
                 }
                 .petSurface()
             } else {
-                PetDiscoveryWalkPicker(controller: controller, selectedPetID: preferredPetID)
+                PetDiscoveryWalkPicker(controller: controller, selectedPetID: preferredPetID, onSaveFailure: showSaveError)
             }
             Button { showsAlbum = true } label: {
                 HStack(spacing: 12) {
@@ -85,6 +87,7 @@ private struct PetDiscoveriesContent: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .disabled(controller.isBusy)
             .accessibilityIdentifier("discoveries.album")
         }
         .foregroundStyle(PetDesign.ink)
@@ -96,11 +99,25 @@ private struct PetDiscoveriesContent: View {
         }
         .confirmationDialog("End this walk?", isPresented: $showsCancelConfirmation, titleVisibility: .visible) {
             Button("End walk", role: .destructive) {
-                Task { _ = await controller.cancelDiscoveryWalk() }
+                Task {
+                    if !(await controller.cancelDiscoveryWalk()), controller.discoveries.activeWalk != nil {
+                        showSaveError()
+                    }
+                }
             }
         } message: {
             Text("Your pet will come home without a find. Everything in your album will stay.")
         }
+        .alert("Could not save", isPresented: Binding(get: { saveError != nil }, set: { if !$0 { saveError = nil } })) {
+            Button("OK", role: .cancel) { saveError = nil }
+        } message: { Text(saveError ?? "") }
+    }
+
+    private func showSaveError() {
+        // Present inside the walk sheet, as in the wardrobe. A root alert may
+        // be covered by the sheet; consume it here to avoid showing it later.
+        saveError = controller.alertMessage ?? String(localized: "Your changes could not be saved. Please try again.")
+        controller.alertMessage = nil
     }
 
     private func walkContent(_ walk: PetDiscoveryWalk, at now: Date) -> some View {
@@ -117,7 +134,13 @@ private struct PetDiscoveriesContent: View {
                     .font(.subheadline)
                     .foregroundStyle(PetDesign.secondary)
                 Button {
-                    Task { collectedMemory = await controller.collectDiscoveryWalk() }
+                    Task {
+                        if let memory = await controller.collectDiscoveryWalk() {
+                            collectedMemory = memory
+                        } else if controller.discoveries.activeWalk?.id == walk.id {
+                            showSaveError()
+                        }
+                    }
                 } label: {
                     Label("See the find", systemImage: "gift.fill")
                 }
@@ -175,13 +198,15 @@ private struct PetDiscoveriesContent: View {
 
 private struct PetDiscoveryWalkPicker: View {
     @ObservedObject var controller: PetSessionController
+    let onSaveFailure: () -> Void
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var selectedPetID: UUID?
     @State private var selectedRoute: PetWalkRoute = .garden
     @State private var isStarting = false
 
-    init(controller: PetSessionController, selectedPetID: UUID? = nil) {
+    init(controller: PetSessionController, selectedPetID: UUID? = nil, onSaveFailure: @escaping () -> Void) {
         self.controller = controller
+        self.onSaveFailure = onSaveFailure
         _selectedPetID = State(initialValue: selectedPetID)
     }
 
@@ -193,6 +218,7 @@ private struct PetDiscoveryWalkPicker: View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Who's going?").font(PetDesign.title(.title3))
+                    .accessibilityAddTraits(.isHeader)
                 if controller.availableDiscoveryPets.isEmpty {
                     Label("Bring a pet home from Dynamic Island before starting a walk.", systemImage: "house")
                         .font(.subheadline)
@@ -202,21 +228,38 @@ private struct PetDiscoveryWalkPicker: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .petSurface(radius: 20)
                 } else {
-                    HStack(spacing: 16) {
+                    (dynamicTypeSize.isAccessibilitySize
+                     ? AnyLayout(VStackLayout(alignment: .leading, spacing: 12))
+                     : AnyLayout(HStackLayout(spacing: 16))) {
                         if let pet = selectedPet {
                             DiscoveryPetPortrait(pet: pet)
                                 .frame(width: 76, height: 66)
                                 .accessibilityHidden(true)
                         }
-                        Picker("Walk companion", selection: $selectedPetID) {
-                            if selectedPetID == nil {
-                                Text("Choose a pet").tag(Optional<UUID>.none)
+                        Menu {
+                            Picker("Walk companion", selection: $selectedPetID) {
+                                if selectedPetID == nil {
+                                    Text("Choose a pet").tag(Optional<UUID>.none)
+                                }
+                                ForEach(controller.availableDiscoveryPets) { pet in
+                                    Text(pet.name).tag(Optional(pet.id))
+                                }
                             }
-                            ForEach(controller.availableDiscoveryPets) { pet in
-                                Text(pet.name).tag(Optional(pet.id))
+                        } label: {
+                            HStack(spacing: 12) {
+                                Text(selectedPet?.name ?? String(localized: "Choose a pet"))
+                                    .font(.headline)
+                                    .multilineTextAlignment(.leading)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                Image(systemName: "chevron.up.chevron.down")
+                                    .font(.caption.weight(.semibold))
                             }
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
                         }
-                        .pickerStyle(.menu)
+                        .accessibilityLabel("Walk companion")
+                        .accessibilityValue(selectedPet?.name ?? String(localized: "Choose a pet"))
                         .accessibilityIdentifier("discoveries.companion")
                         .tint(PetDesign.ink)
                         .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
@@ -228,6 +271,8 @@ private struct PetDiscoveryWalkPicker: View {
             }
             VStack(alignment: .leading, spacing: 8) {
                 Text("Pick a path").font(PetDesign.title(.title3))
+                    .accessibilityAddTraits(.isHeader)
+                    .accessibilityIdentifier("discoveries.routes.title")
                 ForEach(PetWalkRoute.allCases, id: \.self) { route in
                     routeButton(route)
                 }
@@ -245,8 +290,9 @@ private struct PetDiscoveryWalkPicker: View {
                 guard let petID = selectedPetID, !isStarting else { return }
                 isStarting = true
                 Task {
-                    _ = await controller.startDiscoveryWalk(petID: petID, route: selectedRoute)
+                    let started = await controller.startDiscoveryWalk(petID: petID, route: selectedRoute)
                     isStarting = false
+                    if !started { onSaveFailure() }
                 }
             } label: {
                 if isStarting {

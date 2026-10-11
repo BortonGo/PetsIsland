@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 367 tests (354 unit and 13 UI tests), a Release build, and static analysis on October 10,
+> build passed 373 tests (354 unit and 19 UI tests), a Release build, and static analysis on October 11,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -179,6 +179,11 @@ memories. Sharing includes the exact story shown. Notes use the existing minute
 countdown; no extra timer or background work is added. Island backups preserve
 the selected stories and still accept older format 1 and 2 files.
 
+If starting, ending or collecting a walk cannot be saved, the walk sheet shows
+an error and keeps the previous walk or find available for another attempt.
+The sheet stays open during a save. The companion selector wraps long names and
+places the portrait above the name at accessibility text sizes.
+
 The active walk now shows its own landscape inside the walks sheet: a garden with
 flowers and bushes, a shore with pebbles and reeds, or a grove with roots, mushrooms
 and a fallen branch. The companion follows paths, pauses to investigate landmarks,
@@ -328,7 +333,9 @@ place a widget on the Home Screen automatically.
 ### Requirements
 
 - macOS and Xcode with an installed iOS Simulator runtime.
-- iOS **17.0 or later**; current simulator verification uses **iOS 27.0**.
+- iOS **17.0 or later**; the full simulator suite uses **iOS 27.0**.
+  Focused walk checks also passed on an iPhone SE (3rd generation) simulator
+  running **iOS 26.5**. iOS 17 compatibility testing remains pending.
 - A compatible iPhone or simulator for Dynamic Island testing, and a physical
   iPhone with Always-On Display to verify that behaviour on hardware.
 - No external package dependencies are required to build the iOS app.
@@ -415,6 +422,9 @@ updates, per-pet friendship and large-text habits, the selected companion in the
 export/import through Files, restore confirmation and cancellation, and large text
 layouts. These tests use in-memory fixtures and run only in Simulator.
 Their screenshots are attached to the Xcode test results.
+Walk tests also cover retrying failed starts, cancellations and collections,
+returning after backgrounding with Reduce Motion, Russian story counts, empty
+albums and long companion names at large text sizes.
 
 Run the **PetIsland** test action with **Command-U** in Xcode. The latest verified
 suite covers save recovery, full-island backup validation, interrupted restore

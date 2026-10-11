@@ -29,7 +29,8 @@ struct PetProfileDebugHostView: View {
         let args = ProcessInfo.processInfo.arguments
         var state = PersistedAppState()
         let lead = PetProfile(id: UUID(uuidString: "CD000000-0000-0000-0000-000000000001")!, name: "Корги", species: .dog, coat: .sunrise, createdAt: .now, breed: .corgi)
-        let pet = PetProfile(id: UUID(uuidString: "CD000000-0000-0000-0000-000000000002")!, name: "Пиксель", species: .cat, coat: .sunrise,
+        let pet = PetProfile(id: UUID(uuidString: "CD000000-0000-0000-0000-000000000002")!,
+                             name: args.contains("-profile-long-name") ? "Пиксель Пушистый Исследователь Острова" : "Пиксель", species: .cat, coat: .sunrise,
                              createdAt: .now.addingTimeInterval(-86400 * 21), breed: .maineCoon,
                              outfit: PetOutfit(headwear: .knitHat))
         petID = pet.id
@@ -55,6 +56,12 @@ struct PetProfileDebugHostView: View {
             state.discoveries.startWalk(pet: pet, route: .shore,
                                        at: .now.addingTimeInterval(args.contains("-profile-ready") ? -3600 : -300))
         }
+        if args.contains("-profile-returning") {
+            let end = Date.now.addingTimeInterval(15)
+            let walk = PetDiscoveryWalk(pet: pet, route: .shore, startedAt: end.addingTimeInterval(-PetWalkRoute.shore.duration),
+                                        endsAt: end, discovery: .shell, story: .curious)
+            state.discoveries = PetDiscoveriesState(activeWalk: walk, memories: state.discoveries.memories)
+        }
         var inventory = ArcadeInventory()
         if !args.contains("-profile-empty") {
             inventory.add(.food, count: 3); inventory.add(.treat, count: 2); inventory.add(.toy)
@@ -79,7 +86,8 @@ struct PetProfileDebugHostView: View {
                                       habitat: PetHabitatState(residentPetIDs: saved.pets.map(\.id)))
             recoveryData = try? IslandBackupCodec.encode(backup)
         }
-        _controller = StateObject(wrappedValue: PetSessionController(store: InMemoryPetStore(state), arcadeStore: InMemoryArcadeStore(arcade),
+        let store: any PetStore = args.contains("-profile-fail-walk-save") ? PetWalkFailurePreviewStore(state) : InMemoryPetStore(state)
+        _controller = StateObject(wrappedValue: PetSessionController(store: store, arcadeStore: InMemoryArcadeStore(arcade),
             backupStore: InMemoryIslandBackupStore(recovery: recoveryData)))
     }
 
@@ -101,6 +109,23 @@ struct PetProfileDebugHostView: View {
         }
         .preferredColorScheme(ProcessInfo.processInfo.arguments.contains("-profile-light") ? .light : .dark)
         .dynamicTypeSize(ProcessInfo.processInfo.arguments.contains("-profile-large") ? .accessibility3 : .large)
+        .environment(\.petMinimizeMotion, ProcessInfo.processInfo.arguments.contains("-profile-reduced-motion"))
+    }
+}
+
+/// Fail only the first walk mutation, after bootstrap, so UI tests can retry
+/// without touching the real save or changing production persistence.
+private actor PetWalkFailurePreviewStore: PetStore {
+    private var state: PersistedAppState
+    private var hasFailed = false
+    init(_ state: PersistedAppState) { self.state = state }
+    func load() -> PersistedAppState { state }
+    func save(_ candidate: PersistedAppState) throws {
+        if !hasFailed, candidate.discoveries != state.discoveries {
+            hasFailed = true
+            throw CocoaError(.fileWriteUnknown)
+        }
+        state = candidate
     }
 }
 #endif
