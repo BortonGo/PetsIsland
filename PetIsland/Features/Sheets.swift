@@ -443,26 +443,67 @@ struct PetPicker: View {
     }
 }
 
+/// Only the preferences edited on this screen. Applying them to the latest
+/// settings keeps separately edited Live Activity options intact.
+struct GeneralSettingsDraft: Equatable {
+    var appearance: AppAppearance
+    var hapticsEnabled: Bool
+    var minimizeMotion: Bool
+
+    init(_ settings: AppSettings) {
+        appearance = settings.appearance
+        hapticsEnabled = settings.hapticsEnabled
+        minimizeMotion = settings.minimizeMotion
+    }
+
+    func applying(to settings: AppSettings) -> AppSettings {
+        var result = settings
+        result.appearance = appearance
+        result.hapticsEnabled = hapticsEnabled
+        result.minimizeMotion = minimizeMotion
+        return result
+    }
+}
+
 struct SettingsView: View {
     @ObservedObject var controller: PetSessionController
     var showsDismissButton = true
     @Environment(\.dismiss) private var dismiss
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @State private var draft: AppSettings
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @State private var draft: GeneralSettingsDraft
+    @State private var isSaving = false
+    @State private var failedDraft: GeneralSettingsDraft?
     @State private var showsAppIcons = false
     @State private var showsIslandBackup = false
 
     init(controller: PetSessionController, showsDismissButton: Bool = true) {
         self.controller = controller
         self.showsDismissButton = showsDismissButton
-        _draft = State(initialValue: controller.settings)
+        _draft = State(initialValue: GeneralSettingsDraft(controller.settings))
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    PetScreenHeading(title: "Settings")
+                    VStack(alignment: .leading, spacing: 8) {
+                        PetScreenHeading(title: "Settings")
+                        Group {
+                            if isSaving {
+                                HStack(spacing: 8) {
+                                    ProgressView().controlSize(.small)
+                                    Text("Saving settings…")
+                                }
+                                .accessibilityElement(children: .combine)
+                                .accessibilityIdentifier("settings.saving")
+                            } else {
+                                Text(showsDismissButton ? "Tap Done to save your changes." : "Changes save automatically.")
+                                    .accessibilityIdentifier("settings.saveHint")
+                            }
+                        }
+                        .font(.caption).foregroundStyle(PetDesign.secondary)
+                    }
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Appearance").font(.subheadline.weight(.semibold))
                         appearanceLayout {
@@ -470,6 +511,7 @@ struct SettingsView: View {
                                 appearanceButton(appearance)
                             }
                         }
+                        .disabled(isSaving || controller.isBusy)
                         Text("System follows the appearance selected in iOS Settings.")
                             .font(.caption).foregroundStyle(PetDesign.secondary)
                     }
@@ -491,11 +533,28 @@ struct SettingsView: View {
                         .petSurface()
                     }
                     .buttonStyle(.plain)
-                    VStack(spacing: 18) {
-                        Toggle("Haptic feedback", isOn: $draft.hapticsEnabled)
+                    VStack(alignment: .leading, spacing: 18) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Toggle("Haptic feedback", isOn: preference(\.hapticsEnabled))
+                                .accessibilityIdentifier("settings.haptics")
+                            Text("Gentle vibrations for actions and games.")
+                                .font(.caption).foregroundStyle(PetDesign.secondary)
+                        }
                         Divider()
-                        Toggle("Minimize pet motion", isOn: $draft.minimizeMotion)
+                        VStack(alignment: .leading, spacing: 6) {
+                            Toggle("Minimize pet motion", isOn: preference(\.minimizeMotion))
+                                .accessibilityIdentifier("settings.motion")
+                            Text("Calmer animation inside the app. Choose the Dynamic Island movement mode separately in Island setup.")
+                                .font(.caption).foregroundStyle(PetDesign.secondary)
+                                .accessibilityIdentifier("settings.motionHint")
+                            if systemReduceMotion {
+                                Text("Reduce Motion is also enabled in iOS Settings.")
+                                    .font(.caption).foregroundStyle(PetDesign.secondary)
+                                    .accessibilityIdentifier("settings.systemMotion")
+                            }
+                        }
                     }
+                    .disabled(isSaving || controller.isBusy)
                     .font(.subheadline)
                     .padding(18)
                     .petSurface()
@@ -562,28 +621,65 @@ struct SettingsView: View {
             .toolbar(showsDismissButton ? .visible : .hidden, for: .navigationBar)
             .toolbar {
                 if showsDismissButton {
-                    ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                    ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(isSaving) }
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") { Task { if await controller.updateSettings(draft) { dismiss() } } }
+                        Button("Done") { save(draft) }
+                            .disabled(isSaving || controller.isBusy)
                     }
                 }
             }
         }
         .sheet(isPresented: $showsAppIcons) { AppIconPickerView() }
         .sheet(isPresented: $showsIslandBackup) { IslandBackupView(controller: controller) }
-        .onChange(of: draft) { _, newSettings in
-            guard !showsDismissButton else { return }
-            Task { await controller.updateSettings(newSettings) }
+        .interactiveDismissDisabled(isSaving)
+        .alert("Settings were not saved", isPresented: Binding(
+            get: { failedDraft != nil },
+            set: { if !$0 { failedDraft = nil } }
+        ), presenting: failedDraft) { failed in
+            Button("Try again") { save(failed) }
+                .disabled(isSaving || controller.isBusy)
+            Button("Cancel", role: .cancel) { failedDraft = nil }
+        } message: { _ in
+            Text("Your previous settings are still in use. You can try saving again.")
         }
         .onChange(of: controller.settings) { _, newSettings in
-            guard newSettings != draft else { return }
-            draft = newSettings
+            guard !showsDismissButton, !isSaving else { return }
+            draft = GeneralSettingsDraft(newSettings)
+        }
+    }
+
+    private func preference<Value: Equatable>(_ key: WritableKeyPath<GeneralSettingsDraft, Value>) -> Binding<Value> {
+        Binding(get: { draft[keyPath: key] }, set: { value in
+            guard !isSaving, !controller.isBusy, draft[keyPath: key] != value else { return }
+            draft[keyPath: key] = value
+            if !showsDismissButton { save(draft) }
+        })
+    }
+
+    private func save(_ changes: GeneralSettingsDraft) {
+        guard !isSaving, !controller.isBusy else { return }
+        isSaving = true
+        let candidate = changes.applying(to: controller.settings)
+        Task {
+            let saved = await controller.updateSettings(candidate)
+            isSaving = false
+            if saved {
+                draft = GeneralSettingsDraft(controller.settings)
+                failedDraft = nil
+                if showsDismissButton { dismiss() }
+            } else {
+                // Keep the controls honest about the preferences actually in use.
+                // Retain the attempted values separately for the Retry action.
+                controller.alertMessage = nil
+                if !showsDismissButton { draft = GeneralSettingsDraft(controller.settings) }
+                failedDraft = changes
+            }
         }
     }
 
     private func appearanceButton(_ appearance: AppAppearance) -> some View {
         let selected = draft.appearance == appearance
-        return Button { draft.appearance = appearance } label: {
+        return Button { preference(\.appearance).wrappedValue = appearance } label: {
             appearanceContentLayout {
                 if !dynamicTypeSize.isAccessibilitySize {
                     Image(systemName: appearance == .system ? "circle.lefthalf.filled" : appearance == .light ? "sun.max" : "moon")
@@ -611,6 +707,7 @@ struct SettingsView: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityIdentifier("settings.appearance.\(appearance.rawValue)")
     }
 
     private var appearanceLayout: AnyLayout {
@@ -633,6 +730,63 @@ struct SettingsView: View {
         }
     }
 }
+
+#if DEBUG && targetEnvironment(simulator)
+/// Isolated settings fixture: save failures never touch the user's island.
+struct SettingsClarityDebugHostView: View {
+    @StateObject private var controller: PetSessionController
+
+    init() {
+        var state = PersistedAppState()
+        state.completedOnboarding = true
+        state.pets = [
+            PetProfile(id: UUID(uuidString: "CE000000-0000-0000-0000-000000000001")!, name: "Pixel", species: .dog,
+                       coat: .sunrise, createdAt: .now, breed: .cardigan),
+            PetProfile(id: UUID(uuidString: "CE000000-0000-0000-0000-000000000002")!, name: "Luna", species: .cat,
+                       coat: .cloud, createdAt: .now, breed: .britishShorthair)
+        ]
+        state.activePetIDs = [state.pets[0].id]
+        state.settings = AppSettings(defaultSessionMinutes: 120, dynamicIslandMotionMode: .walkSleep,
+                                     liveActivityBackgroundColor: .init(red: 0.7, green: 0.5, blue: 0.6),
+                                     liveActivityBackgroundTransparency: 0.4)
+        _controller = StateObject(wrappedValue: PetSessionController(
+            store: SettingsClarityPreviewStore(state), arcadeStore: InMemoryArcadeStore()
+        ))
+    }
+
+    var body: some View {
+        Group {
+            if controller.operation == .loading { ProgressView() }
+            else { HomeView(controller: controller) }
+        }
+        .task {
+            await controller.bootstrap()
+            controller.selectedTab = .settings
+        }
+        .preferredColorScheme(controller.settings.appearance == .system ? nil : controller.settings.appearance == .light ? .light : .dark)
+        .environment(\.petMinimizeMotion, true)
+    }
+}
+
+private actor SettingsClarityPreviewStore: PetStore {
+    private var state: PersistedAppState
+    private var hasFailed = false
+    init(_ state: PersistedAppState) { self.state = state }
+    func load() -> PersistedAppState { state }
+    func save(_ candidate: PersistedAppState) async throws {
+        if candidate.settings != state.settings {
+            if ProcessInfo.processInfo.arguments.contains("-settings-slow-save") {
+                try await Task.sleep(for: .seconds(3))
+            }
+            if !hasFailed, ProcessInfo.processInfo.arguments.contains("-settings-fail-save") {
+                hasFailed = true
+                throw CocoaError(.fileWriteOutOfSpace)
+            }
+        }
+        state = candidate
+    }
+}
+#endif
 
 enum AppIconChoice: String, CaseIterable, Identifiable {
     case classic, quietIsland, together, moonNap, pixelFriend, warmPaw

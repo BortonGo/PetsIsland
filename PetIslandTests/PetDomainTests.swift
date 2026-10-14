@@ -4,6 +4,61 @@ import SwiftUI
 @testable import PetIsland
 
 final class PetDomainTests: XCTestCase {
+    func testGeneralSettingsDraftPreservesLatestIslandOptions() {
+        var draft = GeneralSettingsDraft(AppSettings())
+        draft.appearance = .dark
+        draft.hapticsEnabled = false
+        draft.minimizeMotion = true
+        let current = AppSettings(defaultSessionMinutes: 240, dynamicIslandMotionMode: .walkSleep,
+                                  liveActivityBackgroundColor: .init(red: 0.7, green: 0.4, blue: 0.5),
+                                  liveActivityBackgroundTransparency: 0.6)
+        var expected = current
+        expected.appearance = .dark
+        expected.hapticsEnabled = false
+        expected.minimizeMotion = true
+        XCTAssertEqual(draft.applying(to: current), expected)
+    }
+
+    @MainActor
+    func testGeneralSettingsFailureAndRetryPreserveIslandAndReloadPreferences() async throws {
+        let habitat = PetHabitatStore.load(), life = PetLifeStore.load()
+        defer {
+            try? PetHabitatStore.save(habitat)
+            try? PetLifeStore.save(life)
+        }
+        let store = FailablePetStore()
+        let arcade = InMemoryArcadeStore()
+        let controller = PetSessionController(store: store, arcadeStore: arcade)
+        await controller.bootstrap()
+        await controller.updateDynamicIslandSettings(mode: .runWalkSleep, durationMinutes: 120)
+        let before = await store.load()
+        let sharedBefore = PetHabitatStore.load(), lifeBefore = PetLifeStore.load()
+        var changes = GeneralSettingsDraft(controller.settings)
+        changes.appearance = .light
+        changes.hapticsEnabled = false
+        changes.minimizeMotion = true
+        let next = changes.applying(to: controller.settings)
+        await store.setFailure(true)
+        let failed = await controller.updateSettings(next)
+        XCTAssertFalse(failed)
+        let failedState = await store.load()
+        XCTAssertEqual(failedState, before)
+        XCTAssertEqual(controller.settings, before.settings)
+        await store.setFailure(false)
+        let saved = await controller.updateSettings(next)
+        XCTAssertTrue(saved)
+        let after = await store.load()
+        var expected = before
+        expected.settings = next
+        XCTAssertEqual(after, expected, "Changing preferences must not change pets, walks or history")
+        XCTAssertEqual(PetHabitatStore.load(), sharedBefore)
+        XCTAssertEqual(PetLifeStore.load(), lifeBefore)
+        let reopened = PetSessionController(store: store, arcadeStore: arcade)
+        await reopened.bootstrap()
+        XCTAssertEqual(reopened.settings, next)
+        XCTAssertEqual(reopened.pets, before.pets)
+    }
+
 
     func testProfileRefreshStopsWhenCoveredAndOtherwiseTicksOnceAMinute() {
         let start = Date(timeIntervalSince1970: 2000)

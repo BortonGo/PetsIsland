@@ -89,6 +89,91 @@ final class PetProfileUITests: XCTestCase {
         app.buttons[name].tap()
     }
 
+    private func launchSettings(_ arguments: String...) {
+        let russian = arguments.contains("-settings-russian")
+        app.launchArguments = ["-settings-clarity-preview", "-AppleLanguages", russian ? "(ru)" : "(en)",
+                               "-AppleLocale", russian ? "ru_RU" : "en_US"] + arguments
+        if arguments.contains("-settings-largest") {
+            app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        }
+        app.launch()
+        XCTAssertTrue(app.buttons["settings.appearance.system"].waitForExistence(timeout: 10))
+    }
+
+    private func waitForSettingsSave() {
+        XCTAssertTrue(app.staticTexts["settings.saveHint"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["settings.appearance.system"].isEnabled)
+    }
+
+    func testSettingsAutosaveKeepsChoicesAndPetCollection() {
+        launchSettings("-settings-slow-save")
+        XCTAssertEqual(app.staticTexts["settings.saveHint"].label, "Changes save automatically.")
+        app.buttons["settings.appearance.system"].tap()
+        XCTAssertTrue(app.buttons["settings.appearance.dark"].isEnabled, "Reselecting the current theme must not start another save")
+        let light = app.buttons["settings.appearance.light"]
+        light.tap()
+        XCTAssertFalse(app.buttons["settings.appearance.dark"].isEnabled)
+        waitForSettingsSave()
+        XCTAssertTrue(light.isSelected)
+        let haptics = app.switches["settings.haptics"], motion = app.switches["settings.motion"]
+        reveal(haptics); haptics.tap()
+        waitForSettingsSave()
+        reveal(motion); motion.tap()
+        waitForSettingsSave()
+        capture("Settings — saved preferences")
+        app.tabBars.buttons["Pets"].tap()
+        let pixel = app.buttons["pet.profile.CE000000-0000-0000-0000-000000000001"]
+        let luna = app.buttons["pet.profile.CE000000-0000-0000-0000-000000000002"]
+        XCTAssertTrue(pixel.waitForExistence(timeout: 5))
+        XCTAssertEqual(pixel.label, "Pixel")
+        XCTAssertEqual(luna.label, "Luna")
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'pet.profile.'")).count, 2)
+        app.tabBars.buttons["Settings"].tap()
+        reveal(light)
+        XCTAssertTrue(light.isSelected)
+        XCTAssertEqual(haptics.value as? String, "0")
+        XCTAssertEqual(motion.value as? String, "1")
+    }
+
+    func testSettingsFailureShowsPreviousChoiceAndRetrySaves() {
+        launchSettings("-settings-fail-save")
+        let light = app.buttons["settings.appearance.light"]
+        light.tap()
+        let alert = app.alerts["Settings were not saved"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["settings.appearance.system"].isSelected)
+        XCTAssertFalse(light.isSelected)
+        capture("Settings — failed save and retry")
+        alert.buttons["Try again"].tap()
+        waitForSettingsSave()
+        XCTAssertFalse(alert.exists)
+        XCTAssertTrue(light.isSelected)
+        let haptics = app.switches["settings.haptics"]
+        reveal(haptics)
+        XCTAssertEqual(haptics.value as? String, "1")
+    }
+
+    func testSettingsLargestRussianTextExplainsMotionAndRemainsReachable() throws {
+        launchSettings("-settings-russian", "-settings-largest")
+        XCTAssertEqual(app.staticTexts["settings.saveHint"].label, "Изменения сохраняются автоматически.")
+        let dark = app.buttons["settings.appearance.dark"]
+        reveal(dark); dark.tap()
+        waitForSettingsSave()
+        XCTAssertTrue(dark.isSelected)
+        let motion = app.switches["settings.motion"]
+        reveal(motion)
+        XCTAssertEqual(motion.value as? String, "0")
+        let hint = app.staticTexts["settings.motionHint"]
+        reveal(hint)
+        XCTAssertTrue(hint.label.contains("Dynamic Island"))
+        capture("Settings — largest Russian text and motion explanation")
+        try auditVisibleContent()
+        let guide = app.buttons["settings.guide"]
+        reveal(guide); guide.tap()
+        reveal(element("guide.walks"))
+        XCTAssertTrue(element("guide.walks").isHittable)
+    }
+
     private func launchOnboarding(russian: Bool = false, largest: Bool = false, failingSave: Bool = false) {
         app.launchArguments = ["-onboarding-preview", "-AppleLanguages", russian ? "(ru)" : "(en)",
                                "-AppleLocale", russian ? "ru_RU" : "en_US"]
@@ -889,9 +974,14 @@ final class PetProfileUITests: XCTestCase {
         capture("Backup — contents")
         app.buttons["backup.restore"].tap()
         XCTAssertTrue(app.staticTexts["Replace your current island?"].waitForExistence(timeout: 5))
-        let confirm = app.buttons.matching(identifier: "Restore this island").allElementsBoundByIndex.last
-        XCTAssertNotNil(confirm)
-        confirm?.tap()
+        // The background button has the same label. Its ordering relative to
+        // the confirmation differs between iOS releases and screen sizes.
+        let confirm = app.buttons.matching(NSPredicate(
+            format: "label == %@ AND identifier != %@", "Restore this island", "backup.restore"
+        )).firstMatch
+        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
+        XCTAssertTrue(confirm.isHittable)
+        confirm.tap()
         XCTAssertTrue(app.staticTexts["Your island has been restored."].waitForExistence(timeout: 10))
         reveal(previous); previous.tap()
         XCTAssertTrue(app.navigationBars["Backup contents"].waitForExistence(timeout: 5))
@@ -909,7 +999,9 @@ final class PetProfileUITests: XCTestCase {
         reveal(backups); backups.tap()
         XCTAssertTrue(app.navigationBars["Island backup"].waitForExistence(timeout: 5))
         app.buttons["backup.export"].tap()
-        let save = app.buttons["DOCPicker.actionButton"]
+        // Files on iOS 26 does not expose the iOS 27 Save identifier.
+        let save = app.navigationBars["FullDocumentManagerViewControllerNavigationBar"].buttons
+            .matching(NSPredicate(format: "identifier == %@ OR label IN %@", "DOCPicker.actionButton", ["Save", "Сохранить"])).firstMatch
         XCTAssertTrue(save.waitForExistence(timeout: 10))
         // Files persists between test launches; never overwrite or import a previous run's copy.
         let uniqueName = "Backup-" + UUID().uuidString.prefix(8)

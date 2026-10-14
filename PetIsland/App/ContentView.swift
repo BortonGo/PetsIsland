@@ -7,7 +7,13 @@ struct ContentView: View {
 
     var body: some View {
 #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-onboarding-preview") {
+        if ProcessInfo.processInfo.arguments.contains("-settings-clarity-preview") {
+#if targetEnvironment(simulator)
+            SettingsClarityDebugHostView()
+#else
+            appContent
+#endif
+        } else if ProcessInfo.processInfo.arguments.contains("-onboarding-preview") {
 #if targetEnvironment(simulator)
             PetOnboardingDebugHostView()
 #else

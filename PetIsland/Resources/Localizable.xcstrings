@@ -1,6 +1,94 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Saving settings…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохраняем настройки…"
+          }
+        }
+      }
+    },
+    "Tap Done to save your changes.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите «Готово», чтобы сохранить изменения."
+          }
+        }
+      }
+    },
+    "Changes save automatically.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменения сохраняются автоматически."
+          }
+        }
+      }
+    },
+    "Gentle vibrations for actions and games.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Лёгкая вибрация при действиях и в играх."
+          }
+        }
+      }
+    },
+    "Calmer animation inside the app. Choose the Dynamic Island movement mode separately in Island setup.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Более спокойная анимация внутри приложения. Режим движения в Dynamic Island выбирается отдельно в настройках острова."
+          }
+        }
+      }
+    },
+    "Reduce Motion is also enabled in iOS Settings.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В настройках iOS также включено уменьшение движения."
+          }
+        }
+      }
+    },
+    "Settings were not saved": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки не сохранены"
+          }
+        }
+      }
+    },
+    "Your previous settings are still in use. You can try saving again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока действуют прежние настройки. Можно попробовать сохранить ещё раз."
+          }
+        }
+      }
+    },
     "Will be saved as: %@": {
       "extractionState": "manual",
       "localizations": {

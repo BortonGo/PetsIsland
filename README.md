@@ -8,8 +8,8 @@ the Lock Screen.
 The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
-> **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 411 tests (377 unit and 34 UI tests), a Release build, and static analysis on October 14,
+> **Status: active development, ready for iPhone testing.** The latest full
+> regression passed 411 tests (377 unit and 34 UI tests), a Release build, and static analysis on October 14,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -291,6 +291,12 @@ and failed saves do not spend extra items.
 
 The **Quiet Island** interface has a graphite dark theme, a gentle light theme,
 and a system-following option. Haptics and reduced pet motion are configurable.
+The Settings tab saves changes automatically and briefly disables preferences
+while writing. A failed save shows the previous values and offers a retry.
+These controls only update general preferences, preserving the separately
+chosen Dynamic Island mode, duration, card color, and transparency.
+Short explanations distinguish reduced animation inside the app from the
+Dynamic Island movement mode; the system Reduce Motion preference still applies.
 
 <p align="center">
   <img src="Docs/Media/quiet-island-light.png" width="240" alt="Quiet Island light theme">
@@ -462,6 +468,13 @@ reopening without starting a walk or Live Activity.
 All four first-launch/guide UI checks also passed on an iPhone SE simulator with
 iOS 26.5 and on iOS 27. Files checks cover cancelling an export, reopening it,
 and importing the saved copy for review without replacing the island.
+Settings checks cover failed saves and retry, slow saves, reselecting the current
+theme, retaining the pet collection, and the largest Russian text size. Unit
+checks also verify that general preferences survive reopening and leave pets,
+walks, shared habitat state, and Live Activity options unchanged.
+The settings follow-up ran all 379 unit tests and seven settings, guide, and
+backup UI scenarios on iPhone SE with iOS 26.5. The three new settings flows
+also passed on iOS 27, including a save failure and retry.
 Interface checks cover shop category switching without losing the companion or
 stock, buying/wearing/removing an accessory as separate actions, and disabled
 actions with an explanation. They also exercise the largest Russian text size
