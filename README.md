@@ -9,7 +9,7 @@ The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
 > **Status: active development, ready for iPhone testing.** The latest verified
-> build passed 405 tests (375 unit and 30 UI tests), a Release build, and static analysis on October 11,
+> build passed 411 tests (377 unit and 34 UI tests), a Release build, and static analysis on October 14,
 > 2026. Simulator checks cover the main flows; physical-device and accessibility
 > testing are still part of the work before a public release.
 
@@ -20,6 +20,18 @@ The interface is available in English and Russian.
 <p align="center"><sub>Dynamic Island footage recorded in the iOS Simulator.</sub></p>
 
 ## Pets and their island
+
+First launch has three steps with explicit Back/Continue controls. The chosen
+pet, appearance, and name stay in the draft when going back. Names use the
+existing 16-character limit, and the final step shows the name that will be saved.
+Finishing creates the pet at home; it does not start a walk or Live Activity.
+A failed save leaves the draft available for retry.
+
+The introduction explains discovery walks and taking a pet onto the Lock Screen.
+**Settings → Quick guide** repeats those explanations and points to care,
+wardrobe, and enclosure furniture. The guide stays collapsed until opened.
+Species and breed choices wrap at accessibility text sizes; coat selection uses
+a menu when segmented labels would be too small.
 
 The collection contains **20 visual variants across six species**:
 
@@ -442,6 +454,14 @@ The **PetIslandUITests** target exercises the collection-to-card flow, care stoc
 updates, per-pet friendship and large-text habits, the selected companion in the shop and walks, return/collection, backup
 export/import through Files, restore confirmation and cancellation, and large text
 layouts. These tests use in-memory fixtures and run only in Simulator.
+First-launch checks cover keeping the chosen breed and name when going back,
+closing the keyboard before review, previewing shortened names, empty-name
+fallback, retrying a failed save, and the collapsible guide at the largest
+Russian text size. Controller tests verify that the saved first pet survives
+reopening without starting a walk or Live Activity.
+All four first-launch/guide UI checks also passed on an iPhone SE simulator with
+iOS 26.5 and on iOS 27. Files checks cover cancelling an export, reopening it,
+and importing the saved copy for review without replacing the island.
 Interface checks cover shop category switching without losing the companion or
 stock, buying/wearing/removing an accessory as separate actions, and disabled
 actions with an explanation. They also exercise the largest Russian text size

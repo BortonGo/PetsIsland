@@ -1,6 +1,160 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Will be saved as: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохраним как: %@"
+          }
+        }
+      }
+    },
+    "Back": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Назад"
+          }
+        }
+      }
+    },
+    "Step %lld of 3": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Шаг %lld из 3"
+          }
+        }
+      }
+    },
+    "Saving your pet…": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сохраняем питомца…"
+          }
+        }
+      }
+    },
+    "Go to the island": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На остров"
+          }
+        }
+      }
+    },
+    "Your pet starts in the enclosure. You can explore the island together at your own pace.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Питомец поселится в вольере. Осваивайтесь на острове и выбирайте занятие по настроению."
+          }
+        }
+      }
+    },
+    "Take with you": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Взять с собой"
+          }
+        }
+      }
+    },
+    "Open the compass on the Island tab to choose a route. Your pet explores and brings back a find. While away, they cannot join you on the Lock Screen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите на компас во вкладке «Остров» и выберите маршрут. Питомец отправится на прогулку и принесёт находку. Пока он гуляет, взять его на экран блокировки нельзя."
+          }
+        }
+      }
+    },
+    "Use Take with you on the Island tab for company on the Lock Screen and, on supported iPhones, Dynamic Island. The same button brings your pet home.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На вкладке «Остров» нажмите «Взять с собой»: питомец появится на экране блокировки, а на совместимых iPhone — и в Dynamic Island. Эта же кнопка вернёт его домой."
+          }
+        }
+      }
+    },
+    "Care and wardrobe": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Уход и гардероб"
+          }
+        }
+      }
+    },
+    "Open Pets and tap a pet’s card for care and Wardrobe. Supplies and accessories are in Arcade → Shop.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Во вкладке «Питомцы» откройте карточку друга: там находятся уход и гардероб. Корм и аксессуары продаются в «Аркаде» → «Магазин»."
+          }
+        }
+      }
+    },
+    "On Island, tap the palette, then Furniture to place your items. Buy new ones in Arcade → Shop → Furniture.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На вкладке «Остров» нажмите на палитру, затем «Предметы для вольера», чтобы разместить купленное. Новые предметы — в «Аркаде» → «Магазин» → «Предметы для вольера»."
+          }
+        }
+      }
+    },
+    "Quick guide": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Как всё устроено"
+          }
+        }
+      }
+    },
+    "Up to 16 characters. You can change the name later.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "До 16 символов. Имя можно будет изменить."
+          }
+        }
+      }
+    },
     "" : {
 
     },

@@ -25,7 +25,7 @@ final class PetProfileUITests: XCTestCase {
         app.launch()
     }
 
-    private func reveal(_ element: XCUIElement) {
+    private func reveal(_ element: XCUIElement, fullyVisible: Bool = false) {
         // Large fling gestures can carry a control behind a pinned header.
         // Keep the target in the visible middle and use short, deliberate drags.
         for _ in 0..<35 {
@@ -35,14 +35,21 @@ final class PetProfileUITests: XCTestCase {
             if category.exists && category.isHittable { top = max(top, category.frame.maxY + 8) }
             let footer = app.otherElements["wardrobe.pinnedControls"]
             let bottom = footer.exists ? footer.frame.minY - 12 : visible.maxY
-            if element.exists && element.isHittable,
-               element.frame.midY > top,
-               element.frame.midY < bottom { return }
+            // A hittable centre does not mean a tall button is fully visible.
+            // Geometry assertions request full visibility; ordinary interactions
+            // and oversized paragraphs only need a reachable centre.
+            if element.exists && element.isHittable {
+                let frame = element.frame
+                if fullyVisible && frame.height <= bottom - top {
+                    if frame.minY >= top && frame.maxY <= bottom { return }
+                } else if frame.midY > top && frame.midY < bottom { return }
+            }
             if element.exists && element.frame.minY > visible.maxY + 100 {
                 app.swipeUp()
                 continue
             }
-            let down = element.exists && element.frame.midY < top
+            let down = element.exists && (fullyVisible && element.frame.height <= bottom - top
+                ? element.frame.minY < top : element.frame.midY < top)
             let from = app.coordinate(withNormalizedOffset: CGVector(dx: 0.88, dy: down ? 0.43 : 0.63))
             let to = app.coordinate(withNormalizedOffset: CGVector(dx: 0.88, dy: down ? 0.63 : 0.43))
             from.press(forDuration: 0.05, thenDragTo: to, withVelocity: .slow, thenHoldForDuration: 0)
@@ -57,6 +64,20 @@ final class PetProfileUITests: XCTestCase {
         add(attachment)
     }
 
+    private func auditVisibleContent(pinnedHeader: XCUIElement? = nil) throws {
+        try app.performAccessibilityAudit(for: [.sufficientElementDescription, .hitRegion, .textClipped]) { issue in
+            guard issue.auditType == .textClipped, let element = issue.element else { return false }
+            let frame = element.frame, window = self.app.frame
+            // Text in a scroll view may straddle the screen or sticky header.
+            // Keep auditing truncation inside visible labels, including the
+            // header itself; only these expected vertical scroll clips are exempt.
+            if frame.minY < window.minY || frame.maxY > window.maxY { return true }
+            if let header = pinnedHeader, header.isHittable,
+               frame.minY < header.frame.maxY && frame.maxY > header.frame.maxY { return true }
+            return false
+        }
+    }
+
     private func element(_ identifier: String) -> XCUIElement {
         app.descendants(matching: .any).matching(identifier: identifier).firstMatch
     }
@@ -66,6 +87,135 @@ final class PetProfileUITests: XCTestCase {
         XCTAssertTrue(category.isHittable)
         category.tap()
         app.buttons[name].tap()
+    }
+
+    private func launchOnboarding(russian: Bool = false, largest: Bool = false, failingSave: Bool = false) {
+        app.launchArguments = ["-onboarding-preview", "-AppleLanguages", russian ? "(ru)" : "(en)",
+                               "-AppleLocale", russian ? "ru_RU" : "en_US"]
+        if largest {
+            app.launchArguments += ["-onboarding-light", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        }
+        if failingSave { app.launchArguments += ["-onboarding-fail-save"] }
+        app.launch()
+        XCTAssertTrue(app.buttons["onboarding.next"].waitForExistence(timeout: 10))
+    }
+
+    private func enterFirstPetName(_ value: String) {
+        let field = app.textFields["petPicker.name"]
+        reveal(field)
+        field.tap()
+        let count = (field.value as? String ?? "").count
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: count) + value)
+    }
+
+    func testOnboardingBackPreservesChoiceAndKeyboardClosesBeforeReview() throws {
+        launchOnboarding()
+        XCTAssertEqual(app.staticTexts["onboarding.step"].label, "Step 1 of 3")
+        XCTAssertFalse(app.buttons["onboarding.back"].exists)
+        capture("Onboarding — welcome")
+        app.buttons["onboarding.next"].tap()
+        let cat = app.buttons["petPicker.species.cat"]
+        XCTAssertTrue(cat.waitForExistence(timeout: 5))
+        reveal(cat); cat.tap()
+        let british = app.buttons["petPicker.variant.britishShorthair.family"]
+        reveal(british); british.tap()
+        enterFirstPetName("  Luna   ")
+        app.buttons["onboarding.next"].tap()
+        XCTAssertTrue(app.staticTexts["onboarding.petName"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["onboarding.petName"].label, "Luna")
+        XCTAssertFalse(app.keyboards.firstMatch.exists)
+        capture("Onboarding — review and two destinations")
+        app.buttons["onboarding.back"].tap()
+        XCTAssertEqual(app.textFields["petPicker.name"].value as? String, "Luna")
+        XCTAssertTrue(cat.isSelected)
+        XCTAssertTrue(british.isSelected)
+        app.buttons["onboarding.back"].tap()
+        app.buttons["onboarding.next"].tap()
+        XCTAssertTrue(british.isSelected)
+        app.buttons["onboarding.next"].tap()
+        app.buttons["onboarding.next"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Pets"].waitForExistence(timeout: 10))
+        app.tabBars.buttons["Pets"].tap()
+        let saved = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'pet.profile.' AND label == 'Luna'")).firstMatch
+        XCTAssertTrue(saved.waitForExistence(timeout: 5))
+        XCTAssertEqual(saved.value as? String, "British shorthair")
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'pet.profile.'")).count, 1)
+    }
+
+    func testOnboardingFailedSaveKeepsDraftAndAllowsRetry() throws {
+        launchOnboarding(failingSave: true)
+        app.buttons["onboarding.next"].tap()
+        enterFirstPetName("Milo")
+        app.buttons["onboarding.next"].tap()
+        app.buttons["onboarding.next"].tap()
+        let alert = app.alerts["Your pet could not be saved"]
+        XCTAssertTrue(alert.waitForExistence(timeout: 5))
+        capture("Onboarding — save failure keeps draft")
+        alert.buttons["OK"].tap()
+        XCTAssertEqual(app.staticTexts["onboarding.petName"].label, "Milo")
+        XCTAssertTrue(app.buttons["onboarding.next"].isEnabled)
+        app.buttons["onboarding.back"].tap()
+        XCTAssertEqual(app.textFields["petPicker.name"].value as? String, "Milo")
+        app.buttons["onboarding.next"].tap()
+        app.buttons["onboarding.next"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Pets"].waitForExistence(timeout: 10))
+        app.tabBars.buttons["Pets"].tap()
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'pet.profile.' AND label == 'Milo'")).firstMatch.waitForExistence(timeout: 5))
+        XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'pet.profile.'")).count, 1)
+    }
+
+    func testOnboardingLargestRussianTextNamesAndControlsRemainReachable() throws {
+        launchOnboarding(russian: true, largest: true)
+        capture("Onboarding — Russian welcome, largest text")
+        app.buttons["onboarding.next"].tap()
+        enterFirstPetName("12345678901234567890")
+        XCTAssertEqual(app.textFields["petPicker.name"].value as? String, "12345678901234567890")
+        XCTAssertTrue(app.staticTexts["petPicker.savedName"].label.contains("1234567890123456"))
+        app.buttons["onboarding.next"].tap()
+        XCTAssertEqual(app.staticTexts["onboarding.petName"].label, "1234567890123456")
+        app.buttons["onboarding.back"].tap()
+        XCTAssertEqual(app.textFields["petPicker.name"].value as? String, "1234567890123456")
+        enterFirstPetName("   ")
+        app.buttons["onboarding.next"].tap()
+        XCTAssertEqual(app.staticTexts["onboarding.petName"].label, "Pixel")
+        XCTAssertEqual(app.staticTexts["onboarding.step"].label, "Шаг 3 из 3")
+        reveal(element("guide.companion"))
+        XCTAssertTrue(app.buttons["onboarding.next"].isHittable)
+        capture("Onboarding — Russian guide, largest text")
+        try app.performAccessibilityAudit(for: [.sufficientElementDescription, .hitRegion, .textClipped])
+        app.buttons["onboarding.back"].tap()
+        XCTAssertEqual(app.textFields["petPicker.name"].value as? String, "Pixel")
+        reveal(app.buttons["petPicker.species.cat"])
+        app.buttons["petPicker.species.cat"].tap()
+        let british = app.buttons["petPicker.variant.britishShorthair.family"]
+        // The breed list scrolls horizontally, independently of the page.
+        let breeds = app.scrollViews.containing(.button, identifier: "petPicker.variant.classicCat.family").element(boundBy: 0)
+        if !british.isHittable { breeds.swipeLeft() }
+        reveal(british)
+        capture("Onboarding — Russian choice, largest text")
+        british.tap()
+        app.buttons["onboarding.next"].tap()
+        app.buttons["onboarding.next"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Питомцы"].waitForExistence(timeout: 10))
+    }
+
+    func testQuickGuideExplainsExistingRoutesWithoutChangingPet() throws {
+        launch("-profile-collection", "-profile-russian", "-profile-largest", "-profile-light")
+        XCTAssertTrue(app.tabBars.buttons["Настройки"].waitForExistence(timeout: 10))
+        app.tabBars.buttons["Настройки"].tap()
+        let guide = app.buttons["settings.guide"]
+        reveal(guide); guide.tap()
+        for id in ["walks", "companion", "wardrobe", "furniture"] {
+            let tip = element("guide.\(id)")
+            reveal(tip)
+            XCTAssertFalse(tip.label.isEmpty)
+        }
+        capture("Settings — quick guide, largest Russian text")
+        try auditVisibleContent()
+        app.tabBars.buttons["Питомцы"].tap()
+        let pet = app.buttons["pet.profile.CD000000-0000-0000-0000-000000000002"]
+        reveal(pet)
+        XCTAssertEqual(pet.label, "Пиксель")
     }
 
     func testInterfaceShopCategoriesKeepCompanionWalletAndStock() throws {
@@ -150,7 +300,7 @@ final class PetProfileUITests: XCTestCase {
             let action = app.buttons[away ? "wardrobe.apply" : "wardrobe.buy"]
             reveal(reason)
             XCTAssertTrue(reason.isHittable)
-            reveal(action)
+            reveal(action, fullyVisible: true)
             XCTAssertTrue(action.isHittable)
             XCTAssertFalse(action.isEnabled)
             XCTAssertLessThanOrEqual(reason.frame.maxY, action.frame.minY)
@@ -206,7 +356,7 @@ final class PetProfileUITests: XCTestCase {
         XCTAssertTrue(furniture.isEnabled)
         XCTAssertTrue(app.buttons["shop.category"].isHittable)
         capture("Interface — furniture, largest text")
-        try app.performAccessibilityAudit(for: [.sufficientElementDescription, .hitRegion, .textClipped])
+        try auditVisibleContent(pinnedHeader: app.buttons["shop.category"])
     }
 
     func testEnclosureMeetingFacesNeighbourPausesAndFinishes() {
@@ -764,7 +914,18 @@ final class PetProfileUITests: XCTestCase {
         // Files persists between test launches; never overwrite or import a previous run's copy.
         let uniqueName = "Backup-" + UUID().uuidString.prefix(8)
         let filename = app.textFields["DOCPicker.filenameTextField"]
-        XCTAssertTrue(filename.waitForExistence(timeout: 5))
+        // On a fresh iOS Files provider the first export may offer only its
+        // default filename. Cancellation is valid in either presentation.
+        capture("Backup — initial Files export")
+        // Cancelling an export must not show an error or leave the next export
+        // with an empty document. The island stays unchanged throughout.
+        let cancel = app.buttons["Cancel"]
+        if cancel.exists { cancel.tap() }
+        else { app.navigationBars["FullDocumentManagerViewControllerNavigationBar"].swipeDown() }
+        XCTAssertTrue(app.buttons["backup.export"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.alerts.firstMatch.exists)
+        app.buttons["backup.export"].tap()
+        XCTAssertTrue(filename.waitForExistence(timeout: 10), app.debugDescription)
         filename.tap()
         filename.typeText(uniqueName + "\n")
         capture("Backup — Files export")

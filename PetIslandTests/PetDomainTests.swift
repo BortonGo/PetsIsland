@@ -2096,6 +2096,64 @@ final class PetDomainTests: XCTestCase {
         XCTAssertLessThanOrEqual(profile.name.count, 16)
     }
 
+    @MainActor
+    func testFirstPetPersistsAppearanceAndDoesNotStartWalkOrLiveActivity() async throws {
+        let previousHabitat = PetHabitatStore.load()
+        let previousLife = PetLifeStore.load()
+        defer {
+            try? PetHabitatStore.save(previousHabitat)
+            try? PetLifeStore.save(previousLife)
+        }
+        let store = InMemoryPetStore(), arcade = InMemoryArcadeStore()
+        let controller = PetSessionController(store: store, arcadeStore: arcade)
+        await controller.bootstrap()
+        var pet = PetProfile(id: UUID(), name: "  Луна   🐾  ", species: .dog, coat: .cloud,
+                             createdAt: .now, customColor: .init(red: 0.3, green: 0.5, blue: 0.8), breed: .cardigan)
+        let saved = await controller.completeOnboarding(profile: pet)
+        XCTAssertTrue(saved)
+        pet.normalizeName()
+
+        let reopened = PetSessionController(store: store, arcadeStore: arcade)
+        await reopened.bootstrap()
+        XCTAssertTrue(reopened.completedOnboarding)
+        XCTAssertEqual(reopened.pets, [pet])
+        XCTAssertEqual(reopened.activePetIDs, [pet.id])
+        XCTAssertEqual(reopened.placement, .enclosure)
+        XCTAssertNil(reopened.session)
+        XCTAssertNil(reopened.discoveries.activeWalk)
+    }
+
+    @MainActor
+    func testFirstPetSaveFailureKeepsOnboardingOpenAndRetryDoesNotDuplicatePet() async {
+        let previousHabitat = PetHabitatStore.load()
+        let previousLife = PetLifeStore.load()
+        defer {
+            try? PetHabitatStore.save(previousHabitat)
+            try? PetLifeStore.save(previousLife)
+        }
+        let store = FailablePetStore()
+        let controller = PetSessionController(store: store, arcadeStore: InMemoryArcadeStore())
+        await controller.bootstrap()
+        let original = await store.load()
+        let pet = PetProfile(id: UUID(), name: "Миша", species: .cat, coat: .midnight,
+                             createdAt: .now, breed: .britishShorthair)
+        await store.setFailure(true)
+        let failed = await controller.completeOnboarding(profile: pet)
+        XCTAssertFalse(failed)
+        XCTAssertFalse(controller.completedOnboarding)
+        let unchanged = await store.load()
+        XCTAssertEqual(unchanged, original)
+        XCTAssertEqual(controller.pets, original.pets)
+
+        await store.setFailure(false)
+        let retried = await controller.completeOnboarding(profile: pet)
+        XCTAssertTrue(retried)
+        let saved = await store.load()
+        XCTAssertTrue(saved.completedOnboarding)
+        XCTAssertEqual(saved.pets, [pet])
+        XCTAssertEqual(controller.pets, [pet])
+    }
+
     func testHistoryNeverRecordsMoreThanSessionDuration() {
         let start = Date(timeIntervalSince1970: 1_000)
         let session = PetSession(

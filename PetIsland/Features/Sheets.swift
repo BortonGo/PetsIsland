@@ -148,6 +148,8 @@ struct PetPicker: View {
     @Binding var profile: PetProfile
     var allowedSpecies: [PetSpecies] = PetSpecies.selectableCases
     @FocusState private var isNameFieldFocused: Bool
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @PetReduceMotion private var reduceMotion
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -158,7 +160,12 @@ struct PetPicker: View {
                     .textInputAutocapitalization(.words)
                     .submitLabel(.done)
                     .focused($isNameFieldFocused)
-                    .onSubmit { isNameFieldFocused = false }
+                    .onSubmit {
+                        profile.normalizeName()
+                        isNameFieldFocused = false
+                    }
+                    .accessibilityLabel("Pet name")
+                    .accessibilityIdentifier("petPicker.name")
                     .padding(.horizontal, 14)
                     .frame(minHeight: 52)
                     .background(PetDesign.surface, in: RoundedRectangle(cornerRadius: 12))
@@ -166,6 +173,14 @@ struct PetPicker: View {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(isNameFieldFocused ? Color.accentColor : Color(.separator), lineWidth: isNameFieldFocused ? 2 : 1)
                     }
+                Text("Up to 16 characters. You can change the name later.")
+                    .font(.caption).foregroundStyle(PetDesign.secondary)
+                if profile.name.count > 16 {
+                    Text("Will be saved as: \(savedName)")
+                        .font(.caption)
+                        .foregroundStyle(PetDesign.secondary)
+                        .accessibilityIdentifier("petPicker.savedName")
+                }
             }
 
             Text("Species")
@@ -192,7 +207,7 @@ struct PetPicker: View {
                     Text("Corgi variant")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.secondary)
-                    HStack(spacing: 8) {
+                    corgiLayout {
                         variantButton(.corgi, isCorgiOption: true)
                         variantButton(.cardigan, isCorgiOption: true)
                     }
@@ -203,22 +218,36 @@ struct PetPicker: View {
             Text("Coat")
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.secondary)
-            Picker("Coat", selection: $profile.coat) {
-                ForEach(PetCoat.allCases) { coat in Text(coat.displayName).tag(coat) }
+            if dynamicTypeSize.isAccessibilitySize {
+                coatPicker.pickerStyle(.menu)
+            } else {
+                coatPicker.pickerStyle(.segmented)
             }
-            .pickerStyle(.segmented)
 
             Toggle("Custom color", isOn: customColorEnabled)
             if profile.customColor != nil {
                 ColorPicker("Pet color", selection: customColor, supportsOpacity: false)
             }
         }
-        .toolbar {
-            ToolbarItemGroup(placement: .keyboard) {
-                Spacer()
-                Button("Done") { isNameFieldFocused = false }
-            }
+    }
+
+    private var savedName: String {
+        var normalized = profile
+        normalized.normalizeName()
+        return normalized.name
+    }
+
+    private var corgiLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 8))
+            : AnyLayout(HStackLayout(spacing: 8))
+    }
+
+    private var coatPicker: some View {
+        Picker("Coat", selection: $profile.coat) {
+            ForEach(PetCoat.allCases) { coat in Text(coat.displayName).tag(coat) }
         }
+        .accessibilityIdentifier("petPicker.coat")
     }
 
     private var variantPicker: some View {
@@ -258,7 +287,7 @@ struct PetPicker: View {
         return Button {
             // Tapping the selected family must not reset a saved Cardigan.
             if !isCorgiGroup || !isCorgiSelected {
-                withAnimation(.snappy) { profile.breed = variant }
+                withAnimation(reduceMotion ? nil : .snappy) { profile.breed = variant }
             }
         } label: {
             VStack(spacing: 4) {
@@ -276,10 +305,13 @@ struct PetPicker: View {
 
                 Text(title)
                     .font(.caption2.weight(isSelected ? .bold : .medium))
-                    .lineLimit(1)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
                     .minimumScaleFactor(0.72)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .frame(width: 88, height: 82)
+            .frame(width: dynamicTypeSize.isAccessibilitySize ? 140 : 88)
+            .padding(.vertical, 5)
+            .frame(minHeight: 82)
             .background(
                 isSelected ? Color.accentColor.opacity(0.14) : Color.secondary.opacity(0.07),
                 in: RoundedRectangle(cornerRadius: 15, style: .continuous)
@@ -292,6 +324,7 @@ struct PetPicker: View {
         .buttonStyle(.plain)
         .accessibilityLabel(title)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("petPicker.variant.\(variant.rawValue).\(isCorgiOption ? "option" : "family")")
     }
 
     private var customColorEnabled: Binding<Bool> {
@@ -337,7 +370,7 @@ struct PetPicker: View {
         )
 
         return Button {
-            withAnimation(.snappy) {
+            withAnimation(reduceMotion ? nil : .snappy) {
                 profile.species = species
                 profile.breed = PetBreed.defaultVariant(for: species)
             }
@@ -376,7 +409,7 @@ struct PetPicker: View {
 
                     if isSelected {
                         Image(systemName: "checkmark.circle.fill")
-                            .font(.caption.bold())
+                            .font(.system(size: 13, weight: .bold))
                             .symbolRenderingMode(.palette)
                             .foregroundStyle(PetDesign.onAccent, PetDesign.accent)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
@@ -387,10 +420,13 @@ struct PetPicker: View {
 
                 Text(species.displayName)
                     .font(.caption.weight(isSelected ? .bold : .medium))
-                    .lineLimit(1)
+                    .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
                     .minimumScaleFactor(0.75)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .frame(width: 88, height: 96)
+            .frame(width: dynamicTypeSize.isAccessibilitySize ? 140 : 88)
+            .padding(.vertical, 5)
+            .frame(minHeight: 96)
             .background(
                 isSelected ? Color.accentColor.opacity(0.14) : Color.secondary.opacity(0.07),
                 in: RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -403,6 +439,7 @@ struct PetPicker: View {
         .buttonStyle(.plain)
         .accessibilityLabel(species.displayName)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("petPicker.species.\(species.rawValue)")
     }
 }
 
@@ -473,6 +510,16 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     .disabled(controller.isBusy)
                     .accessibilityIdentifier("settings.backup")
+                    DisclosureGroup {
+                        PetGettingStartedGuide()
+                            .padding(.top, 16)
+                    } label: {
+                        Text("Quick guide")
+                            .accessibilityIdentifier("settings.guide")
+                    }
+                    .font(.subheadline.weight(.medium))
+                    .padding(18)
+                    .petSurface()
                     DisclosureGroup {
                         VStack(alignment: .leading, spacing: 16) {
                             Label("Dynamic Island is available on supported iPhones.", systemImage: "iphone.gen3")
