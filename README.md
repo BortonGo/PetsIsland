@@ -65,7 +65,9 @@ The collection contains **20 visual variants across six species**:
   or appearance remains a separate pencil action; the original artwork is reused.
 - Open **Enclosure → Furniture**, tap an owned item and choose its place. Placement
   saves immediately and shows a checkmark; no separate enclosure save is needed.
-  Tap a placed item to remove it, or use its **Move item** context menu.
+  Tap a placed item to see its current place, move it or explicitly remove it.
+  Opening and closing these controls leaves the layout unchanged. Before replacing
+  furniture, the confirmation lists every item that will return to the collection.
 - The layout has **two ground places and one upper perch**, leaving the middle
   open for walking. Only one bulky item (a box or leaf nest) can be placed at once.
   Replacing an item returns it to the collection without another charge.
@@ -475,6 +477,11 @@ walks, shared habitat state, and Live Activity options unchanged.
 The settings follow-up ran all 379 unit tests and seven settings, guide, and
 backup UI scenarios on iPhone SE with iOS 26.5. The three new settings flows
 also passed on iOS 27, including a save failure and retry.
+Furniture checks cover opening without changing the layout, moving, removing
+and placing owned items again without another charge, and cancelling a replacement
+that affects two items. All 379 unit tests and the four new furniture UI scenarios
+passed on iPhone SE with iOS 26.5; the four scenarios and two existing shop flows
+also passed on iOS 27. The checks include the largest Russian text size.
 Interface checks cover shop category switching without losing the companion or
 stock, buying/wearing/removing an accessory as separate actions, and disabled
 actions with an explanation. They also exercise the largest Russian text size

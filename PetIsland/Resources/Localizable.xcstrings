@@ -1,6 +1,72 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Tap an item to place, move or remove it. Changes save immediately.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нажмите на предмет, чтобы разместить, передвинуть или убрать его. Изменения сохраняются сразу."
+          }
+        }
+      }
+    },
+    "Move or remove": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Передвинуть или убрать"
+          }
+        }
+      }
+    },
+    "Current place": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Текущее место"
+          }
+        }
+      }
+    },
+    "Returns to collection: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Вернутся в коллекцию: %@"
+          }
+        }
+      }
+    },
+    "The box and leaf nest share one large-item space.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Коробку и гнездо из листьев нельзя разместить одновременно."
+          }
+        }
+      }
+    },
+    "Remove from enclosure": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Убрать из вольера"
+          }
+        }
+      }
+    },
     "Saving settings…": {
       "extractionState": "manual",
       "localizations": {

@@ -7,7 +7,13 @@ struct ContentView: View {
 
     var body: some View {
 #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-settings-clarity-preview") {
+        if ProcessInfo.processInfo.arguments.contains("-furniture-clarity-preview") {
+#if targetEnvironment(simulator)
+            HabitatFurnitureDebugHostView()
+#else
+            appContent
+#endif
+        } else if ProcessInfo.processInfo.arguments.contains("-settings-clarity-preview") {
 #if targetEnvironment(simulator)
             SettingsClarityDebugHostView()
 #else

@@ -89,6 +89,131 @@ final class PetProfileUITests: XCTestCase {
         app.buttons[name].tap()
     }
 
+    private func launchFurniture(russianLarge: Bool = false) {
+        app.launchArguments = ["-furniture-clarity-preview", "-AppleLanguages", russianLarge ? "(ru)" : "(en)",
+                               "-AppleLocale", russianLarge ? "ru_RU" : "en_US"]
+        if russianLarge {
+            app.launchArguments += ["-furniture-light", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        }
+        app.launch()
+        XCTAssertTrue(app.navigationBars[russianLarge ? "Предметы для вольера" : "Furniture"].waitForExistence(timeout: 10))
+    }
+
+    private func assertFurnitureFixture(layout: String) {
+        XCTAssertTrue(app.staticTexts["furniture.fixture.layout"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["furniture.fixture.layout"].label, layout)
+        XCTAssertEqual(app.staticTexts["furniture.fixture.coins"].label, "120")
+        XCTAssertEqual(app.staticTexts["furniture.fixture.pets"].label, "Pixel,Luna")
+    }
+
+    func testFurnitureOpeningAndCancelDoNotChangePlacement() throws {
+        launchFurniture()
+        app.navigationBars["Furniture"].buttons["Done"].tap()
+        let layout = "birdPerch:perch,cozyBox:left,softBed:right"
+        assertFurnitureFixture(layout: layout)
+        let revision = app.staticTexts["furniture.fixture.revision"].label
+        app.buttons["furniture.fixture.open"].tap()
+        let box = app.buttons["furniture.cozyBox"]
+        reveal(box)
+        XCTAssertTrue(box.isSelected)
+        XCTAssertEqual(box.value as? String, "Left corner")
+        box.tap()
+        let current = app.buttons["furniture.place.left"]
+        XCTAssertTrue(current.waitForExistence(timeout: 5))
+        XCTAssertTrue(current.isSelected)
+        XCTAssertFalse(current.isEnabled)
+        XCTAssertTrue(app.buttons["furniture.remove"].isHittable)
+        capture("Furniture — current place and explicit removal")
+        try auditVisibleContent()
+        app.navigationBars["Cozy box"].buttons["Cancel"].tap()
+        XCTAssertTrue(box.isSelected)
+        app.navigationBars["Furniture"].buttons["Done"].tap()
+        assertFurnitureFixture(layout: layout)
+        XCTAssertEqual(app.staticTexts["furniture.fixture.revision"].label, revision)
+    }
+
+    func testFurnitureMoveRemoveAndPlaceKeepsOwnershipAndCoins() {
+        launchFurniture()
+        let box = app.buttons["furniture.cozyBox"]
+        reveal(box)
+        box.tap()
+        app.buttons["furniture.place.right"].tap()
+        XCTAssertTrue(app.alerts.buttons["Replace"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts.matching(identifier: "Returns to collection: Soft bed (Right corner)").firstMatch.exists)
+        app.alerts.buttons["Replace"].tap()
+        XCTAssertTrue(box.waitForExistence(timeout: 5))
+        XCTAssertEqual(box.value as? String, "Right corner")
+        box.tap()
+        let remove = app.buttons["furniture.remove"]
+        XCTAssertTrue(remove.waitForExistence(timeout: 5))
+        remove.tap()
+        XCTAssertTrue(box.waitForExistence(timeout: 5))
+        XCTAssertFalse(box.isSelected)
+        XCTAssertEqual(box.value as? String, "Purchased")
+        box.tap()
+        XCTAssertTrue(app.buttons["furniture.place.left"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["furniture.remove"].exists)
+        app.buttons["furniture.place.left"].tap()
+        XCTAssertTrue(box.waitForExistence(timeout: 5))
+        XCTAssertEqual(box.value as? String, "Left corner")
+        XCTAssertEqual(app.buttons["furniture.softBed"].value as? String, "Purchased")
+        capture("Furniture — moved, removed and placed without another purchase")
+        app.navigationBars["Furniture"].buttons["Done"].tap()
+        assertFurnitureFixture(layout: "birdPerch:perch,cozyBox:left")
+    }
+
+    func testFurnitureBulkyReplacementExplainsBothItemsAndCanBeCancelled() {
+        launchFurniture()
+        let nest = app.buttons["furniture.leafNest"]
+        reveal(nest)
+        nest.tap()
+        XCTAssertTrue(app.staticTexts["The box and leaf nest share one large-item space."].waitForExistence(timeout: 5))
+        let right = app.buttons["furniture.place.right"]
+        XCTAssertTrue(right.label.contains("Cozy box (Left corner)"))
+        XCTAssertTrue(right.label.contains("Soft bed (Right corner)"))
+        right.tap()
+        let replace = app.alerts.buttons["Replace"]
+        XCTAssertTrue(replace.waitForExistence(timeout: 5))
+        capture("Furniture — named replacement confirmation")
+        app.alerts.buttons["Cancel"].tap()
+        app.navigationBars["Leaf nest"].buttons["Cancel"].tap()
+        app.navigationBars["Furniture"].buttons["Done"].tap()
+        assertFurnitureFixture(layout: "birdPerch:perch,cozyBox:left,softBed:right")
+        app.buttons["furniture.fixture.open"].tap()
+        reveal(nest)
+        nest.tap()
+        right.tap()
+        XCTAssertTrue(replace.waitForExistence(timeout: 5))
+        replace.tap()
+        XCTAssertTrue(nest.waitForExistence(timeout: 5))
+        XCTAssertEqual(nest.value as? String, "Right corner")
+        app.navigationBars["Furniture"].buttons["Done"].tap()
+        assertFurnitureFixture(layout: "birdPerch:perch,leafNest:right")
+    }
+
+    func testFurnitureLargestRussianTextAndLockedShopRemainReachable() throws {
+        launchFurniture(russianLarge: true)
+        let box = app.buttons["furniture.cozyBox"]
+        reveal(box)
+        box.tap()
+        let current = app.buttons["furniture.place.left"]
+        XCTAssertTrue(current.waitForExistence(timeout: 5))
+        reveal(current)
+        XCTAssertTrue(current.isSelected)
+        let remove = app.buttons["furniture.remove"]
+        reveal(remove, fullyVisible: true)
+        capture("Furniture — largest Russian text, light theme")
+        try auditVisibleContent()
+        app.navigationBars.buttons["Отмена"].tap()
+        let locked = app.buttons["furniture.warmStone"]
+        reveal(locked)
+        locked.tap()
+        let buy = app.buttons["furniture.buy.warmStone"]
+        reveal(buy)
+        XCTAssertTrue(buy.isEnabled)
+        capture("Furniture — locked item opens the shop")
+    }
+
     private func launchSettings(_ arguments: String...) {
         let russian = arguments.contains("-settings-russian")
         app.launchArguments = ["-settings-clarity-preview", "-AppleLanguages", russian ? "(ru)" : "(en)",
