@@ -7,7 +7,13 @@ struct ContentView: View {
 
     var body: some View {
 #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-furniture-clarity-preview") {
+        if ProcessInfo.processInfo.arguments.contains("-enclosure-editor-preview") {
+#if targetEnvironment(simulator)
+            HabitatEditorDebugHostView()
+#else
+            appContent
+#endif
+        } else if ProcessInfo.processInfo.arguments.contains("-furniture-clarity-preview") {
 #if targetEnvironment(simulator)
             HabitatFurnitureDebugHostView()
 #else
@@ -659,6 +665,94 @@ private struct DynamicIslandSpritePreview: View {
         .padding(.horizontal, 9)
         .frame(width: 230, height: 37)
         .background(.black, in: Capsule())
+    }
+}
+#endif
+
+#if DEBUG && targetEnvironment(simulator)
+/// Exercises the real editor and persistence on disposable UI-test simulators.
+private struct HabitatEditorDebugHostView: View {
+    @StateObject private var controller: PetSessionController
+    @State private var showsEditor = false
+    @State private var draftTheme: HabitatTheme = .meadow
+    @State private var draftPetIDs: [UUID] = []
+    @State private var hasFailed = false
+    private let initialIDs: [UUID]
+    private let initialHabitat: SharedPetHabitat
+
+    init() {
+        let args = ProcessInfo.processInfo.arguments
+        let names = args.contains("-editor-full") ? ["Pixel", "Luna", "Mochi", "Leo", "Kiwi", "Snow", "Sunny"] : ["Pixel", "Luna", "Mochi"]
+        var state = PersistedAppState()
+        state.completedOnboarding = true
+        state.pets = names.enumerated().map { index, name in
+            PetProfile(id: UUID(uuidString: "ED000000-0000-0000-0000-00000000000\(index + 1)")!,
+                       name: name, species: index == 0 ? .dog : .cat, coat: .sunrise,
+                       createdAt: .distantPast, breed: index == 0 ? .corgi : .classicCat)
+        }
+        state.activePetIDs = [state.pets[0].id]
+        let residentIDs = Array(state.pets.prefix(args.contains("-editor-full") ? 6 : 2).map(\.id))
+        initialIDs = residentIDs
+        initialHabitat = SharedPetHabitat(
+            configuration: PetHabitatState(residentPetIDs: residentIDs),
+            residents: state.pets.filter { residentIDs.contains($0.id) }.map {
+                SharedHabitatResident(profile: $0, vitals: PetVitals())
+            }
+        )
+        if args.contains("-editor-away") {
+            state.discoveries.startWalk(pet: state.pets[1], route: .garden, at: .now)
+        }
+        _controller = StateObject(wrappedValue: PetSessionController(
+            store: InMemoryPetStore(state),
+            arcadeStore: InMemoryArcadeStore(ArcadeState(progress: ArcadeProgress(coins: 120, ownedHabitatItems: [.cozyBox])))
+        ))
+    }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Button("Edit enclosure") { openEditor() }.accessibilityIdentifier("editor.fixture.open")
+            Button("Reload saved enclosure") {
+                Task { await controller.bootstrap() }
+            }.accessibilityIdentifier("editor.fixture.reload")
+            Text(controller.habitat.configuration.theme.rawValue).accessibilityIdentifier("editor.fixture.theme")
+            Text(controller.habitat.configuration.residentPetIDs.compactMap { id in controller.pets.first { $0.id == id }?.name }.joined(separator: ","))
+                .accessibilityIdentifier("editor.fixture.residents")
+            Text(controller.pets.map(\.name).joined(separator: ",")).accessibilityIdentifier("editor.fixture.pets")
+            Text("\(controller.arcadeProgress.coins)").accessibilityIdentifier("editor.fixture.coins")
+            Text(controller.habitat.configuration.furniture.map { "\($0.item.rawValue):\($0.slot.rawValue)" }.joined(separator: ","))
+                .accessibilityIdentifier("editor.fixture.furniture")
+        }
+        .sheet(isPresented: $showsEditor) {
+            HabitatEditorView(controller: controller, pets: controller.pets,
+                              selectedPetIDs: $draftPetIDs, selectedTheme: $draftTheme,
+                              unavailablePetIDs: Set(controller.pets.filter { controller.isPetOnDiscoveryWalk($0.id) }.map(\.id)),
+                              maximumPets: PetHabitatState.maximumResidents) {
+                if !hasFailed, ProcessInfo.processInfo.arguments.contains("-editor-fail-save") {
+                    hasFailed = true
+                    return false
+                }
+                if controller.saveHabitat(theme: draftTheme, residentPetIDs: draftPetIDs) {
+                    showsEditor = false
+                    return true
+                }
+                return false
+            }
+        }
+        .task {
+            guard controller.operation == .loading else { return }
+            try? PetHabitatStore.save(initialHabitat)
+            await controller.bootstrap()
+            _ = controller.saveHabitat(theme: .meadow, residentPetIDs: initialIDs)
+            openEditor()
+        }
+        .preferredColorScheme(ProcessInfo.processInfo.arguments.contains("-editor-light") ? .light : .dark)
+        .environment(\.petMinimizeMotion, true)
+    }
+
+    private func openEditor() {
+        draftTheme = controller.habitat.configuration.theme
+        draftPetIDs = controller.habitat.configuration.residentPetIDs
+        showsEditor = true
     }
 }
 #endif

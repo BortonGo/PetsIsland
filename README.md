@@ -50,6 +50,11 @@ The collection contains **20 visual variants across six species**:
 - Keep up to **six residents** in the enclosure and choose from **ten scenes**:
   five calm environments and five vivid alternatives, including a sunny meadow,
   a starry night, a warm room, a snowy cove, and sunset dunes.
+- The enclosure editor marks unsaved background and resident choices. **Close**
+  asks before discarding them; an accidental swipe keeps the draft open.
+  Furniture saves separately and remains placed if the draft is discarded.
+  Resident cards explain full capacity, the last required resident, and reserved
+  places for pets on walks; the selection count includes those reserved places.
 - Pet your companions and open the full-screen playroom to throw a ball and
   play fetch. Grounded movement and gait frames follow the distance travelled.
 - Track fullness, happiness, and energy, with rest and care between games.
@@ -482,6 +487,14 @@ and placing owned items again without another charge, and cancelling a replaceme
 that affects two items. All 379 unit tests and the four new furniture UI scenarios
 passed on iPhone SE with iOS 26.5; the four scenarios and two existing shop flows
 also passed on iOS 27. The checks include the largest Russian text size.
+Enclosure editor checks cover keeping or discarding a draft, returning to the
+original choices, failed saves and retry, filling all resident places, and keeping
+a walking pet's place reserved. They also verify that furniture saves independently
+without another coin charge and remains placed after discarding the editor draft.
+All 379 unit tests and the five editor scenarios passed on iPhone SE with iOS 26.5;
+the five scenarios plus existing furniture and wardrobe checks passed on iOS 27.
+These checks include the largest Russian text size, and disabled-choice explanations
+keep their normal text contrast.
 Interface checks cover shop category switching without losing the companion or
 stock, buying/wearing/removing an accessory as separate actions, and disabled
 actions with an explanation. They also exercise the largest Russian text size

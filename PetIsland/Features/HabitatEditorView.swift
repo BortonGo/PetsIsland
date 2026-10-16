@@ -5,6 +5,7 @@ import UIKit
 struct HabitatEditorView: View {
     @ObservedObject var controller: PetSessionController
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.dismiss) private var dismiss
     let pets: [PetProfile]
     @Binding var selectedPetIDs: [UUID]
     @Binding var selectedTheme: HabitatTheme
@@ -15,6 +16,13 @@ struct HabitatEditorView: View {
     var onSave: () -> Bool
     @State private var saveFailed = false
     @State private var showsFurniture = false
+    @State private var initialPetIDs: [UUID]
+    @State private var initialTheme: HabitatTheme
+    @State private var confirmsDiscard = false
+
+    private var hasChanges: Bool {
+        selectedPetIDs != initialPetIDs || selectedTheme != initialTheme
+    }
 
     init(
         controller: PetSessionController,
@@ -30,6 +38,8 @@ struct HabitatEditorView: View {
         self.pets = pets
         _selectedPetIDs = selectedPetIDs
         _selectedTheme = selectedTheme
+        _initialPetIDs = State(initialValue: selectedPetIDs.wrappedValue)
+        _initialTheme = State(initialValue: selectedTheme.wrappedValue)
         self.vitalsByPetID = vitalsByPetID
         self.unavailablePetIDs = unavailablePetIDs
         self.maximumPets = max(maximumPets, 1)
@@ -41,6 +51,7 @@ struct HabitatEditorView: View {
             ScrollView {
                 VStack(spacing: 22) {
                     habitatPreview
+                    if dynamicTypeSize.isAccessibilitySize { saveStatus }
                     themePicker
                     furniturePicker
                     petPicker
@@ -55,6 +66,25 @@ struct HabitatEditorView: View {
             } message: { Text("Your draft is safe. Please try saving again.") }
             .navigationTitle("Enclosure")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Close") {
+                        if hasChanges { confirmsDiscard = true }
+                        else { dismiss() }
+                    }
+                    .accessibilityIdentifier("habitat.close")
+                }
+            }
+            .alert("Discard enclosure changes?", isPresented: $confirmsDiscard) {
+                Button("Keep editing", role: .cancel) { }
+                Button("Discard changes", role: .destructive) {
+                    selectedPetIDs = initialPetIDs
+                    selectedTheme = initialTheme
+                    dismiss()
+                }
+            } message: {
+                Text("The background and resident selection will not be saved. Furniture changes are already saved and will stay.")
+            }
             .sheet(isPresented: $showsFurniture) {
                 HabitatFurnitureView(controller: controller)
             }
@@ -62,6 +92,7 @@ struct HabitatEditorView: View {
                 saveBar
             }
         }
+        .interactiveDismissDisabled(hasChanges)
     }
 
     private var habitatPreview: some View {
@@ -78,9 +109,10 @@ struct HabitatEditorView: View {
             VStack(alignment: .leading, spacing: 3) {
                 Text("Your enclosure")
                     .font(.headline)
-                Text("\(presentPets.count)/\(maximumPets) residents")
+                Text("Selected: \(selectedPets.count) of \(maximumPets)")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
+                    .accessibilityIdentifier("habitat.selectionCount")
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 9)
@@ -107,8 +139,9 @@ struct HabitatEditorView: View {
         Button { showsFurniture = true } label: {
             HStack(spacing: 12) {
                 Image(systemName: "shippingbox")
-                    .font(.title3)
+                    .font(.system(size: 22))
                     .foregroundStyle(PetDesign.secondary)
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("Furniture").font(.subheadline.weight(.semibold))
                     Text(controller.habitat.configuration.furniture.isEmpty
@@ -116,12 +149,16 @@ struct HabitatEditorView: View {
                          : controller.habitat.configuration.furniture.map { $0.item.title }.joined(separator: ", "))
                         .font(.caption)
                         .foregroundStyle(PetDesign.secondary)
-                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Furniture changes save immediately.")
+                        .font(.caption).foregroundStyle(PetDesign.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 8)
                 Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
+                    .font(.system(size: 12, weight: .semibold))
                     .foregroundStyle(PetDesign.secondary)
+                    .accessibilityHidden(true)
             }
             .padding(14)
             .background(PetDesign.surface, in: RoundedRectangle(cornerRadius: 18))
@@ -159,7 +196,7 @@ struct HabitatEditorView: View {
 
                 Label(theme.name, systemImage: theme.symbol)
                     .font(.caption.bold())
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
                     .frame(minHeight: 34, alignment: .topLeading)
             }
             .frame(width: dynamicTypeSize.isAccessibilitySize ? 240 : 120, alignment: .leading)
@@ -175,6 +212,7 @@ struct HabitatEditorView: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .accessibilityIdentifier("habitat.theme.\(theme.theme.rawValue)")
     }
 
     private var petPicker: some View {
@@ -194,6 +232,12 @@ struct HabitatEditorView: View {
                 Text("A space is kept for your exploring pet.")
                     .font(.caption)
                     .foregroundStyle(PetDesign.secondary)
+            }
+            if selectedPets.count >= maximumPets, pets.count > selectedPets.count {
+                Text("To choose another pet, first remove a resident.")
+                    .font(.caption).foregroundStyle(PetDesign.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("habitat.capacityHint")
             }
             if pets.isEmpty {
                 ContentUnavailableView(
@@ -220,6 +264,10 @@ struct HabitatEditorView: View {
         let selectionIsFull = selectedPets.count >= maximumPets
         let cannotRemoveLast = isSelected && selectedPets.count == 1
         let isAway = unavailablePetIDs.contains(pet.id)
+        let reason: String? = isAway ? (isSelected ? String(localized: "A space is kept for your exploring pet.")
+                                        : String(localized: "Available after the walk"))
+            : cannotRemoveLast ? String(localized: "At least one resident is required")
+            : selectionIsFull && !isSelected ? String(localized: "No free places") : nil
 
         return Button {
             toggleSelection(of: pet.id)
@@ -239,22 +287,27 @@ struct HabitatEditorView: View {
                     .frame(width: 66, height: 56)
 
                     Image(systemName: isAway ? "clock.fill" : isSelected ? "checkmark.circle.fill" : "plus.circle.fill")
-                        .font(.title3)
+                        .font(.system(size: 18))
                         .symbolRenderingMode(.palette)
                         .foregroundStyle(
                             isSelected ? PetDesign.onAccent : PetDesign.accent,
                             isSelected ? PetDesign.accent : PetDesign.surface
                         )
                         .offset(x: 5, y: -3)
+                        .accessibilityHidden(true)
                 }
 
                 Text(pet.name)
                     .font(.caption.bold())
-                    .lineLimit(1)
-                Text(isAway ? "Out exploring" : pet.species.displayName)
+                    .foregroundStyle(PetDesign.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                Group {
+                    if let reason { Text(reason) }
+                    else { Text(pet.species.displayName) }
+                }
                     .font(.caption2)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                    .foregroundStyle(PetDesign.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 8)
@@ -268,12 +321,18 @@ struct HabitatEditorView: View {
                     .stroke(isSelected ? PetDesign.accent : Color.clear, lineWidth: 2)
             }
         }
-        .buttonStyle(.plain)
+        .buttonStyle(ResidentChoiceStyle())
         .disabled(isAway || (selectionIsFull && !isSelected) || cannotRemoveLast)
-        .opacity((selectionIsFull && !isSelected) ? 0.48 : 1)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
-        .accessibilityHint(isAway ? Text("A space is kept for your exploring pet.") :
-                           cannotRemoveLast ? Text("At least one resident is required") : Text(""))
+        .accessibilityHint(Text(reason ?? ""))
+        .accessibilityIdentifier("habitat.resident.\(pet.id.uuidString)")
+    }
+
+    /// Keep the reason readable even when this choice cannot be tapped.
+    private struct ResidentChoiceStyle: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label.opacity(configuration.isPressed ? 0.8 : 1)
+        }
     }
 
     @ViewBuilder
@@ -305,21 +364,45 @@ struct HabitatEditorView: View {
         }
     }
 
+    private var saveStatus: some View {
+        Text(hasChanges ? "Unsaved background or residents" : "Background and residents are saved")
+            .font(.caption.weight(.medium))
+            .foregroundStyle(PetDesign.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityIdentifier("habitat.saveStatus")
+    }
+
     private var saveBar: some View {
-        Button {
-            saveFailed = !onSave()
-        } label: {
-            Label("Save enclosure", systemImage: "checkmark.circle.fill")
-                .font(.headline)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 4)
+        VStack(spacing: 8) {
+            if !dynamicTypeSize.isAccessibilitySize { saveStatus }
+            Button {
+                guard !controller.isBusy else { return }
+                if hasChanges {
+                    if onSave() {
+                        initialPetIDs = selectedPetIDs
+                        initialTheme = selectedTheme
+                    } else {
+                        controller.alertMessage = nil
+                        saveFailed = true
+                    }
+                } else { dismiss() }
+            } label: {
+                Text(hasChanges ? "Save enclosure" : "Done")
+                    .font(.headline)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 4)
+            }
+            .buttonStyle(PetPrimaryButtonStyle())
+            .controlSize(.large)
+            .disabled(controller.isBusy || (hasChanges && selectedPets.isEmpty))
+            .accessibilityIdentifier("habitat.save")
         }
-        .buttonStyle(PetPrimaryButtonStyle())
-        .controlSize(.large)
-        .disabled(selectedPets.isEmpty)
         .padding(.horizontal, 18)
         .padding(.vertical, 10)
         .background(.bar)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("habitat.saveBar")
     }
 
     private var selectedPets: [PetProfile] {
@@ -360,9 +443,10 @@ struct HabitatEditorView: View {
     ) -> some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: symbol)
-                .font(.body.bold())
+                .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(.tint)
                 .frame(width: 24)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text(title).font(.headline)
                 Text(subtitle)

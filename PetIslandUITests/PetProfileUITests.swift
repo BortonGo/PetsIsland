@@ -33,7 +33,9 @@ final class PetProfileUITests: XCTestCase {
             var top = (app.navigationBars.allElementsBoundByIndex.last?.frame.maxY ?? visible.minY) + 8
             let category = app.buttons["shop.category"]
             if category.exists && category.isHittable { top = max(top, category.frame.maxY + 8) }
-            let footer = app.otherElements["wardrobe.pinnedControls"]
+            let hasEditorFooter = app.buttons["habitat.save"].exists && app.buttons["habitat.save"].isHittable
+            let footer = hasEditorFooter
+                ? app.otherElements["habitat.saveBar"] : app.otherElements["wardrobe.pinnedControls"]
             let bottom = footer.exists ? footer.frame.minY - 12 : visible.maxY
             // A hittable centre does not mean a tall button is fully visible.
             // Geometry assertions request full visibility; ordinary interactions
@@ -44,14 +46,31 @@ final class PetProfileUITests: XCTestCase {
                     if frame.minY >= top && frame.maxY <= bottom { return }
                 } else if frame.midY > top && frame.midY < bottom { return }
             }
-            if element.exists && element.frame.minY > visible.maxY + 100 {
+            if !hasEditorFooter, element.exists && element.frame.minY > visible.maxY + 100 {
                 app.swipeUp()
                 continue
             }
             let down = element.exists && (fullyVisible && element.frame.height <= bottom - top
                 ? element.frame.minY < top : element.frame.midY < top)
-            let from = app.coordinate(withNormalizedOffset: CGVector(dx: 0.88, dy: down ? 0.43 : 0.63))
-            let to = app.coordinate(withNormalizedOffset: CGVector(dx: 0.88, dy: down ? 0.63 : 0.43))
+            let from: XCUICoordinate
+            let to: XCUICoordinate
+            if hasEditorFooter {
+                // Keep gestures inside the scroll area, above the pinned save
+                // button even when its label wraps at accessibility sizes.
+                let height = max(0, bottom - top)
+                let origin = app.coordinate(withNormalizedOffset: .zero)
+                var distance = height * 0.6
+                if fullyVisible, element.exists, element.isHittable, element.frame.height <= height {
+                    let overflow = down ? top - element.frame.minY : element.frame.maxY - bottom
+                    distance = min(distance, max(24, overflow + 12))
+                }
+                let start = top + height * (down ? 0.2 : 0.8)
+                from = origin.withOffset(CGVector(dx: visible.width * 0.88, dy: start))
+                to = origin.withOffset(CGVector(dx: visible.width * 0.88, dy: start + (down ? distance : -distance)))
+            } else {
+                from = app.coordinate(withNormalizedOffset: CGVector(dx: 0.88, dy: down ? 0.43 : 0.63))
+                to = app.coordinate(withNormalizedOffset: CGVector(dx: 0.88, dy: down ? 0.63 : 0.43))
+            }
             from.press(forDuration: 0.05, thenDragTo: to, withVelocity: .slow, thenHoldForDuration: 0)
         }
         XCTAssertTrue(element.isHittable, "Unreachable control: \(element)")
@@ -64,7 +83,7 @@ final class PetProfileUITests: XCTestCase {
         add(attachment)
     }
 
-    private func auditVisibleContent(pinnedHeader: XCUIElement? = nil) throws {
+    private func auditVisibleContent(pinnedHeader: XCUIElement? = nil, pinnedFooter: XCUIElement? = nil) throws {
         try app.performAccessibilityAudit(for: [.sufficientElementDescription, .hitRegion, .textClipped]) { issue in
             guard issue.auditType == .textClipped, let element = issue.element else { return false }
             let frame = element.frame, window = self.app.frame
@@ -74,6 +93,8 @@ final class PetProfileUITests: XCTestCase {
             if frame.minY < window.minY || frame.maxY > window.maxY { return true }
             if let header = pinnedHeader, header.isHittable,
                frame.minY < header.frame.maxY && frame.maxY > header.frame.maxY { return true }
+            if let footer = pinnedFooter, footer.isHittable,
+               frame.minY < footer.frame.minY && frame.maxY > footer.frame.minY { return true }
             return false
         }
     }
@@ -87,6 +108,163 @@ final class PetProfileUITests: XCTestCase {
         XCTAssertTrue(category.isHittable)
         category.tap()
         app.buttons[name].tap()
+    }
+
+    private func launchEnclosureEditor(_ arguments: String...) {
+        let russian = arguments.contains("-editor-russian-large")
+        app.launchArguments = ["-enclosure-editor-preview", "-AppleLanguages", russian ? "(ru)" : "(en)",
+                               "-AppleLocale", russian ? "ru_RU" : "en_US"] + arguments
+        if russian { app.launchArguments += ["-editor-light", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"] }
+        app.launch()
+        XCTAssertTrue(app.buttons["habitat.close"].waitForExistence(timeout: 10))
+    }
+
+    private func resident(_ index: Int) -> XCUIElement {
+        app.buttons["habitat.resident.ED000000-0000-0000-0000-00000000000\(index)"]
+    }
+
+    private func chooseEnclosureTheme(_ theme: String) {
+        let choice = app.buttons["habitat.theme.\(theme)"]
+        reveal(choice)
+        choice.tap()
+        XCTAssertTrue(choice.isSelected)
+    }
+
+    private func placeEditorBox() {
+        let furniture = app.buttons["furniture.open"]
+        reveal(furniture)
+        furniture.tap()
+        XCTAssertTrue(app.navigationBars["Furniture"].waitForExistence(timeout: 5))
+        let box = app.buttons["furniture.cozyBox"]
+        reveal(box)
+        box.tap()
+        XCTAssertTrue(app.buttons["furniture.place.left"].waitForExistence(timeout: 5))
+        app.buttons["furniture.place.left"].tap()
+        XCTAssertTrue(box.waitForExistence(timeout: 5))
+        XCTAssertTrue(box.isSelected)
+        app.navigationBars["Furniture"].buttons["Done"].tap()
+    }
+
+    func testEnclosureEditorGuardsDraftAndDiscardKeepsFurniture() {
+        launchEnclosureEditor()
+        chooseEnclosureTheme("sunnyMeadow")
+        XCTAssertEqual(app.staticTexts["habitat.saveStatus"].label, "Unsaved background or residents")
+        app.navigationBars["Enclosure"].swipeDown()
+        XCTAssertTrue(app.buttons["habitat.close"].isHittable, "An accidental swipe must not discard the draft")
+        app.buttons["habitat.close"].tap()
+        XCTAssertTrue(app.alerts.buttons["Keep editing"].waitForExistence(timeout: 5))
+        capture("Enclosure — explicit discard confirmation")
+        app.alerts.buttons["Keep editing"].tap()
+        chooseEnclosureTheme("meadow")
+        XCTAssertEqual(app.buttons["habitat.save"].label, "Done", "Returning to the original choice clears the unsaved state")
+        app.buttons["habitat.close"].tap()
+        XCTAssertTrue(app.buttons["editor.fixture.open"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.alerts.firstMatch.exists)
+        app.buttons["editor.fixture.open"].tap()
+        chooseEnclosureTheme("sunnyMeadow")
+        placeEditorBox()
+        app.buttons["habitat.close"].tap()
+        XCTAssertTrue(app.alerts.buttons["Discard changes"].waitForExistence(timeout: 5))
+        app.alerts.buttons["Discard changes"].tap()
+        XCTAssertTrue(app.staticTexts["editor.fixture.theme"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["editor.fixture.theme"].label, "meadow")
+        XCTAssertEqual(app.staticTexts["editor.fixture.residents"].label, "Pixel,Luna")
+        XCTAssertEqual(app.staticTexts["editor.fixture.furniture"].label, "cozyBox:left")
+        XCTAssertEqual(app.staticTexts["editor.fixture.coins"].label, "120")
+    }
+
+    func testEnclosureEditorFailureKeepsDraftAndRetryPersistsResidents() {
+        launchEnclosureEditor("-editor-fail-save")
+        chooseEnclosureTheme("sunnyMeadow")
+        let luna = resident(2)
+        reveal(luna)
+        luna.tap()
+        let pixel = resident(1)
+        XCTAssertFalse(pixel.isEnabled)
+        XCTAssertTrue(pixel.label.contains("At least one resident is required"))
+        app.buttons["habitat.save"].tap()
+        XCTAssertTrue(app.alerts["Could not save"].waitForExistence(timeout: 5))
+        capture("Enclosure — failed save retains the draft")
+        app.alerts.buttons["OK"].tap()
+        XCTAssertTrue(pixel.isSelected)
+        XCTAssertFalse(luna.isSelected)
+        XCTAssertEqual(app.staticTexts["habitat.saveStatus"].label, "Unsaved background or residents")
+        app.buttons["habitat.save"].tap()
+        XCTAssertTrue(app.buttons["editor.fixture.reload"].waitForExistence(timeout: 5))
+        app.buttons["editor.fixture.reload"].tap()
+        XCTAssertEqual(app.staticTexts["editor.fixture.theme"].label, "sunnyMeadow")
+        XCTAssertEqual(app.staticTexts["editor.fixture.residents"].label, "Pixel")
+        XCTAssertEqual(app.staticTexts["editor.fixture.pets"].label, "Pixel,Luna,Mochi")
+        app.buttons["editor.fixture.open"].tap()
+        XCTAssertTrue(app.buttons["habitat.save"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.buttons["habitat.save"].label, "Done")
+        reveal(luna)
+        luna.tap()
+        XCTAssertTrue(pixel.isEnabled, "Choosing a second resident makes the first removable again")
+        app.buttons["habitat.save"].tap()
+        XCTAssertTrue(app.staticTexts["editor.fixture.residents"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["editor.fixture.residents"].label, "Pixel,Luna")
+    }
+
+    func testEnclosureEditorCapacityExplainsHowToChooseAnotherResident() throws {
+        launchEnclosureEditor("-editor-full")
+        let spare = resident(7)
+        reveal(spare)
+        XCTAssertFalse(spare.isEnabled)
+        XCTAssertTrue(spare.label.contains("No free places"))
+        let selected = resident(6)
+        reveal(selected)
+        selected.tap()
+        reveal(spare)
+        XCTAssertTrue(spare.isEnabled)
+        spare.tap()
+        XCTAssertTrue(spare.isSelected)
+        XCTAssertFalse(selected.isEnabled)
+        XCTAssertTrue(selected.label.contains("No free places"))
+        capture("Enclosure — full selection with visible reasons")
+        try auditVisibleContent(pinnedFooter: app.otherElements["habitat.saveBar"])
+        app.buttons["habitat.save"].tap()
+        XCTAssertTrue(app.staticTexts["editor.fixture.residents"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["editor.fixture.residents"].label, "Pixel,Luna,Mochi,Leo,Kiwi,Sunny")
+        XCTAssertEqual(app.staticTexts["editor.fixture.pets"].label, "Pixel,Luna,Mochi,Leo,Kiwi,Snow,Sunny")
+    }
+
+    func testEnclosureEditorWalkingResidentAndLargestRussianText() throws {
+        launchEnclosureEditor("-editor-away", "-editor-russian-large")
+        let luna = resident(2)
+        reveal(luna, fullyVisible: true)
+        XCTAssertTrue(luna.isSelected)
+        XCTAssertFalse(luna.isEnabled)
+        XCTAssertTrue(luna.label.contains("Место"))
+        capture("Enclosure — walking resident, largest Russian text")
+        try auditVisibleContent(pinnedFooter: app.otherElements["habitat.saveBar"])
+        let mochi = resident(3)
+        reveal(mochi)
+        mochi.tap()
+        XCTAssertTrue(luna.isSelected)
+        XCTAssertFalse(luna.isEnabled)
+        XCTAssertTrue(app.buttons["habitat.save"].isHittable)
+        app.buttons["habitat.save"].tap()
+        XCTAssertTrue(app.staticTexts["editor.fixture.residents"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["editor.fixture.residents"].label, "Pixel,Luna,Mochi")
+        XCTAssertEqual(app.staticTexts["editor.fixture.coins"].label, "120")
+    }
+
+    func testEnclosureEditorFurnitureOnlySavesWithoutDraftConfirmation() {
+        launchEnclosureEditor()
+        placeEditorBox()
+        XCTAssertEqual(app.buttons["habitat.save"].label, "Done")
+        XCTAssertEqual(app.staticTexts["habitat.saveStatus"].label, "Background and residents are saved")
+        app.buttons["habitat.close"].tap()
+        XCTAssertTrue(app.buttons["editor.fixture.reload"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.alerts.firstMatch.exists)
+        app.buttons["editor.fixture.reload"].tap()
+        XCTAssertEqual(app.staticTexts["editor.fixture.theme"].label, "meadow")
+        XCTAssertEqual(app.staticTexts["editor.fixture.residents"].label, "Pixel,Luna")
+        XCTAssertEqual(app.staticTexts["editor.fixture.furniture"].label, "cozyBox:left")
+        app.buttons["editor.fixture.open"].tap()
+        XCTAssertTrue(app.buttons["habitat.save"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.buttons["habitat.save"].label, "Done")
     }
 
     private func launchFurniture(russianLarge: Bool = false) {

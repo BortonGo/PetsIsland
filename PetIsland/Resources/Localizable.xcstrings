@@ -1,6 +1,127 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Discard enclosure changes?": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Закрыть без сохранения?"
+          }
+        }
+      }
+    },
+    "Keep editing": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Продолжить редактирование"
+          }
+        }
+      }
+    },
+    "Discard changes": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не сохранять"
+          }
+        }
+      }
+    },
+    "The background and resident selection will not be saved. Furniture changes are already saved and will stay.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбранный фон и состав жителей не сохранятся. Изменения предметов уже сохранены и останутся."
+          }
+        }
+      }
+    },
+    "Selected: %lld of %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрано: %1$lld из %2$lld"
+          }
+        }
+      }
+    },
+    "Furniture changes save immediately.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Изменения предметов сохраняются сразу."
+          }
+        }
+      }
+    },
+    "To choose another pet, first remove a resident.": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Чтобы выбрать другого питомца, сначала освободите место."
+          }
+        }
+      }
+    },
+    "Available after the walk": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Можно выбрать после прогулки"
+          }
+        }
+      }
+    },
+    "No free places": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет свободных мест"
+          }
+        }
+      }
+    },
+    "Unsaved background or residents": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фон или состав жителей не сохранён"
+          }
+        }
+      }
+    },
+    "Background and residents are saved": {
+      "extractionState": "manual",
+      "localizations": {
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Фон и состав жителей сохранены"
+          }
+        }
+      }
+    },
     "Tap an item to place, move or remove it. Changes save immediately.": {
       "extractionState": "manual",
       "localizations": {
