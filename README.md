@@ -55,6 +55,10 @@ The collection contains **20 visual variants across six species**:
   Furniture saves separately and remains placed if the draft is discarded.
   Resident cards explain full capacity, the last required resident, and reserved
   places for pets on walks; the selection count includes those reserved places.
+- The Island screen counts residents currently present. An empty enclosure
+  explains whether the companion is on a walk or with you, and why play is
+  unavailable. At accessibility text sizes, the enclosure heading moves above
+  the scene; names and empty-state text wrap without changing the pet artwork.
 - Pet your companions and open the full-screen playroom to throw a ball and
   play fetch. Grounded movement and gait frames follow the distance travelled.
 - Track fullness, happiness, and energy, with rest and care between games.
@@ -495,6 +499,11 @@ All 379 unit tests and the five editor scenarios passed on iPhone SE with iOS 26
 the five scenarios plus existing furniture and wardrobe checks passed on iOS 27.
 These checks include the largest Russian text size, and disabled-choice explanations
 keep their normal text contrast.
+Home screen checks cover enclosure and settings navigation, entering and leaving
+the playroom, an absent walking pet, returning the companion from Dynamic Island,
+complete long names, and an empty scene at the largest Russian text size.
+All 379 unit tests and the five home screen UI scenarios passed on iPhone SE
+with iOS 26.5; the five UI scenarios also passed on iOS 27.
 Interface checks cover shop category switching without losing the companion or
 stock, buying/wearing/removing an accessory as separate actions, and disabled
 actions with an explanation. They also exercise the largest Russian text size

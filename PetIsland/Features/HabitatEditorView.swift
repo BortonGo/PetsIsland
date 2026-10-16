@@ -491,15 +491,20 @@ struct HabitatEditorCanvas: View {
                 HabitatThemeBackdrop(theme: palette)
                     .equatable()
                 if pets.isEmpty {
-                    if !motion.furniture.isEmpty {
-                        Label("Empty enclosure", systemImage: "pawprint")
+                    VStack(spacing: 8) {
+                        if motion.furniture.isEmpty {
+                            Image(systemName: "pawprint")
+                                .font(.system(size: 28))
+                                .accessibilityHidden(true)
+                        }
+                        Text("Empty enclosure")
                             .font(.subheadline.weight(.medium))
-                            .foregroundStyle(palette.foreground)
-                            .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.44)
-                    } else {
-                        ContentUnavailableView("Empty enclosure", systemImage: "pawprint")
-                            .foregroundStyle(palette.foreground)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
+                    .foregroundStyle(palette.foreground)
+                    .frame(width: max(0, proxy.size.width - 40))
+                    .position(x: proxy.size.width * 0.5, y: proxy.size.height * 0.44)
                 }
                 if motion.hasCozyBox {
                     cozyBox(layer: .back)

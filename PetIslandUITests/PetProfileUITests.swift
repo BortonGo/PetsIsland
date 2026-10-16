@@ -110,6 +110,116 @@ final class PetProfileUITests: XCTestCase {
         app.buttons[name].tap()
     }
 
+    private func launchHomeClarity(_ arguments: String...) {
+        let large = arguments.contains("-home-large")
+        app.launchArguments = ["-home-clarity-preview", "-AppleLanguages", large ? "(ru)" : "(en)",
+                               "-AppleLocale", large ? "ru_RU" : "en_US"] + arguments
+        if large { app.launchArguments += ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"] }
+        app.launch()
+        XCTAssertTrue(app.buttons["discoveries.open"].waitForExistence(timeout: 10))
+    }
+
+    func testHomeClarityNavigationKeepsResidentsAndPlayroom() throws {
+        launchHomeClarity("-home-multiple")
+        XCTAssertEqual(app.staticTexts["island.residentCount"].label, "Here now: 2")
+        capture("Home — clear resident count and compact actions")
+        try auditVisibleContent(pinnedFooter: app.tabBars.firstMatch)
+        app.buttons["island.editEnclosure"].tap()
+        XCTAssertTrue(app.buttons["habitat.close"].waitForExistence(timeout: 5))
+        app.buttons["habitat.close"].tap()
+        app.buttons["island.settings"].tap()
+        XCTAssertTrue(app.navigationBars["Island setup"].waitForExistence(timeout: 5))
+        app.navigationBars["Island setup"].buttons["Done"].tap()
+        let play = app.buttons["island.play"]
+        reveal(play)
+        XCTAssertTrue(play.isEnabled)
+        play.tap()
+        XCTAssertTrue(app.navigationBars["Playroom"].waitForExistence(timeout: 5))
+        XCTAssertTrue(element("Pixel").exists)
+        XCTAssertTrue(element("Luna").exists)
+        app.navigationBars["Playroom"].buttons["Close"].tap()
+        XCTAssertTrue(app.buttons["island.play"].waitForExistence(timeout: 5))
+        reveal(app.staticTexts["island.residentCount"])
+        XCTAssertEqual(app.staticTexts["island.residentCount"].label, "Here now: 2")
+    }
+
+    func testHomeClarityAwayPetExplainsDisabledActionsAndOpensWalk() throws {
+        launchHomeClarity("-home-away")
+        XCTAssertEqual(app.staticTexts["island.residentCount"].label, "Here now: 0")
+        XCTAssertEqual(app.buttons["discoveries.open"].value as? String, "Pixel is out exploring")
+        let placement = app.buttons["island.placement"]
+        reveal(placement)
+        XCTAssertFalse(placement.isEnabled)
+        XCTAssertTrue(placement.label.contains("Pixel is out exploring"))
+        XCTAssertFalse(app.buttons["island.play"].isEnabled)
+        XCTAssertTrue(app.staticTexts["island.playReason"].exists)
+        capture("Home — away companion and readable disabled actions")
+        try auditVisibleContent(pinnedFooter: app.tabBars.firstMatch)
+        reveal(app.buttons["discoveries.open"])
+        app.buttons["discoveries.open"].tap()
+        XCTAssertTrue(app.navigationBars["Walks"].waitForExistence(timeout: 5))
+        app.navigationBars["Walks"].buttons["Done"].tap()
+        XCTAssertTrue(app.buttons["discoveries.open"].waitForExistence(timeout: 5))
+        XCTAssertEqual(app.staticTexts["island.residentCount"].label, "Here now: 0")
+        XCTAssertFalse(app.buttons["island.play"].isEnabled)
+    }
+
+    func testHomeClarityCompanionReturnsToEnclosureAndEnablesPlay() {
+        launchHomeClarity("-home-with-you")
+        XCTAssertEqual(app.staticTexts["island.residentCount"].label, "Here now: 0")
+        let summary = element("island.residentSummary")
+        reveal(summary)
+        XCTAssertTrue(summary.label.contains("Pixel is with you"))
+        XCTAssertFalse(app.buttons["island.play"].isEnabled)
+        let placement = app.buttons["island.placement"]
+        reveal(placement)
+        XCTAssertTrue(placement.label.contains("Bring Pixel home"))
+        XCTAssertTrue(placement.isEnabled)
+        capture("Home — companion is with you")
+        placement.tap()
+        let ready = NSPredicate(format: "enabled == true")
+        expectation(for: ready, evaluatedWith: app.buttons["island.play"])
+        waitForExpectations(timeout: 8)
+        XCTAssertTrue(placement.label.contains("Take Pixel with you"))
+        reveal(app.staticTexts["island.residentCount"])
+        XCTAssertEqual(app.staticTexts["island.residentCount"].label, "Here now: 1")
+        XCTAssertTrue(element("island.residentSummary").label.contains("Pixel"))
+        XCTAssertFalse(app.staticTexts["island.playReason"].exists)
+    }
+
+    func testHomeClarityLargestRussianTextKeepsNamesAndControlsReadable() throws {
+        launchHomeClarity("-home-large")
+        let edit = app.buttons["island.editEnclosure"]
+        reveal(edit)
+        XCTAssertEqual(app.staticTexts["island.residentCount"].label, "Сейчас здесь: 2")
+        capture("Home — large Russian heading stays outside the scene")
+        edit.tap()
+        XCTAssertTrue(app.buttons["habitat.close"].waitForExistence(timeout: 5))
+        app.buttons["habitat.close"].tap()
+        let summary = element("island.residentSummary")
+        reveal(summary, fullyVisible: true)
+        XCTAssertTrue(summary.label.contains("Пиксель Длиннохвостый"))
+        XCTAssertTrue(summary.label.contains("Луна Пушистая"))
+        capture("Home — largest text and complete companion names")
+        try auditVisibleContent(pinnedFooter: app.tabBars.firstMatch)
+        reveal(app.buttons["island.play"])
+        XCTAssertTrue(app.buttons["island.play"].isEnabled)
+    }
+
+    func testHomeClarityEmptySceneFitsLargestRussianText() throws {
+        launchHomeClarity("-home-away", "-home-large", "-home-single")
+        app.swipeUp()
+        let empty = app.staticTexts["Вольер пуст"]
+        reveal(empty, fullyVisible: true)
+        XCTAssertLessThanOrEqual(empty.frame.maxY, app.tabBars.firstMatch.frame.minY,
+                                 "The complete empty-state label must be readable above the tab bar")
+        capture("Home — empty scene at largest Russian text")
+        try auditVisibleContent(pinnedFooter: app.tabBars.firstMatch)
+        XCTAssertEqual(app.staticTexts["island.residentCount"].label, "Сейчас здесь: 0")
+        reveal(app.buttons["island.play"])
+        XCTAssertFalse(app.buttons["island.play"].isEnabled)
+    }
+
     private func launchEnclosureEditor(_ arguments: String...) {
         let russian = arguments.contains("-editor-russian-large")
         app.launchArguments = ["-enclosure-editor-preview", "-AppleLanguages", russian ? "(ru)" : "(en)",

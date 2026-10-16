@@ -7,7 +7,13 @@ struct ContentView: View {
 
     var body: some View {
 #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-enclosure-editor-preview") {
+        if ProcessInfo.processInfo.arguments.contains("-home-clarity-preview") {
+#if targetEnvironment(simulator)
+            HomeClarityDebugHostView()
+#else
+            appContent
+#endif
+        } else if ProcessInfo.processInfo.arguments.contains("-enclosure-editor-preview") {
 #if targetEnvironment(simulator)
             HabitatEditorDebugHostView()
 #else
@@ -753,6 +759,66 @@ private struct HabitatEditorDebugHostView: View {
         draftTheme = controller.habitat.configuration.theme
         draftPetIDs = controller.habitat.configuration.residentPetIDs
         showsEditor = true
+    }
+}
+#endif
+
+#if DEBUG && targetEnvironment(simulator)
+/// Uses the real home screen with disposable saved states for UI regression checks.
+private struct HomeClarityDebugHostView: View {
+    @StateObject private var controller: PetSessionController
+    @State private var ready = false
+    private let initialHabitat: SharedPetHabitat
+    private let initialLife: PetLifeState
+
+    init() {
+        let args = ProcessInfo.processInfo.arguments
+        var names = args.contains("-home-large") ? ["Пиксель Длиннохвостый", "Луна Пушистая"] :
+            args.contains("-home-multiple") ? ["Pixel", "Luna"] : ["Pixel"]
+        if args.contains("-home-single") { names = Array(names.prefix(1)) }
+        var state = PersistedAppState()
+        state.completedOnboarding = true
+        state.settings.minimizeMotion = true
+        state.pets = names.enumerated().map { index, name in
+            PetProfile(id: UUID(uuidString: "AE000000-0000-0000-0000-00000000000\(index + 1)")!,
+                       name: name, species: index == 0 ? .dog : .cat, coat: .sunrise,
+                       createdAt: .distantPast, breed: index == 0 ? .corgi : .classicCat)
+        }
+        state.activePetIDs = [state.pets[0].id]
+        let withYou = args.contains("-home-with-you")
+        if withYou {
+            state.activeSession = PetSession(id: UUID(), petID: state.pets[0].id, startedAt: .now,
+                                             endsAt: Date.now.addingTimeInterval(3_600), snapshot: .initial(at: .now))
+        }
+        if args.contains("-home-away") {
+            state.discoveries.startWalk(pet: state.pets[0], route: .garden, at: .now)
+        }
+        let residents = withYou ? Array(state.pets.dropFirst()) : state.pets
+        initialHabitat = SharedPetHabitat(
+            configuration: PetHabitatState(theme: .sunnyMeadow, residentPetIDs: residents.map(\.id),
+                                           leadDynamicIslandPetID: withYou ? state.pets[0].id : nil),
+            residents: residents.map { SharedHabitatResident(profile: $0, vitals: PetVitals()) }
+        )
+        initialLife = PetLifeState(profile: state.pets[0], placement: withYou ? .dynamicIsland : .enclosure)
+        _controller = StateObject(wrappedValue: PetSessionController(
+            store: InMemoryPetStore(state), arcadeStore: InMemoryArcadeStore(ArcadeState(progress: ArcadeProgress(coins: 120)))
+        ))
+    }
+
+    var body: some View {
+        Group {
+            if ready { HomeView(controller: controller) }
+            else { ProgressView() }
+        }
+        .task {
+            guard !ready else { return }
+            try? PetHabitatStore.save(initialHabitat)
+            try? PetLifeStore.save(initialLife)
+            await controller.bootstrap()
+            ready = true
+        }
+        .preferredColorScheme(ProcessInfo.processInfo.arguments.contains("-home-large") ? .light : .dark)
+        .environment(\.petMinimizeMotion, true)
     }
 }
 #endif

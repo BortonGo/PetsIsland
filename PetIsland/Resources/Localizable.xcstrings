@@ -1,6 +1,102 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ is with you": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is with you"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ сейчас с вами"
+          }
+        }
+      }
+    },
+    "Bring your companion home to play together.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bring your companion home to play together."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Верните питомца в вольер, чтобы поиграть вместе."
+          }
+        }
+      }
+    },
+    "Choose residents in the enclosure editor.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose residents in the enclosure editor."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите жителей в настройках вольера."
+          }
+        }
+      }
+    },
+    "Dynamic Island settings": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dynamic Island settings"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Настройки Dynamic Island"
+          }
+        }
+      }
+    },
+    "Here now: %lld": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Here now: %lld"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сейчас здесь: %lld"
+          }
+        }
+      }
+    },
+    "Play is available when a pet is in the enclosure.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play is available when a pet is in the enclosure."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Играть можно, когда в вольере есть питомец."
+          }
+        }
+      }
+    },
     "Discard enclosure changes?": {
       "extractionState": "manual",
       "localizations": {

@@ -36,6 +36,7 @@ enum AppTab: Hashable {
 private struct IslandView: View {
     @ObservedObject var controller: PetSessionController
     @Environment(\.openURL) private var openURL
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var showsHabitatEditor = false
     @State private var showsIslandSetup = false
     @State private var showsDiscoveries = false
@@ -46,25 +47,23 @@ private struct IslandView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 22) {
-                    HStack {
-                        PetScreenHeading(title: "Island")
-                        discoveriesButton
-                        Button { showsIslandSetup = true } label: {
-                            Image(systemName: "slider.horizontal.3")
-                                .font(.subheadline)
-                                .frame(width: 44, height: 44)
-                                .background(PetDesign.soft, in: Circle())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Island setup")
-                    }
+                    islandHeading
                     habitat
                     residentSummary
-                    Button { controller.showsPlayYard = true } label: {
-                        Label("Play together", systemImage: "tennisball")
+                    VStack(alignment: .leading, spacing: 8) {
+                        Button { controller.showsPlayYard = true } label: {
+                            Label("Play together", systemImage: "tennisball")
+                        }
+                        .buttonStyle(PetPrimaryButtonStyle())
+                        .disabled(controller.habitatResidents.isEmpty)
+                        .accessibilityIdentifier("island.play")
+                        if controller.habitatResidents.isEmpty {
+                            Text("Play is available when a pet is in the enclosure.")
+                                .font(.caption).foregroundStyle(PetDesign.secondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .accessibilityIdentifier("island.playReason")
+                        }
                     }
-                    .buttonStyle(PetPrimaryButtonStyle())
-                    .disabled(controller.habitatResidents.isEmpty)
                     placementCard
                     activityAvailabilityNotice
                 }
@@ -106,47 +105,87 @@ private struct IslandView: View {
         }
     }
 
-    private var habitat: some View {
-        HabitatEditorCanvas(
-            theme: controller.habitat.configuration.theme,
-            pets: controller.habitatResidents,
-            vitalsByPetID: controller.habitatVitalsByPetID,
-            petScale: 1.2,
-            hasCozyBox: controller.habitat.configuration.hasCozyBox,
-            furniture: controller.habitat.configuration.furniture,
-            isAnimationEnabled: controller.selectedTab == .island && !showsHabitatEditor && !showsIslandSetup && !showsDiscoveries && !controller.showsPlayYard
-        )
-        .frame(height: 240)
-        .overlay(alignment: .topLeading) {
-            VStack(alignment: .leading, spacing: 5) {
-                Label("Enclosure", systemImage: "leaf")
-                    .font(.caption.weight(.medium))
-                Text(verbatim: "\(themeTitle) · \(controller.habitatResidents.count)/\(PetHabitatState.maximumResidents)")
-                    .font(.caption2)
+    private var islandHeading: some View {
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(alignment: .leading, spacing: 12) {
+                    PetScreenHeading(title: "Island")
+                    HStack { Spacer(); islandActions }
+                }
+            } else {
+                HStack {
+                    PetScreenHeading(title: "Island")
+                    islandActions
+                }
             }
+        }
+    }
+
+    private var islandActions: some View {
+        Group {
+            discoveriesButton
+            Button { showsIslandSetup = true } label: {
+                Image(systemName: "slider.horizontal.3")
+                    .font(.system(size: 16))
+                    .frame(width: 44, height: 44)
+                    .background(PetDesign.soft, in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Dynamic Island settings")
+            .accessibilityIdentifier("island.settings")
+        }
+    }
+
+    private var habitat: some View {
+        VStack(spacing: 8) {
+            if dynamicTypeSize.isAccessibilitySize { habitatHeading }
+            HabitatEditorCanvas(
+                theme: controller.habitat.configuration.theme,
+                pets: controller.habitatResidents,
+                vitalsByPetID: controller.habitatVitalsByPetID,
+                petScale: 1.2,
+                hasCozyBox: controller.habitat.configuration.hasCozyBox,
+                furniture: controller.habitat.configuration.furniture,
+                isAnimationEnabled: controller.selectedTab == .island && !showsHabitatEditor && !showsIslandSetup && !showsDiscoveries && !controller.showsPlayYard
+            )
+            .frame(height: 240)
+            .overlay(alignment: .top) {
+                if !dynamicTypeSize.isAccessibilitySize { habitatHeading.padding(8) }
+            }
+        }
+    }
+
+    private var habitatHeading: some View {
+        HStack(alignment: .top, spacing: 8) {
+            VStack(alignment: .leading, spacing: 5) {
+                Text("Enclosure").font(.caption.weight(.medium))
+                Text(themeTitle).font(.caption2)
+                Text("Here now: \(controller.habitatResidents.count)")
+                    .font(.caption2.monospacedDigit())
+                    .accessibilityIdentifier("island.residentCount")
+            }
+            .fixedSize(horizontal: false, vertical: true)
             .foregroundStyle(PetDesign.secondary)
             .padding(10)
             .background {
-                if controller.habitat.configuration.theme.isVivid {
+                if controller.habitat.configuration.theme.isVivid && !dynamicTypeSize.isAccessibilitySize {
                     RoundedRectangle(cornerRadius: 14).fill(.regularMaterial)
                 }
             }
-            .padding(8)
-        }
-        .overlay(alignment: .topTrailing) {
+            Spacer(minLength: 0)
             Button {
                 draftResidentIDs = controller.habitat.configuration.residentPetIDs
                 draftTheme = controller.habitat.configuration.theme
                 showsHabitatEditor = true
             } label: {
                 Image(systemName: "paintpalette")
-                    .font(.subheadline)
+                    .font(.system(size: 16))
                     .frame(width: 44, height: 44)
                     .background(PetDesign.surface.opacity(0.8), in: Circle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Edit enclosure")
-            .padding(12)
+            .accessibilityIdentifier("island.editEnclosure")
         }
     }
 
@@ -154,7 +193,7 @@ private struct IslandView: View {
         let hasFind = controller.discoveries.activeWalk?.isReady(at: .now) == true
         return Button { showsDiscoveries = true } label: {
             Image(systemName: "safari")
-                .font(.title3)
+                .font(.system(size: 20))
                 .frame(width: 44, height: 44)
                 .background(PetDesign.soft, in: Circle())
                 .overlay(alignment: .topTrailing) {
@@ -170,7 +209,8 @@ private struct IslandView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Walks")
-        .accessibilityValue(hasFind ? Text("A find is ready") : Text(""))
+        .accessibilityValue(hasFind ? Text("A find is ready") :
+                            awayWalk.map { Text("\($0.pet.name) is out exploring") } ?? Text(""))
         .accessibilityIdentifier("discoveries.open")
     }
 
@@ -183,20 +223,29 @@ private struct IslandView: View {
                         .fixedSize(horizontal: false, vertical: true)
                     Text("Back at \(walk.endsAt.formatted(date: .omitted, time: .shortened))")
                         .font(.caption).foregroundStyle(PetDesign.secondary)
+                } else if controller.habitatResidents.isEmpty, controller.placement == .dynamicIsland {
+                    Text("\(controller.profile.name) is with you")
+                        .font(.title3.weight(.semibold))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Bring your companion home to play together.")
+                        .font(.caption).foregroundStyle(PetDesign.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 } else {
                     Text(controller.habitatResidents.isEmpty ? String(localized: "A quiet moment") :
                          controller.habitatResidents.map(\.name).joined(separator: ", "))
                         .font(.title3.weight(.semibold))
-                        .lineLimit(2)
-                    Text(controller.habitatResidents.isEmpty ? "Your pet is keeping you company." : "Tap a pet to say hello.")
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text(controller.habitatResidents.isEmpty ? "Choose residents in the enclosure editor." : "Tap a pet to say hello.")
                         .font(.caption).foregroundStyle(PetDesign.secondary)
                 }
             }
             Spacer(minLength: 4)
-            Image(systemName: "heart").foregroundStyle(PetDesign.secondary)
+            Image(systemName: "heart").font(.system(size: 18))
+                .foregroundStyle(PetDesign.secondary).accessibilityHidden(true)
         }
         .padding(.horizontal, 2)
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("island.residentSummary")
     }
 
     private var placementCard: some View {
@@ -208,7 +257,7 @@ private struct IslandView: View {
             } label: {
                 HStack(spacing: 13) {
                     Image(systemName: leadPetIsAway ? "pawprint" : controller.placement == .dynamicIsland ? "house" : "iphone")
-                        .font(.title3)
+                        .font(.system(size: 20))
                         .frame(width: 40, height: 40)
                         .background(PetDesign.soft, in: RoundedRectangle(cornerRadius: 13))
                     VStack(alignment: .leading, spacing: 5) {
@@ -229,6 +278,7 @@ private struct IslandView: View {
                                 .font(.caption).foregroundStyle(PetDesign.secondary)
                         }
                     }
+                    .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     if controller.isBusy { ProgressView().controlSize(.small) }
                     else if !leadPetIsAway { Image(systemName: "arrow.up.right").font(.subheadline) }
@@ -236,8 +286,16 @@ private struct IslandView: View {
                 .padding(16)
                 .petSurface(radius: 20)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PlacementChoiceStyle())
             .disabled(controller.isBusy || leadPetIsAway)
+            .accessibilityIdentifier("island.placement")
+        }
+    }
+
+    /// An unavailable companion still needs a readable explanation.
+    private struct PlacementChoiceStyle: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label.opacity(configuration.isPressed ? 0.8 : 1)
         }
     }
 
