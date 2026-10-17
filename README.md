@@ -544,11 +544,13 @@ then runs the simulator tests, a Release build, and static analysis. Reports go
 to `outputs/qa/`. Set `PET_TEST_DESTINATION` to select a particular simulator,
 `PET_PYTHON` to choose a Python interpreter, or `PET_REPORT_DIR` to choose a new
 report directory. Pillow and fontTools are development-only dependencies.
-The local StoreKit server test is a separate release gate: enable it with
-`PET_STOREKIT_TESTS=1`. It is explicitly excluded by default because the current
-CLI/simulator combination fails to complete local StoreKit transactions;
-controller tests still cover cancellation, errors, pending approval and duplicate delivery.
-Do not treat those tests as a substitute for Sandbox/TestFlight purchases.
+Local StoreKit tests are included by default, using the `PetIslandTips` scheme.
+They exercise the application's purchase path, repeated consumable tips and
+transaction recovery. Controller and UI tests also cover cancellation, errors,
+pending approval and duplicate delivery. Local tests use no real account or money;
+they do not replace Sandbox/TestFlight checks after configuring App Store Connect.
+For manual local purchases, Run `PetIslandTips` from Xcode. Use `PetIsland` for
+Sandbox and distribution; it intentionally has no local price configuration.
 
 These checks use only committed application resources and do not require artwork
 drafts or generation tools. Automated and simulator checks do not replace

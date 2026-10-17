@@ -30,17 +30,9 @@ if [[ "$PET_TEST_DESTINATION" == *id=* ]]; then
   PET_SIM_ID="${PET_SIM_ID%%,*}"
   xcrun simctl bootstatus "$PET_SIM_ID" -b > "$PET_REPORT_DIR/simulator.log"
 fi
-# StoreKit's local server is a separate integration gate. Enable explicitly on
-# a host where StoreKit Test works; never silently convert its failures to skips.
-PET_TEST_OPTIONS=(-parallel-testing-enabled NO)
-PET_TEST_SCHEME=PetIsland
-if [[ "${PET_STOREKIT_TESTS:-0}" == "1" ]]; then
-  PET_TEST_SCHEME=PetIslandTips
-else
-  PET_TEST_OPTIONS+=(-skip-testing:PetIslandTests/AuthorSupportTests/testRealStoreKitConsumableCanBePurchasedTwiceAndFinished)
-  printf 'StoreKit server integration excluded; run with PET_STOREKIT_TESTS=1 before release.\n'
-fi
-xcodebuild test -project PetIsland.xcodeproj -scheme "$PET_TEST_SCHEME" "${PET_TEST_OPTIONS[@]}" \
+# Include the local StoreKit purchase/recovery tests in every full check.
+# Serialize tests because SKTestSession mutates the app's shared test catalog.
+xcodebuild test -project PetIsland.xcodeproj -scheme PetIslandTips -parallel-testing-enabled NO \
   -destination "$PET_TEST_DESTINATION" -derivedDataPath "$PET_DERIVED_DATA" \
   -resultBundlePath "$PET_REPORT_DIR/Tests.xcresult" \
   CODE_SIGN_IDENTITY=- SWIFT_EMIT_LOC_STRINGS=NO > "$PET_REPORT_DIR/tests.log" 2>&1 || { tail -n 80 "$PET_REPORT_DIR/tests.log"; exit 1; }

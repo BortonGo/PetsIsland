@@ -4,6 +4,8 @@ struct AuthorSupportView: View {
     @ObservedObject var store: AuthorSupportStore = .shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.scenePhase) private var scenePhase
+    @State private var pendingRetryProduct: SupportProduct?
+    @State private var showsPendingRetry = false
 
     var body: some View {
         NavigationStack {
@@ -32,21 +34,32 @@ struct AuthorSupportView: View {
                         }
                     } else {
                         ForEach(store.products) { product in
-                            Button { Task { await store.purchase(product) } } label: {
-                                HStack(spacing: 12) {
-                                    VStack(alignment: .leading, spacing: 5) {
-                                        Text(product.title).font(.headline)
-                                        Text(product.price).font(.subheadline)
+                            VStack(alignment: .leading, spacing: 8) {
+                                Button { Task { await store.purchase(product) } } label: {
+                                    HStack(spacing: 12) {
+                                        VStack(alignment: .leading, spacing: 5) {
+                                            Text(product.title).font(.headline)
+                                            Text(product.price).font(.subheadline)
+                                        }
+                                        Spacer(minLength: 4)
+                                        if store.purchasingID == product.id { ProgressView() }
+                                        else if store.pendingIDs.contains(product.id) { Image(systemName: "clock") }
+                                        else { Image(systemName: "heart") }
+                                    }.padding(18).frame(maxWidth: .infinity, alignment: .leading).petSurface()
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(store.purchasingID != nil || store.pendingIDs.contains(product.id))
+                                .accessibilityIdentifier("support.buy.\(product.id)")
+                                if store.pendingIDs.contains(product.id) {
+                                    Button(String(localized: "Retry declined request", table: "ReleaseSupport")) {
+                                        pendingRetryProduct = product
+                                        showsPendingRetry = true
                                     }
-                                    Spacer(minLength: 4)
-                                    if store.purchasingID == product.id { ProgressView() }
-                                    else if store.pendingIDs.contains(product.id) { Image(systemName: "clock") }
-                                    else { Image(systemName: "heart") }
-                                }.padding(18).frame(maxWidth: .infinity, alignment: .leading).petSurface()
+                                    .buttonStyle(PetQuietButtonStyle())
+                                    .disabled(store.purchasingID != nil)
+                                    .accessibilityIdentifier("support.retry.\(product.id)")
+                                }
                             }
-                            .buttonStyle(.plain)
-                            .disabled(store.purchasingID != nil || store.pendingIDs.contains(product.id))
-                            .accessibilityIdentifier("support.buy.\(product.id)")
                         }
                     }
                     Text(String(localized: "Apple confirms the price and processes the payment. Completed tips do not need restoring on another device.", table: "ReleaseSupport"))
@@ -61,6 +74,17 @@ struct AuthorSupportView: View {
         .task { store.startObserving(); await store.load() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await store.load() } }
+        }
+        .alert(pendingRetryProduct?.title ?? "", isPresented: $showsPendingRetry,
+               presenting: pendingRetryProduct) { product in
+            Button(String(localized: "Retry declined request", table: "ReleaseSupport")) {
+                Task { await store.purchase(product, retryPending: true) }
+            }
+            .accessibilityIdentifier("support.retry.confirm")
+            Button("Cancel", role: .cancel) {}
+                .accessibilityIdentifier("support.retry.cancel")
+        } message: { _ in
+            Text(String(localized: "Only try again if your previous request was declined. If it is still waiting for approval, cancel and wait so you do not send another request.", table: "ReleaseSupport"))
         }
     }
 

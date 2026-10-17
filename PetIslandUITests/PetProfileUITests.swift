@@ -34,6 +34,35 @@ final class PetProfileUITests: XCTestCase {
         }
     }
 
+    func testAuthorSupportPendingRetryRequiresConfirmationInBothLanguages() {
+        for language in ["en", "ru"] {
+            app.launchArguments = ["-release-support-preview", "-support-pending", "-AppleLanguages", "(\(language))"]
+            app.launch()
+            let buy = app.buttons["support.buy.org.bortongo.PetIsland.tip.small"]
+            XCTAssertTrue(buy.waitForExistence(timeout: 10))
+            reveal(buy)
+            buy.tap()
+            let retry = app.buttons["support.retry.org.bortongo.PetIsland.tip.small"]
+            XCTAssertTrue(retry.waitForExistence(timeout: 5))
+            reveal(retry)
+            XCTAssertEqual(retry.label, language == "en" ? "Retry declined request" : "Повторить отклонённый запрос")
+            retry.tap()
+            let cancel = app.alerts.buttons["support.retry.cancel"].firstMatch
+            XCTAssertTrue(cancel.waitForExistence(timeout: 5), app.debugDescription)
+            cancel.tap()
+            XCTAssertFalse(buy.isEnabled)
+            XCTAssertTrue(retry.isEnabled)
+            retry.tap()
+            let confirm = app.alerts.buttons["support.retry.confirm"].firstMatch
+            XCTAssertTrue(confirm.waitForExistence(timeout: 5), app.debugDescription)
+            capture("Support — declined request confirmation \(language)")
+            confirm.tap()
+            XCTAssertTrue(app.staticTexts["support.notice.pending"].waitForExistence(timeout: 5))
+            XCTAssertFalse(buy.isEnabled)
+            app.terminate()
+        }
+    }
+
     func testAuthorSupportUnavailableAtLargestRussianText() {
         app.launchArguments = ["-release-support-preview", "-support-empty", "-AppleLanguages", "(ru)",
                                "-AppleLocale", "ru_RU", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]

@@ -1,6 +1,20 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "Retry declined request": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Retry declined request" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Повторить отклонённый запрос" } }
+      }
+    },
+    "Only try again if your previous request was declined. If it is still waiting for approval, cancel and wait so you do not send another request.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "Only try again if your previous request was declined. If it is still waiting for approval, cancel and wait so you do not send another request." } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Повторите запрос, только если предыдущий отклонили. Если он ещё ожидает одобрения, нажмите «Отмена» и подождите, чтобы не отправлять ещё один запрос." } }
+      }
+    },
     "A little kindness for Pet Island": {
       "extractionState": "manual",
       "localizations": {

@@ -54,6 +54,8 @@ final class AuthorSupportStore: ObservableObject {
     private var listener: Task<Void, Never>?
     private var recovery: Task<Void, Never>?
     private var handled: Set<UInt64> = []
+    private var finishing: [UInt64: (productID: String, token: UUID, task: Task<Void, Never>)] = [:]
+    private var activePurchaseConfirmed = false
 
     init(commerce: any SupportCommerce) { self.commerce = commerce }
     deinit { listener?.cancel(); recovery?.cancel() }
@@ -91,18 +93,30 @@ final class AuthorSupportStore: ObservableObject {
         }
     }
 
-    func purchase(_ product: SupportProduct) async {
-        guard purchasingID == nil, !isLoading, !pendingIDs.contains(product.id),
+    func purchase(_ product: SupportProduct, retryPending: Bool = false) async {
+        // Ask to Buy declines have no transaction callback. Only an explicit
+        // retry may resubmit a pending tip; an approval closes that retry path.
+        guard !retryPending || pendingIDs.contains(product.id) else { return }
+        guard purchasingID == nil, !isLoading,
+              retryPending || !pendingIDs.contains(product.id),
               products.contains(product), AuthorTip.productIDs.contains(product.id) else { return }
         guard commerce.canMakePayments else { notice = .restricted; return }
         purchasingID = product.id
-        notice = nil
-        defer { purchasingID = nil }
+        activePurchaseConfirmed = false
+        defer { purchasingID = nil; activePurchaseConfirmed = false }
+        // A recovered or externally approved tip may still be finishing when
+        // the user starts another purchase of the same consumable.
+        await waitForFinishingTransactions(for: product.id)
+        guard !retryPending || pendingIDs.contains(product.id) else { return }
+        activePurchaseConfirmed = false
+        notice = pendingIDs.contains(product.id) ? .pending : nil
         do {
             switch try await commerce.purchase(product.id) {
             case .completed(let transaction): await accept(transaction)
             case .pending:
-                if notice != .thanks {
+                if activePurchaseConfirmed {
+                    notice = .thanks
+                } else {
                     pendingIDs.insert(product.id)
                     notice = .pending
                 }
@@ -111,21 +125,51 @@ final class AuthorSupportStore: ObservableObject {
         } catch is CancellationError {
             // Dismissing Apple's payment sheet is not a failed payment.
         } catch SupportPurchaseError.verification {
-            notice = .verification
+            notice = activePurchaseConfirmed ? .thanks : .verification
         } catch {
-            if notice != .thanks { notice = .failed }
+            notice = activePurchaseConfirmed ? .thanks : .failed
+        }
+        // Updates can approve a tip while purchase() still returns pending,
+        // cancellation or an error. Keep the purchase guard until those matching
+        // transactions finish, including any received during this wait.
+        await waitForFinishingTransactions(for: product.id)
+    }
+
+    private func waitForFinishingTransactions(for productID: String) async {
+        var awaited: Set<UUID> = []
+        while let finish = finishing.values.first(where: {
+            $0.productID == productID && !awaited.contains($0.token)
+        }) {
+            awaited.insert(finish.token)
+            await finish.task.value
         }
     }
 
     func accept(_ transaction: SupportTransaction) async {
         guard AuthorTip.productIDs.contains(transaction.productID) else { return }
         guard transaction.verified else { notice = .verification; return }
-        guard handled.insert(transaction.id).inserted else { return }
-        pendingIDs.remove(transaction.productID)
-        if !transaction.revoked { notice = .thanks }
+        if let finish = finishing[transaction.id] {
+            await finish.task.value
+            return
+        }
+        if handled.insert(transaction.id).inserted {
+            pendingIDs.remove(transaction.productID)
+            if !transaction.revoked {
+                // Approval may arrive before purchase() returns its pending result.
+                // Another tip's approval must not suppress this purchase's outcome.
+                if transaction.productID == purchasingID { activePurchaseConfirmed = true }
+                notice = .thanks
+            }
+        }
         // There is no consumable game benefit to grant. Acknowledge verified tips
         // even when delivered after a relaunch or while the support screen is closed.
-        await commerce.finish(transaction.id)
+        // A later redelivery must finish again even if its thanks was already shown.
+        let commerce = commerce
+        let token = UUID()
+        let task = Task { await commerce.finish(transaction.id) }
+        finishing[transaction.id] = (transaction.productID, token, task)
+        await task.value
+        if finishing[transaction.id]?.token == token { finishing[transaction.id] = nil }
     }
 }
 
@@ -133,7 +177,6 @@ final class AuthorSupportStore: ObservableObject {
 final class StoreKitSupportCommerce: SupportCommerce {
     private var catalog: [String: Product] = [:]
     private var transactions: [UInt64: Transaction] = [:]
-    private var finished: Set<UInt64> = []
     var canMakePayments: Bool { AppStore.canMakePayments }
 
     func products() async throws -> [SupportProduct] {
@@ -174,14 +217,21 @@ final class StoreKitSupportCommerce: SupportCommerce {
 
     func finish(_ id: UInt64) async {
         guard let transaction = transactions.removeValue(forKey: id) else { return }
-        finished.insert(id)
         await transaction.finish()
+        // StoreKit can return from finish while its transaction cache still
+        // reports this consumable as unfinished. Acknowledge that verified
+        // redelivery once; never start another purchase or poll in the background.
+        for await result in Transaction.unfinished {
+            if case .verified(let remaining) = result, remaining.id == id {
+                await remaining.finish()
+            }
+        }
     }
 
     private func record(_ result: VerificationResult<Transaction>) -> SupportTransaction {
         switch result {
         case .verified(let transaction):
-            if AuthorTip.productIDs.contains(transaction.productID), !finished.contains(transaction.id) {
+            if AuthorTip.productIDs.contains(transaction.productID) {
                 transactions[transaction.id] = transaction
             }
             return SupportTransaction(id: transaction.id, productID: transaction.productID,
