@@ -14,6 +14,175 @@ final class PetProfileUITests: XCTestCase {
 
     override func tearDownWithError() throws { app?.terminate() }
 
+    func testEnclosureWidgetCareFeedbackAndCooldownInEnglishAndRussian() {
+        for language in ["en", "ru"] {
+            launchEnclosureWidget(language: language)
+            let pet = app.buttons["widget.pet"]
+            let play = app.buttons["widget.play"]
+            XCTAssertTrue(pet.waitForExistence(timeout: 10))
+            XCTAssertTrue(pet.isEnabled && pet.isHittable)
+            XCTAssertTrue(play.isEnabled && play.isHittable)
+            XCTAssertEqual(pet.label, language == "ru" ? "Погладить" : "Pet")
+            XCTAssertEqual(play.label, language == "ru" ? "Поиграть" : "Play")
+            XCTAssertEqual(element("widget.scene").label, "Pixel, Mochi")
+
+            pet.tap()
+            let feedback = app.staticTexts["widget.feedback"]
+            XCTAssertTrue(feedback.waitForExistence(timeout: 5))
+            XCTAssertEqual(feedback.label, language == "ru" ? "Спасибо за ласку!" : "Thanks for the cuddles!")
+            XCTAssertFalse(pet.isEnabled, "Repeated taps must not apply care during cooldown.")
+            XCTAssertFalse(play.isEnabled, "Switching actions must not bypass cooldown.")
+            capture("Widget — petting feedback \(language)")
+
+            let ready = XCTNSPredicateExpectation(predicate: NSPredicate(format: "enabled == true"), object: pet)
+            XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: 8), .completed)
+            XCTAssertTrue(play.isEnabled)
+            play.tap()
+            let played = XCTNSPredicateExpectation(
+                predicate: NSPredicate(format: "label == %@", language == "ru" ? "Здорово поиграли!" : "That was fun!"),
+                object: feedback
+            )
+            XCTAssertEqual(XCTWaiter.wait(for: [played], timeout: 5), .completed)
+            XCTAssertEqual(element("widget.scene").label, "Pixel, Mochi", "Care must preserve the displayed residents.")
+            capture("Widget — play feedback \(language)")
+            app.terminate()
+        }
+    }
+
+    func testEnclosureWidgetSmallLongNameKeepsOneReachableCareAction() {
+        launchEnclosureWidget(language: "ru", arguments: ["-widget-small", "-widget-long-name"])
+        let pet = app.buttons["widget.pet"]
+        XCTAssertTrue(pet.waitForExistence(timeout: 10))
+        XCTAssertTrue(pet.isEnabled && pet.isHittable)
+        XCTAssertFalse(app.buttons["widget.play"].exists)
+        let title = app.staticTexts.matching(identifier: "Константинополька").firstMatch
+        XCTAssertTrue(title.exists)
+        XCTAssertTrue(app.frame.contains(title.frame))
+        XCTAssertLessThan(title.frame.maxY, pet.frame.minY)
+        XCTAssertEqual(element("widget.scene").label, "Константинополька")
+        XCTAssertEqual(pet.label, "Погладить")
+        capture("Widget — small Russian card with long name")
+        pet.tap()
+        let feedback = app.staticTexts["widget.feedback"]
+        XCTAssertTrue(feedback.waitForExistence(timeout: 5))
+        XCTAssertEqual(feedback.label, "Спасибо за ласку!")
+        XCTAssertTrue(app.frame.contains(feedback.frame))
+        capture("Widget — small card petting feedback")
+    }
+
+    func testEnclosureWidgetSixPetsKeepControlsInDarkAndAccentedModes() {
+        for accented in [false, true] {
+            launchEnclosureWidget(language: "en", arguments: ["-widget-six", "-widget-dark"] + (accented ? ["-widget-accented"] : []))
+            let pet = app.buttons["widget.pet"]
+            let play = app.buttons["widget.play"]
+            XCTAssertTrue(pet.waitForExistence(timeout: 10))
+            XCTAssertTrue(pet.isHittable && play.isHittable)
+            XCTAssertTrue(app.frame.contains(pet.frame) && app.frame.contains(play.frame))
+            XCTAssertLessThanOrEqual(pet.frame.maxX, play.frame.minX)
+            XCTAssertEqual(element("widget.scene").label, "Pixel, Mochi, Sunny, Coco, Milo, Luna")
+            XCTAssertTrue(app.staticTexts["6 at home"].exists)
+            capture(accented ? "Widget — six pets, dark accented appearance" : "Widget — six pets, dark appearance")
+            play.tap()
+            let feedback = app.staticTexts["widget.feedback"]
+            XCTAssertTrue(feedback.waitForExistence(timeout: 5))
+            XCTAssertEqual(feedback.label, "That was fun!")
+            XCTAssertEqual(element("widget.scene").label, "Pixel, Mochi, Sunny, Coco, Milo, Luna")
+            capture(accented ? "Widget — accented play feedback" : "Widget — dark play feedback")
+            app.terminate()
+        }
+    }
+
+    func testEnclosureWidgetEmptyAndWalkingStatesOfferNavigationWithoutCare() {
+        for away in [false, true] {
+            launchEnclosureWidget(language: away ? "ru" : "en",
+                                  arguments: away ? ["-widget-away", "-widget-small"] : ["-widget-empty"])
+            let empty = element("widget.empty")
+            XCTAssertTrue(empty.waitForExistence(timeout: 10))
+            XCTAssertFalse(app.buttons["widget.pet"].exists)
+            XCTAssertFalse(app.buttons["widget.play"].exists)
+            XCTAssertFalse(app.staticTexts["widget.feedback"].exists)
+            if away {
+                XCTAssertTrue(empty.label.hasPrefix("Вернётся в "))
+                XCTAssertTrue(app.staticTexts["На прогулке"].exists)
+            } else {
+                XCTAssertEqual(empty.label, "Choose who lives here")
+            }
+            let openTitle = away ? "Открыть остров" : "Open island"
+            let open = app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", openTitle)).firstMatch
+            XCTAssertTrue(open.isHittable)
+            XCTAssertTrue(app.frame.contains(open.frame))
+            capture(away ? "Widget — small card with pet away" : "Widget — empty enclosure")
+            app.terminate()
+        }
+    }
+
+    private func launchEnclosureWidget(language: String, arguments: [String] = []) {
+        app.launchArguments = ["-enclosure-widget-preview", "-AppleLanguages", "(\(language))",
+                               "-AppleLocale", language == "ru" ? "ru_RU" : "en_US"] + arguments
+        app.launch()
+    }
+
+    func testEnclosureWidgetOnHomeScreen() throws {
+        guard #available(iOS 18.0, *) else { throw XCTSkip("Home Screen widget sizing shortcuts require iOS 18.") }
+        launchHomeClarity("-home-multiple")
+        XCUIDevice.shared.press(.home)
+        let home = XCUIApplication(bundleIdentifier: "com.apple.springboard")
+        let icon = home.icons["Pet Island"].firstMatch
+        XCTAssertTrue(icon.waitForExistence(timeout: 10), home.debugDescription)
+        for _ in 0..<4 where !home.frame.contains(icon.frame) { home.swipeLeft() }
+        if icon.frame.width < icon.frame.height * 1.5 {
+            icon.press(forDuration: 1.2)
+            let medium = home.buttons.containing(.image, identifier: "widget.medium").firstMatch
+            XCTAssertTrue(medium.waitForExistence(timeout: 5), home.debugDescription)
+            medium.tap()
+        }
+        app.terminate()
+        let pet = home.buttons["widget.pet"]
+        let present = pet.waitForExistence(timeout: 30)
+        let tree = XCTAttachment(string: home.debugDescription)
+        tree.name = "Widget Home Screen hierarchy"
+        tree.lifetime = .keepAlways
+        add(tree)
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "Widget — actual Home Screen"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        XCTAssertTrue(present)
+        XCTAssertTrue(pet.isHittable)
+        pet.tap()
+        let feedback = home.staticTexts["widget.feedback"]
+        XCTAssertTrue(feedback.waitForExistence(timeout: 15))
+        XCTAssertTrue(["Thanks for the cuddles!", "Спасибо за ласку!"].contains(feedback.label))
+        XCTAssertEqual(app.state, .notRunning, "Widget care must work without opening the app.")
+        let reacted = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        reacted.name = "Widget — real AppIntent feedback"
+        reacted.lifetime = .keepAlways
+        add(reacted)
+        let play = home.buttons["widget.play"]
+        play.tap()
+        XCTAssertEqual(app.state, .notRunning, "A rapid tap must not fall through to the widget's app link.")
+        XCTAssertTrue(["Thanks for the cuddles!", "Спасибо за ласку!"].contains(feedback.label))
+        // The intent remains tappable while the shared store enforces the
+        // visual cooldown. Let that deadline pass before the next care action.
+        let cooldownEnd = Date.now.addingTimeInterval(6)
+        let elapsed = XCTNSPredicateExpectation(predicate: NSPredicate { _, _ in Date.now >= cooldownEnd }, object: nil)
+        XCTAssertEqual(XCTWaiter.wait(for: [elapsed], timeout: 9), .completed)
+        let ready = XCTNSPredicateExpectation(predicate: NSPredicate(format: "enabled == true"), object: play)
+        XCTAssertEqual(XCTWaiter.wait(for: [ready], timeout: 12), .completed)
+        play.tap()
+        let played = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "label IN %@", ["That was fun!", "Здорово поиграли!"]), object: feedback)
+        XCTAssertEqual(XCTWaiter.wait(for: [played], timeout: 10), .completed)
+        XCTAssertEqual(app.state, .notRunning)
+        let playing = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        playing.name = "Widget — real play feedback"
+        playing.lifetime = .keepAlways
+        add(playing)
+        let cleared = XCTNSPredicateExpectation(predicate: NSPredicate(format: "exists == false"), object: feedback)
+        XCTAssertEqual(XCTWaiter.wait(for: [cleared], timeout: 18), .completed)
+        XCTAssertTrue(pet.isEnabled && play.isEnabled)
+    }
+
     func testAuthorSupportSuccessAndPendingDoNotBlockClosing() {
         for mode in ["", "-support-pending"] {
             app.launchArguments = ["-release-support-preview", mode, "-AppleLanguages", "(en)"]

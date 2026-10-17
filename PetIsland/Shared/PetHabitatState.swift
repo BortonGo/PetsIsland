@@ -658,6 +658,22 @@ struct PetCareEvent: Codable, Equatable, Sendable {
     }
 }
 
+enum HabitatWidgetAction: String, Codable, CaseIterable, Sendable {
+    case pet
+    case play
+}
+
+/// The feedback and its care effect share one locked snapshot write.
+struct HabitatWidgetInteraction: Codable, Equatable, Sendable {
+    static let cooldown: TimeInterval = 5
+    static let feedbackDuration: TimeInterval = 12
+
+    let requestID: UUID
+    let action: HabitatWidgetAction
+    let date: Date
+    var petIDs: [UUID]
+}
+
 /// Complete cross-process payload used by the app and the enclosure widget.
 /// The selection model keeps stable IDs while this payload carries the small
 /// amount of render data the extension needs for an offline timeline.
@@ -665,6 +681,8 @@ struct SharedPetHabitat: Codable, Equatable, Sendable {
     var configuration: PetHabitatState
     var residents: [SharedHabitatResident]
     var appliedCareEventIDs: [UUID] = []
+    var lastWidgetInteraction: HabitatWidgetInteraction?
+    var processedWidgetRequestIDs: [UUID] = []
     /// Residents keep their reserved slot while away. Widget timelines can
     /// return them at the scheduled date without opening the app or claiming a find.
     var discoveryWalk: PetDiscoveryWalk?
@@ -697,7 +715,10 @@ struct SharedPetHabitat: Codable, Equatable, Sendable {
         appliedCareEventIDs = Array(appliedCareEventIDs.suffix(512))
     }
 
-    private enum CodingKeys: String, CodingKey { case configuration, residents, appliedCareEventIDs, discoveryWalk }
+    private enum CodingKeys: String, CodingKey {
+        case configuration, residents, appliedCareEventIDs, discoveryWalk
+        case lastWidgetInteraction, processedWidgetRequestIDs
+    }
 
     init(configuration: PetHabitatState, residents: [SharedHabitatResident], discoveryWalk: PetDiscoveryWalk? = nil) {
         self.configuration = configuration
@@ -711,6 +732,79 @@ struct SharedPetHabitat: Codable, Equatable, Sendable {
         residents = try values.decode([SharedHabitatResident].self, forKey: .residents)
         appliedCareEventIDs = try values.decodeIfPresent([UUID].self, forKey: .appliedCareEventIDs) ?? []
         discoveryWalk = try values.decodeIfPresent(PetDiscoveryWalk.self, forKey: .discoveryWalk)
+        lastWidgetInteraction = try values.decodeIfPresent(HabitatWidgetInteraction.self, forKey: .lastWidgetInteraction)
+        processedWidgetRequestIDs = Array((try values.decodeIfPresent([UUID].self, forKey: .processedWidgetRequestIDs) ?? []).suffix(32))
+    }
+
+    func canPerformWidgetAction(at date: Date) -> Bool {
+        guard date.timeIntervalSinceReferenceDate.isFinite,
+              !widgetCareRecipientIndices(at: date).isEmpty else { return false }
+        if let interaction = lastWidgetInteraction {
+            let age = date.timeIntervalSince(interaction.date)
+            // A corrected device clock must not leave a future receipt locking
+            // every subsequent action. Newer individual care anchors still win.
+            if age.isFinite, age >= 0, age < HabitatWidgetInteraction.cooldown { return false }
+        }
+        return true
+    }
+
+    /// Called inside PetHabitatStore.update, which serializes app/extension care.
+    /// Stale buttons are harmless: the current selection and absence are checked
+    /// again under the lock, and a successful request ID cannot be replayed.
+    @discardableResult
+    mutating func performWidgetAction(_ action: HabitatWidgetAction, requestID: UUID, at date: Date) -> Bool {
+        guard !processedWidgetRequestIDs.contains(requestID),
+              lastWidgetInteraction?.requestID != requestID,
+              canPerformWidgetAction(at: date) else { return false }
+        let indices = widgetCareRecipientIndices(at: date)
+        for index in indices {
+            let current = residents[index].vitals.projected(from: residents[index].vitalsUpdatedAt, to: date)
+            residents[index].vitals = PetVitals(
+                fullness: current.fullness,
+                happiness: current.happiness + (action == .pet ? 0.06 : 0.12),
+                energy: current.energy - (action == .play ? 0.035 : 0)
+            )
+            residents[index].vitalsUpdatedAt = date
+        }
+        lastWidgetInteraction = HabitatWidgetInteraction(
+            requestID: requestID, action: action, date: date, petIDs: indices.map { residents[$0].id }
+        )
+        processedWidgetRequestIDs.append(requestID)
+        processedWidgetRequestIDs = Array(processedWidgetRequestIDs.suffix(32))
+        return true
+    }
+
+    func widgetInteraction(at date: Date) -> HabitatWidgetInteraction? {
+        guard date.timeIntervalSinceReferenceDate.isFinite,
+              var interaction = lastWidgetInteraction else { return nil }
+        let age = date.timeIntervalSince(interaction.date)
+        guard age.isFinite, age >= 0, age < HabitatWidgetInteraction.feedbackDuration else { return nil }
+        let visibleIDs = Set(widgetVisibleResidents(at: date).map(\.id))
+        interaction.petIDs = interaction.petIDs.filter { visibleIDs.contains($0) }
+        return interaction.petIDs.isEmpty ? nil : interaction
+    }
+
+    private func widgetVisibleResidents(at date: Date) -> [SharedHabitatResident] {
+        let selected = Set(configuration.residentPetIDs)
+        return residents.filter {
+            selected.contains($0.id) && $0.id != configuration.leadDynamicIslandPetID && !isPetAway($0.id, at: date)
+        }
+    }
+
+    private func widgetCareRecipientIndices(at date: Date) -> [Int] {
+        let selected = Set(configuration.residentPetIDs)
+        var seen = Set<UUID>()
+        return residents.indices.filter { index in
+            let resident = residents[index]
+            // A queued tap dated before a newer care write must not move that
+            // timestamp backwards or hide the newer care on the next app merge.
+            return selected.contains(resident.id)
+                && resident.id != configuration.leadDynamicIslandPetID
+                && !isPetAway(resident.id, at: date)
+                && resident.vitalsUpdatedAt.timeIntervalSinceReferenceDate.isFinite
+                && resident.vitalsUpdatedAt <= date
+                && seen.insert(resident.id).inserted
+        }
     }
 
     mutating func playWithResidents(at date: Date) {
@@ -750,6 +844,7 @@ struct SharedPetHabitat: Codable, Equatable, Sendable {
     }
 
     mutating func reconcile() {
+        processedWidgetRequestIDs = Array(processedWidgetRequestIDs.suffix(32))
         var seen = Set<UUID>()
         residents = residents.filter { seen.insert($0.id).inserted }
         // The lead is intentionally absent from the resident payload. Only the

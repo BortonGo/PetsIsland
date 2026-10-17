@@ -396,8 +396,12 @@ private struct IslandSetupView: View {
                 }
 
                 Section("Home Screen widget") {
-                    Label("Add the medium Enclosure widget", systemImage: "square.grid.2x2.fill")
-                    Text("Hold an empty area on the Home Screen, tap +, find Pet Island and choose Enclosure.")
+                    Label {
+                        Text("Choose a small or medium widget", tableName: "EnclosureWidget")
+                    } icon: {
+                        Image(systemName: "square.grid.2x2.fill")
+                    }
+                    Text("Touch and hold your Home Screen, open the widget gallery, and choose Pet Island → Your island. Choose its residents on the Island tab.", tableName: "EnclosureWidget")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

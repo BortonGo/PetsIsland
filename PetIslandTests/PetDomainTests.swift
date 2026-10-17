@@ -966,6 +966,147 @@ final class PetDomainTests: XCTestCase {
     }
 
     @MainActor
+    func testEnclosureWidgetArtworkPreservesEveryPetsPoseSizeGroundAndDirection() throws {
+        // Cover both the widget's natural canvas and a height-constrained view.
+        // These compare actual rendered pixels rather than the geometry helpers
+        // used by both implementations, so a native Image layout error is caught.
+        for species in PetSpecies.allCases {
+            for breed in PetBreed.available(for: species) {
+                let profile = PetProfile(id: UUID(), name: breed.rawValue, species: species,
+                                         coat: .sunrise, createdAt: .distantPast, breed: breed)
+                for pose in [PetPose.idle, .play, .sleep] {
+                    for direction in [PetDirection.left, .right] {
+                        for viewport in [CGSize(width: 88, height: 70.4), CGSize(width: 100, height: 50)] {
+                            try assertWidgetArtworkMatchesOriginal(profile: profile, pose: pose,
+                                                                   direction: direction, viewport: viewport)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @MainActor
+    func testEnclosureWidgetOutfitsAndCustomCoatsPreserveOriginalRenderedBounds() throws {
+        let coats: [(PetCoat, PetColorSelection?)] = [
+            (.sunrise, nil), (.cloud, nil), (.midnight, nil),
+            (.sunrise, PetColorSelection(red: 0.19, green: 0.56, blue: 0.74))
+        ]
+        for species in PetSpecies.allCases {
+            for breed in PetBreed.available(for: species) {
+                for (accessoryIndex, accessory) in PetAccessory.allCases.enumerated() {
+                    for (poseIndex, pose) in [PetPose.idle, .play, .sleep].enumerated() {
+                        let asset = PetAnimationLibrary.clip(for: species, breed: breed, pose: pose).frameName(forStep: 0)
+                        XCTAssertNotNil(PetDressedAssets.frame(for: accessory, assetName: asset),
+                                        "Missing authored outfit: \(breed), \(pose), \(accessory)")
+                        // Exercise all treatments for every breed without an
+                        // unnecessary full product of identical alpha layouts.
+                        let (coat, customColor) = coats[(accessoryIndex * 3 + poseIndex) % coats.count]
+                        let profile = PetProfile(id: UUID(), name: breed.rawValue, species: species,
+                            coat: coat, createdAt: .distantPast, customColor: customColor,
+                            breed: breed, outfit: PetOutfit(headwear: accessory))
+                        for direction in [PetDirection.left, .right] {
+                            try assertWidgetArtworkMatchesOriginal(profile: profile, pose: pose,
+                                direction: direction, viewport: CGSize(width: 88, height: 70.4))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @MainActor
+    func testEnclosureWidgetIntentPersistsCareOnceWithoutChangingDynamicIslandState() async throws {
+        let originalHabitat = PetHabitatStore.load()
+        let originalLife = PetLifeStore.load()
+        defer {
+            try? PetHabitatStore.save(originalHabitat)
+            try? PetLifeStore.save(originalLife)
+        }
+        let anchor = Date.now.addingTimeInterval(-60)
+        let home = PetProfile(id: UUID(), name: "Home", species: .cat, coat: .sunrise,
+                              createdAt: anchor, breed: .classicCat)
+        let companion = PetProfile(id: UUID(), name: "Companion", species: .dog, coat: .cloud,
+                                   createdAt: anchor, breed: .corgi)
+        let lead = PetProfile(id: UUID(), name: "Island lead", species: .lion, coat: .sunrise,
+                              createdAt: anchor, breed: .adultLion)
+        let vitals = PetVitals(fullness: 0.35, happiness: 0.4, energy: 0.55)
+        let configuration = PetHabitatState(residentPetIDs: [home.id, companion.id],
+                                            leadDynamicIslandPetID: lead.id, simulationEpoch: anchor)
+        try PetHabitatStore.save(SharedPetHabitat(configuration: configuration, residents: [
+            SharedHabitatResident(profile: home, vitals: vitals, vitalsUpdatedAt: anchor),
+            SharedHabitatResident(profile: companion, vitals: vitals, vitalsUpdatedAt: anchor)
+        ]))
+        let before = PetHabitatStore.load()
+        let life = PetLifeState(profile: lead, placement: .dynamicIsland, vitals: vitals,
+                                vitalsUpdatedAt: anchor, lastBallThrownAt: anchor, revision: 42)
+        try PetLifeStore.save(life)
+
+        let requestID = UUID()
+        let intent = HabitatWidgetCareIntent(action: .pet, requestID: requestID)
+        _ = try await intent.perform()
+
+        let cared = PetHabitatStore.load()
+        let receipt = try XCTUnwrap(cared.lastWidgetInteraction)
+        XCTAssertEqual(receipt.requestID, requestID)
+        XCTAssertEqual(receipt.action, .pet)
+        XCTAssertEqual(Set(receipt.petIDs), Set([home.id, companion.id]))
+        XCTAssertEqual(cared.processedWidgetRequestIDs, [requestID])
+        XCTAssertEqual(cared.configuration, before.configuration)
+        XCTAssertEqual(cared.residents.map(\.profile), before.residents.map(\.profile))
+        for resident in cared.residents {
+            let baseline = try XCTUnwrap(before.residents.first { $0.id == resident.id })
+            let projected = baseline.vitals.projected(from: baseline.vitalsUpdatedAt, to: receipt.date)
+            XCTAssertEqual(resident.vitals, PetVitals(fullness: projected.fullness,
+                happiness: projected.happiness + 0.06, energy: projected.energy))
+            XCTAssertEqual(resident.vitalsUpdatedAt, receipt.date)
+        }
+        XCTAssertEqual(PetLifeStore.load(), life)
+
+        _ = try await intent.perform()
+        XCTAssertEqual(PetHabitatStore.load(), cared, "A retried AppIntent must not apply care twice")
+        XCTAssertEqual(PetLifeStore.load(), life, "Widget care must not change the Dynamic Island lead")
+
+        // Clear the cooldown so it cannot accidentally mask a malformed wire value.
+        try PetHabitatStore.save(before)
+        XCTAssertTrue(PetHabitatStore.load().canPerformWidgetAction(at: .now))
+        var malformed = HabitatWidgetCareIntent(action: .pet, requestID: UUID())
+        malformed.actionValue = "to-0.0"
+        _ = try await malformed.perform()
+        XCTAssertEqual(PetHabitatStore.load(), before, "An unknown archived action must be ignored")
+        XCTAssertEqual(PetLifeStore.load(), life)
+
+        malformed.actionValue = HabitatWidgetAction.pet.rawValue
+        malformed.request = "not-a-uuid"
+        _ = try await malformed.perform()
+        XCTAssertEqual(PetHabitatStore.load(), before, "An invalid request identifier must be ignored")
+        XCTAssertEqual(PetLifeStore.load(), life)
+    }
+
+    @MainActor
+    private func assertWidgetArtworkMatchesOriginal(profile: PetProfile, pose: PetPose,
+                                                    direction: PetDirection, viewport: CGSize,
+                                                    file: StaticString = #filePath, line: UInt = #line) throws {
+        let original = PetArtwork(species: profile.species, coat: profile.coat, customColor: profile.customColor,
+            breed: profile.resolvedBreed, pose: pose, direction: direction, step: 0,
+            animatesMotion: false, accessory: profile.outfit?.headwear)
+            .frame(width: viewport.width, height: viewport.height)
+        let widget = EnclosureWidgetPetArtwork(profile: profile, pose: pose, direction: direction)
+            .frame(width: viewport.width, height: viewport.height)
+        let originalBounds = try renderedBounds(original)
+        let widgetBounds = try renderedBounds(widget)
+        let sample = "\(profile.resolvedBreed?.rawValue ?? profile.species.rawValue), \(pose), \(direction), "
+            + "\(profile.coat), custom: \(profile.customColor != nil), \(String(describing: profile.outfit?.headwear)), \(viewport)"
+        // ImageRenderer runs at 3x. Allow only one physical edge pixel for
+        // fractional point rounding between Canvas and a native Image.
+        let onePixel: CGFloat = 1.0 / 3.0 + 0.001
+        XCTAssertEqual(widgetBounds.minX, originalBounds.minX, accuracy: onePixel, sample, file: file, line: line)
+        XCTAssertEqual(widgetBounds.maxX, originalBounds.maxX, accuracy: onePixel, sample, file: file, line: line)
+        XCTAssertEqual(widgetBounds.minY, originalBounds.minY, accuracy: onePixel, sample, file: file, line: line)
+        XCTAssertEqual(widgetBounds.maxY, originalBounds.maxY, accuracy: onePixel, sample, file: file, line: line)
+    }
+
+    @MainActor
     private func renderedBounds<V: View>(_ view: V) throws -> CGRect {
         let renderer = ImageRenderer(content: view)
         renderer.scale = 3

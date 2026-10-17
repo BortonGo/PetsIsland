@@ -618,7 +618,7 @@ struct SettingsView: View {
                     .padding(18)
                     .petSurface()
                     DisclosureGroup("Add the enclosure widget") {
-                        Text("Touch and hold your Home Screen, open the widget gallery, find Pet Island, and add the enclosure. Choose its residents on the Island tab.")
+                        Text("Touch and hold your Home Screen, open the widget gallery, and choose Pet Island → Your island. Choose its residents on the Island tab.", tableName: "EnclosureWidget")
                             .font(.footnote)
                             .foregroundStyle(PetDesign.secondary)
                             .padding(.top, 12)

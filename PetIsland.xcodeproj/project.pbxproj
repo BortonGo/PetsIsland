@@ -99,6 +99,12 @@
 		ACEA10000000000000000008 /* PetIslandTips.storekit */ = {isa = PBXBuildFile; fileRef = ACEA20000000000000000008; };
 		ACEA10000000000000000009 /* AppLanguageView.swift */ = {isa = PBXBuildFile; fileRef = ACEA20000000000000000009; };
 		ACEA1000000000000000000A /* AppLanguageTests.swift */ = {isa = PBXBuildFile; fileRef = ACEA2000000000000000000A; };
+		CA1700000000000000000004 /* PetWidgetCare.swift */ = {isa = PBXBuildFile; fileRef = CA1700000000000000000001 /* PetWidgetCare.swift */; };
+		CA1700000000000000000005 /* PetWidgetCare.swift */ = {isa = PBXBuildFile; fileRef = CA1700000000000000000001 /* PetWidgetCare.swift */; };
+		CA1700000000000000000006 /* PetEnclosureCard.swift */ = {isa = PBXBuildFile; fileRef = CA1700000000000000000002 /* PetEnclosureCard.swift */; };
+		CA1700000000000000000007 /* PetEnclosureCard.swift */ = {isa = PBXBuildFile; fileRef = CA1700000000000000000002 /* PetEnclosureCard.swift */; };
+		CA1700000000000000000008 /* EnclosureWidget.xcstrings */ = {isa = PBXBuildFile; fileRef = CA1700000000000000000003 /* EnclosureWidget.xcstrings */; };
+		CA1700000000000000000009 /* EnclosureWidget.xcstrings */ = {isa = PBXBuildFile; fileRef = CA1700000000000000000003 /* EnclosureWidget.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -220,6 +226,9 @@
 		ACEA20000000000000000008 /* PetIslandTips.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration/PetIslandTips.storekit; sourceTree = SOURCE_ROOT; };
 		ACEA20000000000000000009 /* AppLanguageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguageView.swift; sourceTree = "<group>"; };
 		ACEA2000000000000000000A /* AppLanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguageTests.swift; sourceTree = "<group>"; };
+		CA1700000000000000000001 /* PetWidgetCare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetWidgetCare.swift; sourceTree = "<group>"; };
+		CA1700000000000000000002 /* PetEnclosureCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetEnclosureCard.swift; sourceTree = "<group>"; };
+		CA1700000000000000000003 /* EnclosureWidget.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = EnclosureWidget.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -292,6 +301,8 @@
 				ACCE00000000000000000001 /* PetAccessories.swift */,
 				D20000000000000000000003 /* PetActivityAttributes.swift */,
 				W20000000000000000000001 /* PetLifeState.swift */,
+				CA1700000000000000000001 /* PetWidgetCare.swift */,
+				CA1700000000000000000002 /* PetEnclosureCard.swift */,
 				H20000000000000000000001 /* PetHabitatState.swift */,
 				A20000000000000000000005 /* PetPixelArtwork.swift */,
 			);
@@ -410,6 +421,7 @@
 		R60000000000000000000001 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				CA1700000000000000000003 /* EnclosureWidget.xcstrings */,
 				ACEA20000000000000000005 /* ReleaseSupport.xcstrings */,R20000000000000000000001 /* Localizable.xcstrings */, CA4D20000000000000000003 /* WalkPostcards.xcstrings */, EC0120000000000000000002 /* HabitatInteractions.xcstrings */, F20000000000000000000001 /* NaturalGaits.xcassets */, );
 			path = Resources;
 			sourceTree = "<group>";
@@ -552,6 +564,7 @@
 				ACCF00000000000000000300 /* PetAccessories.json in Resources */,
 				A10000000000000000000006 /* Assets.xcassets in Resources */,
 				R10000000000000000000001 /* Localizable.xcstrings in Resources */,
+				CA1700000000000000000008 /* EnclosureWidget.xcstrings */,
 				CA4D10000000000000000003 /* WalkPostcards.xcstrings in Resources */,
 				EC0110000000000000000002 /* HabitatInteractions.xcstrings in Resources */,
 				S10000000000000000000001 /* PetSprites.xcassets in Resources */,
@@ -570,6 +583,7 @@
 				L10000000000000000000004 /* PetIslandTimerPets.ttc in Resources */,
 				L10000000000000000000005 /* PetIslandLockTimerPets.ttc in Resources */,
 				R10000000000000000000002 /* Localizable.xcstrings in Resources */,
+				CA1700000000000000000009 /* EnclosureWidget.xcstrings */,
 				S10000000000000000000002 /* PetSprites.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -622,6 +636,8 @@
 				D1000000000000000000000A /* PlayYardView.swift in Sources */,
 				W10000000000000000000001 /* PetLifeState.swift in Sources */,
 				H10000000000000000000001 /* PetHabitatState.swift in Sources */,
+				CA1700000000000000000004 /* PetWidgetCare.swift */,
+				CA1700000000000000000006 /* PetEnclosureCard.swift */,
 				H10000000000000000000003 /* HabitatEditorView.swift in Sources */,
 				B10000000000000000000001 /* HabitatCozyBoxArtwork.swift in Sources */,
 				B10000000000000000000003 /* HabitatFurnitureView.swift in Sources */,
@@ -648,6 +664,8 @@
 				D10000000000000000000008 /* PetActivityAttributes.swift in Sources */,
 				W10000000000000000000002 /* PetLifeState.swift in Sources */,
 				H10000000000000000000002 /* PetHabitatState.swift in Sources */,
+				CA1700000000000000000005 /* PetWidgetCare.swift */,
+				CA1700000000000000000007 /* PetEnclosureCard.swift */,
 				W10000000000000000000003 /* PetEnclosureWidget.swift in Sources */,
 				B10000000000000000000005 /* HabitatCozyBoxArtwork.swift in Widget Sources */,
 			);

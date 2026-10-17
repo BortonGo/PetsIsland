@@ -7,7 +7,13 @@ struct ContentView: View {
 
     var body: some View {
 #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-release-support-preview") {
+        if ProcessInfo.processInfo.arguments.contains("-enclosure-widget-preview") {
+#if targetEnvironment(simulator)
+            EnclosureWidgetPreviewHost()
+#else
+            appContent
+#endif
+        } else if ProcessInfo.processInfo.arguments.contains("-release-support-preview") {
 #if targetEnvironment(simulator)
             AuthorSupportPreviewHost()
 #else

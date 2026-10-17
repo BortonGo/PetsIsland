@@ -103,7 +103,7 @@ The collection contains **20 visual variants across six species**:
   a pet, or tap its occupant to let it leave. A pet reserves its item throughout
   approach, entry, use and exit, so two pets cannot occupy it simultaneously.
 - Existing boxes remain owned without a charge. All animal artwork and sprite
-  frames are preserved. The Home Screen widget reflects the placed furniture.
+  frames are preserved.
 - Enclosure neighbours occasionally approach each other, greet with small hearts,
   and rest or nap together. One pair meets at a time, with room for both pets;
   sleeping pets and furniture occupants are left to their activities. Tap a pet
@@ -377,12 +377,24 @@ Always-On state.
 
 ## Home Screen widget
 
-The medium enclosure widget shares residents, background, and care state with
-the app through an App Group. It displays timeline snapshots and short care
-reactions. **Play** opens the interactive playroom in the app.
+The small and medium widgets share enclosure residents, scene colors, and care
+state with the app through an App Group. **Pet** gives the companions at home
+a little happiness; **Play** in the medium widget also uses a little energy.
+Both actions work directly on the Home Screen and show hearts and a short
+response. No supplies or coins are spent. Repeated taps are guarded by a short
+cooldown and atomic shared saves. Pets on a discovery walk or in Dynamic Island
+are excluded from widget care.
+
+The small card shows the first resident and the total at home; the medium card
+shows all residents. Original coats and outfits remain visible, including in
+tinted Home Screen appearance. An empty island offers a link back to the app;
+a companion away on a walk shows its return time. Tapping the card opens the
+enclosure. WidgetKit controls snapshot refresh times; there is no continuous
+animation or background polling loop.
 
 To add it, launch Pet Island once, choose enclosure residents, then open the
-Home Screen widget gallery and select **Pet Island → Enclosure**. The app cannot
+Home Screen widget gallery and select **Pet Island → Your island**
+(**Твой остров** in Russian). Choose the small or medium size. The app cannot
 place a widget on the Home Screen automatically.
 
 ## Build and run
