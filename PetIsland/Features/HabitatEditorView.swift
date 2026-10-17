@@ -457,6 +457,33 @@ struct HabitatEditorView: View {
     }
 }
 
+/// Enclosure-only sizing. The simulation keeps its original floor coordinates;
+/// larger artwork grows upward from the same authored paw baseline.
+struct HabitatPetLayout {
+    let baseWidth: CGFloat
+    let scale: CGFloat
+
+    init(profile: PetProfile, baseWidth: CGFloat) {
+        self.baseWidth = baseWidth
+        switch profile.resolvedBreed {
+        case .adultLion: scale = 1.2
+        case .lioness: scale = 1.45
+        default: scale = 1
+        }
+    }
+
+    var width: CGFloat { baseWidth * scale }
+    var size: CGSize { CGSize(width: width, height: width * 0.8) }
+    var centerOffsetY: CGFloat {
+        (baseWidth - width) * (PetSpriteGeometry.baseline - PetSpriteGeometry.canvas.height / 2)
+            / PetSpriteGeometry.canvas.width
+    }
+    var horizontalInset: CGFloat {
+        // Larger lions need room for the full running silhouette and gait gutter.
+        scale == 1 ? baseWidth * 0.46 : width * (0.5 + 12 / PetSpriteGeometry.canvas.width)
+    }
+}
+
 struct HabitatEditorCanvas: View {
     let theme: HabitatTheme
     let pets: [PetProfile]
@@ -535,22 +562,24 @@ struct HabitatEditorCanvas: View {
                 }
                 ForEach(motion.actors) { actor in
                     let width = min(proxy.size.width * 0.24, 78) * petScale
+                    let layout = HabitatPetLayout(profile: actor.profile, baseWidth: width)
                     ZStack {
                         Ellipse().fill(.black.opacity(0.12))
-                            .frame(width: width * 0.48, height: 5)
+                            .frame(width: layout.width * 0.48, height: 5)
                             .offset(y: width * 0.31)
                         PetArtwork(species: actor.profile.species, coat: actor.profile.coat,
                                    customColor: actor.profile.customColor, breed: actor.profile.resolvedBreed,
                                    pose: actor.pose, direction: .right, step: reduceMotion ? 0 : actor.step,
                                    animatesMotion: false, usesNaturalGait: true, accessory: actor.profile.outfit?.headwear)
+                            .frame(width: layout.size.width, height: layout.size.height)
                             .scaleEffect(x: actor.facing, y: 1)
-                            .offset(y: actor.visualOffsetY)
+                            .offset(y: layout.centerOffsetY + actor.visualOffsetY)
                         if actor.affection > 0 {
                             Image(systemName: "heart.fill")
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundStyle(Color(red: 0.88, green: 0.48, blue: 0.52))
                                 .opacity(min(actor.affection, 1))
-                                .offset(y: -width * 0.4 - (reduceMotion ? 0 : (1.5 - actor.affection) * 7))
+                                .offset(y: layout.centerOffsetY - layout.width * 0.4 - (reduceMotion ? 0 : (1.5 - actor.affection) * 7))
                         }
                     }
                     .frame(width: width, height: width * 0.8)
@@ -841,14 +870,20 @@ final class HabitatMotionSimulation: ObservableObject {
         let existing = Dictionary(uniqueKeysWithValues: actors.map { ($0.id, $0) })
         actors = pets.enumerated().map { index, profile in
             if var actor = existing[profile.id] {
+                let previousScale = HabitatPetLayout(profile: actor.profile, baseWidth: petWidth).scale
                 actor.profile = profile
                 if previousSize != size, previousSize.width > 1 {
                     actor.position.x *= size.width / previousSize.width
                     actor.position.y *= size.height / previousSize.height
                     actor.target.x *= size.width / previousSize.width
                     actor.target.y *= size.height / previousSize.height
-                    actor.position = bounded(actor.position)
-                    actor.target = bounded(actor.target)
+                    actor.position = bounded(actor.position, profile: profile)
+                    actor.target = bounded(actor.target, profile: profile)
+                }
+                let newScale = HabitatPetLayout(profile: profile, baseWidth: petWidth).scale
+                if newScale != previousScale || (previousPetWidth != petWidth && newScale != 1) {
+                    actor.position = bounded(actor.position, profile: profile)
+                    actor.target = bounded(actor.target, profile: profile)
                 }
                 return actor
             }
@@ -856,7 +891,7 @@ final class HabitatMotionSimulation: ObservableObject {
                 bytes.reduce(UInt64(14695981039346656037)) { ($0 ^ UInt64($1)) &* 1099511628211 }
             }
             let position = bounded(CGPoint(x: size.width * (0.18 + Double(index % 3) * 0.24 + Double(index / 3) * 0.25),
-                                           y: groundRange.lowerBound + Double(index % 3) * (groundRange.upperBound - groundRange.lowerBound) / 2))
+                                           y: groundRange.lowerBound + Double(index % 3) * (groundRange.upperBound - groundRange.lowerBound) / 2), profile: profile)
             var actor = Actor(id: profile.id, profile: profile, position: position, target: position, seed: seed)
             actor.waiting = 0.25 + actor.random() * 1.4
             actor.gaitPhase = actor.random()
@@ -1086,7 +1121,7 @@ final class HabitatMotionSimulation: ObservableObject {
                 let neighbour = previous.first { other in
                     other.id != actor.id && abs(other.position.y - actor.position.y) < 14 &&
                     (other.position.x - actor.position.x) * actor.facing > 0 &&
-                    abs(other.position.x - actor.position.x) < petWidth * 0.8
+                    abs(other.position.x - actor.position.x) < (artworkWidth(for: actor) + artworkWidth(for: other)) * 0.4
                 }
                 if let neighbour {
                     desired.dx *= 0.12
@@ -1104,12 +1139,13 @@ final class HabitatMotionSimulation: ObservableObject {
                 actor.velocity.dy += (desired.dy - actor.velocity.dy) * blend
                 let oldPosition = actor.position
                 actor.position = bounded(CGPoint(x: actor.position.x + actor.velocity.dx * dt,
-                                                 y: actor.position.y + actor.velocity.dy * dt))
+                                                 y: actor.position.y + actor.velocity.dy * dt),
+                                         profile: actor.profile, allowingOrigin: oldPosition)
                 let travelled = hypot(actor.position.x - oldPosition.x, actor.position.y - oldPosition.y)
                 let actualSpeed = travelled / dt
                 actor.pose = actor.profile.species == .parrot ? .fly : (actualSpeed > 40 ? .run : .walk)
                 // Continuous cycles survive a walk/run switch; only stride length changes.
-                let stride = petWidth * PetAnimationLibrary.enclosureStrideRatio(
+                let stride = artworkWidth(for: actor) * PetAnimationLibrary.enclosureStrideRatio(
                     for: actor.profile.species, breed: actor.profile.resolvedBreed, pose: actor.pose)
                 actor.gaitPhase += travelled / max(stride, 1)
                 if distance < 2 && actualSpeed < 7 {
@@ -1339,7 +1375,8 @@ final class HabitatMotionSimulation: ObservableObject {
     }
 
     private func chooseDestination(for actor: inout Actor) {
-        let xRange = (petWidth * 0.46)...max(size.width - petWidth * 0.46, petWidth * 0.46)
+        let inset = min(HabitatPetLayout(profile: actor.profile, baseWidth: petWidth).horizontalInset, size.width / 2)
+        let xRange = inset...max(size.width - inset, inset)
         // Look for breathing room instead of sending every resident to the
         // opposite edge. Reserve neighbours' destinations as well as their
         // current resting places, so they do not all stop in the same corner.
@@ -1350,11 +1387,11 @@ final class HabitatMotionSimulation: ObservableObject {
             let candidate = bounded(CGPoint(
                 x: xRange.lowerBound + actor.random() * (xRange.upperBound - xRange.lowerBound),
                 y: groundRange.lowerBound + actor.random() * (groundRange.upperBound - groundRange.lowerBound)
-            ))
+            ), profile: actor.profile)
             if furnitureBlocks(candidate) { continue }
             let clearance = neighbours.map { other in
                 let occupied = other.travelling ? other.target : other.position
-                return hypot((candidate.x - occupied.x) / (petWidth * 0.8),
+                return hypot((candidate.x - occupied.x) / ((artworkWidth(for: actor) + artworkWidth(for: other)) * 0.4),
                              (candidate.y - occupied.y) / (petWidth * 0.34))
             }.min() ?? 2
             let travel = hypot(candidate.x - actor.position.x, candidate.y - actor.position.y)
@@ -1370,9 +1407,18 @@ final class HabitatMotionSimulation: ObservableObject {
         return min(top, size.height - petWidth * 0.4 - 8)...max(top, size.height - petWidth * 0.4 - 8)
     }
 
-    private func bounded(_ point: CGPoint) -> CGPoint {
-        let inset = min(petWidth * 0.46, size.width / 2)
-        return CGPoint(x: min(max(point.x, inset), size.width - inset),
+    private func artworkWidth(for actor: Actor) -> CGFloat {
+        HabitatPetLayout(profile: actor.profile, baseWidth: petWidth).width
+    }
+
+    private func bounded(_ point: CGPoint, profile: PetProfile? = nil, allowingOrigin origin: CGPoint? = nil) -> CGPoint {
+        let inset = min(profile.map { HabitatPetLayout(profile: $0, baseWidth: petWidth).horizontalInset }
+                        ?? petWidth * 0.46, size.width / 2)
+        // Furniture keeps its original floor position. A larger lion leaving it
+        // walks back inside its free-roaming margin instead of snapping sideways.
+        let left = min(inset, origin?.x ?? inset)
+        let right = max(size.width - inset, origin?.x ?? (size.width - inset))
+        return CGPoint(x: min(max(point.x, left), right),
                        y: min(max(point.y, groundRange.lowerBound), groundRange.upperBound))
     }
 }
@@ -1556,7 +1602,7 @@ extension HabitatMotionSimulation {
             actor.facing = abs(dx) > 1 ? (dx < 0 ? -1 : 1) : actor.facing
             actor.position = bounded(CGPoint(x: actor.position.x + dx / max(distance, 0.001) * step,
                                              y: actor.position.y + dy / max(distance, 0.001) * step))
-            actor.gaitPhase += step / max(petWidth * 0.38, 1)
+            actor.gaitPhase += step / max(artworkWidth(for: actor) * 0.38, 1)
             actor.pose = actor.profile.species == .parrot ? .fly : .walk
             if distance < 1 {
                 visit.phase = .settling; visit.elapsed = 0
@@ -1577,7 +1623,7 @@ extension HabitatMotionSimulation {
             let offset = leaving ? 0 : furnitureRestOffset(visit.placement)
             actor.visualOffsetY = visit.originOffset + (offset - visit.originOffset) * t
             actor.pose = actor.profile.species == .parrot ? .fly : .walk
-            actor.gaitPhase += hypot(actor.position.x - old.x, actor.position.y - old.y) / max(petWidth * 0.38, 1)
+            actor.gaitPhase += hypot(actor.position.x - old.x, actor.position.y - old.y) / max(artworkWidth(for: actor) * 0.38, 1)
             if p >= 1 {
                 actor.travelling = false; actor.velocity = .zero
                 if leaving { finishFurnitureVisit(slot, actor: &actor); return }
@@ -1611,7 +1657,7 @@ extension HabitatMotionSimulation {
 
     private func avoidFurniture(for actor: inout Actor) {
         guard actor.profile.species != .parrot, !furniture.isEmpty else { return }
-        let ahead = CGPoint(x: actor.position.x + actor.facing * petWidth * 0.35, y: actor.position.y)
+        let ahead = CGPoint(x: actor.position.x + actor.facing * artworkWidth(for: actor) * 0.35, y: actor.position.y)
         if furnitureBlocks(ahead) || furnitureBlocks(actor.target) {
             actor.target.y = groundRange.upperBound
         }
@@ -1650,14 +1696,14 @@ extension HabitatMotionSimulation {
         else { return false }
         let left = first.position.x <= second.position.x ? first : second
         let right = left.id == firstID ? second : first
-        let spacing = petWidth * 0.82
+        let spacing = (artworkWidth(for: left) + artworkWidth(for: right)) * 0.41
         let midpoint = CGPoint(x: (left.position.x + right.position.x) / 2,
                                y: (left.position.y + right.position.y) / 2)
         var best: (CGPoint, CGPoint, CGFloat)?
         for y in [midpoint.y, groundRange.upperBound, groundRange.lowerBound] {
             for x in [midpoint.x, size.width / 2] {
-                let a = bounded(CGPoint(x: x - spacing / 2, y: y))
-                let b = bounded(CGPoint(x: x + spacing / 2, y: y))
+                let a = bounded(CGPoint(x: x - spacing / 2, y: y), profile: left.profile)
+                let b = bounded(CGPoint(x: x + spacing / 2, y: y), profile: right.profile)
                 guard b.x - a.x >= spacing - 0.01,
                       encounterPathIsClear(from: left.position, to: a, excluding: [left.id, right.id]),
                       encounterPathIsClear(from: right.position, to: b, excluding: [left.id, right.id]),
@@ -1790,7 +1836,7 @@ extension HabitatMotionSimulation {
         actor.position = next
         actor.velocity = CGVector(dx: dx / distance * speed, dy: dy / distance * speed)
         actor.pose = actor.profile.species == .parrot ? .fly : .walk
-        let stride = petWidth * PetAnimationLibrary.enclosureStrideRatio(
+        let stride = artworkWidth(for: actor) * PetAnimationLibrary.enclosureStrideRatio(
             for: actor.profile.species, breed: actor.profile.resolvedBreed, pose: actor.pose)
         actor.gaitPhase += travel / max(stride, 1)
     }

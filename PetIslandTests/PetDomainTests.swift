@@ -1221,6 +1221,179 @@ final class PetDomainTests: XCTestCase {
         }
     }
 
+    func testEnclosureSizingOnlyEnlargesAdultLionsAndPreservesAuthoredGround() throws {
+        for species in PetSpecies.allCases {
+            for breed in PetBreed.available(for: species) {
+                let pet = PetProfile(id: UUID(), name: breed.rawValue, species: species, coat: .sunrise,
+                                     createdAt: .distantPast, breed: breed)
+                for baseWidth: CGFloat in [67.2, 78, 93.6, 109.2] {
+                    let layout = HabitatPetLayout(profile: pet, baseWidth: baseWidth)
+                    if breed == .adultLion || breed == .lioness {
+                        XCTAssertGreaterThan(layout.width, baseWidth)
+                        XCTAssertLessThan(layout.centerOffsetY, 0)
+                    } else {
+                        XCTAssertEqual(layout.size, CGSize(width: baseWidth, height: baseWidth * 0.8))
+                        XCTAssertEqual(layout.centerOffsetY, 0)
+                        XCTAssertEqual(layout.horizontalInset, baseWidth * 0.46)
+                    }
+                    for pose in [PetPose.walk, .run, .idle, .sleep, .play, .eat] {
+                        for name in PetAnimationLibrary.naturalClip(for: species, breed: breed, pose: pose).frames {
+                            let geometry = try XCTUnwrap(PetSpriteGeometry.load(assetName: name))
+                            let clearance = geometry.preservesAuthoredBaseline ? 160 - geometry.visibleBounds.maxY : 0
+                            let foot = geometry.rect(in: layout.size).minY
+                                + geometry.visibleBounds.maxY * geometry.scale * layout.width / 220
+                                - layout.size.height / 2 + layout.centerOffsetY
+                            XCTAssertEqual(foot, baseWidth * 72 / 220 - clearance * layout.width / 220,
+                                           accuracy: 0.0001, "\(breed) / \(pose) / \(name)")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    func testAdultLionsHaveLargerStandingAndWalkingSilhouettesThanClassicCat() throws {
+        for pose in [PetPose.idle, .walk] {
+            let catHeights = try PetAnimationLibrary.naturalClip(for: .cat, breed: .classicCat, pose: pose).frames.map {
+                try XCTUnwrap(PetSpriteGeometry.load(assetName: $0)).visibleBounds.height
+            }
+            for breed in [PetBreed.adultLion, .lioness] {
+                let pet = PetProfile(id: UUID(), name: "Lion", species: .lion, coat: .sunrise,
+                                     createdAt: .distantPast, breed: breed)
+                let scale = HabitatPetLayout(profile: pet, baseWidth: 78).scale
+                for name in PetAnimationLibrary.naturalClip(for: .lion, breed: breed, pose: pose).frames {
+                    let height = try XCTUnwrap(PetSpriteGeometry.load(assetName: name)).visibleBounds.height
+                    XCTAssertGreaterThan(height * scale, try XCTUnwrap(catHeights.max()), name)
+                }
+            }
+        }
+    }
+
+    @MainActor
+    func testAdultLionsRemainVisibleDuringTravelAndEnclosureResizing() throws {
+        let pets = [PetBreed.adultLion, .lioness, .classicCat].enumerated().map { index, breed in
+            PetProfile(id: UUID(uuidString: String(format: "FE000000-0000-0000-0000-%012d", index + 1))!,
+                       name: breed.rawValue, species: breed == .classicCat ? .cat : .lion,
+                       coat: .sunrise, createdAt: .distantPast, breed: breed)
+        }
+        let simulation = HabitatMotionSimulation()
+        var walking = Set<PetBreed>(), running = Set<PetBreed>()
+        for (size, scale) in [(CGSize(width: 360, height: 236), CGFloat(1)),
+                              (CGSize(width: 280, height: 190), 1.2), (CGSize(width: 430, height: 270), 1.4)] {
+            simulation.configure(pets: pets, size: size, petScale: scale)
+            let baseWidth = min(size.width * 0.24, 78) * scale
+            for tick in 0..<2_400 {
+                if tick > 0 { simulation.advance(by: 1.0 / 30) }
+                for actor in simulation.actors where actor.profile.species == .lion {
+                    let breed = try XCTUnwrap(actor.profile.resolvedBreed)
+                    if actor.pose == .walk { walking.insert(breed) }
+                    if actor.pose == .run { running.insert(breed) }
+                    let bounds = try habitatVisibleBounds(actor, baseWidth: baseWidth)
+                    XCTAssertGreaterThanOrEqual(bounds.minX, -0.01)
+                    XCTAssertLessThanOrEqual(bounds.maxX, size.width + 0.01)
+                    XCTAssertGreaterThanOrEqual(bounds.minY, -0.01)
+                    XCTAssertLessThanOrEqual(bounds.maxY, size.height + 0.01)
+                }
+            }
+        }
+        XCTAssertEqual(walking, [.adultLion, .lioness])
+        XCTAssertEqual(running, [.adultLion, .lioness])
+        simulation.configure(pets: pets, size: CGSize(width: 390, height: 240), petScale: 1.2)
+        let renderer = ImageRenderer(content: HabitatEditorCanvas(theme: .sunnyMeadow, pets: pets,
+            vitalsByPetID: [:], petScale: 1.2, isAnimationEnabled: false, motion: simulation).frame(width: 390, height: 240))
+        renderer.scale = 3
+        let attachment = XCTAttachment(image: try XCTUnwrap(renderer.uiImage))
+        attachment.name = "Adult lion, lioness and cat — actual enclosure"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+
+    @MainActor
+    func testAdultLionsKeepFurnitureContactAfterEnlargement() throws {
+        for breed in [PetBreed.adultLion, .lioness] {
+            for item in [HabitatItemKind.warmStone, .playBall] {
+                let pet = PetProfile(id: UUID(), name: "Lion", species: .lion, coat: .sunrise, createdAt: .distantPast, breed: breed)
+                let simulation = HabitatMotionSimulation(), size = CGSize(width: 360, height: 236)
+                let placement = HabitatFurniturePlacement(item: item, slot: .left)
+                simulation.configure(pets: [pet], size: size, petScale: 1.2, furniture: [placement])
+                XCTAssertTrue(simulation.requestFurniture(.left, petID: pet.id))
+                for _ in 0..<1_500 where simulation.furnitureVisits[.left]?.phase != .using {
+                    simulation.advance(by: 1.0 / 60)
+                    let bounds = try habitatVisibleBounds(XCTUnwrap(simulation.actors.first), baseWidth: 93.6)
+                    XCTAssertGreaterThanOrEqual(bounds.minX, -0.01, "\(breed) / \(item)")
+                    XCTAssertLessThanOrEqual(bounds.maxX, size.width + 0.01, "\(breed) / \(item)")
+                }
+                XCTAssertEqual(simulation.furnitureVisits[.left]?.phase, .using)
+                let actor = try XCTUnwrap(simulation.actors.first)
+                let bounds = try habitatVisibleBounds(actor, baseWidth: 93.6)
+                let name = PetAnimationLibrary.naturalClip(for: .lion, breed: breed, pose: actor.pose).frameName(forStep: actor.step)
+                let geometry = try XCTUnwrap(PetSpriteGeometry.load(assetName: name))
+                let authoredContactOffset = (geometry.visibleBounds.maxY - PetSpriteGeometry.baseline)
+                    * HabitatPetLayout(profile: pet, baseWidth: 93.6).width / PetSpriteGeometry.canvas.width
+                let ground = HabitatFurnitureLayout.ground(for: .left, in: size).y
+                let rest = item == .warmStone ? -simulation.furnitureFrame(placement).height * 0.64 : 0
+                XCTAssertEqual(bounds.maxY, ground + rest + authoredContactOffset, accuracy: 0.0001, "\(breed) / \(item)")
+            }
+        }
+    }
+
+    @MainActor
+    func testAdultLionsLeaveFurnitureOrItsRemovalWithoutSidewaysJump() throws {
+        for breed in [PetBreed.adultLion, .lioness] {
+            for slot in [HabitatFurnitureSlot.left, .right] {
+                for removeItem in [false, true] {
+                    let pet = PetProfile(id: UUID(uuidString: "FE000000-0000-0000-0000-000000000004")!,
+                        name: "Lion", species: .lion, coat: .sunrise, createdAt: .distantPast, breed: breed)
+                    let simulation = HabitatMotionSimulation(), size = CGSize(width: 360, height: 236)
+                    let placement = HabitatFurniturePlacement(item: .warmStone, slot: slot)
+                    simulation.configure(pets: [pet], size: size, petScale: 1.2, furniture: [placement])
+                    XCTAssertTrue(simulation.requestFurniture(slot, petID: pet.id))
+                    for _ in 0..<1_500 where simulation.furnitureVisits[slot]?.phase != .using { simulation.advance(by: 1.0 / 60) }
+                    XCTAssertEqual(simulation.furnitureVisits[slot]?.phase, .using)
+                    let seated = try XCTUnwrap(simulation.actors.first).position
+                    if removeItem {
+                        simulation.configure(pets: [pet], size: size, petScale: 1.2, furniture: [])
+                        XCTAssertEqual(simulation.actors.first?.position, seated, "Removing a stone must not teleport its occupant")
+                    }
+                    let inset = HabitatPetLayout(profile: pet, baseWidth: 93.6).horizontalInset
+                    var resumedFreeMovement = false, reachedFreeMargin = false
+                    for _ in 0..<1_800 {
+                        let old = try XCTUnwrap(simulation.actors.first)
+                        simulation.advance(by: 1.0 / 60)
+                        let actor = try XCTUnwrap(simulation.actors.first)
+                        // Free running tops out at 71 pt/s. The item exit is slower.
+                        XCTAssertLessThanOrEqual(abs(actor.position.x - old.position.x), 71 / 60 + 0.001,
+                                                 "\(breed) / \(slot) / removed=\(removeItem)")
+                        if simulation.furnitureVisits.isEmpty, actor.travelling {
+                            resumedFreeMovement = true
+                            let inside = actor.position.x >= inset - 0.001 && actor.position.x <= size.width - inset + 0.001
+                            // Furniture can legally sit outside this margin. Require
+                            // it only after the resident has walked back inside.
+                            if reachedFreeMargin { XCTAssertTrue(inside) }
+                            reachedFreeMargin = reachedFreeMargin || inside
+                        }
+                    }
+                    XCTAssertTrue(resumedFreeMovement)
+                    XCTAssertTrue(reachedFreeMargin)
+                }
+            }
+        }
+    }
+
+    private func habitatVisibleBounds(_ actor: HabitatMotionSimulation.Actor, baseWidth: CGFloat) throws -> CGRect {
+        let layout = HabitatPetLayout(profile: actor.profile, baseWidth: baseWidth)
+        let name = PetAnimationLibrary.naturalClip(for: actor.profile.species, breed: actor.profile.resolvedBreed,
+                                                  pose: actor.pose).frameName(forStep: actor.step)
+        let geometry = try XCTUnwrap(PetSpriteGeometry.load(assetName: name)), rect = geometry.rect(in: layout.size)
+        let fit = geometry.scale * layout.width / 220
+        let local = CGRect(x: rect.minX + geometry.visibleBounds.minX * fit,
+                           y: rect.minY + geometry.visibleBounds.minY * fit,
+                           width: geometry.visibleBounds.width * fit, height: geometry.visibleBounds.height * fit)
+        return CGRect(x: actor.position.x + (actor.facing < 0 ? layout.size.width - local.maxX : local.minX) - layout.width / 2,
+                      y: actor.position.y + layout.centerOffsetY + actor.visualOffsetY - layout.size.height / 2 + local.minY,
+                      width: local.width, height: local.height)
+    }
+
     func testAllForegroundPetsKeepGroundedWalkAndAuthoredFlightClearance() throws {
         for species in PetSpecies.allCases {
             for breed in PetBreed.available(for: species) {

@@ -50,7 +50,7 @@ final class PetEncounterTests: XCTestCase {
                                 breed: actor.profile.resolvedBreed, pose: actor.pose)
                             XCTAssertTrue(clip.frames.indices.contains(actor.step), "\(breed) / \(actor.pose)")
                             if actor.pose == .walk || actor.pose == .fly, distance > 0 {
-                                let stride = 78 * PetAnimationLibrary.enclosureStrideRatio(
+                                let stride = HabitatPetLayout(profile: actor.profile, baseWidth: 78).width * PetAnimationLibrary.enclosureStrideRatio(
                                     for: actor.profile.species, breed: actor.profile.resolvedBreed, pose: actor.pose)
                                 XCTAssertEqual(actor.gaitPhase - old.gaitPhase, distance / stride, accuracy: 0.000001)
                             }
