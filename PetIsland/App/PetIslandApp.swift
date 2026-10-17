@@ -12,9 +12,11 @@ struct PetIslandApp: App {
                 Color.clear
             } else {
                 ContentView().tint(PetDesign.accent)
+                    .task { AuthorSupportStore.shared.startObserving() }
             }
 #else
             ContentView().tint(PetDesign.accent)
+                .task { AuthorSupportStore.shared.startObserving() }
 #endif
         }
     }

@@ -476,6 +476,9 @@ struct SettingsView: View {
     @State private var failedDraft: GeneralSettingsDraft?
     @State private var showsAppIcons = false
     @State private var showsIslandBackup = false
+    @State private var showsAuthorSupport = false
+    @State private var showsSupportPrivacy = false
+    @State private var showsAppLanguage = false
 
     init(controller: PetSessionController, showsDismissButton: Bool = true) {
         self.controller = controller
@@ -558,6 +561,16 @@ struct SettingsView: View {
                     .font(.subheadline)
                     .padding(18)
                     .petSurface()
+                    Button { showsAppLanguage = true } label: {
+                        HStack(spacing: 14) {
+                            Label(String(localized: "App language", table: "ReleaseSupport"), systemImage: "globe")
+                                .font(.subheadline.weight(.semibold))
+                            Spacer()
+                            Text(verbatim: PetAppLanguage.current.nativeName)
+                                .font(.subheadline).foregroundStyle(PetDesign.secondary)
+                            Image(systemName: "chevron.right").font(.caption.bold()).foregroundStyle(PetDesign.secondary)
+                        }.padding(18).petSurface()
+                    }.buttonStyle(.plain).accessibilityIdentifier("settings.language")
                     Button { showsIslandBackup = true } label: {
                         HStack(spacing: 14) {
                             Label("Island backup", systemImage: "externaldrive")
@@ -569,6 +582,16 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                     .disabled(controller.isBusy)
                     .accessibilityIdentifier("settings.backup")
+                    Button { showsAuthorSupport = true } label: {
+                        Label(String(localized: "Support the author", table: "ReleaseSupport"), systemImage: "heart")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, alignment: .leading).padding(18).petSurface()
+                    }.buttonStyle(.plain).accessibilityIdentifier("settings.authorSupport")
+                    Button { showsSupportPrivacy = true } label: {
+                        Label(String(localized: "Help and privacy", table: "ReleaseSupport"), systemImage: "questionmark.circle")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity, alignment: .leading).padding(18).petSurface()
+                    }.buttonStyle(.plain).accessibilityIdentifier("settings.supportPrivacy")
                     DisclosureGroup {
                         PetGettingStartedGuide()
                             .padding(.top, 16)
@@ -631,6 +654,9 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showsAppIcons) { AppIconPickerView() }
         .sheet(isPresented: $showsIslandBackup) { IslandBackupView(controller: controller) }
+        .sheet(isPresented: $showsAuthorSupport) { AuthorSupportView() }
+        .sheet(isPresented: $showsSupportPrivacy) { SupportPrivacyView() }
+        .sheet(isPresented: $showsAppLanguage) { AppLanguageView() }
         .interactiveDismissDisabled(isSaving)
         .alert("Settings were not saved", isPresented: Binding(
             get: { failedDraft != nil },

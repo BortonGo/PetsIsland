@@ -89,6 +89,16 @@
 		CA4D10000000000000000003 /* WalkPostcards.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = CA4D20000000000000000003 /* WalkPostcards.xcstrings */; };
 		EC0110000000000000000001 /* PetEncounterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0120000000000000000001 /* PetEncounterTests.swift */; };
 		EC0110000000000000000002 /* HabitatInteractions.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = EC0120000000000000000002 /* HabitatInteractions.xcstrings */; };
+		ACEA10000000000000000001 /* AuthorSupportStore.swift */ = {isa = PBXBuildFile; fileRef = ACEA20000000000000000001; };
+		ACEA10000000000000000002 /* AuthorSupportView.swift */ = {isa = PBXBuildFile; fileRef = ACEA20000000000000000002; };
+		ACEA10000000000000000003 /* SupportPrivacyView.swift */ = {isa = PBXBuildFile; fileRef = ACEA20000000000000000003; };
+		ACEA10000000000000000004 /* AuthorSupportTests.swift */ = {isa = PBXBuildFile; fileRef = ACEA20000000000000000004; };
+		ACEA10000000000000000005 /* ReleaseSupport.xcstrings */ = {isa = PBXBuildFile; fileRef = ACEA20000000000000000005; };
+		ACEA10000000000000000006 /* PrivacyInfo.xcprivacy */ = {isa = PBXBuildFile; fileRef = ACEA20000000000000000006; };
+		ACEA10000000000000000007 /* PrivacyInfo.xcprivacy */ = {isa = PBXBuildFile; fileRef = ACEA20000000000000000006; };
+		ACEA10000000000000000008 /* PetIslandTips.storekit */ = {isa = PBXBuildFile; fileRef = ACEA20000000000000000008; };
+		ACEA10000000000000000009 /* AppLanguageView.swift */ = {isa = PBXBuildFile; fileRef = ACEA20000000000000000009; };
+		ACEA1000000000000000000A /* AppLanguageTests.swift */ = {isa = PBXBuildFile; fileRef = ACEA2000000000000000000A; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -201,6 +211,15 @@
 		CA4D20000000000000000003 /* WalkPostcards.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = WalkPostcards.xcstrings; sourceTree = "<group>"; };
 		EC0120000000000000000001 /* PetEncounterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PetEncounterTests.swift; sourceTree = "<group>"; };
 		EC0120000000000000000002 /* HabitatInteractions.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = HabitatInteractions.xcstrings; sourceTree = "<group>"; };
+		ACEA20000000000000000001 /* AuthorSupportStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorSupportStore.swift; sourceTree = "<group>"; };
+		ACEA20000000000000000002 /* AuthorSupportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorSupportView.swift; sourceTree = "<group>"; };
+		ACEA20000000000000000003 /* SupportPrivacyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportPrivacyView.swift; sourceTree = "<group>"; };
+		ACEA20000000000000000004 /* AuthorSupportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorSupportTests.swift; sourceTree = "<group>"; };
+		ACEA20000000000000000005 /* ReleaseSupport.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = ReleaseSupport.xcstrings; sourceTree = "<group>"; };
+		ACEA20000000000000000006 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		ACEA20000000000000000008 /* PetIslandTips.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Configuration/PetIslandTips.storekit; sourceTree = SOURCE_ROOT; };
+		ACEA20000000000000000009 /* AppLanguageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguageView.swift; sourceTree = "<group>"; };
+		ACEA2000000000000000000A /* AppLanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLanguageTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -334,6 +353,10 @@
 		D60000000000000000000003 /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				ACEA20000000000000000003 /* SupportPrivacyView.swift */,
+				ACEA20000000000000000009 /* AppLanguageView.swift */,
+				ACEA20000000000000000002 /* AuthorSupportView.swift */,
+				ACEA20000000000000000001 /* AuthorSupportStore.swift */,
 				D15C20000000000000000001 /* PetDiscoveryStories.swift */,
 				CA4D20000000000000000001 /* PetWalkPostcard.swift */,
 				B0AD20000000000000000002 /* PetBondView.swift */,
@@ -363,6 +386,9 @@
 		T60000000000000000000001 /* PetIslandTests */ = {
 			isa = PBXGroup;
 			children = (
+				ACEA20000000000000000008 /* PetIslandTips.storekit */,
+				ACEA20000000000000000004 /* AuthorSupportTests.swift */,
+				ACEA2000000000000000000A /* AppLanguageTests.swift */,
 				D15C20000000000000000002 /* PetDiscoveryStoryTests.swift */,
 				CA4D20000000000000000002 /* PetWalkPostcardTests.swift */,
 				B0AD20000000000000000003 /* PetBondTests.swift */,
@@ -383,13 +409,15 @@
 		};
 		R60000000000000000000001 /* Resources */ = {
 			isa = PBXGroup;
-			children = (R20000000000000000000001 /* Localizable.xcstrings */, CA4D20000000000000000003 /* WalkPostcards.xcstrings */, EC0120000000000000000002 /* HabitatInteractions.xcstrings */, F20000000000000000000001 /* NaturalGaits.xcassets */, );
+			children = (
+				ACEA20000000000000000005 /* ReleaseSupport.xcstrings */,R20000000000000000000001 /* Localizable.xcstrings */, CA4D20000000000000000003 /* WalkPostcards.xcstrings */, EC0120000000000000000002 /* HabitatInteractions.xcstrings */, F20000000000000000000001 /* NaturalGaits.xcassets */, );
 			path = Resources;
 			sourceTree = "<group>";
 		};
 		S60000000000000000000001 /* SharedResources */ = {
 			isa = PBXGroup;
 			children = (
+				ACEA20000000000000000006 /* PrivacyInfo.xcprivacy */,
 				ACCE00000000000000000006 /* PetOutfitFonts */,
 				ACCE00000000000000000007 /* PetOutfits */,
 				ACCE00000000000000000003 /* PetAccessories.json */,
@@ -476,6 +504,10 @@
 					CAFE00000000000000000007 = { CreatedOnToolsVersion = 27.0; TestTargetID = A80000000000000000000001; };
 					A80000000000000000000001 = {
 						CreatedOnToolsVersion = 26.0;
+						SystemCapabilities = {
+							com.apple.InAppPurchase = { enabled = 1; };
+							com.apple.ApplicationGroups.iOS = { enabled = 1; };
+						};
 					};
 					A80000000000000000000002 = {
 						CreatedOnToolsVersion = 26.0;
@@ -492,6 +524,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				ru,
 				Base,
 			);
 			mainGroup = A60000000000000000000001;
@@ -513,6 +546,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACEA10000000000000000006 /* PrivacyInfo.xcprivacy */,
+				ACEA10000000000000000005 /* ReleaseSupport.xcstrings */,
 				ACCF00000000000000000700 /* PetOutfits in Resources */,
 				ACCF00000000000000000300 /* PetAccessories.json in Resources */,
 				A10000000000000000000006 /* Assets.xcassets in Resources */,
@@ -528,6 +563,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACEA10000000000000000007 /* PrivacyInfo.xcprivacy */,
 				ACCF00000000000000000601 /* PetOutfitFonts in Resources */,
 				ACCF00000000000000000701 /* PetOutfits in Resources */,
 				ACCF00000000000000000301 /* PetAccessories.json in Resources */,
@@ -541,7 +577,8 @@
 		T70000000000000000000002 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = ();
+			files = (
+				ACEA10000000000000000008 /* PetIslandTips.storekit */,);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
@@ -552,6 +589,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACEA10000000000000000003 /* SupportPrivacyView.swift */,
+				ACEA10000000000000000009 /* AppLanguageView.swift */,
+				ACEA10000000000000000002 /* AuthorSupportView.swift */,
+				ACEA10000000000000000001 /* AuthorSupportStore.swift */,
 				BACC10000000000000000002 /* IslandBackupView.swift in Sources */,
 				BACC10000000000000000001 /* IslandBackup.swift in Sources */,
 				D15C10000000000000000001 /* PetDiscoveryStories.swift in Sources */,
@@ -616,6 +657,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ACEA10000000000000000004 /* AuthorSupportTests.swift */,
+				ACEA1000000000000000000A /* AppLanguageTests.swift */,
 				BACC10000000000000000003 /* IslandBackupTests.swift in Sources */,
 				D15C10000000000000000002 /* PetDiscoveryStoryTests.swift in Sources */,
 				CA4D10000000000000000002 /* PetWalkPostcardTests.swift in Sources */,

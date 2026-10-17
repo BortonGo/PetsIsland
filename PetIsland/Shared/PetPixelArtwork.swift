@@ -661,6 +661,15 @@ enum PetAnimationLibrary {
         let variants = PetBreed.available(for: species)
         let variant = breed.flatMap { variants.contains($0) ? $0 : nil } ?? variants.first
         guard let token = variant?.companionArtworkToken else { return nil }
+        if variant == .adultLion || variant == .lioness, pose == .walk || pose == .run {
+            // Four authored contact/passing phases; the two timer glyphs keep
+            // using 00/04 (opposite walking contacts or push-off/flight).
+            let indices = pose == .walk ? [0, 2, 4, 6] : [0, 4, 2, 6]
+            return PetAnimationClip(
+                frames: indices.map { "companion_\(token)_\(pose.rawValue)_\(String(format: "%02d", $0))" },
+                frameDuration: pose == .walk ? 0.19 : 0.12
+            )
+        }
         if variant == .cardigan, pose == .walk || pose == .run {
             // Keep the approved contact/flight pair on the same authored canvas.
             // 00 and 04 are also the two frames used by the timer font glyphs.

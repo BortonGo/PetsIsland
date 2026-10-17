@@ -8,10 +8,10 @@ the Lock Screen.
 The app works locally, without an account, a backend, analytics, or advertising.
 The interface is available in English and Russian.
 
-> **Status: active development, ready for iPhone testing.** The latest full
-> regression passed 411 tests (377 unit and 34 UI tests), a Release build, and static analysis on October 14,
-> 2026. Simulator checks cover the main flows; physical-device and accessibility
-> testing are still part of the work before a public release.
+> **Status: release preparation, not yet published.** See the [release report](Docs/RELEASE-READINESS-2026-10-17.md) for checks and remaining gates.
+> The [App Store launch guide](Docs/APP-STORE-LAUNCH.md) covers enrollment from Russia,
+> support pages, in-app purchases, signing, TestFlight and submission. Apple Developer
+> membership, public support URLs and Sandbox payment verification are still required.
 
 <p align="center">
   <img src="Docs/Media/dynamic-island-demo.gif" width="635" alt="A shepherd, parrot, and cat moving and resting in Dynamic Island">
@@ -519,7 +519,7 @@ Walk tests also cover retrying failed starts, cancellations and collections,
 returning after backgrounding with Reduce Motion, Russian story counts, empty
 albums and long companion names at large text sizes.
 
-Run the **PetIsland** test action with **Command-U** in Xcode. The latest verified
+Run the **PetIsland** test action with **Command-U** in Xcode. The regression
 suite covers save recovery, full-island backup validation, interrupted restore
 rollback, return copies, repeated import without duplicated coins or pets, pet placement, arcade
 rules, per-pet Bubble Paws recovery, interrupted shots, care availability and
@@ -539,11 +539,16 @@ bash Tools/check_project.sh
 ```
 
 The script validates timer fonts, complete outfit frames and colour masks, natural gaits,
-and the bundled lion/Cardigan frames;
+the bundled lion/Cardigan frames, privacy manifests, tip configuration and release packaging;
 then runs the simulator tests, a Release build, and static analysis. Reports go
 to `outputs/qa/`. Set `PET_TEST_DESTINATION` to select a particular simulator,
 `PET_PYTHON` to choose a Python interpreter, or `PET_REPORT_DIR` to choose a new
 report directory. Pillow and fontTools are development-only dependencies.
+The local StoreKit server test is a separate release gate: enable it with
+`PET_STOREKIT_TESTS=1`. It is explicitly excluded by default because the current
+CLI/simulator combination fails to complete local StoreKit transactions;
+controller tests still cover cancellation, errors, pending approval and duplicate delivery.
+Do not treat those tests as a substitute for Sandbox/TestFlight purchases.
 
 These checks use only committed application resources and do not require artwork
 drafts or generation tools. Automated and simulator checks do not replace
@@ -576,12 +581,37 @@ Docs/Media/               Screenshots and illustrations used by the README
 Tools/                    Resource validation and automated build checks
 ```
 
-## Further development
+## Support and release preparation
 
-The next focus is device testing and polishing the existing pet, enclosure, and
-arcade experience. Walk stories, illustrated postcards and enclosure encounters
-are implemented. Further accessories and a way to support the author remain
-possible later stages; advertising and App Store preparation are deferred.
+**Settings → Support the author** offers optional one-time consumable tips through
+Apple StoreKit 2. Prices come from the store; tips grant no coins, features or pet
+advantages. Cancellation, restricted purchases, pending approval and unavailable
+products have explicit states. A verified transaction is finished even when it
+arrives after the support sheet closes. There is no third-party payment SDK.
+Settings also includes **App language** (Русский / English). It opens iOS’s
+per-app language settings, keeping the phone’s primary language and island saves
+unchanged. Both targets declare English and Russian, and the release validator
+checks every string catalog for missing Russian translations.
+
+The real catalog must be created in App Store Connect before release; local
+`PetIslandTips` prices are test-only and are not bundled in the shipping app.
+
+**Settings → Help and privacy** contains an offline privacy policy, email support
+and a copy-address fallback. Contact: **bortone52@yandex.ru**.
+`Docs/AppStoreSite/` contains bilingual static support/privacy pages for hosting;
+these files have not been published. The app and extension include privacy manifests.
+
+Adult lion and lioness movement now uses four distinct walking phases and four
+running phases (push-off, flight, landing and gathering). DI and Lock Screen
+retain two key frames per gait, with matching full outfits and timer fonts.
+The lion cub and all other pets keep their existing artwork and animation timing.
+`Tools/rebuild_lion_motion_fonts.py` rebuilds only the two lions' font faces from
+shipped assets and verifies that other faces stay unchanged.
+
+The remaining work is enrollment, public support URLs, store product setup and
+real-device/Sandbox verification, followed by signed archive validation and
+TestFlight. Advertising remains a future task. See the release report and launch
+guide linked above for the exact steps and limits of local checks.
 
 ## License
 

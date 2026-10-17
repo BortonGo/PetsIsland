@@ -14,6 +14,103 @@ final class PetProfileUITests: XCTestCase {
 
     override func tearDownWithError() throws { app?.terminate() }
 
+    func testAuthorSupportSuccessAndPendingDoNotBlockClosing() {
+        for mode in ["", "-support-pending"] {
+            app.launchArguments = ["-release-support-preview", mode, "-AppleLanguages", "(en)"]
+            app.launch()
+            let buy = app.buttons["support.buy.org.bortongo.PetIsland.tip.small"]
+            XCTAssertTrue(buy.waitForExistence(timeout: 10))
+            reveal(buy)
+            buy.tap()
+            let notice = app.staticTexts[mode.isEmpty ? "support.notice.thanks" : "support.notice.pending"]
+            XCTAssertTrue(notice.waitForExistence(timeout: 5))
+            XCTAssertTrue(app.buttons["Done"].isHittable)
+            if !mode.isEmpty { XCTAssertFalse(buy.isEnabled) }
+            capture(mode.isEmpty ? "Support — thanks" : "Support — pending")
+            app.buttons["Done"].tap()
+            XCTAssertTrue(app.staticTexts["support.preview.closed"].waitForExistence(timeout: 5))
+            XCTAssertFalse(buy.exists)
+            app.terminate()
+        }
+    }
+
+    func testAuthorSupportUnavailableAtLargestRussianText() {
+        app.launchArguments = ["-release-support-preview", "-support-empty", "-AppleLanguages", "(ru)",
+                               "-AppleLocale", "ru_RU", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+        let reload = app.buttons["support.reload"]
+        XCTAssertTrue(app.navigationBars.firstMatch.waitForExistence(timeout: 10))
+        reveal(reload)
+        XCTAssertTrue(reload.isHittable)
+        XCTAssertEqual(reload.label, "Обновить цены")
+        capture("Support — unavailable, largest Russian text")
+        XCTAssertTrue(app.buttons.matching(identifier: "support.buy.org.bortongo.PetIsland.tip.small").allElementsBoundByIndex.isEmpty)
+    }
+
+    func testPrivacyPolicyAndCopyContactWorkOffline() {
+        app.launchArguments = ["-release-privacy-preview", "-AppleLanguages", "(en)"]
+        app.launch()
+        let copy = app.buttons["privacy.copyEmail"]
+        XCTAssertTrue(copy.waitForExistence(timeout: 10))
+        copy.tap()
+        XCTAssertEqual(copy.label, "Email copied")
+        capture("Privacy — contact copied")
+        let policy = app.staticTexts["privacy.policy"]
+        reveal(policy)
+        XCTAssertTrue(policy.isHittable)
+        let deletion = app.staticTexts["Deleting your data"]
+        reveal(deletion)
+        XCTAssertTrue(deletion.isHittable)
+    }
+
+    func testSupportAndPrivacyOpenAndCloseFromSettings() {
+        launchSettings()
+        for identifier in ["settings.authorSupport", "settings.supportPrivacy"] {
+            let row = app.buttons[identifier]
+            reveal(row)
+            row.tap()
+            XCTAssertTrue(app.buttons["Done"].waitForExistence(timeout: 5))
+            app.buttons["Done"].tap()
+            XCTAssertTrue(row.waitForExistence(timeout: 5))
+        }
+    }
+
+    func testAppLanguageOpensInEnglishAndRussianWithoutChangingPets() {
+        for russian in [false, true] {
+            launchSettings(russian ? "-settings-russian" : "")
+            let row = app.buttons["settings.language"]
+            reveal(row)
+            XCTAssertTrue(row.label.contains(russian ? "Русский" : "English"))
+            row.tap()
+            let open = app.buttons["language.openSettings"]
+            XCTAssertTrue(open.waitForExistence(timeout: 5))
+            XCTAssertEqual(open.label, russian ? "Выбрать язык в настройках iOS" : "Choose language in iOS Settings")
+            XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "language.option.en").firstMatch.exists)
+            XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "language.option.ru").firstMatch.exists)
+            capture(russian ? "Language — Russian" : "Language — English")
+            app.buttons[russian ? "Готово" : "Done"].tap()
+            XCTAssertTrue(row.waitForExistence(timeout: 5))
+            app.terminate()
+        }
+    }
+
+    func testAppLanguageLargestRussianTextKeepsSettingsAndHelpReachable() {
+        launchSettings("-settings-russian", "-settings-largest")
+        let row = app.buttons["settings.language"]
+        reveal(row)
+        row.tap()
+        let open = app.buttons["language.openSettings"]
+        reveal(open, fullyVisible: true)
+        XCTAssertTrue(open.isHittable)
+        let help = app.buttons["Нет пункта «Язык»?"]
+        reveal(help)
+        help.tap()
+        capture("Language — largest Russian text")
+        XCTAssertTrue(app.buttons["Готово"].isHittable)
+        app.buttons["Готово"].tap()
+        XCTAssertTrue(row.waitForExistence(timeout: 5))
+    }
+
     private func launch(_ arguments: String...) {
         let russian = arguments.contains("-profile-russian")
         app.launchArguments = ["-pet-profile-preview", "-AppleLanguages", russian ? "(ru)" : "(en)", "-AppleLocale", russian ? "ru_RU" : "en_US"] + arguments
@@ -1250,9 +1347,13 @@ final class PetProfileUITests: XCTestCase {
         let export = app.buttons["postcard.save"]
         XCTAssertTrue(export.waitForExistence(timeout: 10))
         reveal(export); export.tap()
-        let save = app.navigationBars["FullDocumentManagerViewControllerNavigationBar"].buttons
+        // Match the system picker action without depending on its private
+        // navigation-controller name or where iOS places the button.
+        let save = app.buttons
             .matching(NSPredicate(format: "identifier == %@ OR label IN %@", "DOCPicker.actionButton", ["Save", "Сохранить"])).firstMatch
-        XCTAssertTrue(save.waitForExistence(timeout: 10))
+        let pickerOpened = save.waitForExistence(timeout: 10)
+        if !pickerOpened { capture("Postcard — document picker diagnostic"); print(app.debugDescription) }
+        XCTAssertTrue(pickerOpened)
         let cancel = app.buttons.matching(NSPredicate(format: "label IN %@", ["Cancel", "Отменить"])).firstMatch
         if cancel.exists { cancel.tap() }
         else { app.navigationBars["FullDocumentManagerViewControllerNavigationBar"].swipeDown() }

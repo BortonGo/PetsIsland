@@ -4645,19 +4645,19 @@
       176
     ],
     "visibleBounds": [
-      48,
-      31,
+      19,
+      32,
       198,
       160
     ],
-    "inkBounds": [
-      127,
-      31,
-      191,
-      81
-    ],
     "canonicalBottom": 160,
-    "scale": 0.8376569729015202
+    "scale": 0.49,
+    "inkBounds": [
+      131,
+      32,
+      196,
+      80
+    ]
   },
   "companion_lion_adult_run_01": {
     "size": [
@@ -4665,19 +4665,19 @@
       176
     ],
     "visibleBounds": [
-      48,
-      27,
-      196,
+      19,
+      32,
+      198,
       160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
       131,
-      27,
-      194,
-      76
-    ],
-    "canonicalBottom": 160,
-    "scale": 0.8376569729015202
+      32,
+      196,
+      80
+    ]
   },
   "companion_lion_adult_run_02": {
     "size": [
@@ -4685,19 +4685,19 @@
       176
     ],
     "visibleBounds": [
-      48,
-      26,
-      196,
-      158
+      20,
+      28,
+      201,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      130,
-      26,
-      154,
-      47
-    ],
-    "canonicalBottom": 158,
-    "scale": 0.8376569729015202
+      132,
+      28,
+      200,
+      75
+    ]
   },
   "companion_lion_adult_run_03": {
     "size": [
@@ -4705,19 +4705,19 @@
       176
     ],
     "visibleBounds": [
-      46,
-      23,
-      195,
-      156
+      20,
+      28,
+      201,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      130,
-      23,
-      192,
-      73
-    ],
-    "canonicalBottom": 156,
-    "scale": 0.8376569729015202
+      132,
+      28,
+      200,
+      75
+    ]
   },
   "companion_lion_adult_run_04": {
     "size": [
@@ -4725,19 +4725,19 @@
       176
     ],
     "visibleBounds": [
-      36,
-      29,
-      210,
-      148
+      3,
+      28,
+      209,
+      149
     ],
+    "canonicalBottom": 149,
+    "scale": 0.49,
     "inkBounds": [
-      132,
-      29,
-      193,
+      133,
+      28,
+      200,
       77
-    ],
-    "canonicalBottom": 148,
-    "scale": 0.8376569729015202
+    ]
   },
   "companion_lion_adult_run_05": {
     "size": [
@@ -4745,19 +4745,19 @@
       176
     ],
     "visibleBounds": [
-      44,
-      30,
-      197,
-      154
+      3,
+      28,
+      209,
+      149
     ],
+    "canonicalBottom": 149,
+    "scale": 0.49,
     "inkBounds": [
-      130,
-      30,
-      154,
-      51
-    ],
-    "canonicalBottom": 154,
-    "scale": 0.8376569729015202
+      133,
+      28,
+      200,
+      77
+    ]
   },
   "companion_lion_adult_run_06": {
     "size": [
@@ -4765,19 +4765,19 @@
       176
     ],
     "visibleBounds": [
-      48,
+      34,
       31,
-      195,
-      161
+      199,
+      151
     ],
+    "canonicalBottom": 151,
+    "scale": 0.49,
     "inkBounds": [
-      127,
+      132,
       31,
-      190,
-      79
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8376569729015202
+      197,
+      78
+    ]
   },
   "companion_lion_adult_run_07": {
     "size": [
@@ -4785,19 +4785,19 @@
       176
     ],
     "visibleBounds": [
-      45,
+      34,
+      31,
+      199,
+      151
+    ],
+    "canonicalBottom": 151,
+    "scale": 0.49,
+    "inkBounds": [
+      132,
       31,
       197,
-      160
-    ],
-    "inkBounds": [
-      130,
-      31,
-      193,
-      81
-    ],
-    "canonicalBottom": 160,
-    "scale": 0.8376569729015202
+      78
+    ]
   },
   "companion_lion_adult_sleep_00": {
     "size": [
@@ -4845,19 +4845,19 @@
       176
     ],
     "visibleBounds": [
-      45,
-      26,
-      204,
+      40,
+      27,
+      209,
       160
     ],
-    "inkBounds": [
-      132,
-      26,
-      158,
-      46
-    ],
     "canonicalBottom": 160,
-    "scale": 0.8376569729015202
+    "scale": 0.49,
+    "inkBounds": [
+      130,
+      27,
+      193,
+      73
+    ]
   },
   "companion_lion_adult_walk_01": {
     "size": [
@@ -4865,19 +4865,19 @@
       176
     ],
     "visibleBounds": [
-      46,
+      40,
       27,
-      199,
+      209,
       160
     ],
-    "inkBounds": [
-      133,
-      27,
-      157,
-      46
-    ],
     "canonicalBottom": 160,
-    "scale": 0.8376569729015202
+    "scale": 0.49,
+    "inkBounds": [
+      130,
+      27,
+      193,
+      73
+    ]
   },
   "companion_lion_adult_walk_02": {
     "size": [
@@ -4885,19 +4885,19 @@
       176
     ],
     "visibleBounds": [
-      48,
-      31,
-      197,
+      44,
+      27,
+      202,
       160
     ],
-    "inkBounds": [
-      128,
-      31,
-      192,
-      80
-    ],
     "canonicalBottom": 160,
-    "scale": 0.8376569729015202
+    "scale": 0.49,
+    "inkBounds": [
+      133,
+      27,
+      199,
+      76
+    ]
   },
   "companion_lion_adult_walk_03": {
     "size": [
@@ -4905,19 +4905,19 @@
       176
     ],
     "visibleBounds": [
-      46,
+      44,
       27,
-      201,
+      202,
       160
     ],
-    "inkBounds": [
-      130,
-      27,
-      194,
-      74
-    ],
     "canonicalBottom": 160,
-    "scale": 0.8376569729015202
+    "scale": 0.49,
+    "inkBounds": [
+      133,
+      27,
+      199,
+      76
+    ]
   },
   "companion_lion_adult_walk_04": {
     "size": [
@@ -4925,19 +4925,19 @@
       176
     ],
     "visibleBounds": [
-      47,
+      42,
       27,
-      199,
+      201,
       160
     ],
-    "inkBounds": [
-      130,
-      27,
-      196,
-      76
-    ],
     "canonicalBottom": 160,
-    "scale": 0.8376569729015202
+    "scale": 0.49,
+    "inkBounds": [
+      132,
+      27,
+      198,
+      76
+    ]
   },
   "companion_lion_adult_walk_05": {
     "size": [
@@ -4945,19 +4945,19 @@
       176
     ],
     "visibleBounds": [
-      48,
+      42,
       27,
-      198,
+      201,
       160
     ],
-    "inkBounds": [
-      133,
-      27,
-      195,
-      75
-    ],
     "canonicalBottom": 160,
-    "scale": 0.8376569729015202
+    "scale": 0.49,
+    "inkBounds": [
+      132,
+      27,
+      198,
+      76
+    ]
   },
   "companion_lion_adult_walk_06": {
     "size": [
@@ -4965,19 +4965,19 @@
       176
     ],
     "visibleBounds": [
-      46,
-      31,
-      197,
+      39,
+      27,
+      198,
       160
     ],
-    "inkBounds": [
-      126,
-      31,
-      193,
-      81
-    ],
     "canonicalBottom": 160,
-    "scale": 0.8376569729015202
+    "scale": 0.49,
+    "inkBounds": [
+      129,
+      27,
+      194,
+      76
+    ]
   },
   "companion_lion_adult_walk_07": {
     "size": [
@@ -4985,19 +4985,19 @@
       176
     ],
     "visibleBounds": [
-      47,
-      28,
-      196,
+      39,
+      27,
+      198,
       160
     ],
-    "inkBounds": [
-      128,
-      28,
-      192,
-      76
-    ],
     "canonicalBottom": 160,
-    "scale": 0.8376569729015202
+    "scale": 0.49,
+    "inkBounds": [
+      129,
+      27,
+      194,
+      76
+    ]
   },
   "fluid_dog_doberman_run_0": {
     "size": [
@@ -8465,19 +8465,19 @@
       176
     ],
     "visibleBounds": [
-      50,
-      53,
-      192,
-      161
+      30,
+      47,
+      199,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      143,
-      53,
-      192,
-      96
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8382305456893768
+      152,
+      47,
+      199,
+      85
+    ]
   },
   "companion_lioness_run_01": {
     "size": [
@@ -8485,19 +8485,19 @@
       176
     ],
     "visibleBounds": [
-      40,
-      50,
-      194,
-      161
+      30,
+      47,
+      199,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      142,
-      50,
-      194,
-      94
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8382305456893768
+      152,
+      47,
+      199,
+      85
+    ]
   },
   "companion_lioness_run_02": {
     "size": [
@@ -8505,19 +8505,19 @@
       176
     ],
     "visibleBounds": [
-      24,
-      45,
-      207,
-      153
+      17,
+      47,
+      198,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      151,
-      45,
-      199,
-      84
-    ],
-    "canonicalBottom": 153,
-    "scale": 0.8382305456893768
+      150,
+      47,
+      198,
+      85
+    ]
   },
   "companion_lioness_run_03": {
     "size": [
@@ -8525,19 +8525,19 @@
       176
     ],
     "visibleBounds": [
-      48,
-      44,
+      17,
+      47,
       198,
-      155
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      149,
-      44,
+      150,
+      47,
       198,
       85
-    ],
-    "canonicalBottom": 155,
-    "scale": 0.8382305456893768
+    ]
   },
   "companion_lioness_run_04": {
     "size": [
@@ -8545,19 +8545,19 @@
       176
     ],
     "visibleBounds": [
-      51,
-      53,
-      203,
-      161
+      13,
+      45,
+      211,
+      145
     ],
+    "canonicalBottom": 145,
+    "scale": 0.49,
     "inkBounds": [
       149,
-      53,
-      201,
-      94
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8382305456893768
+      45,
+      198,
+      83
+    ]
   },
   "companion_lioness_run_05": {
     "size": [
@@ -8565,19 +8565,19 @@
       176
     ],
     "visibleBounds": [
-      41,
-      49,
-      197,
-      161
+      13,
+      45,
+      211,
+      145
     ],
+    "canonicalBottom": 145,
+    "scale": 0.49,
     "inkBounds": [
-      144,
-      49,
-      197,
-      92
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8382305456893768
+      149,
+      45,
+      198,
+      83
+    ]
   },
   "companion_lioness_run_06": {
     "size": [
@@ -8585,19 +8585,19 @@
       176
     ],
     "visibleBounds": [
-      60,
       49,
-      196,
-      155
+      45,
+      199,
+      149
     ],
+    "canonicalBottom": 149,
+    "scale": 0.49,
     "inkBounds": [
-      144,
-      49,
-      196,
-      92
-    ],
-    "canonicalBottom": 155,
-    "scale": 0.8382305456893768
+      150,
+      45,
+      199,
+      83
+    ]
   },
   "companion_lioness_run_07": {
     "size": [
@@ -8605,19 +8605,19 @@
       176
     ],
     "visibleBounds": [
-      48,
-      51,
-      202,
-      158
+      49,
+      45,
+      199,
+      149
     ],
+    "canonicalBottom": 149,
+    "scale": 0.49,
     "inkBounds": [
-      143,
-      52,
-      194,
-      94
-    ],
-    "canonicalBottom": 158,
-    "scale": 0.8382305456893768
+      150,
+      45,
+      199,
+      83
+    ]
   },
   "companion_lioness_sleep_00": {
     "size": [
@@ -8665,19 +8665,19 @@
       176
     ],
     "visibleBounds": [
-      12,
-      48,
-      190,
-      161
+      23,
+      47,
+      199,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      134,
-      48,
-      190,
-      91
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8382305456893768
+      149,
+      47,
+      199,
+      85
+    ]
   },
   "companion_lioness_walk_01": {
     "size": [
@@ -8685,19 +8685,19 @@
       176
     ],
     "visibleBounds": [
-      19,
-      50,
-      184,
-      161
+      23,
+      47,
+      199,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      132,
-      50,
-      184,
-      93
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8382305456893768
+      149,
+      47,
+      199,
+      85
+    ]
   },
   "companion_lioness_walk_02": {
     "size": [
@@ -8705,19 +8705,19 @@
       176
     ],
     "visibleBounds": [
-      16,
-      49,
-      184,
-      161
+      23,
+      48,
+      197,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      132,
-      49,
-      184,
-      92
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8382305456893768
+      149,
+      48,
+      197,
+      86
+    ]
   },
   "companion_lioness_walk_03": {
     "size": [
@@ -8725,19 +8725,19 @@
       176
     ],
     "visibleBounds": [
-      14,
-      50,
-      186,
-      161
+      23,
+      48,
+      197,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      131,
-      50,
-      186,
-      93
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8382305456893768
+      149,
+      48,
+      197,
+      86
+    ]
   },
   "companion_lioness_walk_04": {
     "size": [
@@ -8745,19 +8745,19 @@
       176
     ],
     "visibleBounds": [
-      16,
-      51,
-      187,
-      161
+      22,
+      47,
+      197,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      133,
-      51,
-      187,
-      95
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8382305456893768
+      149,
+      47,
+      197,
+      85
+    ]
   },
   "companion_lioness_walk_05": {
     "size": [
@@ -8765,19 +8765,19 @@
       176
     ],
     "visibleBounds": [
-      18,
-      50,
-      186,
-      161
+      22,
+      47,
+      197,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      133,
-      50,
-      186,
-      94
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8382305456893768
+      149,
+      47,
+      197,
+      85
+    ]
   },
   "companion_lioness_walk_06": {
     "size": [
@@ -8785,19 +8785,19 @@
       176
     ],
     "visibleBounds": [
-      14,
-      51,
-      188,
-      161
+      24,
+      47,
+      198,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      135,
-      51,
-      188,
-      95
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8382305456893768
+      150,
+      47,
+      198,
+      85
+    ]
   },
   "companion_lioness_walk_07": {
     "size": [
@@ -8805,18 +8805,18 @@
       176
     ],
     "visibleBounds": [
-      16,
-      51,
-      187,
-      161
+      24,
+      47,
+      198,
+      160
     ],
+    "canonicalBottom": 160,
+    "scale": 0.49,
     "inkBounds": [
-      133,
-      51,
-      187,
-      95
-    ],
-    "canonicalBottom": 161,
-    "scale": 0.8382305456893768
+      150,
+      47,
+      198,
+      85
+    ]
   }
 }

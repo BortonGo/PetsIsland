@@ -7,7 +7,19 @@ struct ContentView: View {
 
     var body: some View {
 #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("-home-clarity-preview") {
+        if ProcessInfo.processInfo.arguments.contains("-release-support-preview") {
+#if targetEnvironment(simulator)
+            AuthorSupportPreviewHost()
+#else
+            appContent
+#endif
+        } else if ProcessInfo.processInfo.arguments.contains("-release-privacy-preview") {
+#if targetEnvironment(simulator)
+            SupportPrivacyView()
+#else
+            appContent
+#endif
+        } else if ProcessInfo.processInfo.arguments.contains("-home-clarity-preview") {
 #if targetEnvironment(simulator)
             HomeClarityDebugHostView()
 #else

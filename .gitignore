@@ -48,6 +48,8 @@ outputs/
 
 # Internal planning and dated QA notes; README media stays versioned.
 /Docs/*.md
+!/Docs/APP-STORE-LAUNCH.md
+!/Docs/RELEASE-READINESS-2026-10-17.md
 /Docs/Media/repaired-walk-cycles.gif
 
 # Local assistant state and Python environments

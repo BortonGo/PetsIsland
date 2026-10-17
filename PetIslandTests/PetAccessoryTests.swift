@@ -367,8 +367,10 @@ final class PetAccessoryTests: XCTestCase {
                         let sleeping = mode == "Sleep" || (mode.contains("Sleep") && digit >= 7)
                         let walking = mode == "Walk" || mode == "WalkSleep" || (mode == "RunWalkSleep" && digit >= 4)
                         let pose: PetPose = sleeping ? .sleep : walking ? .walk : .run
+                        let fourPhaseLion = breed == .adultLion || breed == .lioness
                         let step = sleeping ? 0 : species == .parrot ? digit % 8
                             : (breed == .corgi && walking) ? (digit % 2) * 2
+                            : fourPhaseLion ? (digit % 2) * (walking ? 2 : 1)
                             : (breed.companionArtworkToken != nil && breed != .cardigan) ? (digit % 2) * 4 : digit % 2
                         let asset = PetAnimationLibrary.clip(for: species, breed: breed, pose: pose).frameName(forStep: step)
                         let direction: PetDirection = digit.isMultiple(of: 2) ? .right : .left

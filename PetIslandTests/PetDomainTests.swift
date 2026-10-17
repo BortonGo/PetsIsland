@@ -759,7 +759,8 @@ final class PetDomainTests: XCTestCase {
                 for pose in [PetPose.walk, .run] {
                     let clip = PetAnimationLibrary.naturalClip(for: species, breed: breed, pose: pose)
                     let sharedCorgiWalk = breed == .corgi && pose == .walk
-                    let naturalFrameCount = sharedCorgiWalk ? 4 : (breed == .cardigan ? 2 : 8)
+                    let fourPhaseLion = breed == .adultLion || breed == .lioness
+                    let naturalFrameCount = sharedCorgiWalk || fourPhaseLion ? 4 : (breed == .cardigan ? 2 : 8)
                     XCTAssertEqual(clip.frames.count, naturalFrameCount)
                     XCTAssertEqual(Set(clip.frames).count, naturalFrameCount)
                     for name in clip.frames {
@@ -771,7 +772,7 @@ final class PetDomainTests: XCTestCase {
                         XCTAssertEqual(geometry?.scale, 1, name)
                     }
                     XCTAssertEqual(PetAnimationLibrary.clip(for: species, breed: breed, pose: pose).frames.count,
-                                   sharedCorgiWalk ? 4 : (breed.companionArtworkToken == nil || breed == .cardigan ? 2 : 8))
+                                   sharedCorgiWalk || fourPhaseLion ? 4 : (breed.companionArtworkToken == nil || breed == .cardigan ? 2 : 8))
                 }
             }
         }
@@ -1179,7 +1180,7 @@ final class PetDomainTests: XCTestCase {
                         // Preserve the authored flight frames; grounding each
                         // individual image would make these animals drop mid-stride.
                         let clearance: CGFloat = isRun && digit % 2 == 1
-                            ? (breed == .cardigan ? 10 : breed == .adultLion ? 12 : 0) : 0
+                            ? (breed == .cardigan ? 10 : breed == .adultLion ? 11 : breed == .lioness ? 15 : 0) : 0
                         XCTAssertEqual(center - viewport.height / 2 + bounds.maxY,
                                        lineTop - clearance * 84 / 220, accuracy: 1,
                                        "\(token) \(mode) \(digit) \(direction)")
@@ -1878,15 +1879,18 @@ final class PetDomainTests: XCTestCase {
     }
 
     func testLionRunKeepsItsHeadRegisteredWithoutGroundingAirborneFeet() throws {
-        let clip = PetAnimationLibrary.naturalClip(for: .lion, breed: .adultLion, pose: .run)
-        let geometry = try clip.frames.map { try XCTUnwrap(PetSpriteGeometry.load(assetName: $0)) }
-        let tops = geometry.map { $0.visibleBounds.minY }
-        XCTAssertLessThanOrEqual(try XCTUnwrap(tops.max()) - XCTUnwrap(tops.min()), 6)
-        for index in geometry.indices {
-            XCTAssertEqual(geometry[index].rect(in: PetSpriteGeometry.canvas).origin, .zero)
-            XCTAssertLessThanOrEqual(abs(tops[index] - tops[(index + 1) % tops.count]), 3)
+        for breed in [PetBreed.adultLion, .lioness] {
+            let clip = PetAnimationLibrary.naturalClip(for: .lion, breed: breed, pose: .run)
+            let geometry = try clip.frames.map { try XCTUnwrap(PetSpriteGeometry.load(assetName: $0)) }
+            let tops = geometry.map { $0.visibleBounds.minY }
+            XCTAssertLessThanOrEqual(try XCTUnwrap(tops.max()) - XCTUnwrap(tops.min()), 6)
+            for index in geometry.indices {
+                XCTAssertEqual(geometry[index].rect(in: PetSpriteGeometry.canvas).origin, .zero)
+                XCTAssertLessThanOrEqual(abs(tops[index] - tops[(index + 1) % tops.count]), 4)
+            }
+            XCTAssertEqual(clip.frames.count, 4)
+            XCTAssertLessThan(geometry[1].visibleBounds.maxY, geometry[0].visibleBounds.maxY - 8)
         }
-        XCTAssertLessThan(geometry[4].visibleBounds.maxY, geometry[0].visibleBounds.maxY - 8)
     }
 
     @MainActor

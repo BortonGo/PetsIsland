@@ -1,0 +1,669 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "A little kindness for Pet Island": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A little kindness for Pet Island"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Немного тепла для Pet Island"
+          }
+        }
+      }
+    },
+    "Apple confirms the price and processes the payment. Completed tips do not need restoring on another device.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple confirms the price and processes the payment. Completed tips do not need restoring on another device."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple подтверждает цену и обрабатывает платёж. Завершённую поддержку не нужно восстанавливать на другом устройстве."
+          }
+        }
+      }
+    },
+    "Apple processes tips through the App Store. Pet Island verifies the transaction on your device and does not receive your card details. No purchase receipt or identifier is sent to the author’s server; there is no such server. Apple may retain payment records under its own policy.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple processes tips through the App Store. Pet Island verifies the transaction on your device and does not receive your card details. No purchase receipt or identifier is sent to the author’s server; there is no such server. Apple may retain payment records under its own policy."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple обрабатывает поддержку через App Store. Pet Island проверяет транзакцию на устройстве и не получает данные вашей карты. Чеки и идентификаторы покупок не передаются на сервер автора — такого сервера нет. Apple может хранить сведения о платежах по своей политике."
+          }
+        }
+      }
+    },
+    "Backups and sharing are your choice": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Backups and sharing are your choice"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Копии и отправка — по вашему желанию"
+          }
+        }
+      }
+    },
+    "Completely optional. No subscription, coins or extra features — every pet stays available without a tip.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Completely optional. No subscription, coins or extra features — every pet stays available without a tip."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Это полностью добровольно. Без подписки, монет и дополнительных функций — все питомцы доступны и без поддержки."
+          }
+        }
+      }
+    },
+    "Contact the author": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contact the author"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Связаться с автором"
+          }
+        }
+      }
+    },
+    "Copy email": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy email"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Скопировать адрес"
+          }
+        }
+      }
+    },
+    "Deleting your data": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deleting your data"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Удаление данных"
+          }
+        }
+      }
+    },
+    "Email copied": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Email copied"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Адрес скопирован"
+          }
+        }
+      }
+    },
+    "For a bug report, include your iPhone model, iOS version and what happened. Please don’t send passwords or payment details.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For a bug report, include your iPhone model, iOS version and what happened. Please don’t send passwords or payment details."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Если нашли ошибку, укажите модель iPhone, версию iOS и что произошло. Не присылайте пароли и платёжные данные."
+          }
+        }
+      }
+    },
+    "Help and privacy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help and privacy"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Помощь и конфиденциальность"
+          }
+        }
+      }
+    },
+    "If the island makes your day warmer, you can leave a one-time tip to help its author keep improving it. Thank you for being here.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If the island makes your day warmer, you can leave a one-time tip to help its author keep improving it. Thank you for being here."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Если остров делает ваш день теплее, можно поддержать автора разовым платежом. Это помогает развивать приложение. Спасибо, что вы с нами."
+          }
+        }
+      }
+    },
+    "If you email the author, your email address, message and attachments are used to answer your request. Send only what is needed. You can request deletion by writing to the same address. The mailbox provider handles email under its own policy.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If you email the author, your email address, message and attachments are used to answer your request. Send only what is needed. You can request deletion by writing to the same address. The mailbox provider handles email under its own policy."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Если вы пишете автору, ваш адрес, текст письма и вложения используются для ответа. Присылайте только необходимое. Чтобы запросить удаление переписки, напишите на тот же адрес. Почтовый сервис обрабатывает письма по своей политике."
+          }
+        }
+      }
+    },
+    "Island backup exports a file only when you ask. You choose where to save or share it; the file may include pet names and progress. Import replaces the island after your confirmation. iOS device backups and your chosen file or sharing service follow their own privacy policies.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Island backup exports a file only when you ask. You choose where to save or share it; the file may include pet names and progress. Import replaces the island after your confirmation. iOS device backups and your chosen file or sharing service follow their own privacy policies."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Резервная копия острова создаётся только по вашему запросу. Вы выбираете, где сохранить или кому отправить файл; он может содержать имена питомцев и прогресс. Импорт заменяет остров после вашего подтверждения. Копии iOS и выбранные вами сервисы хранения и отправки работают по своим политикам конфиденциальности."
+          }
+        }
+      }
+    },
+    "Loading prices…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading prices…"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Загружаем цены…"
+          }
+        }
+      }
+    },
+    "No email app is available. Copy the address and use your preferred mail service.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No email app is available. Copy the address and use your preferred mail service."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Почтовое приложение недоступно. Скопируйте адрес и напишите через удобный почтовый сервис."
+          }
+        }
+      }
+    },
+    "Optional payments": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional payments"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Добровольная поддержка"
+          }
+        }
+      }
+    },
+    "Pet names, settings, care, walks, postcards, wardrobe and game progress are stored locally. The app and its widgets share this data through an App Group. There is no developer account, server, advertising SDK or tracking in Pet Island.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pet names, settings, care, walks, postcards, wardrobe and game progress are stored locally. The app and its widgets share this data through an App Group. There is no developer account, server, advertising SDK or tracking in Pet Island."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Имена питомцев, настройки, уход, прогулки, открытки, гардероб и игровой прогресс хранятся локально. Приложение и его виджеты обмениваются этими данными через App Group. В Pet Island нет учётной записи у разработчика, сервера, рекламного SDK и отслеживания."
+          }
+        }
+      }
+    },
+    "Privacy policy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy policy"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Политика конфиденциальности"
+          }
+        }
+      }
+    },
+    "Purchases are restricted on this iPhone. You can keep enjoying the island as usual.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Purchases are restricted on this iPhone. You can keep enjoying the island as usual."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "На этом iPhone покупки ограничены. Островом можно пользоваться как обычно."
+          }
+        }
+      }
+    },
+    "Reload prices": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reload prices"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновить цены"
+          }
+        }
+      }
+    },
+    "Support the author": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Support the author"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Поддержать автора"
+          }
+        }
+      }
+    },
+    "Thank you for supporting the island! Your kindness means a lot.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thank you for supporting the island! Your kindness means a lot."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Спасибо за поддержку острова! Ваше участие очень ценно."
+          }
+        }
+      }
+    },
+    "The payment couldn’t be completed. Check your connection and App Store purchase history before trying again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The payment couldn’t be completed. Check your connection and App Store purchase history before trying again."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Не удалось завершить платёж. Перед повторной попыткой проверьте интернет и историю покупок в App Store."
+          }
+        }
+      }
+    },
+    "Tips are unavailable right now. You can try again later — the island works as usual.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tips are unavailable right now. You can try again later — the island works as usual."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Сейчас поддержка недоступна. Можно попробовать позже — остров работает как обычно."
+          }
+        }
+      }
+    },
+    "Updated 17 October 2026. Contact: bortone52@yandex.ru": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated 17 October 2026. Contact: bortone52@yandex.ru"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Обновлено 17 октября 2026 года. Контакт: bortone52@yandex.ru"
+          }
+        }
+      }
+    },
+    "Waiting for Apple's approval. We’ll confirm your tip when it is approved; you don’t need to pay again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for Apple's approval. We’ll confirm your tip when it is approved; you don’t need to pay again."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ожидаем подтверждения Apple. Сообщим, когда поддержка будет одобрена. Повторно платить не нужно."
+          }
+        }
+      }
+    },
+    "We couldn’t verify this payment yet. Please check your App Store purchase history before trying again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "We couldn’t verify this payment yet. Please check your App Store purchase history before trying again."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Пока не удалось проверить этот платёж. Перед повторной попыткой проверьте историю покупок в App Store."
+          }
+        }
+      }
+    },
+    "When you contact us": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When you contact us"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Когда вы пишете автору"
+          }
+        }
+      }
+    },
+    "Write an email": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write an email"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Написать письмо"
+          }
+        }
+      }
+    },
+    "You can delete pets in the app. Deleting the app removes its local data; copies in device backups or exported files must be removed separately. Deleting Pet Island does not delete Apple’s purchase records. There is no account to close.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You can delete pets in the app. Deleting the app removes its local data; copies in device backups or exported files must be removed separately. Deleting Pet Island does not delete Apple’s purchase records. There is no account to close."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Питомцев можно удалить в приложении. При удалении приложения удаляются его локальные данные; копии устройства и экспортированные файлы нужно удалить отдельно. Удаление Pet Island не удаляет сведения о покупках у Apple. Учётной записи, которую нужно закрывать, нет."
+          }
+        }
+      }
+    },
+    "Your island stays on your device": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your island stays on your device"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ваш остров хранится на устройстве"
+          }
+        }
+      }
+    },
+    "App language": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App language"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Язык приложения"
+          }
+        }
+      }
+    },
+    "Choose a language for Pet Island": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a language for Pet Island"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выберите язык Pet Island"
+          }
+        }
+      }
+    },
+    "iOS saves the language for this app. Your iPhone’s language and your island stay the same. Pet Island may reopen after the change.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS saves the language for this app. Your iPhone’s language and your island stay the same. Pet Island may reopen after the change."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS сохраняет язык отдельно для этого приложения. Язык iPhone и ваш остров останутся прежними. После смены языка Pet Island может открыться заново."
+          }
+        }
+      }
+    },
+    "Choose language in iOS Settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose language in iOS Settings"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Выбрать язык в настройках iOS"
+          }
+        }
+      }
+    },
+    "Open Settings on your iPhone, find Pet Island and tap Language.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Settings on your iPhone, find Pet Island and tap Language."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Откройте настройки iPhone, найдите Pet Island и нажмите «Язык»."
+          }
+        }
+      }
+    },
+    "Can’t find the Language option?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Can’t find the Language option?"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет пункта «Язык»?"
+          }
+        }
+      }
+    },
+    "In iPhone Settings, open General → Language & Region and add English or Russian. Keep your current primary language. Then return to Pet Island’s settings and choose Language.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In iPhone Settings, open General → Language & Region and add English or Russian. Keep your current primary language. Then return to Pet Island’s settings and choose Language."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В настройках iPhone откройте «Основные» → «Язык и регион» и добавьте русский или английский. Сохраните текущий основной язык. Затем вернитесь в настройки Pet Island и выберите «Язык»."
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

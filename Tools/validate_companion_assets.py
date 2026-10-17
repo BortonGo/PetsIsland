@@ -32,12 +32,19 @@ def main():
     checked = 0
     for token in TOKENS:
         for pose, count in SIDE_POSES.items():
-            indices = (0, 4) if token == "dog_cardigan" and pose in ("walk", "run") else range(count)
+            if token in ("lion_adult", "lioness") and pose in ("walk", "run"):
+                indices = (0, 2, 4, 6)
+            else:
+                indices = (0, 4) if token == "dog_cardigan" and pose in ("walk", "run") else range(count)
             hashes = set()
             for index in indices:
                 name = f"companion_{token}_{pose}_{index:02}"
                 hashes.add(validate_asset(SHARED, name, (220, 176)))
                 checked += 1
+                if token in ("lion_adult", "lioness") and pose in ("walk", "run"):
+                    # Keep compatibility resources coherent for old snapshots.
+                    alias = f"companion_{token}_{pose}_{index+1:02}"
+                    assert validate_asset(SHARED, alias, (220, 176)) == validate_asset(SHARED, name, (220, 176))
             if pose in ("walk", "run"):
                 assert len(hashes) == len(indices), f"Duplicate gait frames: {token} {pose}"
         for index in range(4):
@@ -45,7 +52,7 @@ def main():
             checked += 1
         validate_asset(ARCADE, f"sky_paws_{token}", (256, 176))
         checked += 1
-    assert checked == 104, checked
+    assert checked == 88, checked
     print(f"Validated {checked} companion assets: complete states, fixed canvases, distinct gaits and safe margins.")
 
 

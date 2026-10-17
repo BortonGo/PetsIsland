@@ -1,0 +1,79 @@
+{
+  "identifier": "C46ABA5B",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "10000001",
+      "localizations": [
+        {
+          "description": "An optional one-time tip. No subscription or game benefits.",
+          "displayName": "A little thank-you",
+          "locale": "en_US"
+        },
+        {
+          "description": "Добровольная разовая поддержка. Без подписки и игровых бонусов.",
+          "displayName": "Маленькое спасибо",
+          "locale": "ru"
+        }
+      ],
+      "productID": "org.bortongo.PetIsland.tip.small",
+      "referenceName": "Author support small",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "2.99",
+      "familyShareable": false,
+      "internalID": "10000002",
+      "localizations": [
+        {
+          "description": "An optional one-time tip. No subscription or game benefits.",
+          "displayName": "A warm thank-you",
+          "locale": "en_US"
+        },
+        {
+          "description": "Добровольная разовая поддержка. Без подписки и игровых бонусов.",
+          "displayName": "Тёплое спасибо",
+          "locale": "ru"
+        }
+      ],
+      "productID": "org.bortongo.PetIsland.tip.medium",
+      "referenceName": "Author support medium",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "4.99",
+      "familyShareable": false,
+      "internalID": "10000003",
+      "localizations": [
+        {
+          "description": "An optional one-time tip. No subscription or game benefits.",
+          "displayName": "A big thank-you",
+          "locale": "en_US"
+        },
+        {
+          "description": "Добровольная разовая поддержка. Без подписки и игровых бонусов.",
+          "displayName": "Большое спасибо",
+          "locale": "ru"
+        }
+      ],
+      "productID": "org.bortongo.PetIsland.tip.large",
+      "referenceName": "Author support large",
+      "type": "Consumable"
+    }
+  ],
+  "settings": {
+    "_applicationInternalID": "",
+    "_developerTeamID": "",
+    "_failTransactionsEnabled": false,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [],
+  "version": {
+    "major": 3,
+    "minor": 0
+  }
+}
