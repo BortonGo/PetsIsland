@@ -104,6 +104,41 @@ final class PetProfileUITests: XCTestCase {
         }
     }
 
+    func testPrivacyWebsiteOpensBrowserInBothLanguagesAndReturnsToPolicy() {
+        let browser = XCUIApplication(bundleIdentifier: "com.apple.mobilesafari")
+        for language in ["en", "ru"] {
+            app.launchArguments = ["-release-privacy-preview", "-AppleLanguages", "(\(language))"]
+            app.launch()
+            let copy = app.buttons["privacy.copyEmail"]
+            XCTAssertTrue(copy.waitForExistence(timeout: 10))
+            copy.tap()
+            let link = app.descendants(matching: .any).matching(identifier: "privacy.website").firstMatch
+            reveal(link, fullyVisible: true)
+            XCTAssertTrue(link.isHittable)
+            XCTAssertEqual(link.label, language == "ru" ? "Открыть политику на сайте" : "Open privacy policy online")
+            capture("Privacy — website link \(language)")
+            link.tap()
+            XCTAssertTrue(browser.wait(for: .runningForeground, timeout: 10))
+            app.activate()
+            XCTAssertTrue(app.staticTexts["privacy.policy"].waitForExistence(timeout: 5))
+            XCTAssertEqual(copy.label, language == "ru" ? "Адрес скопирован" : "Email copied")
+            app.terminate()
+        }
+    }
+
+    func testPrivacyWebsiteRemainsReachableAtLargestRussianText() {
+        app.launchArguments = ["-release-privacy-preview", "-AppleLanguages", "(ru)",
+                               "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL"]
+        app.launch()
+        XCTAssertTrue(app.buttons["privacy.copyEmail"].waitForExistence(timeout: 10))
+        let link = app.descendants(matching: .any).matching(identifier: "privacy.website").firstMatch
+        reveal(link, fullyVisible: true)
+        XCTAssertTrue(link.isHittable)
+        XCTAssertEqual(link.label, "Открыть политику на сайте")
+        capture("Privacy — website link largest Russian text")
+        XCTAssertTrue(app.buttons["Готово"].isHittable)
+    }
+
     func testAppLanguageOpensInEnglishAndRussianWithoutChangingPets() {
         for russian in [false, true] {
             launchSettings(russian ? "-settings-russian" : "")

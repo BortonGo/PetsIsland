@@ -35,7 +35,7 @@ python3 -m http.server 8765 --bind 127.0.0.1 --directory Docs/AppStoreSite
 | Marketing URL (необязательно) | https://bortongo.github.io/pet-island-support/index.html | https://bortongo.github.io/pet-island-support/en/index.html |
 | Privacy Policy URL | https://bortongo.github.io/pet-island-support/privacy.html | https://bortongo.github.io/pet-island-support/en/privacy.html |
 
-Ссылки ещё нужно внести в App Store Connect. Отдельно добавь **ссылку политики внутрь приложения** рядом с доступным офлайн-текстом: сейчас в `SupportPrivacyView` есть офлайн-политика и email, но публичного URL ещё нет. Apple требует ссылку и в консоли, и внутри приложения: [правило 5.1.1](https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage).
+Ссылки ещё нужно внести в App Store Connect. В приложении **Настройки → Помощь и конфиденциальность** ссылка открывает опубликованную политику в браузере на языке приложения — русском или английском. Офлайн-текст и контактный адрес остаются доступны без сети. Apple требует ссылку и в консоли, и внутри приложения: [правило 5.1.1](https://developer.apple.com/app-store/review/guidelines/#data-collection-and-storage).
 
 ## Перед выпуском приложения
 
@@ -45,7 +45,7 @@ python3 -m http.server 8765 --bind 127.0.0.1 --directory Docs/AppStoreSite
 - [ ] Снимки соответствуют версии, которая будет отправлена Apple. В них только демонстрационные питомцы и данные.
 - [ ] Открываются все четыре страницы, изображения, переходы языка и email; нет горизонтальной прокрутки на узком экране.
 - [ ] Ссылки поддержки и политики внесены в App Store Connect для обеих локализаций.
-- [ ] Ссылка политики добавлена в приложение рядом с офлайн-текстом.
+- [x] Ссылка политики добавлена в приложение рядом с офлайн-текстом; язык страницы соответствует языку приложения.
 - [ ] При выходе приложения статус «Готовится к выпуску» заменён на актуальный; ссылка App Store добавлена только после появления настоящей страницы.
 
 ## Изображения и обновление

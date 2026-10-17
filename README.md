@@ -605,12 +605,13 @@ checks every string catalog for missing Russian translations.
 The real catalog must be created in App Store Connect before release; local
 `PetIslandTips` prices are test-only and are not bundled in the shipping app.
 
-**Settings → Help and privacy** contains an offline privacy policy, email support
-and a copy-address fallback. Contact: **bortone52@yandex.ru**.
+**Settings → Help and privacy** contains an offline privacy policy, a native link
+to the published policy, email support and a copy-address fallback. The link opens
+the browser in the app's language (Russian or English); the bundled policy remains
+available offline. Contact: **bortone52@yandex.ru**.
 `Docs/AppStoreSite/` contains the source of the published bilingual support/privacy
-website. Its URLs still need to be entered in App Store Connect, and a public privacy
-link still needs to be added beside the app’s offline policy. The app and extension
-include privacy manifests.
+website. Its URLs still need to be entered in App Store Connect. The app and
+extension include privacy manifests.
 
 Adult lion and lioness movement now uses four distinct walking phases and four
 running phases (push-off, flight, landing and gathering). DI and Lock Screen

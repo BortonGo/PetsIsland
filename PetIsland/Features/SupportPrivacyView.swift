@@ -3,6 +3,15 @@ import UIKit
 
 enum PetSupportContact {
     static let email = "bortone52@yandex.ru"
+
+    static func privacyPolicyURL(for language: PetAppLanguage = .current) -> URL {
+        // Fixed public destinations; use the app language, not the device's region.
+        switch language {
+        case .russian: URL(string: "https://bortongo.github.io/pet-island-support/privacy.html")!
+        case .english: URL(string: "https://bortongo.github.io/pet-island-support/en/privacy.html")!
+        }
+    }
+
     static var emailURL: URL? {
         var parts = URLComponents()
         parts.scheme = "mailto"
@@ -46,9 +55,19 @@ struct SupportPrivacyView: View {
                             .font(.footnote).foregroundStyle(PetDesign.secondary)
                     }
                     Divider()
-                    Text(String(localized: "Privacy policy", table: "ReleaseSupport"))
-                        .font(.title2.bold()).accessibilityAddTraits(.isHeader)
-                        .accessibilityIdentifier("privacy.policy")
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text(String(localized: "Privacy policy", table: "ReleaseSupport"))
+                            .font(.title2.bold()).accessibilityAddTraits(.isHeader)
+                            .accessibilityIdentifier("privacy.policy")
+                        Link(destination: PetSupportContact.privacyPolicyURL()) {
+                            Label(String(localized: "Open privacy policy online", table: "ReleaseSupport"),
+                                  systemImage: "arrow.up.right")
+                        }
+                        .buttonStyle(PetQuietButtonStyle())
+                        .accessibilityIdentifier("privacy.website")
+                        Text(String(localized: "The text below is also available offline.", table: "ReleaseSupport"))
+                            .font(.footnote).foregroundStyle(PetDesign.secondary)
+                    }
                     policy("Your island stays on your device", "Pet names, settings, care, walks, postcards, wardrobe and game progress are stored locally. The app and its widgets share this data through an App Group. There is no developer account, server, advertising SDK or tracking in Pet Island.")
                     policy("Backups and sharing are your choice", "Island backup exports a file only when you ask. You choose where to save or share it; the file may include pet names and progress. Import replaces the island after your confirmation. iOS device backups and your chosen file or sharing service follow their own privacy policies.")
                     policy("Optional payments", "Apple processes tips through the App Store. Pet Island verifies the transaction on your device and does not receive your card details. No purchase receipt or identifier is sent to the author’s server; there is no such server. Apple may retain payment records under its own policy.")
