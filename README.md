@@ -11,12 +11,14 @@ The interface is available in English and Russian.
 > **Status: release preparation, not yet published.** See the [release report](Docs/RELEASE-READINESS-2026-10-17.md) for checks and remaining gates.
 > The [App Store launch guide](Docs/APP-STORE-LAUNCH.md) covers enrollment from Russia,
 > support pages, in-app purchases, signing, TestFlight and submission. Apple Developer
-> membership, public support URLs and Sandbox payment verification are still required.
+> membership, App Store Connect setup and Sandbox payment verification are still required.
 
 Copy-ready Russian and English store text, purchase metadata and current iPhone
 screenshots are in the [App Store materials](Docs/AppStore/README.md).
-The bilingual [support website](Docs/AppStoreSite/README.md) is prepared locally;
-its deployment guide explains publishing it separately from the app source.
+The bilingual [support website](https://bortongo.github.io/pet-island-support/) is live
+on GitHub Pages in [its own repository](https://github.com/BortonGo/pet-island-support).
+[Website documentation](Docs/AppStoreSite/README.md) lists the Russian and English
+Support, Marketing and Privacy URLs and explains how to update the site.
 
 <p align="center">
   <img src="Docs/Media/dynamic-island-demo.gif" width="635" alt="A shepherd, parrot, and cat moving and resting in Dynamic Island">
@@ -605,8 +607,10 @@ The real catalog must be created in App Store Connect before release; local
 
 **Settings → Help and privacy** contains an offline privacy policy, email support
 and a copy-address fallback. Contact: **bortone52@yandex.ru**.
-`Docs/AppStoreSite/` contains bilingual static support/privacy pages for hosting;
-these files have not been published. The app and extension include privacy manifests.
+`Docs/AppStoreSite/` contains the source of the published bilingual support/privacy
+website. Its URLs still need to be entered in App Store Connect, and a public privacy
+link still needs to be added beside the app’s offline policy. The app and extension
+include privacy manifests.
 
 Adult lion and lioness movement now uses four distinct walking phases and four
 running phases (push-off, flight, landing and gathering). DI and Lock Screen

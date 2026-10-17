@@ -1,6 +1,6 @@
 # Pet Island — материалы для App Store
 
-Пакет для первого выпуска **1.0**, подготовлен 17 октября 2026 года. Это локальные материалы для переноса в App Store Connect; сайт ещё не опубликован, товары не созданы в консоли, приложение не отправлено на проверку.
+Пакет для первого выпуска **1.0**, подготовлен 17 октября 2026 года. Это материалы для переноса в App Store Connect. Сайт опубликован через GitHub Pages; товары ещё не созданы в консоли, приложение не отправлено на проверку.
 
 Полный порядок регистрации, подписи, TestFlight и отправки: [APP-STORE-LAUNCH.md](../APP-STORE-LAUNCH.md).
 
@@ -22,14 +22,15 @@
 
 ## Сайт и ссылки
 
-Исходники сайта находятся в [AppStoreSite](../AppStoreSite/), инструкции публикации — в [README сайта](../AppStoreSite/README.md). Вставлять адреса в App Store Connect нужно только после публикации и проверки HTTPS без входа в аккаунт.
+[Сайт опубликован](https://bortongo.github.io/pet-island-support/) в отдельном [репозитории](https://github.com/BortonGo/pet-island-support). Исходники находятся в [AppStoreSite](../AppStoreSite/), порядок обновления — в [README сайта](../AppStoreSite/README.md).
 
-| Локализация | Support URL и необязательный Marketing URL | Privacy Policy URL |
+| Поле | Русский | English (U.S.) |
 | --- | --- | --- |
-| Русский | Главная страница сайта: `index.html` | `privacy.html` |
-| English (U.S.) | `en/index.html` | `en/privacy.html` |
+| Support URL | https://bortongo.github.io/pet-island-support/index.html#support | https://bortongo.github.io/pet-island-support/en/index.html#support |
+| Marketing URL (необязательно) | https://bortongo.github.io/pet-island-support/index.html | https://bortongo.github.io/pet-island-support/en/index.html |
+| Privacy Policy URL | https://bortongo.github.io/pet-island-support/privacy.html | https://bortongo.github.io/pet-island-support/en/privacy.html |
 
-Здесь указаны пути файлов, а не готовые публичные URL. Не вставляй локальный путь или пример с чужим доменом в консоль. Контакт поддержки: **bortone52@yandex.ru**.
+Эти адреса ещё нужно внести в App Store Connect; публичная ссылка политики также пока не добавлена в приложение. Контакт поддержки: **bortone52@yandex.ru**.
 
 ## Скриншоты
 
@@ -76,8 +77,9 @@ Display Name ограничено 30 символами, Description — 45. К�
 - [ ] Apple Developer Program активна; продавец, команда, Bundle ID и App Group соответствуют итоговой подписи. Доступность оплаты членства и выплат для своих данных уточнена у Apple.
 - [ ] Приложение предлагается бесплатно, выбраны реальные страны доступности и цены трёх добровольных платежей. Дополнительные региональные требования проверены до включения соответствующих стран.
 - [ ] Имя приложения доступно; подтверждены права на код, рисунки, шрифты, звуки и название. В Copyright указаны год и настоящий владелец прав; никаких вымышленных ФИО в пакет не добавлено.
-- [ ] Сайт поддержки и обе политики доступны по публичным HTTPS-адресам; ссылки внесены для каждой локализации.
-- [ ] После публикации настоящая ссылка политики добавлена в приложение рядом с офлайн-текстом. Владелец подтвердил обработку и хранение писем поддержки, а также сведения о выбранном хостинге.
+- [ ] Проверены опубликованные страницы; ссылки поддержки и политики внесены в App Store Connect для каждой локализации.
+- [ ] Ссылка политики добавлена в приложение рядом с офлайн-текстом.
+- [ ] Владелец подтвердил фактическую обработку и хранение писем поддержки; политика соответствует этой практике.
 - [ ] App Privacy заполнена по фактической сборке и обработке обращений поддержки. Сейчас прогресс хранится локально, нет рекламного/аналитического SDK или сервера разработчика; это не основание автоматически копировать ответы при будущих изменениях. [Определения Apple](https://developer.apple.com/app-store/app-privacy-details/)
 - [ ] Возрастная анкета заполнена по текущему контенту. Милые животные сами по себе не означают Kids Category. Рейтинг определяет анкета Apple. [Возрастной рейтинг](https://developer.apple.com/help/app-store-connect/manage-app-information/set-an-app-age-rating/)
 - [ ] Выбран соответствующий обстоятельствам статус trader для ЕС; при необходимости предоставлены проверяемые контакты. [DSA](https://developer.apple.com/help/app-store-connect/manage-compliance-information/manage-european-union-digital-services-act-trader-requirements/)

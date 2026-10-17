@@ -2,7 +2,7 @@
 
 Проверено по документации Apple **17 октября 2026 года**. Контакт автора: **bortone52@yandex.ru**.
 
-Это инструкция для владельца проекта. Код и локальные проверки не заменяют регистрацию в Apple, подписанный архив, Sandbox/TestFlight и проверку App Review. Сейчас платного Apple Developer Account и опубликованного сайта ещё нет. Приложение никуда не загружалось, реальные платежи не выполнялись.
+Это инструкция для владельца проекта. Код и локальные проверки не заменяют регистрацию в Apple, подписанный архив, Sandbox/TestFlight и проверку App Review. Сайт уже опубликован через GitHub Pages; платного Apple Developer Account пока нет. Приложение никуда не загружалось, реальные платежи не выполнялись.
 
 Тексты для копирования в консоль, локализации покупок и финальный список полей владельца собраны отдельно: **[материалы App Store](AppStore/README.md)**. Для заполнения карточки используй этот пакет; здесь описан порядок выпуска.
 
@@ -38,24 +38,28 @@
 - Экспортное шифрование: в Info.plist отмечено отсутствие non-exempt encryption. В текущей версии нет собственного криптографического протокола или SDK; системная обработка StoreKit не требует добавления собственного шифрования.
 - У взрослого льва и львицы четыре ключевых кадра ходьбы и бега; на DI и блокировке используются два читаемых основных кадра. Обновлены соответствующие наряды, шрифты и бег в аркаде. Остальные питомцы сохранены.
 - `Configuration/PetIslandTips.storekit` и схема `PetIslandTips` предназначены для локальной отладки. Тестовая конфигурация не включается в релиз приложения.
-- Готовые страницы сайта RU/EN: `Docs/AppStoreSite/`. Они пока **не опубликованы**. Инструкции размещения и проверки — в [README сайта](AppStoreSite/README.md).
+- Сайт RU/EN [опубликован на GitHub Pages](https://bortongo.github.io/pet-island-support/). Исходники: `Docs/AppStoreSite/`; порядок обновления — в [README сайта](AppStoreSite/README.md).
 - Тексты карточки RU/EN, заметки для App Review и короткие локализации IAP: [Docs/AppStore/](AppStore/README.md). Это подготовленные материалы, а не запись в App Store Connect.
 
 Итоги выполненных проверок и ограничения смотри в [RELEASE-READINESS-2026-10-17.md](RELEASE-READINESS-2026-10-17.md).
 
-## 3. Опубликуй страницы поддержки и конфиденциальности
+## 3. Используй опубликованные страницы поддержки и конфиденциальности
 
-Домен покупать необязательно. Один из вариантов — отдельный публичный репозиторий GitHub Pages только для сайта:
+Сайт работает на [GitHub Pages](https://bortongo.github.io/pet-island-support/) из отдельного [репозитория BortonGo/pet-island-support](https://github.com/BortonGo/pet-island-support): `main`, `/ (root)`, Enforce HTTPS включён. Домен покупать необязательно.
 
-1. Создай у себя репозиторий `pet-island-support`.
-2. Положи в корень этого репозитория `index.html`, `privacy.html`, `style.css`, `assets/`, `en/` и `.nojekyll` из `Docs/AppStoreSite/`. Исходники приложения, README с инструкциями и промежуточные файлы туда не нужны.
-3. В Settings → Pages выбери публикацию из ветки `main`, папка `/ (root)`.
-4. Дождись адреса, который выдаст GitHub. Открой его в приватном окне и на iPhone: без авторизации должны работать главная, политика, email и переключение языка.
-5. В App Store Connect укажи главную страницу как **Support URL**, а `privacy.html` — как **Privacy Policy URL** для русского языка. Для английского используй `en/index.html` и `en/privacy.html` на том же опубликованном сайте. Не вставляй пример с чужим логином.
-6. Проверь, что описание на сайте соответствует сборке. При добавлении рекламы, аналитики или серверов политику и App Privacy нужно пересмотреть до выпуска.
-7. После появления рабочего HTTPS-адреса добавь ссылку политики в приложение рядом с офлайн-текстом. Сейчас публичного URL в приложении ещё нет; это отдельный шаг перед отправкой.
+| Поле | Русский | English (U.S.) |
+| --- | --- | --- |
+| Support URL | https://bortongo.github.io/pet-island-support/index.html#support | https://bortongo.github.io/pet-island-support/en/index.html#support |
+| Marketing URL (необязательно) | https://bortongo.github.io/pet-island-support/index.html | https://bortongo.github.io/pet-island-support/en/index.html |
+| Privacy Policy URL | https://bortongo.github.io/pet-island-support/privacy.html | https://bortongo.github.io/pet-island-support/en/privacy.html |
 
-Пошаговая настройка Pages: [документация GitHub](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site).
+Перед отправкой приложения:
+
+1. Внеси эти URL в App Store Connect для русского и английского языков.
+2. Добавь ссылку политики в приложение рядом с офлайн-текстом. Сейчас URL внутри приложения ещё нет; публикация сайта этого не меняет.
+3. Проверь страницы, картинки, email и переключение языка без авторизации на iPhone. Подтверди, что политика соответствует фактической обработке обращений поддержки и составу итоговой сборки.
+
+Для обновления скопируй из `Docs/AppStoreSite/` только `index.html`, `privacy.html`, `style.css`, `assets/`, `en/` и `.nojekyll` в корень репозитория сайта и отправь коммит в его `main`. Дождись успешного развёртывания Pages. Исходники приложения, инструкции и промежуточные файлы не публикуются. Подробности — в [README сайта](AppStoreSite/README.md). При добавлении рекламы, аналитики или серверов пересмотри политику и App Privacy до выпуска.
 
 Apple требует доступную политику и контакт поддержки. В приложении политика работает и без сети. [App Review Guidelines](https://developer.apple.com/app-store/review/guidelines/), [App Privacy](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-app-privacy)
 
@@ -184,7 +188,7 @@ PET_TEST_DESTINATION='platform=iOS Simulator,id=UUID_ТЕСТОВОГО_СИМУ
 
 - [ ] Apple Developer Program активна, выбран верный продавец и команда.
 - [ ] Apple подтвердила доступный платёжный путь и возможность выплат для твоего аккаунта.
-- [ ] Сайт поддержки и политика открываются публично по HTTPS.
+- [ ] Повторно проверены публичные HTTPS-страницы; ссылки внесены в App Store Connect и политика доступна по ссылке внутри приложения.
 - [ ] Договор, налоги, банк, три IAP и их локализации готовы.
 - [ ] Согласованы права на название, код, рисунки и другие ресурсы.
 - [ ] Проверена итоговая сборка, включая оплату в Sandbox/TestFlight и минимум iOS 17.
