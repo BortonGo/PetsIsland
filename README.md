@@ -13,6 +13,11 @@ The interface is available in English and Russian.
 > support pages, in-app purchases, signing, TestFlight and submission. Apple Developer
 > membership, public support URLs and Sandbox payment verification are still required.
 
+Copy-ready Russian and English store text, purchase metadata and current iPhone
+screenshots are in the [App Store materials](Docs/AppStore/README.md).
+The bilingual [support website](Docs/AppStoreSite/README.md) is prepared locally;
+its deployment guide explains publishing it separately from the app source.
+
 <p align="center">
   <img src="Docs/Media/dynamic-island-demo.gif" width="635" alt="A shepherd, parrot, and cat moving and resting in Dynamic Island">
 </p>

@@ -4,6 +4,8 @@
 
 Это инструкция для владельца проекта. Код и локальные проверки не заменяют регистрацию в Apple, подписанный архив, Sandbox/TestFlight и проверку App Review. Сейчас платного Apple Developer Account и опубликованного сайта ещё нет. Приложение никуда не загружалось, реальные платежи не выполнялись.
 
+Тексты для копирования в консоль, локализации покупок и финальный список полей владельца собраны отдельно: **[материалы App Store](AppStore/README.md)**. Для заполнения карточки используй этот пакет; здесь описан порядок выпуска.
+
 ## 1. Сначала реши вопрос регистрации из России
 
 Членство Apple Developer Program стоит **99 USD в год либо местный эквивалент**, окончательная сумма отображается у Apple. Для Individual нужны реальные ФИО, адрес, совершеннолетие и Apple Account с двухфакторной аутентификацией. Имя физического лица будет именем продавца в App Store. D‑U‑N‑S для Individual не нужен. [Регистрация Apple](https://developer.apple.com/help/account/membership/program-enrollment/)
@@ -36,7 +38,8 @@
 - Экспортное шифрование: в Info.plist отмечено отсутствие non-exempt encryption. В текущей версии нет собственного криптографического протокола или SDK; системная обработка StoreKit не требует добавления собственного шифрования.
 - У взрослого льва и львицы четыре ключевых кадра ходьбы и бега; на DI и блокировке используются два читаемых основных кадра. Обновлены соответствующие наряды, шрифты и бег в аркаде. Остальные питомцы сохранены.
 - `Configuration/PetIslandTips.storekit` и схема `PetIslandTips` предназначены для локальной отладки. Тестовая конфигурация не включается в релиз приложения.
-- Готовые страницы сайта: `Docs/AppStoreSite/`. Они пока **не опубликованы**.
+- Готовые страницы сайта RU/EN: `Docs/AppStoreSite/`. Они пока **не опубликованы**. Инструкции размещения и проверки — в [README сайта](AppStoreSite/README.md).
+- Тексты карточки RU/EN, заметки для App Review и короткие локализации IAP: [Docs/AppStore/](AppStore/README.md). Это подготовленные материалы, а не запись в App Store Connect.
 
 Итоги выполненных проверок и ограничения смотри в [RELEASE-READINESS-2026-10-17.md](RELEASE-READINESS-2026-10-17.md).
 
@@ -45,11 +48,12 @@
 Домен покупать необязательно. Один из вариантов — отдельный публичный репозиторий GitHub Pages только для сайта:
 
 1. Создай у себя репозиторий `pet-island-support`.
-2. Положи **содержимое** `Docs/AppStoreSite/` в корень этого репозитория. Исходники приложения и промежуточные файлы туда не нужны.
+2. Положи в корень этого репозитория `index.html`, `privacy.html`, `style.css`, `assets/`, `en/` и `.nojekyll` из `Docs/AppStoreSite/`. Исходники приложения, README с инструкциями и промежуточные файлы туда не нужны.
 3. В Settings → Pages выбери публикацию из ветки `main`, папка `/ (root)`.
 4. Дождись адреса, который выдаст GitHub. Открой его в приватном окне и на iPhone: без авторизации должны работать главная, политика, email и переключение языка.
-5. В App Store Connect укажи этот адрес как **Support URL**, а адрес `privacy.html` — как **Privacy Policy URL**. Не вставляй пример с чужим логином.
+5. В App Store Connect укажи главную страницу как **Support URL**, а `privacy.html` — как **Privacy Policy URL** для русского языка. Для английского используй `en/index.html` и `en/privacy.html` на том же опубликованном сайте. Не вставляй пример с чужим логином.
 6. Проверь, что описание на сайте соответствует сборке. При добавлении рекламы, аналитики или серверов политику и App Privacy нужно пересмотреть до выпуска.
+7. После появления рабочего HTTPS-адреса добавь ссылку политики в приложение рядом с офлайн-текстом. Сейчас публичного URL в приложении ещё нет; это отдельный шаг перед отправкой.
 
 Пошаговая настройка Pages: [документация GitHub](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site).
 
@@ -91,10 +95,12 @@ Apple требует доступную политику и контакт по�
 
 Цены в последнем столбце — **тестовые ориентиры**, они не настраивают App Store Connect. Реальные цены, регионы и доступность выбирает владелец в консоли. Приложение покажет локализованную цену Apple. Product ID в коде и консоли должны совпадать; при смене Bundle ID согласованно пересмотри эти ID до первой публикации.
 
-Описание для всех товаров:
+Короткое описание для поля Description всех товаров (лимит — 45 символов):
 
-- RU: «Добровольная разовая поддержка автора. Без подписки, монет и дополнительных функций.»
-- EN: “An optional one-time tip to the author. No subscription, coins or additional features.”
+- RU: «Разовая поддержка автора. Без подписки.»
+- EN: “A one-time tip. No subscription.”
+
+Готовые поля каждого товара: [products.json](AppStore/metadata/iap/products.json); примечание для ревью: [iap/review-notes.en.txt](AppStore/metadata/iap/review-notes.en.txt). Это данные для ручного заполнения, не автоматический импорт. Display Name ограничено 30 символами; подробное объяснение отсутствия игровых преимуществ находится в приложении и заметках для ревью. [Ограничения полей IAP](https://developer.apple.com/help/app-store-connect/reference/in-app-purchases-and-subscriptions/in-app-purchase-information/)
 
 Добавь локализации, цену, доступность, screenshot экрана поддержки для ревью и примечание о добровольном платеже. Consumable можно покупать повторно; постоянного контента и восстановления таких платежей нет. Не выбирай Non-Consumable или Subscription. [Создание IAP](https://developer.apple.com/help/app-store-connect/manage-in-app-purchases/create-consumable-or-non-consumable-in-app-purchases/)
 
@@ -104,39 +110,13 @@ Apple требует доступную политику и контакт по�
 
 ## 6. Заполни карточку приложения
 
-Предлагаемый текст, который можно отредактировать:
+Готовые файлы для каждого поля находятся в [AppStore/metadata/ru](AppStore/metadata/ru/) и [AppStore/metadata/en-US](AppStore/metadata/en-US/). В [README пакета](AppStore/README.md) указаны соответствия полей и проверенные лимиты Apple. Копируй содержимое `.txt` без имени файла и служебных пометок. Keywords подготовлены в пределах 100 **байт UTF-8**, а не только 100 символов.
 
-- **Название:** Pet Island
-- **Подзаголовок RU:** Питомцы всегда рядом
-- **Подзаголовок EN:** Little companions, always near
+- **Название:** Pet Island; доступность в консоли и права на название подтверждает владелец.
 - **Категория:** Games; подкатегории выбирай по фактическому содержанию, например Casual / Simulation.
-- **Keywords RU:** питомцы,кот,собака,остров,вольер,прогулки,аркада,виджет
-- **Keywords EN:** pets,cat,dog,island,companion,enclosure,walks,arcade,widget
-
-Описание RU:
-
-> Небольшой остров для ваших питомцев. Выберите характерного зверька, обустройте его дом и проводите время вместе.
->
-> — Поселите соседей в вольере, подберите обстановку и наблюдайте за их занятиями.
-> — Отправляйтесь на прогулки, находите маленькие сокровища и собирайте открытки.
-> — Играйте в четыре аркады и тратьте заработанные монеты на уход и украшения.
-> — Подберите питомцу окрас и аксессуар.
-> — Возьмите друга на экран блокировки и в Dynamic Island на совместимом iPhone.
-> — Добавьте виджет вольера на экран «Домой».
->
-> Без регистрации, рекламы и отслеживания. Прогресс хранится на устройстве; копию острова можно экспортировать самостоятельно. Поддержка автора полностью добровольна и не открывает игровые преимущества.
->
-> Dynamic Island доступен только на поддерживаемых моделях. iOS управляет частотой обновления виджетов и Live Activities; на Always-On Display питомец отдыхает.
-
-Описание EN:
-
-> A little island for your companions. Choose a pet, decorate its home and spend time together.
->
-> Build a cozy enclosure, watch your pets meet, collect discoveries and postcards on walks, and play four arcade games. Earn coins for care and decorations, choose colors and accessories, and take a companion onto your Lock Screen or Dynamic Island on a supported iPhone. A Home Screen widget keeps the enclosure close.
->
-> No sign-up, advertising or tracking. Progress stays on your device, with optional manual island backups. Supporting the author is entirely optional and provides no game advantage.
->
-> Dynamic Island requires a supported iPhone. iOS controls widget and Live Activity refresh timing; pets rest on Always-On Display.
+- **Локализации:** Russian и English (U.S.). Основной язык карточки выбери при создании записи.
+- **Promotional Text:** отдельные RU/EN-файлы описывают уже существующие возможности без обещаний будущих функций.
+- **What's New:** для первой версии это поле не требуется; текст появится при обновлении.
 
 Дополнительно:
 
@@ -148,9 +128,9 @@ Apple требует доступную политику и контакт по�
 
 ## 7. Скриншоты
 
-Сделай реальные снимки финальной сборки, желательно в RU и EN: остров, список питомцев/карточка, прогулка с открыткой, аркада и наряд. Покажи настоящий интерфейс и не обещай непрерывную анимацию в DI.
+Финальные материалы витрины хранятся в [AppStore/Screenshots/ru](AppStore/Screenshots/ru/) и [AppStore/Screenshots/en](AppStore/Screenshots/en/). Используй реальный интерфейс: остров, питомцы, прогулки/находки и аркада. Перед отправкой проверь совпадение снимков с выбранной сборкой. Не обещай непрерывную анимацию в DI.
 
-Для основного iPhone-набора используй поддерживаемый 6.9″ симулятор/устройство и нативный размер снимков, например **1320 × 2868**. Не растягивай снимки с iPhone SE. Apple принимает 1–10 изображений без alpha; актуальные размеры проверь перед загрузкой. [Спецификации](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/)
+По актуальным требованиям Apple обязательный слот — **iPhone with Dynamic Island (medium display)**. Для него подготовлены нативные **1206 × 2622** в `AppStore/Screenshots/medium/{ru,en}`. Дополнительно есть большой набор **1320 × 2868** в `AppStore/Screenshots/{ru,en}` для large display. Не растягивай один набор в другой. Apple принимает 1–10 изображений без alpha на размер и локализацию; актуальные слоты проверь перед загрузкой. [Спецификации](https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications/)
 
 Снимки проверок в `outputs/` — диагностические материалы, не автоматически готовая витрина App Store. Экранов iPad не требуется, пока target остаётся iPhone-only.
 
@@ -198,9 +178,7 @@ PET_TEST_DESTINATION='platform=iOS Simulator,id=UUID_ТЕСТОВОГО_СИМУ
 8. Add for Review → проверь состав отправки → Submit for Review. При замечаниях Apple исправь причину; если менялся бинарник, загрузи следующий Build. [Отправка приложения](https://developer.apple.com/help/app-store-connect/manage-submissions-to-app-review/submit-an-app/)
 9. После одобрения ещё раз проверь тексты, регионы, цены и сайт, затем нажми выпуск вручную. Следи за crash reports и письмами поддержки. Одобрение App Review заранее гарантировать нельзя.
 
-Текст Review Notes (EN):
-
-> No sign-in is required. Pet Island stores pet and game progress locally and does not include ads or tracking SDKs. The optional tip screen is under Settings → Support the author. All three products are consumable, one-time tips with no currency, feature or entitlement granted. The app remains fully usable without a tip. The Help and privacy screen includes the support contact and an offline privacy policy. Dynamic Island requires a supported iPhone; the enclosure, arcade and Lock Screen Live Activity do not require it. To start a Live Activity, select a pet and use the take-along action. iOS controls background refresh and Always-On behavior.
+Текст Review Notes (EN) для копирования: [AppStore/metadata/review-notes.en.txt](AppStore/metadata/review-notes.en.txt). Перед отправкой повтори указанные шаги в выбранной TestFlight-сборке.
 
 ## Финальные условия выпуска
 

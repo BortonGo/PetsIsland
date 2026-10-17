@@ -1,0 +1,1 @@
+cat,dog,corgi,fox,cozy,virtual,companion,walks,postcards,arcade,widget

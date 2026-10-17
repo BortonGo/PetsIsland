@@ -1,0 +1,49 @@
+{
+  "products": [
+    {
+      "productID": "org.bortongo.PetIsland.tip.small",
+      "referenceName": "Author support small",
+      "type": "Consumable",
+      "localizations": {
+        "ru": {
+          "displayName": "Маленькое спасибо",
+          "description": "Разовая поддержка автора. Без подписки."
+        },
+        "en-US": {
+          "displayName": "A little thank-you",
+          "description": "A one-time tip. No subscription."
+        }
+      }
+    },
+    {
+      "productID": "org.bortongo.PetIsland.tip.medium",
+      "referenceName": "Author support medium",
+      "type": "Consumable",
+      "localizations": {
+        "ru": {
+          "displayName": "Тёплое спасибо",
+          "description": "Разовая поддержка автора. Без подписки."
+        },
+        "en-US": {
+          "displayName": "A warm thank-you",
+          "description": "A one-time tip. No subscription."
+        }
+      }
+    },
+    {
+      "productID": "org.bortongo.PetIsland.tip.large",
+      "referenceName": "Author support large",
+      "type": "Consumable",
+      "localizations": {
+        "ru": {
+          "displayName": "Большое спасибо",
+          "description": "Разовая поддержка автора. Без подписки."
+        },
+        "en-US": {
+          "displayName": "A big thank-you",
+          "description": "A one-time tip. No subscription."
+        }
+      }
+    }
+  ]
+}

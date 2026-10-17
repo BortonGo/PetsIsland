@@ -1,0 +1,215 @@
+{
+  "captured": "2026-10-17",
+  "appCommit": "c9f6149",
+  "appVersion": "1.0 (1)",
+  "devices": [
+    "iPhone 17 Pro Max",
+    "iPhone 17 Pro"
+  ],
+  "runtime": "iOS 26.5",
+  "capture": "xcrun simctl io screenshot",
+  "source": "Current app Debug build; existing simulator-only in-memory UI fixtures; no app/pet/resource changes",
+  "encoding": "Opaque alpha channel removed losslessly; native dimensions and all RGB pixels preserved",
+  "files": [
+    {
+      "path": "en/01-island.png",
+      "device": "iPhone 17 Pro Max",
+      "width": 1320,
+      "height": 2868,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "bd9d4f01bf94f9438c3137e008fef184a08043dd99681e5bb74ff6c08da14df5",
+      "rgbPixelsSHA256": "256e6ba4dada30d9bfff220bd1d3017220d4f3091dec36224c618a09a13f7d37"
+    },
+    {
+      "path": "en/02-pet.png",
+      "device": "iPhone 17 Pro Max",
+      "width": 1320,
+      "height": 2868,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "4dd9a64b6f99574d028485a830b34a62b0bcb8e11d0f05599e32659b4b05aa32",
+      "rgbPixelsSHA256": "65dd9fd833616d02b9071d7d7e106e3d629b1566075ffe7c66e9d956f1ba353f"
+    },
+    {
+      "path": "en/03-walk.png",
+      "device": "iPhone 17 Pro Max",
+      "width": 1320,
+      "height": 2868,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "5ea1780b8eb91ec77d471e867e7080665266012f1cd26445d51671dc1c9772d0",
+      "rgbPixelsSHA256": "5e51a38d2b3de25e1b5c45a33d2cac98f9605bd290a41bfeba3e2be7f381f5a7"
+    },
+    {
+      "path": "en/04-wardrobe.png",
+      "device": "iPhone 17 Pro Max",
+      "width": 1320,
+      "height": 2868,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "382ca387c0233466e85b37055b739c67b6d3fedda4f4a958c1929e6f67a9cbad",
+      "rgbPixelsSHA256": "843da487fa0c61bd44fcd8be2f540c5a7c40679bf15841c79391dc5bfd31e7ee"
+    },
+    {
+      "path": "en/05-arcade.png",
+      "device": "iPhone 17 Pro Max",
+      "width": 1320,
+      "height": 2868,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "c80065d6157b36073e06b50f2b51a36927416ed12ff3ffa12c414ac8e06ea02c",
+      "rgbPixelsSHA256": "9a9d1e5e1986501cbe6fb5a678a3b2edf48cba49b7e5b4ecced7aa30d4a48902"
+    },
+    {
+      "path": "medium/en/01-island.png",
+      "device": "iPhone 17 Pro",
+      "width": 1206,
+      "height": 2622,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "ff707994960195d10028a768ee732ee99360417a45cb459f643d290177bf1245",
+      "rgbPixelsSHA256": "ff23868b7d484347765fec1c4a8ce79b58bc890578a024127f11154c5f8f5361"
+    },
+    {
+      "path": "medium/en/02-pet.png",
+      "device": "iPhone 17 Pro",
+      "width": 1206,
+      "height": 2622,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "836d67077258ddcfc49dbaec33afd9f3d67a932c5b55f4aa67882601c80df623",
+      "rgbPixelsSHA256": "2fb231db8c2d220e2946a64a6daa89e6b97ef9cba4118d12770909eb52b04127"
+    },
+    {
+      "path": "medium/en/03-walk.png",
+      "device": "iPhone 17 Pro",
+      "width": 1206,
+      "height": 2622,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "72f656a7d4865297fc747c6c33374fd437086ce38b58fb3e98495cc00f072e61",
+      "rgbPixelsSHA256": "519ab8100680b53f2a76b8c2f418c70e5a1792402a3b31706ced8888baed2410"
+    },
+    {
+      "path": "medium/en/04-wardrobe.png",
+      "device": "iPhone 17 Pro",
+      "width": 1206,
+      "height": 2622,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "3911427c38048d117f91d921fd11cd9a08d6266c05d01ecb7e2b3f019c68ce44",
+      "rgbPixelsSHA256": "ef89bd9c5e539f07b9177b1c18d018012767e1b461ea27c841a18704917df95d"
+    },
+    {
+      "path": "medium/en/05-arcade.png",
+      "device": "iPhone 17 Pro",
+      "width": 1206,
+      "height": 2622,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "1a772712f600209e62783e5274d54e65541379337992f1b8a55f7dd8ee643bf9",
+      "rgbPixelsSHA256": "9b6577d7051327297130965f45b93c93638c70ad1f6f47c8104c2dcfe1c0c4e8"
+    },
+    {
+      "path": "medium/ru/01-island.png",
+      "device": "iPhone 17 Pro",
+      "width": 1206,
+      "height": 2622,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "132510998451cc0fae2d7cfd0b2c7618504ebbe330a16edbbdf3d9a024df760a",
+      "rgbPixelsSHA256": "b289abf988a00a665d04d2816bc740f96c4af4568460c667dc6b37feb6e86d62"
+    },
+    {
+      "path": "medium/ru/02-pet.png",
+      "device": "iPhone 17 Pro",
+      "width": 1206,
+      "height": 2622,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "3a5a8c41d3c381375ee72f4a9cf5935dce7dce56a0b93d11e5a9e442dd19ee6f",
+      "rgbPixelsSHA256": "01abc9dec65298f44c0e51660e2fb7b5386764148f09497197a80cf98491d590"
+    },
+    {
+      "path": "medium/ru/03-walk.png",
+      "device": "iPhone 17 Pro",
+      "width": 1206,
+      "height": 2622,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "9c730e24d46425452182d3d5aa50944337388b0226a9a98ba946364b90a60275",
+      "rgbPixelsSHA256": "4bd30a8e02bd69f07eecc3a2faa1b30387e4013852a6ff2ce591e468e81b8c92"
+    },
+    {
+      "path": "medium/ru/04-wardrobe.png",
+      "device": "iPhone 17 Pro",
+      "width": 1206,
+      "height": 2622,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "e4d24edebb366720dd3e94d55767f69c87a1b3448aed79fdd7e7c1da8e6d9c53",
+      "rgbPixelsSHA256": "b444294e9e199ab2b78ec02871d5ff080c992f42e1a9564b164b292526225ab0"
+    },
+    {
+      "path": "medium/ru/05-arcade.png",
+      "device": "iPhone 17 Pro",
+      "width": 1206,
+      "height": 2622,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "e7c845bb2af52dabda368c8830d94f911c0462ceba6faf68263e55f5bbc4ae8e",
+      "rgbPixelsSHA256": "29a0f4dfc12a793106b755e678d9a72d75d7355d0f261e18c24f27ae39f91a93"
+    },
+    {
+      "path": "ru/01-island.png",
+      "device": "iPhone 17 Pro Max",
+      "width": 1320,
+      "height": 2868,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "5ab45138ba7d1ca3135c703f424ae62e7e146095deaa181c8407eaa26bf0ee36",
+      "rgbPixelsSHA256": "ca862b4654d2e07f4dd04f89659d9f55852b17fdcb74172229153a4c14fed265"
+    },
+    {
+      "path": "ru/02-pet.png",
+      "device": "iPhone 17 Pro Max",
+      "width": 1320,
+      "height": 2868,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "e29e3fb4e9582d6173f1111c4aa99c93c4cb1dbb38cd32ed1e05f6402e95b0b2",
+      "rgbPixelsSHA256": "2362d5d50b1b7a099d7055c660994a7ceb745328ba042870e15cbf8f639dfaf9"
+    },
+    {
+      "path": "ru/03-walk.png",
+      "device": "iPhone 17 Pro Max",
+      "width": 1320,
+      "height": 2868,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "31f0e809203910c131a801d20aeacc83cdf178e37c49343aaa7c804e153e3e9d",
+      "rgbPixelsSHA256": "1f820160f0c4e5a4fa79727489ac4368b147405e020dcfd6ea8aee6b5c562eae"
+    },
+    {
+      "path": "ru/04-wardrobe.png",
+      "device": "iPhone 17 Pro Max",
+      "width": 1320,
+      "height": 2868,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "5841c47d4243348e0a825e7a5ae12215a14991776a932d18ae5bb5838c8321ea",
+      "rgbPixelsSHA256": "54e7eacd4a91c9b634e6338f31016576c361175c20be48798d36dea75bb2fca2"
+    },
+    {
+      "path": "ru/05-arcade.png",
+      "device": "iPhone 17 Pro Max",
+      "width": 1320,
+      "height": 2868,
+      "mode": "RGB",
+      "alpha": false,
+      "sha256": "2aa3eef63209361ee8213337e5f30b2ada630722c4d6f1a9897681c4f2cf3815",
+      "rgbPixelsSHA256": "544b9829265907bf4b72670d6c2f3815876f76e9b7d45f609d1e46029748370d"
+    }
+  ]
+}

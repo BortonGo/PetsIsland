@@ -1,0 +1,14 @@
+No account or sign-in is required. Pet Island is an iPhone app with Russian and English localizations. Gameplay and island progress are stored locally. There are no ads, tracking SDKs or developer-operated gameplay servers. Island backups are exported and imported manually by the user.
+
+To review the main features, add or choose a pet on the Pets tab, visit Island for the enclosure, and open Arcade for the four games and the shop. Shop items use coins earned through gameplay, not purchased currency. The compass button on Island opens walks and their discoveries.
+
+Optional In-App Purchases are under Settings > Support the author. All three products are consumable, one-time tips:
+org.bortongo.PetIsland.tip.small
+org.bortongo.PetIsland.tip.medium
+org.bortongo.PetIsland.tip.large
+
+Tips do not grant currency, pets, features or a permanent entitlement. There are no subscriptions. Each tip can be purchased again after its transaction is completed. The app remains usable without a tip. Completed tips have no restorable content; unfinished verified transactions are handled on a later launch.
+
+Settings > Help and privacy includes the support email and an offline privacy policy. Settings > App language opens the system settings for this app's language.
+
+To start a Lock Screen Live Activity, select an available pet and tap Take with you on the Island tab. Pets currently away on an exploration must return first. Dynamic Island requires a supported iPhone; the enclosure, arcade and Lock Screen activity do not require Dynamic Island. iOS controls Live Activity duration and refresh timing. On Always-On Display, the pet rests instead of continuously animating.

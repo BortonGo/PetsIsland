@@ -114,21 +114,25 @@ def check_sources():
 
     site = ROOT / "Docs/AppStoreSite"
     pages = {}
-    for page in site.glob("*.html"):
+    for page in site.rglob("*.html"):
         text = page.read_text()
         require(EMAIL in text and 'name="viewport"' in text, f"Incomplete support page: {page.name}")
         require(not re.search(r"TODO|YOUR_EMAIL|example\.com", text), f"Placeholder in {page.name}")
         parser = Links()
         parser.feed(text)
-        pages[page.name] = parser
+        pages[page.relative_to(site).as_posix()] = parser
+    require(set(pages) == {"index.html", "privacy.html", "en/index.html", "en/privacy.html"},
+            "Support and privacy pages must be available in Russian and English")
     for name, parser in pages.items():
         for link in parser.links:
             url = urlsplit(link)
             if url.scheme:
                 require(url.scheme in ("https", "mailto"), f"Unsafe support link: {link}")
                 continue
-            target = url.path or name
-            require((site / target).is_file(), f"Broken support link: {link}")
+            destination = ((site / name).parent / url.path).resolve() if url.path else (site / name).resolve()
+            require(destination.is_relative_to(site.resolve()), f"Support link leaves site: {link}")
+            target = destination.relative_to(site.resolve()).as_posix()
+            require(destination.is_file(), f"Broken support link in {name}: {link}")
             if url.fragment:
                 require(target in pages and url.fragment in pages[target].ids, f"Broken anchor: {link}")
     print(f"Release metadata passed: 3 tips, {len(strings['strings'])} bilingual strings, {len(icons)} icon sets, support pages.")
@@ -156,10 +160,51 @@ def check_app(app):
     print(f"Release bundle passed: {app.name}, matching app/extension versions and privacy manifests; no test purchases bundled.")
 
 
+def check_store_materials():
+    """Validate the copy/upload files separately from the app's runtime assets."""
+    package = ROOT / "Docs/AppStore"
+    limits = {"name": 30, "subtitle": 30, "promotional-text": 170, "description": 4000}
+    for language in ("ru", "en-US"):
+        directory = package / "metadata" / language
+        for field, limit in limits.items():
+            value = (directory / f"{field}.txt").read_text().strip()
+            require(0 < len(value) <= limit, f"{language} {field}: exceeds {limit} characters or empty")
+        keywords = (directory / "keywords.txt").read_text().strip()
+        require(0 < len(keywords.encode("utf-8")) <= 100, f"{language} keywords: exceeds 100 bytes or empty")
+
+    products = json.loads((package / "metadata/iap/products.json").read_text())["products"]
+    require(len(products) == 3 and {product["productID"] for product in products} == PRODUCTS,
+            "App Store tip IDs must match the application")
+    for product in products:
+        require(product["type"] == "Consumable", "App Store tips must be consumable")
+        require(set(product["localizations"]) == {"ru", "en-US"}, "Missing App Store tip localization")
+        for language, fields in product["localizations"].items():
+            for field, limit in (("displayName", 30), ("description", 45)):
+                require(0 < len(fields[field]) <= limit, f"{language} IAP {field}: invalid length")
+
+    screenshot_count = 0
+    # Apple currently requires the medium Dynamic Island slot. Large screenshots
+    # are an additional set; neither is resized from the other.
+    for folder, size in (("", (1320, 2868)), ("medium", (1206, 2622))):
+        sets = []
+        for language in ("ru", "en"):
+            screenshots = sorted((package / "Screenshots" / folder / language).glob("*.png"))
+            require(1 <= len(screenshots) <= 10, f"{folder}/{language}: App Store needs 1–10 screenshots")
+            for path in screenshots:
+                with Image.open(path) as image:
+                    require(image.format == "PNG" and image.mode == "RGB", f"Screenshot must be opaque RGB PNG: {path}")
+                    require(image.size == size, f"Expected native {size} screenshot: {path}")
+            sets.append([path.name for path in screenshots])
+            screenshot_count += len(screenshots)
+        require(sets[0] == sets[1], f"Russian and English screenshot sets differ: {folder or 'large'}")
+    print(f"App Store materials passed: 2 localizations, 3 tips, {screenshot_count} screenshots in 2 display sizes.")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--app", type=Path, help="Optional built Release .app")
     args = parser.parse_args()
     check_sources()
+    check_store_materials()
     if args.app:
         check_app(args.app)
