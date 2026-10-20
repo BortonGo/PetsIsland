@@ -1389,10 +1389,14 @@ final class HabitatMotionSimulation: ObservableObject {
                 y: groundRange.lowerBound + actor.random() * (groundRange.upperBound - groundRange.lowerBound)
             ), profile: actor.profile)
             if furnitureBlocks(candidate) { continue }
-            let clearance = neighbours.map { other in
+            let clearance = neighbours.map { other -> CGFloat in
                 let occupied = other.travelling ? other.target : other.position
-                return hypot((candidate.x - occupied.x) / ((artworkWidth(for: actor) + artworkWidth(for: other)) * 0.4),
-                             (candidate.y - occupied.y) / (petWidth * 0.34))
+                let combinedWidth: CGFloat = artworkWidth(for: actor) + artworkWidth(for: other)
+                let horizontalSpacing: CGFloat = combinedWidth * 0.4
+                let verticalSpacing: CGFloat = petWidth * 0.34
+                let dx: CGFloat = (candidate.x - occupied.x) / horizontalSpacing
+                let dy: CGFloat = (candidate.y - occupied.y) / verticalSpacing
+                return hypot(dx, dy)
             }.min() ?? 2
             let travel = hypot(candidate.x - actor.position.x, candidate.y - actor.position.y)
             let score = min(clearance, 2) + min(travel / (petWidth * 1.5), 1) * 0.6
