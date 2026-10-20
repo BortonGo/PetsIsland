@@ -563,6 +563,16 @@ then runs the simulator tests, a Release build, and static analysis. Reports go
 to `outputs/qa/`. Set `PET_TEST_DESTINATION` to select a particular simulator,
 `PET_PYTHON` to choose a Python interpreter, or `PET_REPORT_DIR` to choose a new
 report directory. Pillow and fontTools are development-only dependencies.
+The default simulator matches the selected Xcode SDK's iOS major version.
+Build and test output is streamed to the console and saved in the reports.
+You can run individual phases with `bash Tools/check_project.sh resources`,
+`unit`, `ui`, or `release`. UI tests can be divided into disjoint groups with
+`PET_UI_SHARD=1/6 bash Tools/check_project.sh ui` (indices 1 through 6).
+GitHub Actions runs resources/release, unit tests, and all six UI groups as
+independent jobs. Every UI test belongs to exactly one group; failures in one
+group do not cancel the others. Test timeouts bound a stuck case, and a newer
+push cancels the previous workflow for that branch. Logs and Xcode results are
+uploaded separately for each job, including failed jobs.
 Local StoreKit tests are included by default, using the `PetIslandTips` scheme.
 They exercise the application's purchase path, repeated consumable tips and
 transaction recovery. Controller and UI tests also cover cancellation, errors,
