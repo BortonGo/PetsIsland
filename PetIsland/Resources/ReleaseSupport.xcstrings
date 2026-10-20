@@ -590,19 +590,36 @@
         }
       }
     },
-    "Choose a language for Pet Island": {
+    "Current language": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Choose a language for Pet Island"
+            "value": "Current language"
           }
         },
         "ru": {
           "stringUnit": {
             "state": "translated",
-            "value": "Выберите язык Pet Island"
+            "value": "Текущий язык"
+          }
+        }
+      }
+    },
+    "In Settings, tap Language and choose English or Russian. Then reopen Pet Island.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In Settings, tap Language and choose English or Russian. Then reopen Pet Island."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "В настройках нажмите «Язык» и выберите English или «Русский». Затем откройте Pet Island снова."
           }
         }
       }
@@ -654,6 +671,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Откройте настройки iPhone, найдите Pet Island и нажмите «Язык»."
+          }
+        }
+      }
+    },
+    "If Settings opens on its main screen, go to Apps → Pet Island → Language.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "If Settings opens on its main screen, go to Apps → Pet Island → Language."
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Если открылся общий экран настроек, перейдите в «Приложения» → Pet Island → «Язык»."
           }
         }
       }

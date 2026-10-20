@@ -308,6 +308,85 @@ final class PetProfileUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Готово"].isHittable)
     }
 
+    func testAppLanguageSwitchesThroughIOSSettings() {
+        // Launch arguments must not override the system preference under test.
+        app.launchArguments = ["-settings-clarity-preview"]
+        app.launch()
+        XCTAssertTrue(app.buttons["settings.appearance.system"].waitForExistence(timeout: 10))
+        let row = app.buttons["settings.language"]
+        reveal(row)
+        let originallyRussian = row.label.contains("Русский")
+        let settings = XCUIApplication(bundleIdentifier: "com.apple.Preferences")
+
+        // Exercise both transitions, then leave the simulator in its original language.
+        for russian in [!originallyRussian, originallyRussian] {
+            reveal(row)
+            row.tap()
+            let open = app.buttons["language.openSettings"]
+            XCTAssertTrue(open.waitForExistence(timeout: 5))
+            open.tap()
+            XCTAssertTrue(settings.wait(for: .runningForeground, timeout: 10))
+            revealSystemLanguage(settings)
+            settings.buttons["PREFERRED_LANGUAGE"].tap()
+            let choice = settings.staticTexts[russian ? "Русский" : "English"].firstMatch
+            XCTAssertTrue(choice.waitForExistence(timeout: 10), settings.debugDescription)
+            choice.tap()
+            let native = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+            native.name = "Language — native choice \(russian ? "ru" : "en")"
+            native.lifetime = .keepAlways
+            add(native)
+
+            app.launch()
+            let system = app.buttons["settings.appearance.system"]
+            XCTAssertTrue(system.waitForExistence(timeout: 10))
+            XCTAssertEqual(system.label, russian ? "Системная" : "System")
+            reveal(row)
+            XCTAssertTrue(row.label.contains(russian ? "Язык приложения" : "App language"))
+            XCTAssertTrue(row.label.contains(russian ? "Русский" : "English"))
+            row.tap()
+            XCTAssertTrue(open.waitForExistence(timeout: 5))
+            XCTAssertEqual(open.label, russian ? "Выбрать язык в настройках iOS" : "Choose language in iOS Settings")
+            capture(russian ? "Language — switched to Russian in Settings" : "Language — switched to English in Settings")
+            app.buttons[russian ? "Готово" : "Done"].tap()
+            app.tabBars.buttons[russian ? "Питомцы" : "Pets"].tap()
+            let pixel = app.buttons["pet.profile.CE000000-0000-0000-0000-000000000001"]
+            XCTAssertTrue(pixel.waitForExistence(timeout: 5))
+            XCTAssertEqual(pixel.label, "Pixel")
+            XCTAssertEqual(app.buttons["pet.profile.CE000000-0000-0000-0000-000000000002"].label, "Luna")
+            app.tabBars.buttons[russian ? "Настройки" : "Settings"].tap()
+        }
+    }
+
+    private func revealSystemLanguage(_ settings: XCUIApplication) {
+        let language = settings.buttons["PREFERRED_LANGUAGE"]
+        if language.waitForExistence(timeout: 5) { return }
+        // Some Simulator runtimes open Settings without following the app deep link.
+        // Follow the same public Apps → Pet Island route described in the help.
+        let closeSearch = settings.buttons.matching(NSPredicate(format: "label == %@ OR label == %@", "закрыть", "Close")).firstMatch
+        if closeSearch.exists && closeSearch.isHittable { closeSearch.tap() }
+        for _ in 0..<4 {
+            if language.exists { return }
+            let back = settings.navigationBars.buttons["BackButton"]
+            if !back.exists { break }
+            back.tap()
+        }
+        let apps = settings.buttons.matching(NSPredicate(format: "label == %@ OR label == %@", "Приложения", "Apps")).firstMatch
+        for _ in 0..<8 {
+            if apps.exists && apps.isHittable { break }
+            settings.swipeUp()
+        }
+        XCTAssertTrue(apps.isHittable, settings.debugDescription)
+        apps.tap()
+        let entry = settings.staticTexts["Pet Island"].firstMatch
+        for _ in 0..<8 {
+            if entry.exists && entry.isHittable { break }
+            settings.swipeUp()
+        }
+        XCTAssertTrue(entry.isHittable, settings.debugDescription)
+        entry.tap()
+        XCTAssertTrue(language.waitForExistence(timeout: 10), settings.debugDescription)
+    }
+
     func testAppLanguageOpensInEnglishAndRussianWithoutChangingPets() {
         for russian in [false, true] {
             launchSettings(russian ? "-settings-russian" : "")
@@ -318,11 +397,25 @@ final class PetProfileUITests: XCTestCase {
             let open = app.buttons["language.openSettings"]
             XCTAssertTrue(open.waitForExistence(timeout: 5))
             XCTAssertEqual(open.label, russian ? "Выбрать язык в настройках iOS" : "Choose language in iOS Settings")
-            XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "language.option.en").firstMatch.exists)
-            XCTAssertTrue(app.descendants(matching: .any).matching(identifier: "language.option.ru").firstMatch.exists)
+            let current = app.descendants(matching: .any).matching(identifier: "language.current").firstMatch
+            XCTAssertTrue(current.exists)
+            XCTAssertTrue(current.label.contains(russian ? "Русский" : "English"))
+            XCTAssertFalse(app.descendants(matching: .any).matching(identifier: "language.option.en").firstMatch.exists)
+            XCTAssertFalse(app.descendants(matching: .any).matching(identifier: "language.option.ru").firstMatch.exists)
+            let instructions = russian
+                ? "В настройках нажмите «Язык» и выберите English или «Русский». Затем откройте Pet Island снова."
+                : "In Settings, tap Language and choose English or Russian. Then reopen Pet Island."
+            XCTAssertTrue(app.staticTexts[instructions].exists)
             capture(russian ? "Language — Russian" : "Language — English")
             app.buttons[russian ? "Готово" : "Done"].tap()
             XCTAssertTrue(row.waitForExistence(timeout: 5))
+            XCTAssertTrue(row.label.contains(russian ? "Русский" : "English"))
+            app.tabBars.buttons[russian ? "Питомцы" : "Pets"].tap()
+            let pixel = app.buttons["pet.profile.CE000000-0000-0000-0000-000000000001"]
+            XCTAssertTrue(pixel.waitForExistence(timeout: 5))
+            XCTAssertEqual(pixel.label, "Pixel")
+            XCTAssertEqual(app.buttons["pet.profile.CE000000-0000-0000-0000-000000000002"].label, "Luna")
+            XCTAssertEqual(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'pet.profile.'")).count, 2)
             app.terminate()
         }
     }
@@ -332,6 +425,9 @@ final class PetProfileUITests: XCTestCase {
         let row = app.buttons["settings.language"]
         reveal(row)
         row.tap()
+        let current = app.descendants(matching: .any).matching(identifier: "language.current").firstMatch
+        XCTAssertTrue(current.waitForExistence(timeout: 5))
+        XCTAssertTrue(current.label.contains("Русский"))
         let open = app.buttons["language.openSettings"]
         reveal(open, fullyVisible: true)
         XCTAssertTrue(open.isHittable)
