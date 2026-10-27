@@ -628,7 +628,7 @@ struct SettingsView: View {
                     .petSurface()
                     VStack(spacing: 14) {
                         LabeledContent("Privacy", value: String(localized: "No account · No tracking"))
-                        LabeledContent("License", value: "MIT Open Source")
+                        LabeledContent("License", value: String(localized: "All rights reserved", table: "ReleaseSupport"))
                         LabeledContent("Version", value: "\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "–") (\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "–"))")
                     }
                     .font(.caption)

@@ -5745,17 +5745,6 @@
         }
       }
     },
-    "MIT Open Source" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Открытый код · MIT"
-          }
-        }
-      }
-    },
     "Moon nap" : {
       "extractionState" : "stale",
       "localizations" : {

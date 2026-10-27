@@ -639,4 +639,22 @@ guide linked above for the exact steps and limits of local checks.
 
 ## License
 
-The project's source code is licensed under the [MIT License](LICENSE).
+Copyright © 2026 **Alexey Gostyunin (BortonGo)**. All rights reserved.
+
+Pet Island uses a [proprietary license](LICENSE). The original project materials
+may be studied, built and modified for private, personal, non-commercial testing.
+Commercial use, monetization, redistribution and publishing a derived app
+(including a free App Store release) require the owner's prior written permission.
+For permission, contact [bortone52@yandex.ru](mailto:bortone52@yandex.ru).
+Publishing this repository does not transfer ownership or make it open source.
+
+**По-русски:** Pet Island — личный проект Алексея Гостюнина (BortonGo).
+Разрешены личное некоммерческое изучение, сборка и тестирование. Коммерческое
+использование, монетизация, распространение и публикация приложения на его основе
+допускаются только с предварительного письменного разрешения владельца.
+Полные условия приведены в [LICENSE](LICENSE).
+
+The change does not revoke permissions already granted for previously published
+MIT-licensed material. GitHub's terms still allow viewing and forking a public
+repository through GitHub. Official app releases have their own applicable
+end-user and store terms.

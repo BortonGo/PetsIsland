@@ -1,6 +1,13 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "All rights reserved": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": { "stringUnit": { "state": "translated", "value": "All rights reserved" } },
+        "ru": { "stringUnit": { "state": "translated", "value": "Все права защищены" } }
+      }
+    },
     "Open privacy policy online": {
       "extractionState": "manual",
       "localizations": {
